@@ -277,12 +277,7 @@ button{cursor:pointer;border:0;color:inherit}
         </div>
         <div class="panel">
           <div class="section-head"><div><h2>🔥 Firebase (Firestore)</h2><p>Orders / Users / Payments / Coupons / Logs ကို Firestore ထဲမှာ real-time သိမ်းမည်</p></div></div>
-          <div class="notice info">Firebase console → Project settings → General → "Your apps" → Web app config object ကို ဒီနေရာမှာ paste ထည့်ပါ။ Save & Connect လုပ်ပြီးရင် login gate ပေါ်လာပါလိမ့်မယ် — Authentication → Sign-in method → Email/Password ကို enable လုပ်ပြီး admin account တစ်ခု (Authentication → Users → Add user) ဖန်တီးထားဖို့ လိုပါတယ်။</div>
-          <div class="field"><label>Firebase config (JSON — paste from Firebase console)</label><textarea id="cfgFirebaseJson" rows="6" placeholder='{"apiKey":"...","authDomain":"...","projectId":"...","storageBucket":"...","messagingSenderId":"...","appId":"..."}'></textarea></div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px">
-            <button class="btn btn-soft" onclick="testFirebaseConnection()">Test Firebase <span id="fbTestDot" class="dot-status" style="margin-left:6px"><span class="d"></span></span></button>
-            <button class="btn btn-primary" onclick="saveFirebaseSettings()">Save &amp; Connect</button>
-          </div>
+          <div class="notice success">✓ Firebase project <code>linngametopupstore</code> ကို ဒီ admin panel ထဲမှာ တိုက်ရိုက် ချိတ်ဆက်ထားပြီးပါပြီ — config ကို manual paste လုပ်စရာ မလိုတော့ပါ။ Authentication → Sign-in method → Email/Password ကို enable လုပ်ပြီး admin account တစ်ခု (Authentication → Users → Add user) ဖန်တီးထားရုံပဲ လိုပါတော့တယ်။</div>
         </div>
         <div class="panel">
           <div class="section-head"><div><h2>Reference — quick endpoint map</h2><p>From the G2Bulk documentation</p></div></div>
@@ -450,7 +445,7 @@ const LS={
 };
 let telegram=LS.get('linn_telegram',{token:'',chatId:'',enabled:false});
 let workerCfg=LS.get('linn_worker_config',{base:'https://g2bulk-provider.linngamestore.workers.dev',adminToken:''});
-let firebaseCfgRaw=localStorage.getItem('linn_firebase_config')||'';
+const FIREBASE_CONFIG={apiKey:"AIzaSyC9soIo8J-NP5bc4STi_eOB1oP94IvcOL8",authDomain:"linngametopupstore.firebaseapp.com",projectId:"linngametopupstore",storageBucket:"linngametopupstore.firebasestorage.app",messagingSenderId:"1081466939722",appId:"1:1081466939722:web:affbccdedc64a28ca439b3"};
 let db=null;
 let orders=LS.get('linn_orders',[]);
 let games=LS.get('linn_games',[]);
@@ -468,13 +463,10 @@ function saveAll(){LS.set('linn_orders',orders);LS.set('linn_games',games);LS.se
 /* ============ FIREBASE (Firestore + Auth) ============ */
 let authListenerAttached=false,fsUnsubscribers=[];
 function initFirebase(silent){
-  if(!firebaseCfgRaw){if(!silent)showToast('Firebase config not set yet','bad');return}
   try{
-    const cfg=JSON.parse(firebaseCfgRaw);
-    if(!firebase.apps.length)firebase.initializeApp(cfg);
+    if(!firebase.apps.length)firebase.initializeApp(FIREBASE_CONFIG);
     db=firebase.firestore();
     if(!authListenerAttached){authListenerAttached=true;firebase.auth().onAuthStateChanged(handleAdminAuthState)}
-    document.getElementById('fbTestDot')&&(document.getElementById('fbTestDot').className='dot-status ok',document.getElementById('fbTestDot').innerHTML='<span class="d"></span> connected');
   }catch(err){db=null;if(!silent)showToast('Firebase init failed: '+err.message,'bad')}
 }
 function handleAdminAuthState(user){
@@ -498,12 +490,10 @@ function signInAdmin(){
   const pass=document.getElementById('adminPassword').value;
   const err=document.getElementById('adminLoginError');
   if(err){err.textContent='';err.classList.add('hide')}
-  if(!firebase.apps.length){if(err){err.textContent='Firebase config ကို Settings tab ထဲမှာ အရင် Save & Connect လုပ်ပါ။';err.classList.remove('hide')}return}
+  if(!firebase.apps.length){if(err){err.textContent='Firebase connection error — check the console.';err.classList.remove('hide')}return}
   firebase.auth().signInWithEmailAndPassword(email,pass).catch(e=>{if(err){err.textContent='Login failed: '+e.message;err.classList.remove('hide')}});
 }
 function logoutAdmin(){firebase.auth().signOut()}
-function testFirebaseConnection(){firebaseCfgRaw=document.getElementById('cfgFirebaseJson').value.trim();initFirebase(false)}
-function saveFirebaseSettings(){firebaseCfgRaw=document.getElementById('cfgFirebaseJson').value.trim();localStorage.setItem('linn_firebase_config',firebaseCfgRaw);initFirebase(false);showToast('Firebase settings saved','ok')}
 function attachFirestoreListeners(){
   if(!db)return;
   detachFirestoreListeners();
@@ -559,7 +549,7 @@ function logResult(statusCode,ok){if(!logs.length)return;logs[0].ok=ok;logs[0].s
 
 /* ============ G2BULK API WRAPPERS (via Cloudflare Worker proxy) ============ */
 function saveApiSettings(){workerCfg={base:(document.getElementById('cfgWorkerBase').value.trim()||workerCfg.base).replace(/\/$/,''),adminToken:document.getElementById('cfgAdminToken').value.trim()};LS.set('linn_worker_config',workerCfg);showToast('Worker settings saved locally','ok');updateSystemStatus()}
-function loadApiSettingsForm(){document.getElementById('cfgWorkerBase').value=workerCfg.base;document.getElementById('cfgAdminToken').value=workerCfg.adminToken;document.getElementById('cfgFirebaseJson').value=firebaseCfgRaw}
+function loadApiSettingsForm(){document.getElementById('cfgWorkerBase').value=workerCfg.base;document.getElementById('cfgAdminToken').value=workerCfg.adminToken}
 
 async function mainApi(path,{method='GET',body=null,idempotency=null}={}){
   if(!workerCfg.base||!workerCfg.adminToken)throw new Error('Worker URL / Admin Token မထည့်ရသေးပါ — Settings မှာ ထည့်ပါ');
@@ -881,7 +871,7 @@ renderUsersTable();
 renderPaymentsTable();
 renderCouponsTable();
 renderLogsTable();
-if(firebaseCfgRaw){document.getElementById('adminMain').style.display='none';initFirebase(true)}
+document.getElementById('adminMain').style.display='none';initFirebase(true);
 </script>
 </body>
 </html>
