@@ -7,8 +7,10 @@
 <style>
 :root{--bg:#100d1b;--panel:#19142a;--panel2:#211a36;--text:#f8f5ff;--muted:#aaa2c0;--pink:#ff4fa3;--pink2:#ff82c4;--purple:#9b6cff;--cyan:#6fe7ff;--green:#61e6a1;--yellow:#ffd36e;--red:#ff718b;--line:rgba(255,255,255,.10);--shadow:0 20px 60px rgba(0,0,0,.3);--radius:20px}
 *{box-sizing:border-box}
-html{scroll-behavior:smooth}
-body{margin:0;background:radial-gradient(circle at 78% -10%,rgba(155,108,255,.25),transparent 30%),radial-gradient(circle at 10% 15%,rgba(255,79,163,.12),transparent 25%),var(--bg);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;min-height:100vh;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-behavior:smooth;overflow-x:hidden;max-width:100%}
+body{margin:0;background:radial-gradient(circle at 78% -10%,rgba(155,108,255,.25),transparent 30%),radial-gradient(circle at 10% 15%,rgba(255,79,163,.12),transparent 25%),var(--bg);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;min-height:100vh;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);overflow-x:hidden;max-width:100vw;word-break:break-word;overflow-wrap:break-word}
+.main{overflow-x:hidden;width:100%}
+.panel,.stat,.modal,.notice,.game-price-card{overflow-wrap:break-word;word-break:break-word}
 button,input,select,textarea{font:inherit}
 button{cursor:pointer;border:0;color:inherit}
 .main{max-width:1080px;margin:0 auto;padding:17px 15px 40px}
@@ -98,6 +100,10 @@ button{cursor:pointer;border:0;color:inherit}
 .theme-light .modal{background:#fff}
 .theme-light .modal-head{background:#fff}
 .theme-light .toast{background:#fff;color:#251b35}
+.theme-light .notice.info{background:rgba(37,150,190,.1);color:#0d6685;border-color:rgba(37,150,190,.25)}
+.theme-light .notice.success{background:rgba(24,150,95,.1);color:#0d7a52;border-color:rgba(24,150,95,.25)}
+.theme-light .notice.warning{background:rgba(180,130,10,.1);color:#8a5f06;border-color:rgba(180,130,10,.25)}
+.theme-light .notice.danger{background:rgba(200,40,70,.1);color:#a3123a;border-color:rgba(200,40,70,.25)}
 .pill-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
 .pill{font-size:11px;padding:7px 12px;border-radius:30px;background:rgba(255,255,255,.05);border:1px solid var(--line);color:var(--muted)}
 .pill.active{background:linear-gradient(135deg,var(--pink),var(--purple));color:#fff;border-color:transparent}
@@ -150,7 +156,7 @@ button{cursor:pointer;border:0;color:inherit}
       <button class="active" data-sec="dashboard"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg> Dashboard</button>
       <button data-sec="orders"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v4H4z"/><path d="M4 8v12h16V8" stroke-linecap="round"/><path d="M9 12h6" stroke-linecap="round"/></svg> Orders</button>
       <button data-sec="games"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="11" rx="5"/><path d="M7 10.5v4M5 12.5h4" stroke-linecap="round"/><circle cx="16" cy="10.5" r="1" fill="currentColor"/><circle cx="18.5" cy="13" r="1" fill="currentColor"/></svg> Game List</button>
-      <button data-sec="users"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="3.5"/><path d="M4.5 20c1.4-3.8 4.3-5.5 7.5-5.5s6.1 1.7 7.5 5.5" stroke-linecap="round"/></svg> Users</button>
+      <button data-sec="users"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="3.5"/><path d="M4.5 20c1.4-3.8 4.3-5.5 7.5-5.5s6.1 1.7 7.5 5.5" stroke-linecap="round"/></svg> User List</button>
       <button data-sec="payments"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2.5" y="5.5" width="19" height="13" rx="2.5"/><path d="M2.5 9.5h19" stroke-linecap="round"/><path d="M6 14.5h4" stroke-linecap="round"/></svg> Payments</button>
       <button data-sec="settings"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 13.5a1.8 1.8 0 0 0 .36 1.98l.07.07a2.17 2.17 0 1 1-3.07 3.07l-.07-.07a1.8 1.8 0 0 0-1.98-.36 1.8 1.8 0 0 0-1.09 1.65v.2a2.17 2.17 0 1 1-4.34 0v-.1a1.8 1.8 0 0 0-1.18-1.65 1.8 1.8 0 0 0-1.98.36l-.07.07a2.17 2.17 0 1 1-3.07-3.07l.07-.07a1.8 1.8 0 0 0 .36-1.98 1.8 1.8 0 0 0-1.65-1.09h-.2a2.17 2.17 0 1 1 0-4.34h.1a1.8 1.8 0 0 0 1.65-1.18 1.8 1.8 0 0 0-.36-1.98l-.07-.07a2.17 2.17 0 1 1 3.07-3.07l.07.07a1.8 1.8 0 0 0 1.98.36h.09a1.8 1.8 0 0 0 1.09-1.65v-.2a2.17 2.17 0 1 1 4.34 0v.1a1.8 1.8 0 0 0 1.09 1.65h.09a1.8 1.8 0 0 0 1.98-.36l.07-.07a2.17 2.17 0 1 1 3.07 3.07l-.07.07a1.8 1.8 0 0 0-.36 1.98v.09a1.8 1.8 0 0 0 1.65 1.09h.2a2.17 2.17 0 1 1 0 4.34h-.1a1.8 1.8 0 0 0-1.65 1.09z"/></svg> Settings</button>
       <button data-sec="logs"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h4l2-6 4 12 2-6h6" stroke-linecap="round" stroke-linejoin="round"/></svg> Activity Logs</button>
@@ -171,16 +177,13 @@ button{cursor:pointer;border:0;color:inherit}
       <section class="view-sec" data-view="orders">
         <div class="panel">
           <div class="section-head">
-            <div><h2>Orders</h2><p>Game top-up, voucher &amp; SMM orders — real G2Bulk API calls</p></div>
+            <div><h2>Orders <span class="status pending" id="ordersPendingBadge" style="margin-left:6px">0 pending</span></h2><p>Game top-up, voucher &amp; SMM orders — real G2Bulk API calls</p></div>
             </div>
           <div class="pill-row" id="orderFilterPills">
             <button class="pill active" data-f="ALL">All</button>
-            <button class="pill" data-f="DRAFT">Draft</button>
-            <button class="pill" data-f="PENDING">Pending</button>
+            <button class="pill" data-f="PENDING">Pending <span id="pillPendingCount"></span></button>
             <button class="pill" data-f="PROCESSING">Processing</button>
             <button class="pill" data-f="COMPLETED">Completed</button>
-            <button class="pill" data-f="FAILED">Failed</button>
-            <button class="pill" data-f="REJECTED">Rejected</button>
           </div>
           <div class="table-wrap"><table class="admin-table" id="ordersTable"><thead><tr><th>Order</th><th>Type</th><th>Customer</th><th>Item</th><th>Amount</th><th>Status</th><th>Actions</th></tr></thead><tbody></tbody></table></div>
         </div>
@@ -188,14 +191,18 @@ button{cursor:pointer;border:0;color:inherit}
 
       <!-- GAME LIST -->
       <section class="view-sec" data-view="games">
-        <div class="panel">
+        <div class="radio-row" id="gameListTabs">
+          <button class="radio-opt active" data-tab="topup" onclick="switchGameListTab('topup')">Top Up Games</button>
+          <button class="radio-opt" data-tab="voucher" onclick="switchGameListTab('voucher')">Voucher / Gift Cards</button>
+        </div>
+        <div class="panel" id="gameListPane-topup">
           <div class="section-head">
             <div><h2>Top Up Games</h2><p>Game top-up denominations, imported one game at a time from G2Bulk</p></div>
             <button class="btn btn-primary" onclick="openImportModal('topup')">+ Import Game</button>
           </div>
           <div class="game-price-grid" id="topupGrid"></div>
         </div>
-        <div class="panel">
+        <div class="panel hide" id="gameListPane-voucher">
           <div class="section-head">
             <div><h2>Voucher / Gift Cards</h2><p>Voucher &amp; digital products, imported one product at a time from G2Bulk</p></div>
             <button class="btn btn-primary" onclick="openImportModal('voucher')">+ Import Voucher</button>
@@ -204,14 +211,13 @@ button{cursor:pointer;border:0;color:inherit}
         </div>
       </section>
 
-      <!-- USERS -->
+      <!-- USER LIST -->
       <section class="view-sec" data-view="users">
         <div class="panel">
           <div class="section-head">
-            <div><h2>Users</h2><p>Local customer records (G2Bulk provider does not expose end-customer data)</p></div>
-            <button class="btn btn-primary" onclick="openUserModal()">+ Add User</button>
+            <div><h2>User List</h2><p>Customers pulled automatically from store orders</p></div>
           </div>
-          <div class="table-wrap"><table class="admin-table" id="usersTable"><thead><tr><th>Name</th><th>Contact</th><th>Wallet (Ks)</th><th>Orders</th><th>Actions</th></tr></thead><tbody></tbody></table></div>
+          <div class="table-wrap"><table class="admin-table" id="usersTable"><thead><tr><th>Customer</th><th>Orders</th><th>Total Spent</th><th>Last Order</th></tr></thead><tbody></tbody></table></div>
         </div>
       </section>
 
@@ -340,18 +346,6 @@ button{cursor:pointer;border:0;color:inherit}
   </div>
 </div>
 
-<div class="modal-backdrop" id="userModal">
-  <div class="modal">
-    <div class="modal-head"><h2>+ Add User</h2><button class="close" onclick="closeModal('userModal')">×</button></div>
-    <div class="modal-body">
-      <div class="field"><label>Name</label><input id="userName" /></div>
-      <div class="field"><label>Contact (phone/telegram)</label><input id="userContact" /></div>
-      <div class="field"><label>Wallet balance (Ks)</label><input id="userWallet" type="number" value="0" /></div>
-      <button class="btn btn-primary" style="width:100%" onclick="saveUser()">Save User</button>
-    </div>
-  </div>
-</div>
-
 <div class="modal-backdrop" id="paymentModal">
   <div class="modal">
     <div class="modal-head"><h2>+ Payment Method</h2><button class="close" onclick="closeModal('paymentModal')">×</button></div>
@@ -393,7 +387,7 @@ function saveAll(){LS.set('linn_orders',orders);LS.set('linn_games',games);LS.se
 
 /* ============ FIREBASE (Firestore + Auth) ============ */
 let authListenerAttached=false,fsUnsubscribers=[];
-const ADMIN_LOGIN_REQUIRED=false; // TEMP: login form skipped while testing — set to true to require sign-in again
+const ADMIN_LOGIN_REQUIRED=false; // login skipped — admin account not set up yet
 function initFirebase(silent){
   try{
     if(typeof firebase==='undefined')throw new Error('Firebase SDK မ load ဖြစ်ပါ — internet connection စစ်ပါ');
@@ -431,13 +425,12 @@ function logoutAdmin(){firebase.auth().signOut()}
 function attachFirestoreListeners(){
   if(!db)return;
   detachFirestoreListeners();
-  fsUnsubscribers.push(db.collection('orders').orderBy('createdAt','desc').limit(300).onSnapshot(snap=>{orders=snap.docs.map(d=>d.data());renderOrdersTable();renderDashboard()},err=>showToast('orders listener: '+err.message,'bad')));
-  fsUnsubscribers.push(db.collection('users').onSnapshot(snap=>{users=snap.docs.map(d=>d.data());renderUsersTable()},err=>showToast('users listener: '+err.message,'bad')));
+  fsUnsubscribers.push(db.collection('orders').orderBy('createdAt','desc').limit(300).onSnapshot(snap=>{orders=snap.docs.map(d=>d.data());renderOrdersTable();renderDashboard();renderUsersTable()},err=>showToast('orders listener: '+err.message,'bad')));
   fsUnsubscribers.push(db.collection('paymentMethods').onSnapshot(snap=>{paymentMethods=snap.docs.map(d=>d.data());renderPaymentsTable()},err=>showToast('payments listener: '+err.message,'bad')));
   fsUnsubscribers.push(db.collection('logs').orderBy('time','desc').limit(150).onSnapshot(snap=>{logs=snap.docs.map(d=>d.data());renderLogsTable()},err=>showToast('logs listener: '+err.message,'bad')));
 }
 function detachFirestoreListeners(){fsUnsubscribers.forEach(u=>{try{u()}catch(e){}});fsUnsubscribers=[]}
-function fsSet(collection,id,data){if(!db)return;db.collection(collection).doc(String(id)).set(data,{merge:true}).catch(err=>showToast('Firestore write failed: '+err.message,'bad'))}
+function fsSet(collection,id,data){if(!db)return;const clean=JSON.parse(JSON.stringify(data));db.collection(collection).doc(String(id)).set(clean,{merge:true}).catch(err=>showToast('Firestore write failed: '+err.message,'bad'))}
 function fsDelete(collection,id){if(!db)return;db.collection(collection).doc(String(id)).delete().catch(err=>showToast('Firestore delete failed: '+err.message,'bad'))}
 
 /* ============ THEME / NAV ============ */
@@ -474,11 +467,11 @@ async function testTelegram(){const ok=await telegramRequest('<b>LINN GAME STORE
 async function notifyTelegramOrder(order){if(!telegram.enabled||!telegram.token||!telegram.chatId)return;const text='<b>New order</b> — '+esc(order.id)+'\nCustomer: '+esc(order.customer||'-')+'\nItem: '+esc(order.itemLabel||'-')+'\nStatus: '+esc(order.status);try{await fetch('https://api.telegram.org/bot'+encodeURIComponent(telegram.token)+'/sendMessage',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({chat_id:telegram.chatId,text,parse_mode:'HTML'})})}catch(e){}}
 
 /* ============ ACTIVITY LOG ============ */
-function logActivity(method,endpoint,statusCode,ok){const entry={id:'L-'+Date.now().toString(36)+Math.random().toString(36).slice(2,6),time:new Date().toISOString(),method,endpoint,statusCode,ok};logs.unshift(entry);if(logs.length>150)logs.length=150;LS.set('linn_logs',logs);renderLogsTable();fsSet('logs',entry.id,entry)}
+function logActivity(method,endpoint,statusCode,ok){const entry={id:'L-'+Date.now().toString(36)+Math.random().toString(36).slice(2,6),time:new Date().toISOString(),method,endpoint,statusCode:statusCode===undefined?null:statusCode,ok:ok===undefined?null:ok};logs.unshift(entry);if(logs.length>150)logs.length=150;LS.set('linn_logs',logs);renderLogsTable();fsSet('logs',entry.id,entry)}
 function renderLogsTable(){const tb=document.querySelector('#logsTable tbody');if(!tb)return;if(!logs.length){tb.innerHTML='<tr class="empty-row"><td colspan="4">No API calls logged yet.</td></tr>';return}
-  tb.innerHTML=logs.map(l=>{const t=new Date(l.time).toLocaleString();const cls=l.ok===undefined?'processing':(l.ok?'completed':'failed');const label=l.ok===undefined?'…':(l.ok?'OK '+l.statusCode:'FAIL '+l.statusCode);return '<tr><td>'+esc(t)+'</td><td>'+esc(l.method)+'</td><td style="max-width:320px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(l.endpoint)+'</td><td><span class="status '+cls+'">'+esc(label)+'</span></td></tr>'}).join('')}
+  tb.innerHTML=logs.map(l=>{const t=new Date(l.time).toLocaleString();const cls=(l.ok===undefined||l.ok===null)?'processing':(l.ok?'completed':'failed');const label=(l.ok===undefined||l.ok===null)?'…':(l.ok?'OK '+l.statusCode:'FAIL '+l.statusCode);return '<tr><td>'+esc(t)+'</td><td>'+esc(l.method)+'</td><td style="max-width:320px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(l.endpoint)+'</td><td><span class="status '+cls+'">'+esc(label)+'</span></td></tr>'}).join('')}
 function clearLogs(){logs=[];LS.set('linn_logs',logs);renderLogsTable();showToast('Logs cleared','ok')}
-function logResult(statusCode,ok){if(!logs.length)return;logs[0].ok=ok;logs[0].statusCode=statusCode;LS.set('linn_logs',logs);renderLogsTable();fsSet('logs',logs[0].id,logs[0])}
+function logResult(statusCode,ok){if(!logs.length)return;logs[0].ok=(ok===undefined?null:ok);logs[0].statusCode=(statusCode===undefined?null:statusCode);LS.set('linn_logs',logs);renderLogsTable();fsSet('logs',logs[0].id,logs[0])}
 
 /* ============ G2BULK API WRAPPERS (via Cloudflare Worker proxy) ============ */
 function saveApiSettings(){workerCfg={base:(document.getElementById('cfgWorkerBase').value.trim()||workerCfg.base).replace(/\/$/,''),adminToken:document.getElementById('cfgAdminToken').value.trim()};LS.set('linn_worker_config',workerCfg);exchangeRate=Number(document.getElementById('cfgExchangeRate').value)||exchangeRate||1;LS.set('linn_exchange_rate',exchangeRate);showToast('Worker settings saved locally','ok');updateSystemStatus()}
@@ -558,8 +551,11 @@ function orderRow(o,compact){
 function renderOrdersTable(){
   const tb=document.querySelector('#ordersTable tbody');
   const list=orderFilter==='ALL'?orders:orders.filter(o=>(o.status||'').toUpperCase()===orderFilter);
-  if(!list.length){tb.innerHTML='<tr class="empty-row"><td colspan="7">No orders in this filter.</td></tr>';return}
-  tb.innerHTML=list.map(o=>orderRow(o,false)).join('');
+  if(!list.length){tb.innerHTML='<tr class="empty-row"><td colspan="7">No orders in this filter.</td></tr>';}
+  else{tb.innerHTML=list.map(o=>orderRow(o,false)).join('');}
+  const pendingCount=orders.filter(o=>(o.status||'').toUpperCase()==='PENDING').length;
+  const badge=document.getElementById('ordersPendingBadge');if(badge)badge.textContent=pendingCount+' pending';
+  const pillCount=document.getElementById('pillPendingCount');if(pillCount)pillCount.textContent=pendingCount?('('+pendingCount+')'):'';
 }
 document.getElementById('orderFilterPills').addEventListener('click',e=>{const b=e.target.closest('.pill');if(!b)return;document.querySelectorAll('#orderFilterPills .pill').forEach(x=>x.classList.remove('active'));b.classList.add('active');orderFilter=b.dataset.f;renderOrdersTable()});
 
@@ -660,6 +656,11 @@ function renderGamesTable(){
   if(topupGrid)topupGrid.innerHTML=games.length?games.map(g=>itemCardHtml(g,'topup')).join(''):'<div class="empty-row" style="padding:32px 10px;text-align:center;color:var(--muted);grid-column:1/-1">No top-up games imported yet — click "+ Import Game".</div>';
   const voucherGrid=document.getElementById('voucherGrid');
   if(voucherGrid)voucherGrid.innerHTML=voucherProducts.length?voucherProducts.map(g=>itemCardHtml(g,'voucher')).join(''):'<div class="empty-row" style="padding:32px 10px;text-align:center;color:var(--muted);grid-column:1/-1">No vouchers imported yet — click "+ Import Voucher".</div>';
+}
+function switchGameListTab(tab){
+  document.querySelectorAll('#gameListTabs .radio-opt').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));
+  document.getElementById('gameListPane-topup').classList.toggle('hide',tab!=='topup');
+  document.getElementById('gameListPane-voucher').classList.toggle('hide',tab!=='voucher');
 }
 function removeImportedItem(category,id){
   if(category==='topup'){games=games.filter(g=>g.id!==id);if(db)db.collection('games').doc(id).delete().catch(()=>{})}
@@ -797,14 +798,22 @@ async function confirmImport(){
   showToast('"'+name+'" saved — now showing in the store','ok');
 }
 
-/* ============ USERS (Firestore, falls back to local) ============ */
-function openUserModal(){document.getElementById('userName').value='';document.getElementById('userContact').value='';document.getElementById('userWallet').value='0';document.getElementById('userModal').classList.add('show')}
-function saveUser(){const name=document.getElementById('userName').value.trim();if(!name){showToast('Name required','bad');return}
-  const u={id:'U-'+Date.now().toString(36),name,contact:document.getElementById('userContact').value.trim(),wallet:parseFloat(document.getElementById('userWallet').value)||0};
-  users.unshift(u);saveAll();fsSet('users',u.id,u);closeModal('userModal');renderUsersTable();showToast('User added','ok')}
-function renderUsersTable(){const tb=document.querySelector('#usersTable tbody');if(!users.length){tb.innerHTML='<tr class="empty-row"><td colspan="5">No users yet.</td></tr>';return}
-  tb.innerHTML=users.map(u=>{const orderCount=orders.filter(o=>o.customer===u.name).length;return '<tr><td>'+esc(u.name)+'</td><td>'+esc(u.contact||'-')+'</td><td>'+(u.wallet||0).toLocaleString()+'</td><td>'+orderCount+'</td><td><button class="link-btn" onclick="deleteUser(\''+u.id+'\')">Delete</button></td></tr>'}).join('')}
-function deleteUser(id){users=users.filter(u=>u.id!==id);saveAll();fsDelete('users',id);renderUsersTable();showToast('User removed','ok')}
+/* ============ USER LIST (derived live from real store orders) ============ */
+function renderUsersTable(){
+  const tb=document.querySelector('#usersTable tbody');
+  const byName={};
+  orders.forEach(o=>{
+    const name=(o.customer||'').trim();if(!name)return;
+    const amt=parseFloat((o.amountLabel||'0').toString().replace(/[^0-9.]/g,''))||0;
+    const created=o.createdAt?new Date(o.createdAt):null;
+    if(!byName[name])byName[name]={name,count:0,total:0,last:null};
+    byName[name].count++;byName[name].total+=amt;
+    if(created&&(!byName[name].last||created>byName[name].last))byName[name].last=created;
+  });
+  const list=Object.values(byName).sort((a,b)=>(b.last?b.last.getTime():0)-(a.last?a.last.getTime():0));
+  if(!list.length){tb.innerHTML='<tr class="empty-row"><td colspan="4">No customers yet — user list fills in automatically once orders come in.</td></tr>';return}
+  tb.innerHTML=list.map(u=>'<tr><td>'+esc(u.name)+'</td><td>'+u.count+'</td><td>'+u.total.toLocaleString()+'</td><td>'+(u.last?u.last.toLocaleDateString():'-')+'</td></tr>').join('');
+}
 
 /* ============ PAYMENTS (Firestore, falls back to local) ============ */
 function openPaymentModal(){document.getElementById('payMethodName').value='';document.getElementById('payAccName').value='';document.getElementById('payAccNo').value='';document.getElementById('paymentModal').classList.add('show')}
