@@ -1,0 +1,887 @@
+<!DOCTYPE html>
+<html lang="my">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+<title>LINN GAME STORE — Admin Dashboard</title>
+<style>
+:root{--bg:#100d1b;--panel:#19142a;--panel2:#211a36;--text:#f8f5ff;--muted:#aaa2c0;--pink:#ff4fa3;--pink2:#ff82c4;--purple:#9b6cff;--cyan:#6fe7ff;--green:#61e6a1;--yellow:#ffd36e;--red:#ff718b;--line:rgba(255,255,255,.10);--shadow:0 20px 60px rgba(0,0,0,.3);--radius:20px}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:radial-gradient(circle at 78% -10%,rgba(155,108,255,.25),transparent 30%),radial-gradient(circle at 10% 15%,rgba(255,79,163,.12),transparent 25%),var(--bg);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;min-height:100vh;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer;border:0;color:inherit}
+.main{max-width:1080px;margin:0 auto;padding:17px 15px 40px}
+.topbar{display:flex;align-items:center;gap:12px;margin-bottom:20px;flex-wrap:wrap}
+.back-link{display:inline-flex;align-items:center;gap:6px;color:var(--muted);text-decoration:none;font-size:12.5px;background:rgba(255,255,255,.06);border:1px solid var(--line);padding:9px 13px;border-radius:11px}
+.back-link:hover{color:var(--text)}
+.topbar h1{font-size:19px;margin:0}
+.topbar p{font-size:12px;color:var(--muted);margin:3px 0 0}
+.icon-btn{width:40px;height:40px;border:1px solid var(--line);background:rgba(255,255,255,.05);border-radius:12px}
+.btn{padding:11px 16px;border-radius:12px;font-weight:700;font-size:13px;transition:.18s}
+.btn:active{transform:scale(.97)}
+.btn-primary{background:linear-gradient(135deg,var(--pink),#d136b4 50%,var(--purple));box-shadow:0 8px 24px rgba(255,79,163,.2)}
+.btn-primary:hover{filter:brightness(1.1);transform:translateY(-1px)}
+.btn-soft{background:rgba(255,255,255,.08);border:1px solid var(--line)}
+.btn-sm{padding:7px 11px;font-size:11.5px;border-radius:9px}
+.btn:disabled{opacity:.5;pointer-events:none}
+.section-head{display:flex;align-items:center;justify-content:space-between;margin:0 0 14px;gap:10px;flex-wrap:wrap}
+.section-head h2{font-size:16px;margin:0}
+.section-head p{font-size:12px;color:var(--muted);margin:5px 0 0}
+.link-btn{background:none;color:var(--pink2);font-size:12px}
+.stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:13px;margin-bottom:17px}
+.stat{background:rgba(255,255,255,.045);border:1px solid var(--line);border-radius:16px;padding:16px}
+.stat small{color:var(--muted);font-size:11px}
+.stat strong{display:block;font-size:20px;margin-top:7px}
+.stat .up{font-size:11px;color:var(--green);margin-top:5px}
+.panel{background:rgba(255,255,255,.045);border:1px solid var(--line);border-radius:18px;padding:20px;margin-bottom:18px}
+.admin-shell{display:grid;grid-template-columns:190px 1fr;gap:18px;align-items:start}
+.admin-menu{background:rgba(255,255,255,.045);border:1px solid var(--line);padding:11px;border-radius:17px;height:max-content;position:sticky;top:14px}
+.admin-menu button{width:100%;text-align:left;background:none;padding:10px;border-radius:9px;color:var(--muted);font-size:11.5px;display:flex;align-items:center;gap:8px}
+.admin-menu button.active,.admin-menu button:hover{background:rgba(155,108,255,.15);color:var(--text)}
+.view-sec{display:none}
+.view-sec.active{display:block;animation:fadeIn .3s ease both}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.admin-table{width:100%;border-collapse:collapse;font-size:11.5px}
+.admin-table th{text-align:left;color:var(--muted);font-weight:600;padding:11px;border-bottom:1px solid var(--line);white-space:nowrap}
+.admin-table td{padding:12px 11px;border-bottom:1px solid rgba(255,255,255,.06);vertical-align:middle}
+.table-wrap{overflow-x:auto}
+.status{display:inline-flex;align-items:center;gap:5px;font-size:10px;padding:6px 10px;border-radius:30px;font-weight:600;border:1px solid transparent;white-space:nowrap}
+.status.completed{color:var(--green);background:rgba(97,230,161,.1);border-color:rgba(97,230,161,.32)}
+.status.processing,.status.pending{color:var(--yellow);background:rgba(255,211,110,.1);border-color:rgba(255,211,110,.32)}
+.status.failed{color:var(--red);background:rgba(255,113,139,.1);border-color:rgba(255,113,139,.32)}
+.status.draft{color:var(--cyan);background:rgba(111,231,255,.1);border-color:rgba(111,231,255,.3)}
+.status.online{color:var(--green);background:rgba(97,230,161,.1);border-color:rgba(97,230,161,.32)}
+.status.offline{color:var(--red);background:rgba(255,113,139,.1);border-color:rgba(255,113,139,.32)}
+.notice{padding:10px 12px;border-radius:11px;font-size:11px;line-height:1.55;margin:12px 0}
+.notice.info{background:rgba(111,231,255,.08);color:#b9f4ff;border:1px solid rgba(111,231,255,.18)}
+.notice.warning{background:rgba(255,211,110,.09);color:#ffeab1;border:1px solid rgba(255,211,110,.18)}
+.notice.success{background:rgba(97,230,161,.09);color:#baf8d7;border:1px solid rgba(97,230,161,.2)}
+.notice.danger{background:rgba(255,113,139,.09);color:#ffd0d9;border:1px solid rgba(255,113,139,.2)}
+.hide{display:none!important}
+.modal-backdrop{position:fixed;inset:0;background:rgba(5,3,10,.7);backdrop-filter:blur(8px);z-index:50;display:none;align-items:center;justify-content:center;padding:18px}
+.modal-backdrop.show{display:flex}
+.modal{width:min(520px,100%);max-height:90vh;overflow:auto;background:#19142a;border:1px solid rgba(255,255,255,.13);border-radius:22px;box-shadow:0 25px 100px rgba(0,0,0,.6);animation:pop .2s ease-out}
+.modal.wide{width:min(720px,100%)}
+@keyframes pop{from{opacity:0;transform:scale(.96) translateY(8px)}to{opacity:1;transform:none}}
+.modal-head{display:flex;align-items:center;justify-content:space-between;padding:19px 21px;border-bottom:1px solid var(--line);position:sticky;top:0;background:#19142a;z-index:2}
+.modal-head h2{margin:0;font-size:16px}
+.close{background:rgba(255,255,255,.07);width:30px;height:30px;border-radius:9px;font-size:18px;flex:none}
+.modal-body{padding:21px}
+.field{display:flex;flex-direction:column;gap:7px;margin-bottom:13px}
+.field label{font-size:11px;color:var(--muted)}
+.field input,.field select,.field textarea{background:rgba(255,255,255,.055);border:1px solid var(--line);border-radius:11px;color:var(--text);padding:11px 12px;outline:none;width:100%}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--pink)}
+.field select option{background:#19142a}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 12px}
+.form-grid .field.full{grid-column:1/-1}
+.radio-row{display:flex;gap:8px;margin-bottom:13px}
+.radio-opt{flex:1;border:1px solid var(--line);border-radius:11px;padding:10px;text-align:center;font-size:11.5px;background:rgba(255,255,255,.04);color:var(--muted)}
+.radio-opt.active{border-color:var(--pink);color:var(--text);background:rgba(255,79,163,.1)}
+.toast-wrap{position:fixed;right:16px;top:16px;left:16px;z-index:100;display:grid;gap:9px;justify-items:end}
+.toast{display:flex;align-items:flex-start;gap:9px;background:#241d37;border:1px solid rgba(255,255,255,.15);box-shadow:var(--shadow);padding:11px 11px 11px 10px;border-radius:14px;font-size:12px;animation:slide .2s ease-out;max-width:320px}
+@keyframes slide{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:none}}
+.toast-ico{width:25px;height:25px;border-radius:8px;display:grid;place-items:center;flex:none}
+.toast-ico svg{width:14px;height:14px}
+.toast-body{flex:1;min-width:0}
+.toast-body strong{display:block;font-size:12px;margin-bottom:2px;font-weight:700}
+.toast-body small{display:block;color:var(--muted);font-size:11px;line-height:1.4}
+.toast-close{background:none;border:0;color:var(--muted);width:20px;height:20px;display:grid;place-items:center;flex:none;border-radius:6px}
+.toast.ok{border-color:rgba(97,230,161,.4)}.toast.ok .toast-ico{background:rgba(97,230,161,.14);color:var(--green)}
+.toast.bad{border-color:rgba(255,113,139,.4)}.toast.bad .toast-ico{background:rgba(255,113,139,.14);color:var(--red)}
+.theme-light{--bg:#f7f3fb;--panel:#ffffff;--panel2:#f0eafa;--text:#251b35;--muted:#71657e;--line:rgba(45,25,70,.13);--shadow:0 20px 60px rgba(83,45,105,.15)}
+.theme-light body{background:radial-gradient(circle at 78% -10%,rgba(155,108,255,.18),transparent 30%),radial-gradient(circle at 10% 15%,rgba(255,79,163,.10),transparent 25%),var(--bg)}
+.theme-light .stat,.theme-light .panel,.theme-light .admin-menu,.theme-light .field input,.theme-light .field select,.theme-light .back-link,.theme-light .icon-btn,.theme-light .btn-soft,.theme-light .radio-opt{background:rgba(255,255,255,.72)}
+.theme-light .modal{background:#fff}
+.theme-light .modal-head{background:#fff}
+.theme-light .toast{background:#fff;color:#251b35}
+.pill-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.pill{font-size:11px;padding:7px 12px;border-radius:30px;background:rgba(255,255,255,.05);border:1px solid var(--line);color:var(--muted)}
+.pill.active{background:linear-gradient(135deg,var(--pink),var(--purple));color:#fff;border-color:transparent}
+.kv{display:grid;grid-template-columns:1fr 1fr;gap:8px 14px;font-size:12px;margin:10px 0}
+.kv div{display:flex;justify-content:space-between;gap:8px;border-bottom:1px dashed var(--line);padding-bottom:6px}
+.kv div b{color:var(--muted);font-weight:500}
+.kv div span{text-align:right;word-break:break-word}
+.code-box{background:rgba(0,0,0,.25);border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11px;white-space:pre-wrap;word-break:break-word;max-height:260px;overflow:auto}
+.action-links{display:flex;gap:10px;flex-wrap:wrap}
+.dot-status{display:inline-flex;align-items:center;gap:6px;font-size:11px}
+.dot-status .d{width:8px;height:8px;border-radius:50%;background:var(--muted)}
+.dot-status.ok .d{background:var(--green);box-shadow:0 0 6px var(--green)}
+.dot-status.bad .d{background:var(--red);box-shadow:0 0 6px var(--red)}
+.spinner{width:13px;height:13px;border-radius:50%;border:2px solid rgba(255,255,255,.2);border-top-color:currentColor;display:inline-block;animation:spin .7s linear infinite;vertical-align:-2px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.empty-row td{text-align:center;color:var(--muted);padding:28px 10px}
+@media(max-width:760px){.admin-shell{grid-template-columns:1fr}.admin-menu{position:static;display:flex;overflow:auto;gap:5px}.admin-menu button{white-space:nowrap;width:auto}.stat-grid{grid-template-columns:1fr 1fr}.form-grid{grid-template-columns:1fr}.form-grid .field{grid-column:1/-1}}
+</style>
+</head>
+<body>
+<div class="modal-backdrop" id="adminLoginGate" style="z-index:200"><div class="modal small"><div class="modal-head"><h2>🔒 Admin Login</h2></div><div class="modal-body"><div class="notice info">Firestore ထဲက Orders/Users/Payments/Coupons data တွေကို admin account ဖြင့် sign-in မှသာ ကြည့်/ပြင်နိုင်ပါမည်။</div><div class="field"><label>Email</label><input id="adminEmail" type="email" autocomplete="username" placeholder="admin@yourstore.com" /></div><div class="field"><label>Password</label><input id="adminPassword" type="password" autocomplete="current-password" placeholder="••••••••" /></div><div class="notice danger hide" id="adminLoginError"></div><button class="btn btn-primary" style="width:100%" onclick="signInAdmin()">Login</button></div></div></div>
+<main class="main" id="adminMain">
+  <header class="topbar">
+    <a class="back-link" href="index.html">← Back to store</a>
+    <div style="flex:1"><h1>Admin Dashboard</h1><p>Store operations, G2Bulk integration &amp; reports</p></div>
+    <button class="icon-btn" id="themeToggle" onclick="toggleTheme()" title="Toggle theme">☾</button>
+    <button class="btn btn-soft" onclick="openTelegramSettings()">✈ Telegram Alerts</button>
+    <button class="btn btn-soft hide" id="adminLogoutBtn" onclick="logoutAdmin()">Logout</button>
+    <span class="status" id="systemStatus">● CHECKING…</span>
+  </header>
+
+  <div class="admin-shell">
+    <div class="admin-menu" id="adminMenu">
+      <button class="active" data-sec="dashboard">▦ Dashboard</button>
+      <button data-sec="orders">▤ Orders</button>
+      <button data-sec="games">◈ Games</button>
+      <button data-sec="servers">⌁ Servers / Regions</button>
+      <button data-sec="packages">▣ Packages &amp; Services</button>
+      <button data-sec="users">♙ Users</button>
+      <button data-sec="payments">◉ Payments</button>
+      <button data-sec="coupons">♢ Coupons / Promotions</button>
+      <button data-sec="settings">⚙ Settings</button>
+      <button data-sec="logs">▥ Activity Logs</button>
+    </div>
+
+    <div>
+      <!-- DASHBOARD -->
+      <section class="view-sec active" data-view="dashboard">
+        <div class="stat-grid">
+          <div class="stat"><small>Today Sales (local)</small><strong id="statSales">0 Ks</strong><div class="up" id="statSalesUp">↗ —</div></div>
+          <div class="stat"><small>Pending / Draft Orders</small><strong id="statPending">0</strong><div class="up" style="color:var(--yellow)">Needs review</div></div>
+          <div class="stat"><small>Provider Wallet (Main)</small><strong id="statMainBalance">—</strong><div class="up" id="statMainUp">Not checked</div></div>
+          <div class="stat"><small>Provider Wallet (SMM)</small><strong id="statSmmBalance">—</strong><div class="up" id="statSmmUp">Not checked</div></div>
+        </div>
+        <div class="panel">
+          <div class="section-head">
+            <div><h2>Recent Orders</h2><p>Latest orders recorded in this admin panel</p></div>
+            <button class="btn btn-primary" onclick="openOrderModal()">+ New Order</button>
+          </div>
+          <div class="table-wrap"><table class="admin-table" id="dashOrdersTable"><thead><tr><th>Order</th><th>Customer</th><th>Item</th><th>Amount</th><th>Status</th><th>Action</th></tr></thead><tbody></tbody></table></div>
+        </div>
+        <div class="notice info">Dashboard ရဲ့ Provider Wallet ကိန်းဂဏန်းများသည် Settings မှာ API key ထည့်ပြီး "Test Connection" နှိပ်ထားမှ ပေါ်ပါမည်။</div>
+      </section>
+
+      <!-- ORDERS -->
+      <section class="view-sec" data-view="orders">
+        <div class="panel">
+          <div class="section-head">
+            <div><h2>Orders</h2><p>Game top-up, voucher &amp; SMM orders — real G2Bulk API calls</p></div>
+            <button class="btn btn-primary" onclick="openOrderModal()">+ New Order</button>
+          </div>
+          <div class="pill-row" id="orderFilterPills">
+            <button class="pill active" data-f="ALL">All</button>
+            <button class="pill" data-f="DRAFT">Draft</button>
+            <button class="pill" data-f="PENDING">Pending</button>
+            <button class="pill" data-f="PROCESSING">Processing</button>
+            <button class="pill" data-f="COMPLETED">Completed</button>
+            <button class="pill" data-f="FAILED">Failed</button>
+          </div>
+          <div class="table-wrap"><table class="admin-table" id="ordersTable"><thead><tr><th>Order</th><th>Type</th><th>Customer</th><th>Item</th><th>Amount</th><th>Status</th><th>Actions</th></tr></thead><tbody></tbody></table></div>
+        </div>
+      </section>
+
+      <!-- GAMES -->
+      <section class="view-sec" data-view="games">
+        <div class="panel">
+          <div class="section-head">
+            <div><h2>Supported Games</h2><p>GET /v1/games — synced directly from G2Bulk</p></div>
+            <button class="btn btn-soft" id="syncGamesBtn" onclick="syncGames()">⟳ Sync from G2Bulk</button>
+          </div>
+          <div class="table-wrap"><table class="admin-table" id="gamesTable"><thead><tr><th>Code</th><th>Name</th><th>Actions</th></tr></thead><tbody></tbody></table></div>
+        </div>
+      </section>
+
+      <!-- SERVERS -->
+      <section class="view-sec" data-view="servers">
+        <div class="panel">
+          <div class="section-head"><div><h2>Servers / Regions</h2><p>POST /v1/games/servers for a chosen game</p></div></div>
+          <div class="field" style="max-width:320px"><label>Game</label><select id="serverGameSelect"></select></div>
+          <button class="btn btn-soft" onclick="loadServers()">Load Server List</button>
+          <div class="notice info" style="margin-top:14px">403 ပြန်လာလျှင် ဒီ game အတွက် server ID မလိုအပ်ကြောင်း ဖြစ်ပါသည် — error မဟုတ်ပါ။</div>
+          <div class="table-wrap" style="margin-top:10px"><table class="admin-table" id="serversTable"><thead><tr><th>Server ID</th><th>Name</th></tr></thead><tbody></tbody></table></div>
+        </div>
+      </section>
+
+      <!-- PACKAGES -->
+      <section class="view-sec" data-view="packages">
+        <div class="panel">
+          <div class="section-head"><div><h2>Catalogue / Denominations</h2><p>GET /v1/games/:code/catalogue — live price &amp; stock</p></div></div>
+          <div class="field" style="max-width:320px"><label>Game</label><select id="catalogueGameSelect"></select></div>
+          <button class="btn btn-soft" onclick="loadCatalogue()">Load Live Catalogue</button>
+          <div class="table-wrap" style="margin-top:10px"><table class="admin-table" id="catalogueTable"><thead><tr><th>Item</th><th>Price</th><th>Stock</th></tr></thead><tbody></tbody></table></div>
+        </div>
+        <div class="panel">
+          <div class="section-head">
+            <div><h2>SMM Services</h2><p>action=services — SMM-compatible panel catalogue</p></div>
+            <button class="btn btn-soft" onclick="syncSmmServices()">⟳ Sync Services</button>
+          </div>
+          <div class="field" style="max-width:320px"><label>Filter by category (optional)</label><input id="smmCategoryFilter" placeholder="e.g. PUBG Mobile" /></div>
+          <div class="table-wrap"><table class="admin-table" id="smmServicesTable"><thead><tr><th>Service ID</th><th>Name</th><th>Category</th><th>Rate (USD)</th><th>Min/Max</th></tr></thead><tbody></tbody></table></div>
+        </div>
+      </section>
+
+      <!-- USERS -->
+      <section class="view-sec" data-view="users">
+        <div class="panel">
+          <div class="section-head">
+            <div><h2>Users</h2><p>Local customer records (G2Bulk provider does not expose end-customer data)</p></div>
+            <button class="btn btn-primary" onclick="openUserModal()">+ Add User</button>
+          </div>
+          <div class="table-wrap"><table class="admin-table" id="usersTable"><thead><tr><th>Name</th><th>Contact</th><th>Wallet (Ks)</th><th>Orders</th><th>Actions</th></tr></thead><tbody></tbody></table></div>
+        </div>
+      </section>
+
+      <!-- PAYMENTS -->
+      <section class="view-sec" data-view="payments">
+        <div class="panel">
+          <div class="section-head"><div><h2>Provider Wallet</h2><p>Live balance check against your G2Bulk account</p></div></div>
+          <div class="kv">
+            <div><b>Main API balance</b><span id="payMainBalance">—</span></div>
+            <div><b>SMM panel balance</b><span id="paySmmBalance">—</span></div>
+          </div>
+          <button class="btn btn-soft" onclick="checkAllBalances()">⟳ Refresh Balances</button>
+        </div>
+        <div class="panel">
+          <div class="section-head">
+            <div><h2>Storefront Payment Methods</h2><p>Local payment options shown to customers at checkout</p></div>
+            <button class="btn btn-primary" onclick="openPaymentModal()">+ Add Method</button>
+          </div>
+          <div class="table-wrap"><table class="admin-table" id="paymentsTable"><thead><tr><th>Method</th><th>Account Name</th><th>Account No.</th><th>Actions</th></tr></thead><tbody></tbody></table></div>
+        </div>
+      </section>
+
+      <!-- COUPONS -->
+      <section class="view-sec" data-view="coupons">
+        <div class="panel">
+          <div class="section-head">
+            <div><h2>Coupons / Promotions</h2><p>Local discount codes for the storefront</p></div>
+            <button class="btn btn-primary" onclick="openCouponModal()">+ Add Coupon</button>
+          </div>
+          <div class="table-wrap"><table class="admin-table" id="couponsTable"><thead><tr><th>Code</th><th>Discount</th><th>Expiry</th><th>Status</th><th>Actions</th></tr></thead><tbody></tbody></table></div>
+        </div>
+      </section>
+
+      <!-- SETTINGS -->
+      <section class="view-sec" data-view="settings">
+        <div class="panel">
+          <div class="section-head"><div><h2>⚙ G2Bulk Connection (via Cloudflare Worker)</h2><p>G2Bulk key များကို Worker ထဲမှာသာ secret အနေနဲ့ ထားပြီး admin panel ကနေ Worker ကိုသာ ခေါ်ပါသည်</p></div></div>
+          <div class="notice success">✓ G2Bulk Main/SMM API key များကို browser ထဲ လုံးဝ မသိမ်းတော့ပါ — Worker (<code>wrangler secret put</code>) ထဲမှာသာ ထားပါသည်။ ဒီနေရာမှာ ထည့်ရမှာက Worker URL နဲ့ admin token ပဲဖြစ်ပါသည်။</div>
+          <div class="form-grid">
+            <div class="field"><label>Cloudflare Worker Base URL</label><input id="cfgWorkerBase" placeholder="https://g2bulk-provider.linngamestore.workers.dev" /></div>
+            <div class="field"><label>Admin Token (X-Admin-Token)</label><input id="cfgAdminToken" type="password" placeholder="matches ADMIN_TOKEN secret on the Worker" autocomplete="off" /></div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px;margin-top:6px">
+            <button class="btn btn-soft" onclick="testMainConnection()">Test Main API <span id="mainTestDot" class="dot-status" style="margin-left:6px"><span class="d"></span></span></button>
+            <button class="btn btn-soft" onclick="testSmmConnection()">Test SMM API <span id="smmTestDot" class="dot-status" style="margin-left:6px"><span class="d"></span></span></button>
+            <button class="btn btn-primary" onclick="saveApiSettings()">Save Settings</button>
+          </div>
+          <div id="settingsResult"></div>
+        </div>
+        <div class="panel">
+          <div class="section-head"><div><h2>🔥 Firebase (Firestore)</h2><p>Orders / Users / Payments / Coupons / Logs ကို Firestore ထဲမှာ real-time သိမ်းမည်</p></div></div>
+          <div class="notice info">Firebase console → Project settings → General → "Your apps" → Web app config object ကို ဒီနေရာမှာ paste ထည့်ပါ။ Save & Connect လုပ်ပြီးရင် login gate ပေါ်လာပါလိမ့်မယ် — Authentication → Sign-in method → Email/Password ကို enable လုပ်ပြီး admin account တစ်ခု (Authentication → Users → Add user) ဖန်တီးထားဖို့ လိုပါတယ်။</div>
+          <div class="field"><label>Firebase config (JSON — paste from Firebase console)</label><textarea id="cfgFirebaseJson" rows="6" placeholder='{"apiKey":"...","authDomain":"...","projectId":"...","storageBucket":"...","messagingSenderId":"...","appId":"..."}'></textarea></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px">
+            <button class="btn btn-soft" onclick="testFirebaseConnection()">Test Firebase <span id="fbTestDot" class="dot-status" style="margin-left:6px"><span class="d"></span></span></button>
+            <button class="btn btn-primary" onclick="saveFirebaseSettings()">Save &amp; Connect</button>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="section-head"><div><h2>Reference — quick endpoint map</h2><p>From the G2Bulk documentation</p></div></div>
+          <div class="kv">
+            <div><b>Current user / balance</b><span>GET /v1/getMe</span></div>
+            <div><b>Categories</b><span>GET /v1/category</span></div>
+            <div><b>Products</b><span>GET /v1/products</span></div>
+            <div><b>Voucher purchase</b><span>POST /v1/products/:id/purchase</span></div>
+            <div><b>Orders list</b><span>GET /v1/orders</span></div>
+            <div><b>Delivery poll</b><span>GET /v1/orders/:id/delivery</span></div>
+            <div><b>Transactions</b><span>GET /v1/transactions</span></div>
+            <div><b>Supported games</b><span>GET /v1/games</span></div>
+            <div><b>Game input fields</b><span>POST /v1/games/fields</span></div>
+            <div><b>Game servers</b><span>POST /v1/games/servers</span></div>
+            <div><b>Player ID validate</b><span>POST /v1/games/checkPlayerId</span></div>
+            <div><b>Catalogue</b><span>GET /v1/games/:code/catalogue</span></div>
+            <div><b>ETA</b><span>POST /v1/games/eta</span></div>
+            <div><b>Game top-up order</b><span>POST /v1/games/:code/order</span></div>
+            <div><b>Game order status</b><span>POST /v1/games/order/status</span></div>
+            <div><b>SMM services</b><span>action=services</span></div>
+            <div><b>SMM add order</b><span>action=add</span></div>
+            <div><b>SMM status</b><span>action=status</span></div>
+            <div><b>SMM balance</b><span>action=balance</span></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- LOGS -->
+      <section class="view-sec" data-view="logs">
+        <div class="panel">
+          <div class="section-head">
+            <div><h2>Activity Logs</h2><p>Every API call made from this admin panel (last 150)</p></div>
+            <button class="btn btn-soft" onclick="clearLogs()">Clear Logs</button>
+          </div>
+          <div class="table-wrap"><table class="admin-table" id="logsTable"><thead><tr><th>Time</th><th>Method</th><th>Endpoint / Action</th><th>Result</th></tr></thead><tbody></tbody></table></div>
+        </div>
+      </section>
+    </div>
+  </div>
+</main>
+
+<!-- MODALS -->
+<div class="modal-backdrop" id="telegramModal">
+  <div class="modal">
+    <div class="modal-head"><h2>✈ Telegram Order Alerts</h2><button class="close" onclick="closeModal('telegramModal')">×</button></div>
+    <div class="modal-body">
+      <div class="notice info">Order အသစ်တင်တိုင်း Telegram Bot က သတ်မှတ်ထားတဲ့ Chat ID သို့ notification ပို့ပါမယ်။</div>
+      <div class="notice warning">Frontend-only demo ဖြစ်တဲ့အတွက် Bot Token ကို ဒီ browser ရဲ့ local storage ထဲမှာ သိမ်းထားပါတယ်။ Production မှာ token ကို backend/server-side proxy ထဲမှာသာ သိမ်းပါ။</div>
+      <div class="field"><label>Telegram Bot Token</label><input id="telegramToken" type="password" placeholder="123456789:AA..." autocomplete="off" /></div>
+      <div class="field"><label>Telegram Chat ID</label><input id="telegramChatId" placeholder="e.g. -1001234567890 or 123456789" /></div>
+      <label style="display:flex;align-items:center;gap:9px;font-size:12px;margin:5px 0 16px;color:var(--muted)"><input id="telegramEnabled" type="checkbox" style="accent-color:var(--pink);width:16px;height:16px" /> Enable automatic order notifications</label>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px">
+        <button class="btn btn-soft" onclick="testTelegram()">Send Test</button>
+        <button class="btn btn-primary" onclick="saveTelegramSettings()">Save Settings</button>
+      </div>
+      <p style="font-size:10px;color:var(--muted);line-height:1.5;margin:14px 0 0">Setup: @BotFather မှ bot တစ်ခုဖန်တီးပါ → token ထည့်ပါ → bot ကို message တစ်စောင်ပို့ပါ → Chat ID ထည့်ပါ။</p>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="orderModal">
+  <div class="modal wide">
+    <div class="modal-head"><h2>+ New Order</h2><button class="close" onclick="closeModal('orderModal')">×</button></div>
+    <div class="modal-body">
+      <div class="radio-row" id="orderTypeRow">
+        <button type="button" class="radio-opt active" data-type="game">Game Top-up</button>
+        <button type="button" class="radio-opt" data-type="voucher">Voucher / Product</button>
+        <button type="button" class="radio-opt" data-type="smm">SMM Panel</button>
+      </div>
+
+      <div id="orderFieldsGame">
+        <div class="form-grid">
+          <div class="field"><label>Game Code</label><input id="ordGameCode" placeholder="e.g. mlbb" /></div>
+          <div class="field"><label>Catalogue name</label><input id="ordCatalogueName" placeholder="e.g. 60 UC" /></div>
+          <div class="field"><label>Player ID</label><input id="ordPlayerId" placeholder="12345678" /></div>
+          <div class="field"><label>Server ID (if required)</label><input id="ordServerId" placeholder="2001" /></div>
+          <div class="field"><label>Charname (if required)</label><input id="ordCharname" placeholder="optional" /></div>
+          <div class="field"><label>Callback URL (optional)</label><input id="ordCallback" placeholder="https://your-domain.com/webhook" /></div>
+        </div>
+        <div class="field full"><label>Remark (optional)</label><input id="ordRemark" placeholder="internal note" /></div>
+        <button type="button" class="btn btn-soft btn-sm" onclick="validatePlayerId()">✓ Validate Player ID first</button>
+        <div id="playerIdResult"></div>
+      </div>
+
+      <div id="orderFieldsVoucher" style="display:none">
+        <div class="form-grid">
+          <div class="field"><label>Product ID</label><input id="ordProductId" placeholder="e.g. 1" /></div>
+          <div class="field"><label>Quantity</label><input id="ordQty" type="number" min="1" value="1" /></div>
+        </div>
+      </div>
+
+      <div id="orderFieldsSmm" style="display:none">
+        <div class="form-grid">
+          <div class="field"><label>Service ID</label><input id="ordServiceId" placeholder="e.g. 1" /></div>
+          <div class="field"><label>Link (Player ID / delimited)</label><input id="ordSmmLink" placeholder="12345678|2001" /></div>
+        </div>
+      </div>
+
+      <div class="form-grid" style="margin-top:4px">
+        <div class="field"><label>Customer name (local label)</label><input id="ordCustomer" placeholder="e.g. Linn Gamer" /></div>
+        <div class="field"><label>Display amount (Ks, optional label only)</label><input id="ordAmountLabel" placeholder="e.g. 12,000 Ks" /></div>
+      </div>
+
+      <label style="display:flex;align-items:center;gap:9px;font-size:12px;margin:5px 0 16px;color:var(--muted)"><input id="ordDraft" type="checkbox" style="accent-color:var(--pink);width:16px;height:16px" /> Save as draft only (don't call G2Bulk API yet — approve later)</label>
+
+      <div class="notice info">Idempotency key auto-generate လုပ်ပြီး order retry လုပ်လျှင်လည်း duplicate charge မဖြစ်စေရန် ထပ်တူသုံးပါမည်။</div>
+      <button class="btn btn-primary" style="width:100%" id="orderSubmitBtn" onclick="submitOrder()">Place Order via G2Bulk API</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="detailModal">
+  <div class="modal wide">
+    <div class="modal-head"><h2 id="detailModalTitle">Details</h2><button class="close" onclick="closeModal('detailModal')">×</button></div>
+    <div class="modal-body" id="detailModalBody"></div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="userModal">
+  <div class="modal">
+    <div class="modal-head"><h2>+ Add User</h2><button class="close" onclick="closeModal('userModal')">×</button></div>
+    <div class="modal-body">
+      <div class="field"><label>Name</label><input id="userName" /></div>
+      <div class="field"><label>Contact (phone/telegram)</label><input id="userContact" /></div>
+      <div class="field"><label>Wallet balance (Ks)</label><input id="userWallet" type="number" value="0" /></div>
+      <button class="btn btn-primary" style="width:100%" onclick="saveUser()">Save User</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="paymentModal">
+  <div class="modal">
+    <div class="modal-head"><h2>+ Payment Method</h2><button class="close" onclick="closeModal('paymentModal')">×</button></div>
+    <div class="modal-body">
+      <div class="field"><label>Method name (e.g. KBZPay, Wave Money)</label><input id="payMethodName" /></div>
+      <div class="field"><label>Account name</label><input id="payAccName" /></div>
+      <div class="field"><label>Account number</label><input id="payAccNo" /></div>
+      <button class="btn btn-primary" style="width:100%" onclick="savePaymentMethod()">Save Method</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="couponModal">
+  <div class="modal">
+    <div class="modal-head"><h2>+ Coupon</h2><button class="close" onclick="closeModal('couponModal')">×</button></div>
+    <div class="modal-body">
+      <div class="field"><label>Code</label><input id="couponCode" placeholder="e.g. LINN10" /></div>
+      <div class="field"><label>Discount %</label><input id="couponDiscount" type="number" min="1" max="100" value="10" /></div>
+      <div class="field"><label>Expiry date</label><input id="couponExpiry" type="date" /></div>
+      <button class="btn btn-primary" style="width:100%" onclick="saveCoupon()">Save Coupon</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-wrap" id="toastWrap"></div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script>
+/* ============ STORAGE HELPERS ============ */
+const LS={
+  get(k,d){try{const v=localStorage.getItem(k);return v===null?d:JSON.parse(v)}catch(e){return d}},
+  set(k,v){localStorage.setItem(k,JSON.stringify(v))}
+};
+let telegram=LS.get('linn_telegram',{token:'',chatId:'',enabled:false});
+let workerCfg=LS.get('linn_worker_config',{base:'https://g2bulk-provider.linngamestore.workers.dev',adminToken:''});
+let firebaseCfgRaw=localStorage.getItem('linn_firebase_config')||'';
+let db=null;
+let orders=LS.get('linn_orders',[]);
+let games=LS.get('linn_games',[]);
+let catalogueCache=LS.get('linn_catalogue',{});
+let smmServices=LS.get('linn_smm_services',[]);
+let users=LS.get('linn_users',[]);
+let paymentMethods=LS.get('linn_payment_methods',[]);
+let coupons=LS.get('linn_coupons',[]);
+let logs=LS.get('linn_logs',[]);
+let currentOrderType='game';
+let orderFilter='ALL';
+
+function saveAll(){LS.set('linn_orders',orders);LS.set('linn_games',games);LS.set('linn_catalogue',catalogueCache);LS.set('linn_smm_services',smmServices);LS.set('linn_users',users);LS.set('linn_payment_methods',paymentMethods);LS.set('linn_coupons',coupons);LS.set('linn_logs',logs)}
+
+/* ============ FIREBASE (Firestore + Auth) ============ */
+let authListenerAttached=false,fsUnsubscribers=[];
+function initFirebase(silent){
+  if(!firebaseCfgRaw){if(!silent)showToast('Firebase config not set yet','bad');return}
+  try{
+    const cfg=JSON.parse(firebaseCfgRaw);
+    if(!firebase.apps.length)firebase.initializeApp(cfg);
+    db=firebase.firestore();
+    if(!authListenerAttached){authListenerAttached=true;firebase.auth().onAuthStateChanged(handleAdminAuthState)}
+    document.getElementById('fbTestDot')&&(document.getElementById('fbTestDot').className='dot-status ok',document.getElementById('fbTestDot').innerHTML='<span class="d"></span> connected');
+  }catch(err){db=null;if(!silent)showToast('Firebase init failed: '+err.message,'bad')}
+}
+function handleAdminAuthState(user){
+  const gate=document.getElementById('adminLoginGate');
+  const main=document.getElementById('adminMain');
+  const logoutBtn=document.getElementById('adminLogoutBtn');
+  if(user){
+    if(gate)gate.classList.remove('show');
+    if(main)main.style.display='';
+    if(logoutBtn)logoutBtn.classList.remove('hide');
+    attachFirestoreListeners();
+  }else{
+    detachFirestoreListeners();
+    if(main)main.style.display='none';
+    if(logoutBtn)logoutBtn.classList.add('hide');
+    if(gate)gate.classList.add('show');
+  }
+}
+function signInAdmin(){
+  const email=document.getElementById('adminEmail').value.trim();
+  const pass=document.getElementById('adminPassword').value;
+  const err=document.getElementById('adminLoginError');
+  if(err){err.textContent='';err.classList.add('hide')}
+  if(!firebase.apps.length){if(err){err.textContent='Firebase config ကို Settings tab ထဲမှာ အရင် Save & Connect လုပ်ပါ။';err.classList.remove('hide')}return}
+  firebase.auth().signInWithEmailAndPassword(email,pass).catch(e=>{if(err){err.textContent='Login failed: '+e.message;err.classList.remove('hide')}});
+}
+function logoutAdmin(){firebase.auth().signOut()}
+function testFirebaseConnection(){firebaseCfgRaw=document.getElementById('cfgFirebaseJson').value.trim();initFirebase(false)}
+function saveFirebaseSettings(){firebaseCfgRaw=document.getElementById('cfgFirebaseJson').value.trim();localStorage.setItem('linn_firebase_config',firebaseCfgRaw);initFirebase(false);showToast('Firebase settings saved','ok')}
+function attachFirestoreListeners(){
+  if(!db)return;
+  detachFirestoreListeners();
+  fsUnsubscribers.push(db.collection('orders').orderBy('createdAt','desc').limit(300).onSnapshot(snap=>{orders=snap.docs.map(d=>d.data());renderOrdersTable();renderDashboard()},err=>showToast('orders listener: '+err.message,'bad')));
+  fsUnsubscribers.push(db.collection('users').onSnapshot(snap=>{users=snap.docs.map(d=>d.data());renderUsersTable()},err=>showToast('users listener: '+err.message,'bad')));
+  fsUnsubscribers.push(db.collection('paymentMethods').onSnapshot(snap=>{paymentMethods=snap.docs.map(d=>d.data());renderPaymentsTable()},err=>showToast('payments listener: '+err.message,'bad')));
+  fsUnsubscribers.push(db.collection('coupons').onSnapshot(snap=>{coupons=snap.docs.map(d=>d.data());renderCouponsTable()},err=>showToast('coupons listener: '+err.message,'bad')));
+  fsUnsubscribers.push(db.collection('logs').orderBy('time','desc').limit(150).onSnapshot(snap=>{logs=snap.docs.map(d=>d.data());renderLogsTable()},err=>showToast('logs listener: '+err.message,'bad')));
+}
+function detachFirestoreListeners(){fsUnsubscribers.forEach(u=>{try{u()}catch(e){}});fsUnsubscribers=[]}
+function fsSet(collection,id,data){if(!db)return;db.collection(collection).doc(String(id)).set(data,{merge:true}).catch(err=>showToast('Firestore write failed: '+err.message,'bad'))}
+function fsDelete(collection,id){if(!db)return;db.collection(collection).doc(String(id)).delete().catch(err=>showToast('Firestore delete failed: '+err.message,'bad'))}
+
+/* ============ THEME / NAV ============ */
+function applyTheme(){const stored=localStorage.getItem('linn_theme');const light=stored?stored==='light':true;document.documentElement.classList.toggle('theme-light',light);const btn=document.getElementById('themeToggle');if(btn){btn.textContent=light?'☀':'☾';btn.title=light?'Switch to dark mode':'Switch to light mode'}}
+function toggleTheme(){const light=document.documentElement.classList.toggle('theme-light');localStorage.setItem('linn_theme',light?'light':'dark');const btn=document.getElementById('themeToggle');if(btn){btn.textContent=light?'☀':'☾';btn.title=light?'Switch to dark mode':'Switch to light mode'}}
+
+document.getElementById('adminMenu').addEventListener('click',e=>{
+  const btn=e.target.closest('button[data-sec]');if(!btn)return;
+  document.querySelectorAll('#adminMenu button').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  const sec=btn.dataset.sec;
+  document.querySelectorAll('.view-sec').forEach(v=>v.classList.toggle('active',v.dataset.view===sec));
+  if(sec==='games')renderGamesTable();
+  if(sec==='servers'||sec==='packages')populateGameSelects();
+  if(sec==='logs')renderLogsTable();
+  if(sec==='users')renderUsersTable();
+  if(sec==='payments')renderPaymentsTable();
+  if(sec==='coupons')renderCouponsTable();
+  if(sec==='orders')renderOrdersTable();
+});
+
+function closeModal(id){document.getElementById(id).classList.remove('show')}
+document.querySelectorAll('.modal-backdrop').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('show')}));
+
+function showToast(msg,type='ok'){const cfg={ok:{title:'Success',cls:'ok',icon:'<svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/><path d="M8 12.5l2.5 2.5L16 9.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>'},bad:{title:'Error',cls:'bad',icon:'<svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/><path d="M9 9l6 6M15 9l-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>'}};const c=cfg[type]||cfg.ok;const t=document.createElement('div');t.className='toast '+c.cls;t.innerHTML='<span class="toast-ico">'+c.icon+'</span><div class="toast-body"><strong>'+c.title+'</strong><small>'+esc(msg)+'</small></div><button class="toast-close" onclick="this.parentElement.remove()" aria-label="Close">✕</button>';document.getElementById('toastWrap').appendChild(t);setTimeout(()=>t.remove(),3800)}
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+function uuid(){if(crypto.randomUUID)return crypto.randomUUID();return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,c=>{const r=Math.random()*16|0;const v=c==='x'?r:(r&0x3|0x8);return v.toString(16)})}
+
+/* ============ TELEGRAM (kept from original) ============ */
+function openTelegramSettings(){document.getElementById('telegramToken').value=telegram.token||'';document.getElementById('telegramChatId').value=telegram.chatId||'';document.getElementById('telegramEnabled').checked=!!telegram.enabled;document.getElementById('telegramModal').classList.add('show')}
+function saveTelegramSettings(){telegram={token:document.getElementById('telegramToken').value.trim(),chatId:document.getElementById('telegramChatId').value.trim(),enabled:document.getElementById('telegramEnabled').checked};LS.set('linn_telegram',telegram);closeModal('telegramModal');showToast(telegram.enabled?'Telegram notifications enabled':'Telegram settings saved','ok')}
+async function telegramRequest(text){const token=document.getElementById('telegramToken').value.trim()||telegram.token;const chatId=document.getElementById('telegramChatId').value.trim()||telegram.chatId;if(!token||!chatId){showToast('Enter Bot Token and Chat ID first','bad');return false}try{const res=await fetch('https://api.telegram.org/bot'+encodeURIComponent(token)+'/sendMessage',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({chat_id:chatId,text,parse_mode:'HTML',disable_web_page_preview:true})});const data=await res.json();if(!res.ok||!data.ok)throw new Error(data.description||'Telegram API error');return true}catch(err){showToast('Telegram send failed: '+err.message,'bad');return false}}
+async function testTelegram(){const ok=await telegramRequest('<b>LINN GAME STORE</b>\n\n✅ Test notification successful!\nYour Telegram order alerts are connected.');if(ok)showToast('Test notification sent to Telegram','ok')}
+async function notifyTelegramOrder(order){if(!telegram.enabled||!telegram.token||!telegram.chatId)return;const text='<b>New order</b> — '+esc(order.id)+'\nCustomer: '+esc(order.customer||'-')+'\nItem: '+esc(order.itemLabel||'-')+'\nStatus: '+esc(order.status);try{await fetch('https://api.telegram.org/bot'+encodeURIComponent(telegram.token)+'/sendMessage',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({chat_id:telegram.chatId,text,parse_mode:'HTML'})})}catch(e){}}
+
+/* ============ ACTIVITY LOG ============ */
+function logActivity(method,endpoint,statusCode,ok){const entry={id:'L-'+Date.now().toString(36)+Math.random().toString(36).slice(2,6),time:new Date().toISOString(),method,endpoint,statusCode,ok};logs.unshift(entry);if(logs.length>150)logs.length=150;LS.set('linn_logs',logs);renderLogsTable();fsSet('logs',entry.id,entry)}
+function renderLogsTable(){const tb=document.querySelector('#logsTable tbody');if(!tb)return;if(!logs.length){tb.innerHTML='<tr class="empty-row"><td colspan="4">No API calls logged yet.</td></tr>';return}
+  tb.innerHTML=logs.map(l=>{const t=new Date(l.time).toLocaleString();const cls=l.ok===undefined?'processing':(l.ok?'completed':'failed');const label=l.ok===undefined?'…':(l.ok?'OK '+l.statusCode:'FAIL '+l.statusCode);return '<tr><td>'+esc(t)+'</td><td>'+esc(l.method)+'</td><td style="max-width:320px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(l.endpoint)+'</td><td><span class="status '+cls+'">'+esc(label)+'</span></td></tr>'}).join('')}
+function clearLogs(){logs=[];LS.set('linn_logs',logs);renderLogsTable();showToast('Logs cleared','ok')}
+function logResult(statusCode,ok){if(!logs.length)return;logs[0].ok=ok;logs[0].statusCode=statusCode;LS.set('linn_logs',logs);renderLogsTable();fsSet('logs',logs[0].id,logs[0])}
+
+/* ============ G2BULK API WRAPPERS (via Cloudflare Worker proxy) ============ */
+function saveApiSettings(){workerCfg={base:(document.getElementById('cfgWorkerBase').value.trim()||workerCfg.base).replace(/\/$/,''),adminToken:document.getElementById('cfgAdminToken').value.trim()};LS.set('linn_worker_config',workerCfg);showToast('Worker settings saved locally','ok');updateSystemStatus()}
+function loadApiSettingsForm(){document.getElementById('cfgWorkerBase').value=workerCfg.base;document.getElementById('cfgAdminToken').value=workerCfg.adminToken;document.getElementById('cfgFirebaseJson').value=firebaseCfgRaw}
+
+async function mainApi(path,{method='GET',body=null,idempotency=null}={}){
+  if(!workerCfg.base||!workerCfg.adminToken)throw new Error('Worker URL / Admin Token မထည့်ရသေးပါ — Settings မှာ ထည့်ပါ');
+  const url=workerCfg.base+'/main/'+path.replace(/^\//,'');
+  const headers={'X-Admin-Token':workerCfg.adminToken};
+  const opts={method,headers};
+  if(idempotency)headers['X-Idempotency-Key']=idempotency;
+  if(body){headers['Content-Type']='application/json';opts.body=JSON.stringify(body)}
+  logActivity(method,url,undefined,undefined);
+  let res,data;
+  try{res=await fetch(url,opts);data=await res.json().catch(()=>({}))}
+  catch(err){logResult('NET',false);throw new Error('Network error — Worker ကို ဆက်သွယ်လို့မရပါ (CORS/network)')}
+  logResult(res.status,res.ok);
+  if(!res.ok){const msg=data.message||data.error||('HTTP '+res.status);const err=new Error(msg);err.httpStatus=res.status;err.data=data;throw err}
+  return data;
+}
+
+async function smmApi(action,params={}){
+  if(!workerCfg.base||!workerCfg.adminToken)throw new Error('Worker URL / Admin Token မထည့်ရသေးပါ — Settings မှာ ထည့်ပါ');
+  const url=workerCfg.base+'/smm';
+  const body=new URLSearchParams({action,...params});
+  logActivity('POST',url+' action='+action,undefined,undefined);
+  let res,data;
+  try{res=await fetch(url,{method:'POST',headers:{'X-Admin-Token':workerCfg.adminToken},body});data=await res.json().catch(()=>({}))}
+  catch(err){logResult('NET',false);throw new Error('Network error — Worker (SMM) ကို ဆက်သွယ်လို့မရပါ')}
+  const ok=res.ok&&!data.error;logResult(data.error?'ERR':res.status,ok);
+  if(data.error)throw new Error(data.error);
+  if(!res.ok)throw new Error('HTTP '+res.status);
+  return data;
+}
+
+/* ============ SYSTEM STATUS ============ */
+function updateSystemStatus(){const el=document.getElementById('systemStatus');if(workerCfg.base&&workerCfg.adminToken){el.className='status completed';el.textContent='● WORKER CONFIGURED'}else{el.className='status failed';el.textContent='● NOT CONFIGURED'}}
+
+/* ============ TEST CONNECTIONS ============ */
+async function testMainConnection(){const dot=document.getElementById('mainTestDot');dot.className='dot-status';dot.innerHTML='<span class="d"></span><span class="spinner"></span>';
+  try{const data=await mainApi('getMe');dot.className='dot-status ok';dot.innerHTML='<span class="d"></span> connected';showToast('Main API connected — user: '+(data.username||data.user_id||'OK'),'ok');document.getElementById('statMainBalance').textContent=(data.balance!==undefined?data.balance:'—')+' USD';document.getElementById('statMainUp').textContent='✓ '+(data.username||'connected');document.getElementById('payMainBalance').textContent=(data.balance!==undefined?data.balance+' USD':'—')}
+  catch(err){dot.className='dot-status bad';dot.innerHTML='<span class="d"></span> failed';showToast('Main API test failed: '+err.message,'bad')}
+  updateSystemStatus()}
+
+async function testSmmConnection(){const dot=document.getElementById('smmTestDot');dot.className='dot-status';dot.innerHTML='<span class="d"></span><span class="spinner"></span>';
+  try{const data=await smmApi('balance');dot.className='dot-status ok';dot.innerHTML='<span class="d"></span> connected';showToast('SMM API connected — balance: '+data.balance+' '+(data.currency||''),'ok');document.getElementById('statSmmBalance').textContent=data.balance+' '+(data.currency||'');document.getElementById('statSmmUp').textContent='✓ connected';document.getElementById('paySmmBalance').textContent=data.balance+' '+(data.currency||'')}
+  catch(err){dot.className='dot-status bad';dot.innerHTML='<span class="d"></span> failed';showToast('SMM API test failed: '+err.message,'bad')}
+  updateSystemStatus()}
+
+async function checkAllBalances(){await testMainConnection();await testSmmConnection()}
+
+/* ============ DASHBOARD ============ */
+function renderDashboard(){
+  const totalSales=orders.filter(o=>o.status==='COMPLETED'||o.status==='Completed').reduce((s,o)=>s+(parseFloat((o.amountLabel||'0').toString().replace(/[^0-9.]/g,''))||0),0);
+  document.getElementById('statSales').textContent=totalSales.toLocaleString()+' Ks';
+  document.getElementById('statSalesUp').textContent=orders.length?('↗ from '+orders.filter(o=>o.status==='COMPLETED'||o.status==='Completed').length+' completed orders'):'↗ no orders yet';
+  const pending=orders.filter(o=>['DRAFT','PENDING','PROCESSING','Processing','Pending'].includes(o.status)).length;
+  document.getElementById('statPending').textContent=String(pending).padStart(2,'0');
+  const tb=document.querySelector('#dashOrdersTable tbody');
+  const recent=orders.slice(0,5);
+  if(!recent.length){tb.innerHTML='<tr class="empty-row"><td colspan="6">No orders yet — click "New Order" to create one.</td></tr>';return}
+  tb.innerHTML=recent.map(o=>orderRow(o,true)).join('');
+}
+
+/* ============ ORDERS ============ */
+function statusClass(s){s=(s||'').toUpperCase();if(s==='COMPLETED')return 'completed';if(s==='FAILED'||s==='CANCELED'||s==='CANCELLED')return 'failed';if(s==='DRAFT')return 'draft';return 'processing'}
+function orderRow(o,compact){
+  const actions=[];
+  if(o.status==='DRAFT'){actions.push('<button class="link-btn" onclick="approveOrder(\''+o.id+'\')">Approve</button>')}
+  else{actions.push('<button class="link-btn" onclick="syncOrder(\''+o.id+'\')">Sync</button>')}
+  if(o.status==='FAILED'){actions.push('<button class="link-btn" onclick="retryOrder(\''+o.id+'\')">Retry</button>')}
+  actions.push('<button class="link-btn" onclick="viewOrder(\''+o.id+'\')">View</button>');
+  const cols=compact?
+    ('<td>'+esc(o.id)+'</td><td>'+esc(o.customer||'-')+'</td><td>'+esc(o.itemLabel||'-')+'</td><td>'+esc(o.amountLabel||'-')+'</td><td><span class="status '+statusClass(o.status)+'">'+esc(o.status)+'</span></td><td>'+actions.join(' ')+'</td>')
+    :('<td>'+esc(o.id)+'</td><td>'+esc(o.type)+'</td><td>'+esc(o.customer||'-')+'</td><td>'+esc(o.itemLabel||'-')+'</td><td>'+esc(o.amountLabel||'-')+'</td><td><span class="status '+statusClass(o.status)+'">'+esc(o.status)+'</span></td><td class="action-links">'+actions.join(' ')+'</td>');
+  return '<tr>'+cols+'</tr>';
+}
+function renderOrdersTable(){
+  const tb=document.querySelector('#ordersTable tbody');
+  const list=orderFilter==='ALL'?orders:orders.filter(o=>(o.status||'').toUpperCase()===orderFilter);
+  if(!list.length){tb.innerHTML='<tr class="empty-row"><td colspan="7">No orders in this filter.</td></tr>';return}
+  tb.innerHTML=list.map(o=>orderRow(o,false)).join('');
+}
+document.getElementById('orderFilterPills').addEventListener('click',e=>{const b=e.target.closest('.pill');if(!b)return;document.querySelectorAll('#orderFilterPills .pill').forEach(x=>x.classList.remove('active'));b.classList.add('active');orderFilter=b.dataset.f;renderOrdersTable()});
+
+function openOrderModal(){document.getElementById('orderModal').classList.add('show');document.getElementById('playerIdResult').innerHTML=''}
+document.getElementById('orderTypeRow').addEventListener('click',e=>{const b=e.target.closest('.radio-opt');if(!b)return;document.querySelectorAll('#orderTypeRow .radio-opt').forEach(x=>x.classList.remove('active'));b.classList.add('active');currentOrderType=b.dataset.type;document.getElementById('orderFieldsGame').style.display=currentOrderType==='game'?'block':'none';document.getElementById('orderFieldsVoucher').style.display=currentOrderType==='voucher'?'block':'none';document.getElementById('orderFieldsSmm').style.display=currentOrderType==='smm'?'block':'none'});
+
+async function validatePlayerId(){
+  const game=document.getElementById('ordGameCode').value.trim();
+  const userId=document.getElementById('ordPlayerId').value.trim();
+  const serverId=document.getElementById('ordServerId').value.trim();
+  const charname=document.getElementById('ordCharname').value.trim();
+  const box=document.getElementById('playerIdResult');
+  if(!game||!userId){box.innerHTML='<div class="notice warning">Game code and Player ID လိုအပ်ပါသည်</div>';return}
+  box.innerHTML='<div class="notice info"><span class="spinner"></span> Validating…</div>';
+  try{const body={game,user_id:userId};if(serverId)body.server_id=serverId;if(charname)body.charname=charname;
+    const data=await mainApi('games/checkPlayerId',{method:'POST',body});
+    box.innerHTML='<div class="notice success">✓ Valid — '+esc(data.name||data.openid||'player found')+'</div>'}
+  catch(err){box.innerHTML='<div class="notice danger">✕ '+esc(err.message)+'</div>'}
+}
+
+function buildOrderRecord(base){return Object.assign({id:'ORD-'+Date.now().toString(36).toUpperCase(),createdAt:new Date().toISOString(),status:'DRAFT',idempotencyKey:uuid()},base)}
+
+async function submitOrder(){
+  const draft=document.getElementById('ordDraft').checked;
+  const customer=document.getElementById('ordCustomer').value.trim();
+  const amountLabel=document.getElementById('ordAmountLabel').value.trim();
+  let record;
+  if(currentOrderType==='game'){
+    const code=document.getElementById('ordGameCode').value.trim();
+    const catalogue_name=document.getElementById('ordCatalogueName').value.trim();
+    const player_id=document.getElementById('ordPlayerId').value.trim();
+    const server_id=document.getElementById('ordServerId').value.trim();
+    const charname=document.getElementById('ordCharname').value.trim();
+    const remark=document.getElementById('ordRemark').value.trim();
+    const callback_url=document.getElementById('ordCallback').value.trim();
+    if(!code||!catalogue_name||!player_id){showToast('Game code, catalogue name and player ID are required','bad');return}
+    record=buildOrderRecord({type:'game',gameCode:code,itemLabel:catalogue_name+' ('+code+')',customer,amountLabel,payload:{catalogue_name,player_id,server_id:server_id||undefined,charname:charname||undefined,remark:remark||undefined,callback_url:callback_url||undefined}});
+  }else if(currentOrderType==='voucher'){
+    const id=document.getElementById('ordProductId').value.trim();
+    const qty=parseInt(document.getElementById('ordQty').value)||1;
+    if(!id){showToast('Product ID is required','bad');return}
+    record=buildOrderRecord({type:'voucher',productId:id,itemLabel:'Product #'+id,customer,amountLabel,payload:{quantity:qty}});
+  }else{
+    const service=document.getElementById('ordServiceId').value.trim();
+    const link=document.getElementById('ordSmmLink').value.trim();
+    if(!service||!link){showToast('Service ID and link are required','bad');return}
+    record=buildOrderRecord({type:'smm',serviceId:service,itemLabel:'SMM Service #'+service,customer,amountLabel,payload:{service,link,quantity:1}});
+  }
+  if(draft){
+    orders.unshift(record);saveAll();fsSet('orders',record.id,record);closeModal('orderModal');renderOrdersTable();renderDashboard();showToast('Order saved as draft — approve later to call the API','ok');return
+  }
+  document.getElementById('orderSubmitBtn').disabled=true;document.getElementById('orderSubmitBtn').textContent='Placing order…';
+  try{await placeOrderViaApi(record);orders.unshift(record);saveAll();fsSet('orders',record.id,record);closeModal('orderModal');renderOrdersTable();renderDashboard();notifyTelegramOrder(record);showToast('Order placed — status: '+record.status,'ok')}
+  catch(err){record.status='FAILED';record.lastError=err.message;orders.unshift(record);saveAll();fsSet('orders',record.id,record);renderOrdersTable();renderDashboard();showToast('Order failed: '+err.message,'bad')}
+  document.getElementById('orderSubmitBtn').disabled=false;document.getElementById('orderSubmitBtn').textContent='Place Order via G2Bulk API';
+}
+
+async function placeOrderViaApi(record){
+  if(record.type==='game'){
+    const data=await mainApi('games/'+encodeURIComponent(record.gameCode)+'/order',{method:'POST',body:record.payload,idempotency:record.idempotencyKey});
+    record.providerOrderId=data.order_id;record.status=data.status||'PENDING';record.raw=data;
+  }else if(record.type==='voucher'){
+    const data=await mainApi('products/'+encodeURIComponent(record.productId)+'/purchase',{method:'POST',body:record.payload,idempotency:record.idempotencyKey});
+    record.providerOrderId=data.order_id;record.status=data.status||'PENDING';record.deliveryItems=data.delivery_items;record.pollUrl=data.poll_url;record.raw=data;
+  }else{
+    const data=await smmApi('add',record.payload);
+    record.providerOrderId=data.order;record.status='Pending';record.raw=data;
+  }
+}
+
+async function approveOrder(id){
+  const o=orders.find(x=>x.id===id);if(!o)return;
+  try{await placeOrderViaApi(o);saveAll();fsSet('orders',o.id,o);renderOrdersTable();renderDashboard();notifyTelegramOrder(o);showToast('Order approved and placed via API — status: '+o.status,'ok')}
+  catch(err){o.status='FAILED';o.lastError=err.message;saveAll();fsSet('orders',o.id,o);renderOrdersTable();showToast('Approve failed: '+err.message,'bad')}
+}
+async function retryOrder(id){
+  const o=orders.find(x=>x.id===id);if(!o)return;
+  try{await placeOrderViaApi(o);saveAll();fsSet('orders',o.id,o);renderOrdersTable();renderDashboard();showToast('Retried — status: '+o.status,'ok')}
+  catch(err){o.lastError=err.message;saveAll();fsSet('orders',o.id,o);showToast('Retry failed: '+err.message,'bad')}
+}
+
+async function syncOrder(id){
+  const o=orders.find(x=>x.id===id);if(!o||!o.providerOrderId){showToast('No provider order ID to sync','bad');return}
+  try{
+    if(o.type==='game'){
+      const data=await mainApi('games/order/status',{method:'POST',body:{order_id:o.providerOrderId}});
+      o.status=data.status||o.status;o.raw=data;
+    }else if(o.type==='voucher'){
+      const url=workerCfg.base+'/main/orders/'+o.providerOrderId+'/delivery';
+      logActivity('GET',url,undefined,undefined);
+      const res=await fetch(url,{headers:{'X-Admin-Token':workerCfg.adminToken}});
+      const data=await res.json().catch(()=>({}));
+      logResult(res.status,res.status===200||res.status===202);
+      if(res.status===200){o.status='COMPLETED';o.deliveryItems=data.delivery_items}
+      else if(res.status===202){o.status='PROCESSING'}
+      else if(res.status===410){o.status='FAILED'}
+      else if(res.status===404){showToast('Order not found on provider','bad');return}
+    }else{
+      const data=await smmApi('status',{order:o.providerOrderId});
+      o.status=data.status||o.status;o.raw=data;
+    }
+    saveAll();fsSet('orders',o.id,o);renderOrdersTable();renderDashboard();showToast('Synced — status: '+o.status,'ok');
+  }catch(err){showToast('Sync failed: '+err.message,'bad')}
+}
+
+function viewOrder(id){
+  const o=orders.find(x=>x.id===id);if(!o)return;
+  document.getElementById('detailModalTitle').textContent='Order '+o.id;
+  document.getElementById('detailModalBody').innerHTML=
+    '<div class="kv">'+
+    '<div><b>Type</b><span>'+esc(o.type)+'</span></div>'+
+    '<div><b>Status</b><span>'+esc(o.status)+'</span></div>'+
+    '<div><b>Customer</b><span>'+esc(o.customer||'-')+'</span></div>'+
+    '<div><b>Item</b><span>'+esc(o.itemLabel||'-')+'</span></div>'+
+    '<div><b>Provider Order ID</b><span>'+esc(o.providerOrderId||'-')+'</span></div>'+
+    '<div><b>Idempotency Key</b><span>'+esc(o.idempotencyKey||'-')+'</span></div>'+
+    '<div><b>Created</b><span>'+esc(new Date(o.createdAt).toLocaleString())+'</span></div>'+
+    '</div>'+
+    (o.deliveryItems?('<p style="font-size:12px;color:var(--muted);margin:10px 0 4px">Delivery items:</p><div class="code-box">'+esc(JSON.stringify(o.deliveryItems,null,2))+'</div>'):'')+
+    (o.lastError?('<div class="notice danger" style="margin-top:10px">Last error: '+esc(o.lastError)+'</div>'):'')+
+    '<p style="font-size:12px;color:var(--muted);margin:10px 0 4px">Raw API response:</p><div class="code-box">'+esc(JSON.stringify(o.raw||o.payload||{},null,2))+'</div>';
+  document.getElementById('detailModal').classList.add('show');
+}
+
+/* ============ GAMES ============ */
+function gameOptionsHtml(){return games.map(g=>'<option value="'+esc(g.code)+'">'+esc(g.name||g.code)+'</option>').join('')}
+function populateGameSelects(){const a=document.getElementById('serverGameSelect');const b=document.getElementById('catalogueGameSelect');if(a)a.innerHTML=gameOptionsHtml()||'<option value="">Sync games first</option>';if(b)b.innerHTML=gameOptionsHtml()||'<option value="">Sync games first</option>'}
+
+async function syncGames(){
+  const btn=document.getElementById('syncGamesBtn');btn.disabled=true;btn.innerHTML='<span class="spinner"></span> Syncing…';
+  try{
+    const data=await mainApi('games');
+    const list=Array.isArray(data)?data:(data.games||data.data||[]);
+    games=list.map(g=>({code:g.code||g.game||g.id||g.slug||String(g),name:g.name||g.title||g.code||String(g)}));
+    saveAll();renderGamesTable();populateGameSelects();showToast('Synced '+games.length+' games from G2Bulk','ok');
+  }catch(err){showToast('Sync failed: '+err.message,'bad')}
+  btn.disabled=false;btn.innerHTML='⟳ Sync from G2Bulk';
+}
+function renderGamesTable(){
+  const tb=document.querySelector('#gamesTable tbody');
+  if(!games.length){tb.innerHTML='<tr class="empty-row"><td colspan="3">No games synced yet — click "Sync from G2Bulk".</td></tr>';return}
+  tb.innerHTML=games.map(g=>'<tr><td>'+esc(g.code)+'</td><td>'+esc(g.name)+'</td><td class="action-links">'+
+    '<button class="link-btn" onclick="viewGameFields(\''+esc(g.code)+'\')">Fields</button>'+
+    '<button class="link-btn" onclick="viewGameCatalogue(\''+esc(g.code)+'\')">Catalogue</button>'+
+    '</td></tr>').join('');
+}
+async function viewGameFields(code){
+  try{const data=await mainApi('games/fields',{method:'POST',body:{game:code}});
+    document.getElementById('detailModalTitle').textContent='Required fields — '+code;
+    document.getElementById('detailModalBody').innerHTML='<div class="code-box">'+esc(JSON.stringify(data,null,2))+'</div>';
+    document.getElementById('detailModal').classList.add('show');
+  }catch(err){showToast('Failed: '+err.message,'bad')}
+}
+async function viewGameCatalogue(code){
+  try{const data=await mainApi('games/'+encodeURIComponent(code)+'/catalogue');
+    catalogueCache[code]=data;saveAll();
+    const list=Array.isArray(data)?data:(data.items||data.data||[]);
+    document.getElementById('detailModalTitle').textContent='Catalogue — '+code;
+    document.getElementById('detailModalBody').innerHTML='<div class="table-wrap"><table class="admin-table"><thead><tr><th>Item</th><th>Price</th><th>Stock</th></tr></thead><tbody>'+
+      (list.length?list.map(it=>'<tr><td>'+esc(it.name||it.catalogue_name||it.title||'-')+'</td><td>'+esc(it.price!==undefined?it.price:(it.face_value||'-'))+'</td><td>'+esc(it.stock!==undefined?it.stock:'-')+'</td></tr>').join(''):'<tr class="empty-row"><td colspan="3">No items returned.</td></tr>')+
+      '</tbody></table></div>';
+    document.getElementById('detailModal').classList.add('show');
+  }catch(err){showToast('Failed: '+err.message,'bad')}
+}
+
+/* ============ SERVERS ============ */
+async function loadServers(){
+  const code=document.getElementById('serverGameSelect').value;
+  if(!code){showToast('Pick a game first','bad');return}
+  const tb=document.querySelector('#serversTable tbody');tb.innerHTML='<tr class="empty-row"><td colspan="2"><span class="spinner"></span> Loading…</td></tr>';
+  try{
+    const url=workerCfg.base+'/main/games/servers';
+    logActivity('POST',url,undefined,undefined);
+    const res=await fetch(url,{method:'POST',headers:{'X-Admin-Token':workerCfg.adminToken,'Content-Type':'application/json'},body:JSON.stringify({game:code})});
+    const data=await res.json().catch(()=>({}));
+    logResult(res.status,res.status===200);
+    if(res.status===403){tb.innerHTML='<tr class="empty-row"><td colspan="2">This game does not require a server ID.</td></tr>';return}
+    if(!res.ok){tb.innerHTML='<tr class="empty-row"><td colspan="2">Failed: '+esc(data.message||res.status)+'</td></tr>';return}
+    const list=Array.isArray(data)?data:(data.servers||data.data||[]);
+    tb.innerHTML=list.length?list.map(s=>'<tr><td>'+esc(s.id!==undefined?s.id:(s.server_id||'-'))+'</td><td>'+esc(s.name||s.title||'-')+'</td></tr>').join(''):'<tr class="empty-row"><td colspan="2">No servers returned.</td></tr>';
+  }catch(err){tb.innerHTML='<tr class="empty-row"><td colspan="2">Network error.</td></tr>'}
+}
+
+/* ============ PACKAGES / CATALOGUE / SMM SERVICES ============ */
+async function loadCatalogue(){
+  const code=document.getElementById('catalogueGameSelect').value;
+  if(!code){showToast('Pick a game first','bad');return}
+  const tb=document.querySelector('#catalogueTable tbody');tb.innerHTML='<tr class="empty-row"><td colspan="3"><span class="spinner"></span> Loading…</td></tr>';
+  try{const data=await mainApi('games/'+encodeURIComponent(code)+'/catalogue');catalogueCache[code]=data;saveAll();
+    const list=Array.isArray(data)?data:(data.items||data.data||[]);
+    tb.innerHTML=list.length?list.map(it=>'<tr><td>'+esc(it.name||it.catalogue_name||it.title||'-')+'</td><td>'+esc(it.price!==undefined?it.price:(it.face_value||'-'))+'</td><td>'+esc(it.stock!==undefined?it.stock:'-')+'</td></tr>').join(''):'<tr class="empty-row"><td colspan="3">No items returned.</td></tr>';
+  }catch(err){tb.innerHTML='<tr class="empty-row"><td colspan="3">Failed: '+esc(err.message)+'</td></tr>'}
+}
+async function syncSmmServices(){
+  const tb=document.querySelector('#smmServicesTable tbody');tb.innerHTML='<tr class="empty-row"><td colspan="5"><span class="spinner"></span> Loading…</td></tr>';
+  const category=document.getElementById('smmCategoryFilter').value.trim();
+  try{const params=category?{category}:{};const data=await smmApi('services',params);
+    smmServices=Array.isArray(data)?data:(data.services||[]);saveAll();
+    tb.innerHTML=smmServices.length?smmServices.map(s=>'<tr><td>'+esc(s.service)+'</td><td>'+esc(s.name)+'</td><td>'+esc(s.category)+'</td><td>'+esc(s.rate)+'</td><td>'+esc(s.min)+' / '+esc(s.max)+'</td></tr>').join(''):'<tr class="empty-row"><td colspan="5">No services returned.</td></tr>';
+    showToast('Synced '+smmServices.length+' SMM services','ok');
+  }catch(err){tb.innerHTML='<tr class="empty-row"><td colspan="5">Failed: '+esc(err.message)+'</td></tr>';showToast('Failed: '+err.message,'bad')}
+}
+
+/* ============ USERS (Firestore, falls back to local) ============ */
+function openUserModal(){document.getElementById('userName').value='';document.getElementById('userContact').value='';document.getElementById('userWallet').value='0';document.getElementById('userModal').classList.add('show')}
+function saveUser(){const name=document.getElementById('userName').value.trim();if(!name){showToast('Name required','bad');return}
+  const u={id:'U-'+Date.now().toString(36),name,contact:document.getElementById('userContact').value.trim(),wallet:parseFloat(document.getElementById('userWallet').value)||0};
+  users.unshift(u);saveAll();fsSet('users',u.id,u);closeModal('userModal');renderUsersTable();showToast('User added','ok')}
+function renderUsersTable(){const tb=document.querySelector('#usersTable tbody');if(!users.length){tb.innerHTML='<tr class="empty-row"><td colspan="5">No users yet.</td></tr>';return}
+  tb.innerHTML=users.map(u=>{const orderCount=orders.filter(o=>o.customer===u.name).length;return '<tr><td>'+esc(u.name)+'</td><td>'+esc(u.contact||'-')+'</td><td>'+(u.wallet||0).toLocaleString()+'</td><td>'+orderCount+'</td><td><button class="link-btn" onclick="deleteUser(\''+u.id+'\')">Delete</button></td></tr>'}).join('')}
+function deleteUser(id){users=users.filter(u=>u.id!==id);saveAll();fsDelete('users',id);renderUsersTable();showToast('User removed','ok')}
+
+/* ============ PAYMENTS (Firestore, falls back to local) ============ */
+function openPaymentModal(){document.getElementById('payMethodName').value='';document.getElementById('payAccName').value='';document.getElementById('payAccNo').value='';document.getElementById('paymentModal').classList.add('show')}
+function savePaymentMethod(){const name=document.getElementById('payMethodName').value.trim();if(!name){showToast('Method name required','bad');return}
+  const p={id:'PM-'+Date.now().toString(36),name,accName:document.getElementById('payAccName').value.trim(),accNo:document.getElementById('payAccNo').value.trim()};
+  paymentMethods.unshift(p);saveAll();fsSet('paymentMethods',p.id,p);closeModal('paymentModal');renderPaymentsTable();showToast('Payment method added','ok')}
+function renderPaymentsTable(){const tb=document.querySelector('#paymentsTable tbody');if(!paymentMethods.length){tb.innerHTML='<tr class="empty-row"><td colspan="4">No payment methods yet.</td></tr>';return}
+  tb.innerHTML=paymentMethods.map(p=>'<tr><td>'+esc(p.name)+'</td><td>'+esc(p.accName||'-')+'</td><td>'+esc(p.accNo||'-')+'</td><td><button class="link-btn" onclick="deletePayment(\''+p.id+'\')">Delete</button></td></tr>').join('')}
+function deletePayment(id){paymentMethods=paymentMethods.filter(p=>p.id!==id);saveAll();fsDelete('paymentMethods',id);renderPaymentsTable();showToast('Payment method removed','ok')}
+
+/* ============ COUPONS (Firestore, falls back to local) ============ */
+function openCouponModal(){document.getElementById('couponCode').value='';document.getElementById('couponDiscount').value='10';document.getElementById('couponExpiry').value='';document.getElementById('couponModal').classList.add('show')}
+function saveCoupon(){const code=document.getElementById('couponCode').value.trim().toUpperCase();if(!code){showToast('Coupon code required','bad');return}
+  const c={id:'C-'+Date.now().toString(36),code,discount:parseFloat(document.getElementById('couponDiscount').value)||0,expiry:document.getElementById('couponExpiry').value};
+  coupons.unshift(c);saveAll();fsSet('coupons',c.id,c);closeModal('couponModal');renderCouponsTable();showToast('Coupon added','ok')}
+function renderCouponsTable(){const tb=document.querySelector('#couponsTable tbody');if(!coupons.length){tb.innerHTML='<tr class="empty-row"><td colspan="5">No coupons yet.</td></tr>';return}
+  const today=new Date().toISOString().slice(0,10);
+  tb.innerHTML=coupons.map(c=>{const expired=c.expiry&&c.expiry<today;return '<tr><td>'+esc(c.code)+'</td><td>'+esc(c.discount)+'%</td><td>'+esc(c.expiry||'-')+'</td><td><span class="status '+(expired?'failed':'completed')+'">'+(expired?'Expired':'Active')+'</span></td><td><button class="link-btn" onclick="deleteCoupon(\''+c.id+'\')">Delete</button></td></tr>'}).join('')}
+function deleteCoupon(id){coupons=coupons.filter(c=>c.id!==id);saveAll();fsDelete('coupons',id);renderCouponsTable();showToast('Coupon removed','ok')}
+
+/* ============ INIT ============ */
+applyTheme();
+loadApiSettingsForm();
+updateSystemStatus();
+renderDashboard();
+renderOrdersTable();
+populateGameSelects();
+renderGamesTable();
+renderUsersTable();
+renderPaymentsTable();
+renderCouponsTable();
+renderLogsTable();
+if(firebaseCfgRaw){document.getElementById('adminMain').style.display='none';initFirebase(true)}
+</script>
+</body>
+</html>
