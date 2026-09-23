@@ -14,7 +14,8 @@ body{margin:0;background:radial-gradient(circle at 78% -10%,rgba(155,108,255,.25
 button,input,select,textarea{font:inherit}
 button{cursor:pointer;border:0;color:inherit}
 .main{max-width:1080px;margin:0 auto;padding:17px 15px 40px}
-.topbar{display:flex;align-items:center;gap:12px;margin-bottom:20px;flex-wrap:wrap}
+.topbar{display:flex;align-items:center;gap:12px;margin-bottom:20px;flex-wrap:wrap;position:sticky;top:env(safe-area-inset-top,0px);z-index:40;background:var(--bg);padding:10px 0;transition:transform .85s cubic-bezier(.22,.61,.36,1),opacity .85s ease}
+.topbar.header-hidden{transform:translateY(-130%);opacity:0}
 .back-link{display:inline-flex;align-items:center;gap:6px;color:var(--muted);text-decoration:none;font-size:12.5px;background:rgba(255,255,255,.06);border:1px solid var(--line);padding:9px 13px;border-radius:11px}
 .back-link:hover{color:var(--text)}
 .topbar h1{font-size:19px;margin:0}
@@ -142,9 +143,8 @@ button{cursor:pointer;border:0;color:inherit}
 <body>
 <div class="modal-backdrop" id="adminLoginGate" style="z-index:200"><div class="modal small"><div class="modal-head"><h2><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:5px"><rect x="4.5" y="10.5" width="15" height="10" rx="2"/><path d="M8 10.5V7a4 4 0 0 1 8 0v3.5" stroke-linecap="round"/></svg>Admin Login</h2></div><div class="modal-body"><div class="notice info">Firestore ထဲက Orders/Users/Payments data တွေကို admin account ဖြင့် sign-in မှသာ ကြည့်/ပြင်နိုင်ပါမည်။</div><div class="field"><label>Email</label><input id="adminEmail" type="email" autocomplete="username" placeholder="admin@yourstore.com" /></div><div class="field"><label>Password</label><input id="adminPassword" type="password" autocomplete="current-password" placeholder="••••••••" /></div><div class="notice danger hide" id="adminLoginError"></div><button class="btn btn-primary" style="width:100%" onclick="signInAdmin()">Login</button></div></div></div>
 <main class="main" id="adminMain">
-  <header class="topbar">
-    <a class="back-link" href="index.html">← Back to store</a>
-    <div style="flex:1"><h1>Admin Dashboard</h1><p>Store operations, G2Bulk integration &amp; reports</p></div>
+  <header class="topbar" id="topbar">
+    <div style="flex:1"></div>
     <button class="icon-btn" id="themeToggle" onclick="toggleTheme()" title="Toggle theme"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z" stroke-linejoin="round"/></svg></button>
     <button class="btn btn-soft" onclick="openTelegramSettings()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:4px"><path d="M21 4L3 11l6 2.5M21 4l-3.5 16-7.5-6M21 4L9.5 13.5" stroke-linejoin="round" stroke-linecap="round"/></svg>Telegram Alerts</button>
     <button class="btn btn-soft hide" id="adminLogoutBtn" onclick="logoutAdmin()">Logout</button>
@@ -154,7 +154,7 @@ button{cursor:pointer;border:0;color:inherit}
   <div class="admin-shell">
     <div class="admin-menu" id="adminMenu">
       <button class="active" data-sec="dashboard"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg> Dashboard</button>
-      <button data-sec="orders"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v4H4z"/><path d="M4 8v12h16V8" stroke-linecap="round"/><path d="M9 12h6" stroke-linecap="round"/></svg> Orders</button>
+      <button data-sec="orders"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v4H4z"/><path d="M4 8v12h16V8" stroke-linecap="round"/><path d="M9 12h6" stroke-linecap="round"/></svg> Orders<span id="navOrdersPendingBadge" style="display:none;margin-left:6px;background:var(--pink);color:#fff;border-radius:20px;font-size:10px;font-weight:700;padding:2px 7px;line-height:1.4"></span></button>
       <button data-sec="games"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="11" rx="5"/><path d="M7 10.5v4M5 12.5h4" stroke-linecap="round"/><circle cx="16" cy="10.5" r="1" fill="currentColor"/><circle cx="18.5" cy="13" r="1" fill="currentColor"/></svg> Game List</button>
       <button data-sec="users"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="3.5"/><path d="M4.5 20c1.4-3.8 4.3-5.5 7.5-5.5s6.1 1.7 7.5 5.5" stroke-linecap="round"/></svg> User List</button>
       <button data-sec="payments"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2.5" y="5.5" width="19" height="13" rx="2.5"/><path d="M2.5 9.5h19" stroke-linecap="round"/><path d="M6 14.5h4" stroke-linecap="round"/></svg> Payments</button>
@@ -177,11 +177,11 @@ button{cursor:pointer;border:0;color:inherit}
       <section class="view-sec" data-view="orders">
         <div class="panel">
           <div class="section-head">
-            <div><h2>Orders <span class="status pending" id="ordersPendingBadge" style="margin-left:6px">0 pending</span></h2><p>Game top-up, voucher &amp; SMM orders — real G2Bulk API calls</p></div>
+            <div><h2>Orders</h2><p>Game top-up, voucher &amp; SMM orders — real G2Bulk API calls</p></div>
             </div>
           <div class="pill-row" id="orderFilterPills">
             <button class="pill active" data-f="ALL">All</button>
-            <button class="pill" data-f="PENDING">Pending <span id="pillPendingCount"></span></button>
+            <button class="pill" data-f="PENDING">Pending</button>
             <button class="pill" data-f="PROCESSING">Processing</button>
             <button class="pill" data-f="COMPLETED">Completed</button>
           </div>
@@ -554,8 +554,8 @@ function renderOrdersTable(){
   if(!list.length){tb.innerHTML='<tr class="empty-row"><td colspan="7">No orders in this filter.</td></tr>';}
   else{tb.innerHTML=list.map(o=>orderRow(o,false)).join('');}
   const pendingCount=orders.filter(o=>(o.status||'').toUpperCase()==='PENDING').length;
-  const badge=document.getElementById('ordersPendingBadge');if(badge)badge.textContent=pendingCount+' pending';
-  const pillCount=document.getElementById('pillPendingCount');if(pillCount)pillCount.textContent=pendingCount?('('+pendingCount+')'):'';
+  const navBadge=document.getElementById('navOrdersPendingBadge');
+  if(navBadge){navBadge.style.display=pendingCount?'inline-block':'none';navBadge.textContent=pendingCount}
 }
 document.getElementById('orderFilterPills').addEventListener('click',e=>{const b=e.target.closest('.pill');if(!b)return;document.querySelectorAll('#orderFilterPills .pill').forEach(x=>x.classList.remove('active'));b.classList.add('active');orderFilter=b.dataset.f;renderOrdersTable()});
 
@@ -720,19 +720,26 @@ async function selectImportItem(id){
   document.querySelector('#importPackagesTable tbody').innerHTML='';
   try{
     const rate=Number(exchangeRate)||1;
+    let rawData;
     if(importCategory==='topup'){
       const code=it.code||it.game||it.id;
       const data=await mainApi('games/'+encodeURIComponent(code)+'/catalogue');
-      const list=Array.isArray(data)?data:(data.items||data.data||[]);
-      importPackages=list.map(x=>{const base=Number(x.price!==undefined?x.price:(x.unit_price!==undefined?x.unit_price:(x.amount!==undefined?x.amount:(x.face_value||0))))||0;const cost=Math.round(base*rate*100)/100;return{name:String(x.name||x.catalogue_name||x.title||'-'),baseUsd:base,cost,price:cost}});
+      rawData=data;
+      const list=Array.isArray(data)?data:(data.items||data.data||data.list||data.result||data.packages||data.catalogue||data.catalog||data.denominations||[]);
+      importPackages=list.map(x=>{const base=Number(x.price!==undefined?x.price:(x.unit_price!==undefined?x.unit_price:(x.amount!==undefined?x.amount:(x.face_value!==undefined?x.face_value:(x.value||0)))))||0;const cost=Math.round(base*rate*100)/100;return{name:String(x.name||x.catalogue_name||x.title||x.label||x.sku||'-'),baseUsd:base,cost,price:cost}});
     }else{
       const pid=it.id;
       const data=await mainApi('products/'+encodeURIComponent(pid));
+      rawData=data;
       const base=Number(data.unit_price!==undefined?data.unit_price:(data.face_value!==undefined?data.face_value:(it.unit_price||0)))||0;
       const cost=Math.round(base*rate*100)/100;
       importPackages=[{name:String(data.title||it.name||it.title||'-'),baseUsd:base,cost,price:cost}];
     }
     renderImportCard(it,rate);renderImportPackages();
+    if(!importPackages.length){
+      const dump=esc(JSON.stringify(rawData).slice(0,600));
+      document.getElementById('importCurrencyCard').insertAdjacentHTML('beforeend','<div class="notice warning" style="margin-top:10px">ဒီ item အတွက် provider ကနေ package/denomination ဘာမှ ပြန်မလာပါ (empty list)။ G2Bulk ဘက်မှာ ဒီ game/product အတွက် package မထည့်ရသေးလို့ ဖြစ်နိုင်ပါတယ် — Worker/provider dashboard ဘက်ကို စစ်ကြည့်ပေးပါ။<br><br><b>Raw response (debug):</b><div class="code-box" style="margin-top:6px">'+dump+'</div></div>');
+    }
   }catch(err){document.getElementById('importCurrencyCard').innerHTML='<div class="notice danger">Failed to fetch provider price: '+esc(err.message)+'</div>'}
 }
 function renderImportCard(it,rate){
@@ -825,6 +832,15 @@ function renderPaymentsTable(){const tb=document.querySelector('#paymentsTable t
 function deletePayment(id){paymentMethods=paymentMethods.filter(p=>p.id!==id);saveAll();fsDelete('paymentMethods',id);renderPaymentsTable();showToast('Payment method removed','ok')}
 
 /* ============ INIT ============ */
+let lastScrollY=window.scrollY;
+function handleHeaderScroll(){
+  const header=document.getElementById('topbar');if(!header)return;
+  const y=window.scrollY;
+  if(y>lastScrollY&&y>70)header.classList.add('header-hidden');
+  else if(y<lastScrollY)header.classList.remove('header-hidden');
+  lastScrollY=y<0?0:y;
+}
+window.addEventListener('scroll',handleHeaderScroll,{passive:true});
 applyTheme();
 loadApiSettingsForm();
 updateSystemStatus();
