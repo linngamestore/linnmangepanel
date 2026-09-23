@@ -24,11 +24,12 @@ button{cursor:pointer;border:0;color:inherit}
 .icon-btn{width:40px;height:40px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.07);border-radius:14px}
 .game-thumb{width:34px;height:34px;border-radius:11px;object-fit:cover;background:var(--panel2);border:1px solid var(--line);display:block}
 .game-thumb-fallback{width:34px;height:34px;border-radius:11px;background:var(--panel2);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:14px}
-.btn{padding:11px 18px;border-radius:16px;font-weight:700;font-size:13px;transition:.18s}
+.btn{padding:11px 18px;border-radius:16px;font-weight:700;font-size:13px;transition:.18s;position:relative}
 .btn:active{transform:scale(.97)}
-.btn-primary{background:linear-gradient(135deg,var(--pink),#d136b4 50%,var(--purple));box-shadow:0 8px 24px rgba(255,79,163,.2)}
-.btn-primary:hover{filter:brightness(1.1);transform:translateY(-1px)}
-.btn-soft{background:rgba(255,255,255,.08);border:1px solid var(--line)}
+.btn-primary{background:linear-gradient(135deg,rgba(255,79,163,.55),rgba(224,60,150,.5));border:1px solid rgba(255,255,255,.22);box-shadow:0 8px 22px rgba(255,79,163,.16),inset 0 1px 0 rgba(255,255,255,.3),inset 0 -10px 14px rgba(255,79,163,.12);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);overflow:hidden}
+.btn-primary::before{content:'';position:absolute;inset:0 0 50% 0;background:linear-gradient(rgba(255,255,255,.22),transparent);border-radius:16px 16px 0 0;pointer-events:none}
+.btn-primary:hover{filter:brightness(1.08);transform:translateY(-1px)}
+.btn-soft{background:rgba(255,255,255,.08);border:1px solid var(--line);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
 .btn-sm{padding:7px 11px;font-size:11.5px;border-radius:9px}
 .btn:disabled{opacity:.5;pointer-events:none}
 .section-head{display:flex;align-items:center;justify-content:space-between;margin:0 0 14px;gap:10px;flex-wrap:wrap}
@@ -51,8 +52,9 @@ button{cursor:pointer;border:0;color:inherit}
 .panel{background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.12);border-radius:24px;padding:22px;margin-bottom:18px;box-shadow:0 14px 36px rgba(60,20,90,.14),inset 0 1px 0 rgba(255,255,255,.06);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
 .admin-shell{display:grid;grid-template-columns:190px 1fr;gap:18px;align-items:start}
 .admin-menu{background:rgba(255,255,255,.045);border:1px solid var(--line);padding:11px;border-radius:17px;height:max-content;position:sticky;top:14px}
-.admin-menu button{width:100%;text-align:left;background:none;padding:10px;border-radius:9px;color:var(--muted);font-size:11.5px;display:flex;align-items:center;gap:8px}
-.admin-menu button.active,.admin-menu button:hover{background:rgba(155,108,255,.15);color:var(--text)}
+.admin-menu button{width:100%;text-align:left;background:none;border:1px solid transparent;padding:10px;border-radius:9px;color:var(--muted);font-size:11.5px;display:flex;align-items:center;gap:8px;transition:.2s}
+.admin-menu button:hover{background:rgba(255,255,255,.07);color:var(--text)}
+.admin-menu button.active{background:linear-gradient(135deg,rgba(255,79,163,.3),rgba(255,79,163,.12));border-color:rgba(255,255,255,.22);color:var(--text);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);box-shadow:inset 0 1px 0 rgba(255,255,255,.22),0 4px 14px rgba(255,79,163,.14)}
 .view-sec{display:none}
 .view-sec.active{display:block;animation:fadeIn .3s ease both}
 @keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
@@ -90,8 +92,8 @@ button{cursor:pointer;border:0;color:inherit}
 .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 12px}
 .form-grid .field.full{grid-column:1/-1}
 .radio-row{display:flex;gap:8px;margin-bottom:13px}
-.radio-opt{flex:1;border:1px solid var(--line);border-radius:11px;padding:10px;text-align:center;font-size:11.5px;background:rgba(255,255,255,.04);color:var(--muted)}
-.radio-opt.active{border-color:var(--pink);color:var(--text);background:rgba(255,79,163,.1)}
+.radio-opt{flex:1;border:1px solid var(--line);border-radius:11px;padding:10px;text-align:center;font-size:11.5px;background:rgba(255,255,255,.04);color:var(--muted);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);transition:.2s}
+.radio-opt.active{border-color:rgba(255,255,255,.26);color:var(--text);background:linear-gradient(135deg,rgba(255,79,163,.32),rgba(255,79,163,.14));backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);box-shadow:inset 0 1px 0 rgba(255,255,255,.24),0 4px 14px rgba(255,79,163,.14)}
 .toast-wrap{position:fixed;right:16px;top:16px;left:16px;z-index:100;display:grid;gap:9px;justify-items:end}
 .toast{display:flex;align-items:flex-start;gap:9px;background:#241d37;border:1px solid rgba(255,255,255,.15);box-shadow:var(--shadow);padding:11px 11px 11px 10px;border-radius:14px;font-size:12px;animation:slide .2s ease-out;max-width:320px}
 @keyframes slide{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:none}}
@@ -114,8 +116,8 @@ button{cursor:pointer;border:0;color:inherit}
 .theme-light .notice.warning{background:rgba(180,130,10,.1);color:#8a5f06;border-color:rgba(180,130,10,.25)}
 .theme-light .notice.danger{background:rgba(200,40,70,.1);color:#a3123a;border-color:rgba(200,40,70,.25)}
 .pill-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
-.pill{font-size:11px;padding:7px 12px;border-radius:30px;background:rgba(255,255,255,.05);border:1px solid var(--line);color:var(--muted)}
-.pill.active{background:linear-gradient(135deg,var(--pink),var(--purple));color:#fff;border-color:transparent}
+.pill{font-size:11px;padding:7px 12px;border-radius:30px;background:rgba(255,255,255,.05);border:1px solid var(--line);color:var(--muted);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);transition:.2s}
+.pill.active{background:linear-gradient(135deg,rgba(255,79,163,.5),rgba(255,79,163,.26));color:#fff;border-color:rgba(255,255,255,.28);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);box-shadow:inset 0 1px 0 rgba(255,255,255,.28),0 4px 14px rgba(255,79,163,.16)}
 .kv{display:grid;grid-template-columns:1fr 1fr;gap:8px 14px;font-size:12px;margin:10px 0}
 .kv div{display:flex;justify-content:space-between;gap:8px;border-bottom:1px dashed var(--line);padding-bottom:6px}
 .kv div b{color:var(--muted);font-weight:500}
@@ -147,10 +149,41 @@ button{cursor:pointer;border:0;color:inherit}
 @media(max-width:760px){.admin-shell{grid-template-columns:1fr}.admin-menu{position:static;display:flex;overflow:auto;gap:5px}.admin-menu button{white-space:nowrap;width:auto}.stat-grid{grid-template-columns:1fr 1fr}.form-grid{grid-template-columns:1fr}.form-grid .field{grid-column:1/-1}.topbar{gap:8px}.topbar h1{font-size:16px}}
 @media(max-width:480px){.stat-grid{grid-template-columns:1fr}[style*="grid-template-columns:1fr 1fr 1fr"]{grid-template-columns:1fr!important}.kv{grid-template-columns:1fr}.action-links{gap:6px}.admin-table{font-size:10.5px}.markup-input{width:46px!important}.game-price-grid{grid-template-columns:1fr 1fr}.section-head{flex-direction:column;align-items:stretch}.section-head>div:last-child{width:100%}.section-head .btn{flex:1}}
 @media(max-width:360px){.game-price-grid{grid-template-columns:1fr}}
+
+/* ===== LIQUID GLASS OVERRIDES ===== */
+:root{--glass:rgba(255,255,255,.07);--glass-b:rgba(255,255,255,.18);--glass-hi:rgba(255,255,255,.28)}
+.theme-light{--glass:rgba(255,255,255,.5);--glass-b:rgba(255,255,255,.85);--glass-hi:rgba(255,255,255,.95)}
+.field input:not([type=checkbox]):not([type=radio]),.field select,.field textarea,.sync-grid,#importPackagesTable input:not([disabled]){background:linear-gradient(180deg,var(--glass-hi),transparent 55%),var(--glass)!important;border:1px solid var(--glass-b)!important;border-radius:16px!important;backdrop-filter:blur(18px) saturate(170%);-webkit-backdrop-filter:blur(18px) saturate(170%);box-shadow:inset 0 1px 0 var(--glass-hi),inset 0 -6px 12px rgba(155,108,255,.06),0 4px 14px rgba(60,20,90,.08);transition:box-shadow .2s,border-color .2s}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:rgba(255,79,163,.6)!important;box-shadow:inset 0 1px 0 var(--glass-hi),0 0 0 3px rgba(255,79,163,.16),0 6px 18px rgba(255,79,163,.14)}
+.admin-menu{background:linear-gradient(135deg,var(--glass-hi),transparent 60%),var(--glass)!important;border:1px solid var(--glass-b)!important;border-radius:22px!important;backdrop-filter:blur(22px) saturate(180%);-webkit-backdrop-filter:blur(22px) saturate(180%);box-shadow:0 12px 34px rgba(60,20,90,.16),inset 0 1px 0 var(--glass-hi)}
+.admin-menu button{background:transparent!important;border:1px solid transparent!important;border-radius:15px!important;transition:.2s}
+.admin-menu button.active{background:linear-gradient(135deg,rgba(255,79,163,.45),rgba(155,108,255,.28))!important;border-color:var(--glass-b)!important;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:inset 0 1px 0 var(--glass-hi),0 6px 16px rgba(255,79,163,.2)}
+.notice{position:relative;overflow:hidden;border-radius:18px!important;backdrop-filter:blur(18px) saturate(170%);-webkit-backdrop-filter:blur(18px) saturate(170%);box-shadow:inset 0 1px 0 var(--glass-hi),0 8px 22px rgba(60,20,90,.08)}
+.notice::before{content:'';position:absolute;inset:0 0 55% 0;background:linear-gradient(rgba(255,255,255,.22),transparent);pointer-events:none}
+.notice.success{background:linear-gradient(135deg,rgba(97,230,161,.30),rgba(97,230,161,.10))!important;border:1px solid rgba(97,230,161,.45)!important}
+.notice.info{background:linear-gradient(135deg,rgba(80,190,255,.30),rgba(80,190,255,.10))!important;border:1px solid rgba(80,190,255,.45)!important}
+.notice.warning{background:linear-gradient(135deg,rgba(255,211,110,.34),rgba(255,211,110,.10))!important;border:1px solid rgba(255,211,110,.5)!important}
+.notice.danger{background:linear-gradient(135deg,rgba(255,113,139,.32),rgba(255,113,139,.10))!important;border:1px solid rgba(255,113,139,.5)!important}
+.status{backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);box-shadow:inset 0 1px 0 rgba(255,255,255,.3)}
+.modal,.modal-head,.toast{background:linear-gradient(135deg,var(--glass-hi),transparent 50%),rgba(30,22,52,.72)!important;backdrop-filter:blur(26px) saturate(180%);-webkit-backdrop-filter:blur(26px) saturate(180%);border:1px solid var(--glass-b)!important}
+.theme-light .modal,.theme-light .modal-head,.theme-light .toast{background:linear-gradient(135deg,rgba(255,255,255,.9),rgba(255,255,255,.6))!important}
+.modal-head{border-radius:0;border-width:0 0 1px 0!important}
+.btn-soft{background:linear-gradient(180deg,var(--glass-hi),transparent 60%),var(--glass)!important;border:1px solid var(--glass-b)!important;box-shadow:inset 0 1px 0 var(--glass-hi)}
+/* login */
+#adminLoginGate{background:radial-gradient(circle at 20% 20%,rgba(255,79,163,.45),transparent 40%),radial-gradient(circle at 85% 80%,rgba(111,231,255,.4),transparent 40%),radial-gradient(circle at 70% 15%,rgba(155,108,255,.5),transparent 40%),#150f26;backdrop-filter:none}
+.login-card{width:min(380px,100%);text-align:center;padding:34px 26px 26px;border-radius:32px;background:linear-gradient(145deg,rgba(255,255,255,.26),rgba(255,255,255,.06)),rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.35);backdrop-filter:blur(30px) saturate(190%);-webkit-backdrop-filter:blur(30px) saturate(190%);box-shadow:0 30px 80px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.5);color:#fff;animation:pop .3s ease-out}
+.login-logo{width:64px;height:64px;margin:0 auto 14px;border-radius:22px;display:grid;place-items:center;font-size:30px;background:linear-gradient(135deg,rgba(255,79,163,.7),rgba(155,108,255,.6));box-shadow:inset 0 1px 0 rgba(255,255,255,.5),0 10px 26px rgba(255,79,163,.35)}
+.login-card h2{margin:0;font-size:20px;letter-spacing:.5px}.login-card p{margin:5px 0 22px;font-size:12px;opacity:.75}
+.login-field{position:relative;margin-bottom:14px}
+.login-field input{width:100%;padding:15px 44px 15px 18px;border-radius:18px;font-size:15px;color:#fff;outline:none;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.35);box-shadow:inset 0 1px 0 rgba(255,255,255,.35);backdrop-filter:blur(14px)}
+.login-field input::placeholder{color:rgba(255,255,255,.55)}
+.login-field input:focus{border-color:rgba(255,130,196,.9);box-shadow:0 0 0 3px rgba(255,79,163,.25)}
+#loginState{position:absolute;right:16px;top:50%;transform:translateY(-50%);font-size:16px}
+.login-card small{display:block;margin-top:14px;font-size:10.5px;opacity:.6}
 </style>
 </head>
 <body>
-<div class="modal-backdrop" id="adminLoginGate" style="z-index:200"><div class="modal small"><div class="modal-head"><h2><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:5px"><rect x="4.5" y="10.5" width="15" height="10" rx="2"/><path d="M8 10.5V7a4 4 0 0 1 8 0v3.5" stroke-linecap="round"/></svg>Admin Login</h2></div><div class="modal-body"><div class="notice info">Firestore ထဲက Orders/Users/Payments data တွေကို admin account ဖြင့် sign-in မှသာ ကြည့်/ပြင်နိုင်ပါမည်။</div><div class="field"><label>Email</label><input id="adminEmail" type="email" autocomplete="username" placeholder="admin@yourstore.com" /></div><div class="field"><label>Password</label><input id="adminPassword" type="password" autocomplete="current-password" placeholder="••••••••" /></div><div class="notice danger hide" id="adminLoginError"></div><button class="btn btn-primary" style="width:100%" onclick="signInAdmin()">Login</button></div></div></div>
+<div class="modal-backdrop" id="adminLoginGate" style="z-index:200"><div class="login-card"><div class="login-logo">🎮</div><h2>LINN GAME STORE</h2><p>Admin Dashboard</p><div class="login-field"><input id="adminName" placeholder="Name" autocomplete="off" autocapitalize="words" oninput="onLoginInput()" onkeydown="if(event.key==='Enter')signInAdmin()" /><span id="loginState"></span></div><div class="notice danger hide" id="adminLoginError"></div><button class="btn btn-primary" style="width:100%" onclick="signInAdmin()">Continue</button><small>ယာယီ name login — နောက်မှ password ပြန်ထည့်မည်</small></div></div>
 <main class="main" id="adminMain">
   <header class="topbar" id="topbar">
     <div style="flex:1"></div>
@@ -255,9 +288,9 @@ button{cursor:pointer;border:0;color:inherit}
           <div class="section-head"><div><h2><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:5px"><circle cx="12" cy="12" r="3"/><path d="M19.4 13.5a1.8 1.8 0 0 0 .36 1.98l.07.07a2.17 2.17 0 1 1-3.07 3.07l-.07-.07a1.8 1.8 0 0 0-1.98-.36 1.8 1.8 0 0 0-1.09 1.65v.2a2.17 2.17 0 1 1-4.34 0v-.1a1.8 1.8 0 0 0-1.18-1.65 1.8 1.8 0 0 0-1.98.36l-.07.07a2.17 2.17 0 1 1-3.07-3.07l.07-.07a1.8 1.8 0 0 0 .36-1.98 1.8 1.8 0 0 0-1.65-1.09h-.2a2.17 2.17 0 1 1 0-4.34h.1a1.8 1.8 0 0 0 1.65-1.18 1.8 1.8 0 0 0-.36-1.98l-.07-.07a2.17 2.17 0 1 1 3.07-3.07l.07.07a1.8 1.8 0 0 0 1.98.36h.09a1.8 1.8 0 0 0 1.09-1.65v-.2a2.17 2.17 0 1 1 4.34 0v.1a1.8 1.8 0 0 0 1.09 1.65h.09a1.8 1.8 0 0 0 1.98-.36l.07-.07a2.17 2.17 0 1 1 3.07 3.07l-.07.07a1.8 1.8 0 0 0-.36 1.98v.09a1.8 1.8 0 0 0 1.65 1.09h.2a2.17 2.17 0 1 1 0 4.34h-.1a1.8 1.8 0 0 0-1.65 1.09z"/></svg>G2Bulk Connection (via Cloudflare Worker)</h2><p>G2Bulk key များကို Worker ထဲမှာသာ secret အနေနဲ့ ထားပြီး admin panel ကနေ Worker ကိုသာ ခေါ်ပါသည်</p></div></div>
           <div class="notice success">✓ G2Bulk Main/SMM API key များကို browser ထဲ လုံးဝ မသိမ်းတော့ပါ — Worker (<code>wrangler secret put</code>) ထဲမှာသာ ထားပါသည်။ ဒီနေရာမှာ ထည့်ရမှာက Worker URL နဲ့ admin token ပဲဖြစ်ပါသည်။</div>
           <div class="form-grid">
-            <div class="field"><label>Cloudflare Worker Base URL</label><input id="cfgWorkerBase" placeholder="https://g2bulk-provider.linngamestore.workers.dev" /></div>
-            <div class="field"><label>Admin Token (X-Admin-Token)</label><input id="cfgAdminToken" type="password" placeholder="matches ADMIN_TOKEN secret on the Worker" autocomplete="off" /></div>
-            <div class="field"><label>Exchange rate (1 USD → local currency, e.g. Ks)</label><input id="cfgExchangeRate" type="number" step="0.01" min="0" placeholder="e.g. 4500" /></div>
+            <div class="field"><label>Cloudflare Worker Base URL</label><input id="cfgWorkerBase" placeholder="Enter URL" /></div>
+            <div class="field"><label>Admin Token (X-Admin-Token)</label><input id="cfgAdminToken" type="password" placeholder="Enter Token" autocomplete="off" /></div>
+            <div class="field"><label>Exchange rate (1 USD → local currency, e.g. Ks)</label><input id="cfgExchangeRate" type="number" step="0.01" min="0" placeholder="Enter Rate" /></div>
           </div>
           <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px;margin-top:6px">
             <button class="btn btn-soft" onclick="testMainConnection()">Test Main API <span id="mainTestDot" class="dot-status" style="margin-left:6px"><span class="d"></span></span></button>
@@ -314,16 +347,14 @@ button{cursor:pointer;border:0;color:inherit}
   <div class="modal">
     <div class="modal-head"><h2>✈ Telegram Order Alerts</h2><button class="close" onclick="closeModal('telegramModal')">×</button></div>
     <div class="modal-body">
-      <div class="notice info">Order အသစ်တင်တိုင်း Telegram Bot က သတ်မှတ်ထားတဲ့ Chat ID သို့ notification ပို့ပါမယ်။</div>
-      <div class="notice warning">Frontend-only demo ဖြစ်တဲ့အတွက် Bot Token ကို ဒီ browser ရဲ့ local storage ထဲမှာ သိမ်းထားပါတယ်။ Production မှာ token ကို backend/server-side proxy ထဲမှာသာ သိမ်းပါ။</div>
-      <div class="field"><label>Telegram Bot Token</label><input id="telegramToken" type="password" placeholder="123456789:AA..." autocomplete="off" /></div>
-      <div class="field"><label>Telegram Chat ID</label><input id="telegramChatId" placeholder="e.g. -1001234567890 or 123456789" /></div>
+      <div class="notice info">Order အသစ်ဝင်တိုင်း Telegram ကို Worker ကနေ အလိုအလျောက် ပို့ပါမယ်။ Bot Token နဲ့ Chat ID ကို Worker secret ထဲမှာသာ ထားပါတယ် (browser ထဲ မသိမ်းပါ)။</div>
+      <div class="notice warning">Worker မှာ <code>wrangler secret put TELEGRAM_BOT_TOKEN</code> နဲ့ <code>TELEGRAM_CHAT_ID</code> ထည့်ပြီး <code>worker-telegram.js</code> route ကို deploy လုပ်ပါ။</div>
+      <div class="field"><label>Telegram Worker URL</label><input id="telegramBase" placeholder="Enter URL" /></div>
       <label style="display:flex;align-items:center;gap:9px;font-size:12px;margin:5px 0 16px;color:var(--muted)"><input id="telegramEnabled" type="checkbox" style="accent-color:var(--pink);width:16px;height:16px" /> Enable automatic order notifications</label>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px">
         <button class="btn btn-soft" onclick="testTelegram()">Send Test</button>
         <button class="btn btn-primary" onclick="saveTelegramSettings()">Save Settings</button>
       </div>
-      <p style="font-size:10px;color:var(--muted);line-height:1.5;margin:14px 0 0">Setup: @BotFather မှ bot တစ်ခုဖန်တီးပါ → token ထည့်ပါ → bot ကို message တစ်စောင်ပို့ပါ → Chat ID ထည့်ပါ။</p>
     </div>
   </div>
 </div>
@@ -340,7 +371,7 @@ button{cursor:pointer;border:0;color:inherit}
     <div class="modal-head"><h2 id="importModalTitle">Import</h2><button class="close" onclick="closeImportModal()">×</button></div>
     <div class="modal-body">
       <div id="importStep1">
-        <div class="field"><label>Search G2Bulk list</label><input id="importSearch" placeholder="Type a name to search…" oninput="filterImportList()" /></div>
+        <div class="field"><label>Search G2Bulk list</label><input id="importSearch" placeholder="Search" oninput="filterImportList()" /></div>
         <div class="table-wrap" style="max-height:320px;overflow:auto" id="importListWrap"></div>
       </div>
       <div id="importStep2" style="display:none">
@@ -359,9 +390,10 @@ button{cursor:pointer;border:0;color:inherit}
   <div class="modal">
     <div class="modal-head"><h2>+ Payment Method</h2><button class="close" onclick="closeModal('paymentModal')">×</button></div>
     <div class="modal-body">
-      <div class="field"><label>Method name (e.g. KBZPay, Wave Money)</label><input id="payMethodName" /></div>
-      <div class="field"><label>Account name</label><input id="payAccName" /></div>
-      <div class="field"><label>Account number</label><input id="payAccNo" /></div>
+      <div class="field"><label>Method name (e.g. KBZPay, Wave Money)</label><input id="payMethodName" placeholder="Method" /></div>
+      <div class="field"><label>Account name</label><input id="payAccName" placeholder="Name" /></div>
+      <div class="field"><label>Account number</label><input id="payAccNo" placeholder="Number" /></div>
+      <div class="field"><label>Image (logo / QR)</label><input id="payImage" type="file" accept="image/*" onchange="onPayImage(this)" /><img id="payImagePreview" class="hide" alt="" style="width:72px;height:72px;object-fit:cover;border-radius:16px;border:1px solid var(--glass-b);margin-top:6px" /></div>
       <button class="btn btn-primary" style="width:100%" onclick="savePaymentMethod()">Save Method</button>
     </div>
   </div>
@@ -378,7 +410,9 @@ const LS={
   get(k,d){try{const v=localStorage.getItem(k);return v===null?d:JSON.parse(v)}catch(e){return d}},
   set(k,v){localStorage.setItem(k,JSON.stringify(v))}
 };
-let telegram=LS.get('linn_telegram',{token:'',chatId:'',enabled:false});
+let telegram=LS.get('linn_telegram',{enabled:true});
+const TG_DEFAULT_BASE='https://linnmanagebot.linngamestore.workers.dev';
+function tgBase(){return ((telegram&&telegram.base)||TG_DEFAULT_BASE).replace(/\/$/,'')}
 let workerCfg=LS.get('linn_worker_config',{base:'https://g2bulk-provider.linngamestore.workers.dev',adminToken:''});
 const FIREBASE_CONFIG={apiKey:"AIzaSyC9soIo8J-NP5bc4STi_eOB1oP94IvcOL8",authDomain:"linngametopupstore.firebaseapp.com",projectId:"linngametopupstore",storageBucket:"linngametopupstore.firebasestorage.app",messagingSenderId:"1081466939722",appId:"1:1081466939722:web:affbccdedc64a28ca439b3"};
 let db=null;
@@ -395,49 +429,97 @@ let orderFilter='ALL';
 function saveAll(){LS.set('linn_orders',orders);LS.set('linn_games',games);LS.set('linn_vouchers',voucherProducts);LS.set('linn_catalogue',catalogueCache);LS.set('linn_users',users);LS.set('linn_payment_methods',paymentMethods);LS.set('linn_logs',logs)}
 
 /* ============ FIREBASE (Firestore + Auth) ============ */
-let authListenerAttached=false,fsUnsubscribers=[];
-const ADMIN_LOGIN_REQUIRED=false; // login skipped — admin account not set up yet
-function initFirebase(silent){
+let fsUnsubscribers=[],notifiedIds=new Set(LS.get('linn_notified',[])),firstOrdersSnap=true,usersCol=[];
+const LOGIN_NAME='linn'; // TEMP name-only login — replace with password/token later
+function initFirebase(){
   try{
-    if(typeof firebase==='undefined')throw new Error('Firebase SDK မ load ဖြစ်ပါ — internet connection စစ်ပါ');
+    if(typeof firebase==='undefined')throw new Error('Firebase SDK မ load ဖြစ်ပါ — internet စစ်ပါ');
     if(!firebase.apps.length)firebase.initializeApp(FIREBASE_CONFIG);
-    db=firebase.firestore();
-    if(!authListenerAttached){authListenerAttached=true;firebase.auth().onAuthStateChanged(handleAdminAuthState)}
-    setTimeout(()=>{const main=document.getElementById('adminMain');const gate=document.getElementById('adminLoginGate');if(main&&main.style.display==='none'&&gate&&!gate.classList.contains('show'))handleAdminAuthState(null)},5000);
-  }catch(err){db=null;handleAdminAuthState(null);if(!silent)showToast('Firebase init failed: '+err.message,'bad')}
+    db=firebase.firestore();return true;
+  }catch(err){db=null;showToast('Firebase init failed: '+err.message,'bad');return false}
 }
-function handleAdminAuthState(user){
-  const gate=document.getElementById('adminLoginGate');
-  const main=document.getElementById('adminMain');
-  const logoutBtn=document.getElementById('adminLogoutBtn');
-  if(user||!ADMIN_LOGIN_REQUIRED){
-    if(gate)gate.classList.remove('show');
-    if(main)main.style.display='';
-    if(logoutBtn)logoutBtn.classList.toggle('hide',!user);
-    attachFirestoreListeners();
-  }else{
-    detachFirestoreListeners();
-    if(main)main.style.display='none';
-    if(logoutBtn)logoutBtn.classList.add('hide');
-    if(gate)gate.classList.add('show');
-  }
+async function startSession(){
+  if(!initFirebase())return;
+  try{
+    const user=await new Promise(r=>{const u=firebase.auth().onAuthStateChanged(x=>{u();r(x)})});
+    if(!user)await firebase.auth().signInAnonymously();
+  }catch(e){showToast('Firebase Anonymous sign-in မရပါ ('+(e.code||e.message)+') — Console → Authentication → Anonymous enable လုပ်ပါ','bad')}
+  attachFirestoreListeners();
+}
+function showApp(){
+  document.getElementById('adminLoginGate').classList.remove('show');
+  document.getElementById('adminMain').style.display='';
+  document.getElementById('adminLogoutBtn').classList.remove('hide');
+  startSession();
+}
+function bootAuth(){
+  if(LS.get('linn_session',null)){showApp();return}
+  document.getElementById('adminMain').style.display='none';
+  document.getElementById('adminLoginGate').classList.add('show');
+  setTimeout(()=>{const i=document.getElementById('adminName');if(i)i.focus()},150);
+}
+let loginTimer=null;
+function onLoginInput(){
+  const v=document.getElementById('adminName').value.trim().toLowerCase();
+  const st=document.getElementById('loginState');
+  document.getElementById('adminLoginError').classList.add('hide');
+  clearTimeout(loginTimer);
+  if(v===LOGIN_NAME){st.innerHTML='<span class="spinner"></span>';loginTimer=setTimeout(doLogin,700)}else st.textContent='';
 }
 function signInAdmin(){
-  const email=document.getElementById('adminEmail').value.trim();
-  const pass=document.getElementById('adminPassword').value;
-  const err=document.getElementById('adminLoginError');
-  if(err){err.textContent='';err.classList.add('hide')}
-  if(!firebase.apps.length){if(err){err.textContent='Firebase connection error — check the console.';err.classList.remove('hide')}return}
-  firebase.auth().signInWithEmailAndPassword(email,pass).catch(e=>{if(err){err.textContent='Login failed: '+e.message;err.classList.remove('hide')}});
+  const v=document.getElementById('adminName').value.trim().toLowerCase();
+  if(v===LOGIN_NAME){doLogin();return}
+  const err=document.getElementById('adminLoginError');err.textContent='Name မမှန်ပါ';err.classList.remove('hide');
 }
-function logoutAdmin(){firebase.auth().signOut()}
+function doLogin(){
+  clearTimeout(loginTimer);
+  document.getElementById('loginState').textContent='✓';
+  LS.set('linn_session',{name:'Linn',at:Date.now()});
+  setTimeout(showApp,250);
+}
+function logoutAdmin(){
+  LS.set('linn_session',null);detachFirestoreListeners();firstOrdersSnap=true;
+  try{firebase.auth().signOut()}catch(e){}
+  document.getElementById('adminName').value='';document.getElementById('loginState').textContent='';
+  document.getElementById('adminMain').style.display='none';
+  document.getElementById('adminLogoutBtn').classList.add('hide');
+  document.getElementById('adminLoginGate').classList.add('show');
+}
+function normOrder(d,id){
+  const o={...d};o.id=o.id||id;
+  let c=o.createdAt||o.created_at||o.timestamp;
+  if(c&&c.toDate)c=c.toDate().toISOString();else if(typeof c==='number')c=new Date(c).toISOString();
+  o.createdAt=c||'';
+  o.customer=o.customer||o.customerName||o.userName||o.username||o.name||o.email||o.playerId||'';
+  o.itemLabel=o.itemLabel||o.item||o.packageName||o.productName||o.gameName||'';
+  o.amountLabel=o.amountLabel||(o.total!=null?String(o.total):o.amount!=null?String(o.amount):o.price!=null?String(o.price):'');
+  o.status=o.status||'PENDING';o.type=o.type||'game';
+  return o;
+}
 function attachFirestoreListeners(){
   if(!db)return;
   detachFirestoreListeners();
-  fsUnsubscribers.push(db.collection('orders').orderBy('createdAt','desc').limit(300).onSnapshot(snap=>{orders=snap.docs.map(d=>d.data());renderOrdersTable();renderDashboard();renderUsersTable()},err=>showToast('orders listener: '+err.message,'bad')));
-  fsUnsubscribers.push(db.collection('paymentMethods').onSnapshot(snap=>{paymentMethods=snap.docs.map(d=>d.data());renderPaymentsTable()},err=>showToast('payments listener: '+err.message,'bad')));
-  fsUnsubscribers.push(db.collection('logs').orderBy('time','desc').limit(150).onSnapshot(snap=>{logs=snap.docs.map(d=>d.data());renderLogsTable()},err=>showToast('logs listener: '+err.message,'bad')));
+  fsUnsubscribers.push(db.collection('orders').limit(500).onSnapshot(snap=>{
+    orders=snap.docs.map(d=>normOrder(d.data(),d.id)).sort((a,b)=>(new Date(b.createdAt).getTime()||0)-(new Date(a.createdAt).getTime()||0));
+    if(!firstOrdersSnap){snap.docChanges().forEach(ch=>{if(ch.type!=='added')return;const o=normOrder(ch.doc.data(),ch.doc.id);if(notifiedIds.has(o.id))return;notifiedIds.add(o.id);LS.set('linn_notified',[...notifiedIds].slice(-500));notifyTelegramOrder(o);showToast('New order: '+o.id,'ok')})}
+    firstOrdersSnap=false;
+    renderOrdersTable();renderDashboard();renderUsersTable();
+  },err=>showToast('orders: '+err.message,'bad')));
+  fsUnsubscribers.push(db.collection('users').onSnapshot(snap=>{usersCol=snap.docs.map(d=>({id:d.id,...d.data()}));renderUsersTable()},err=>showToast('users: '+err.message,'bad')));
+  fsUnsubscribers.push(db.collection('paymentMethods').onSnapshot(snap=>{paymentMethods=snap.docs.map(d=>({id:d.id,...d.data()}));renderPaymentsTable()},err=>showToast('payments: '+err.message,'bad')));
+  fsUnsubscribers.push(db.collection('logs').limit(150).onSnapshot(snap=>{logs=snap.docs.map(d=>d.data()).sort((a,b)=>String(b.time).localeCompare(String(a.time)));renderLogsTable()},err=>showToast('logs: '+err.message,'bad')));
+  fsUnsubscribers.push(db.collection('settings').doc('admin').onSnapshot(doc=>{
+    if(!doc.exists)return;const d=doc.data();
+    if(d.workerBase){workerCfg.base=d.workerBase;LS.set('linn_worker_config',workerCfg)}
+    if(d.adminToken){workerCfg.adminToken=d.adminToken;LS.set('linn_worker_config',workerCfg)}
+    if(d.exchangeRate){exchangeRate=Number(d.exchangeRate)||exchangeRate;LS.set('linn_exchange_rate',exchangeRate)}
+    telegram={enabled:d.tgEnabled!==false,base:d.tgBase||telegram.base};LS.set('linn_telegram',telegram);
+    loadApiSettingsForm();updateSystemStatus();
+  },err=>showToast('settings: '+err.message,'bad')));
+  fsUnsubscribers.push(db.collection('games').onSnapshot(snap=>{if(snap.size){games=snap.docs.map(d=>d.data());renderGamesTable()}}));
+  fsUnsubscribers.push(db.collection('vouchers').onSnapshot(snap=>{if(snap.size){voucherProducts=snap.docs.map(d=>d.data());renderGamesTable()}}));
 }
+function syncSettingsToFs(){fsSet('settings','admin',{workerBase:workerCfg.base,adminToken:workerCfg.adminToken||'',exchangeRate:exchangeRate,tgBase:telegram.base||'',tgEnabled:telegram.enabled!==false,updatedAt:new Date().toISOString()})}
 function detachFirestoreListeners(){fsUnsubscribers.forEach(u=>{try{u()}catch(e){}});fsUnsubscribers=[]}
 function fsSet(collection,id,data){if(!db)return;const clean=JSON.parse(JSON.stringify(data));db.collection(collection).doc(String(id)).set(clean,{merge:true}).catch(err=>showToast('Firestore write failed: '+err.message,'bad'))}
 function fsDelete(collection,id){if(!db)return;db.collection(collection).doc(String(id)).delete().catch(err=>showToast('Firestore delete failed: '+err.message,'bad'))}
@@ -468,12 +550,24 @@ function showToast(msg,type='ok'){const cfg={ok:{title:'Success',cls:'ok',icon:'
 function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
 function uuid(){if(crypto.randomUUID)return crypto.randomUUID();return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,c=>{const r=Math.random()*16|0;const v=c==='x'?r:(r&0x3|0x8);return v.toString(16)})}
 
-/* ============ TELEGRAM (kept from original) ============ */
-function openTelegramSettings(){document.getElementById('telegramToken').value=telegram.token||'';document.getElementById('telegramChatId').value=telegram.chatId||'';document.getElementById('telegramEnabled').checked=!!telegram.enabled;document.getElementById('telegramModal').classList.add('show')}
-function saveTelegramSettings(){telegram={token:document.getElementById('telegramToken').value.trim(),chatId:document.getElementById('telegramChatId').value.trim(),enabled:document.getElementById('telegramEnabled').checked};LS.set('linn_telegram',telegram);closeModal('telegramModal');showToast(telegram.enabled?'Telegram notifications enabled':'Telegram settings saved','ok')}
-async function telegramRequest(text){const token=document.getElementById('telegramToken').value.trim()||telegram.token;const chatId=document.getElementById('telegramChatId').value.trim()||telegram.chatId;if(!token||!chatId){showToast('Enter Bot Token and Chat ID first','bad');return false}try{const res=await fetch('https://api.telegram.org/bot'+encodeURIComponent(token)+'/sendMessage',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({chat_id:chatId,text,parse_mode:'HTML',disable_web_page_preview:true})});const data=await res.json();if(!res.ok||!data.ok)throw new Error(data.description||'Telegram API error');return true}catch(err){showToast('Telegram send failed: '+err.message,'bad');return false}}
-async function testTelegram(){const ok=await telegramRequest('<b>LINN GAME STORE</b>\n\n✅ Test notification successful!\nYour Telegram order alerts are connected.');if(ok)showToast('Test notification sent to Telegram','ok')}
-async function notifyTelegramOrder(order){if(!telegram.enabled||!telegram.token||!telegram.chatId)return;const text='<b>New order</b> — '+esc(order.id)+'\nCustomer: '+esc(order.customer||'-')+'\nItem: '+esc(order.itemLabel||'-')+'\nStatus: '+esc(order.status);try{await fetch('https://api.telegram.org/bot'+encodeURIComponent(telegram.token)+'/sendMessage',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({chat_id:telegram.chatId,text,parse_mode:'HTML'})})}catch(e){}}
+/* ============ TELEGRAM (via Cloudflare Worker) ============ */
+function openTelegramSettings(){document.getElementById('telegramBase').value=tgBase();document.getElementById('telegramEnabled').checked=telegram.enabled!==false;document.getElementById('telegramModal').classList.add('show')}
+function saveTelegramSettings(){telegram={enabled:document.getElementById('telegramEnabled').checked,base:(document.getElementById('telegramBase').value.trim()||TG_DEFAULT_BASE)};LS.set('linn_telegram',telegram);syncSettingsToFs();closeModal('telegramModal');showToast(telegram.enabled?'Telegram notifications on':'Telegram notifications off','ok')}
+async function telegramRequest(text){
+  if(!workerCfg.adminToken){showToast('Settings မှာ Admin Token အရင်ထည့်ပါ','bad');return false}
+  try{
+    const res=await fetch(tgBase()+'/telegram/send',{method:'POST',headers:{'X-Admin-Token':workerCfg.adminToken,'Content-Type':'application/json'},body:JSON.stringify({text})});
+    const d=await res.json().catch(()=>({}));
+    if(!res.ok||d.error){showToast('Telegram: '+(d.error||('HTTP '+res.status)),'bad');return false}
+    return true;
+  }catch(e){showToast('Telegram network error — Worker route (/telegram/send) စစ်ပါ','bad');return false}
+}
+async function testTelegram(){const ok=await telegramRequest('<b>LINN GAME STORE</b>\n\n✅ Test notification successful!\nTelegram order alerts are connected.');if(ok)showToast('Test notification sent to Telegram','ok')}
+async function notifyTelegramOrder(o,title){
+  if(telegram.enabled===false)return;
+  const text='<b>'+esc(title||'🛒 New order')+'</b> — '+esc(o.id)+'\nCustomer: '+esc(o.customer||'-')+'\nItem: '+esc(o.itemLabel||'-')+'\nAmount: '+esc(o.amountLabel||'-')+'\nStatus: '+esc(o.status);
+  await telegramRequest(text);
+}
 
 /* ============ ACTIVITY LOG ============ */
 function logActivity(method,endpoint,statusCode,ok){const entry={id:'L-'+Date.now().toString(36)+Math.random().toString(36).slice(2,6),time:new Date().toISOString(),method,endpoint,statusCode:statusCode===undefined?null:statusCode,ok:ok===undefined?null:ok};logs.unshift(entry);if(logs.length>150)logs.length=150;LS.set('linn_logs',logs);renderLogsTable();fsSet('logs',entry.id,entry)}
@@ -483,7 +577,7 @@ function clearLogs(){logs=[];LS.set('linn_logs',logs);renderLogsTable();showToas
 function logResult(statusCode,ok){if(!logs.length)return;logs[0].ok=(ok===undefined?null:ok);logs[0].statusCode=(statusCode===undefined?null:statusCode);LS.set('linn_logs',logs);renderLogsTable();fsSet('logs',logs[0].id,logs[0])}
 
 /* ============ G2BULK API WRAPPERS (via Cloudflare Worker proxy) ============ */
-function saveApiSettings(){workerCfg={base:(document.getElementById('cfgWorkerBase').value.trim()||workerCfg.base).replace(/\/$/,''),adminToken:document.getElementById('cfgAdminToken').value.trim()};LS.set('linn_worker_config',workerCfg);exchangeRate=Number(document.getElementById('cfgExchangeRate').value)||exchangeRate||1;LS.set('linn_exchange_rate',exchangeRate);showToast('Worker settings saved locally','ok');updateSystemStatus()}
+function saveApiSettings(){workerCfg={base:(document.getElementById('cfgWorkerBase').value.trim()||workerCfg.base).replace(/\/$/,''),adminToken:document.getElementById('cfgAdminToken').value.trim()};LS.set('linn_worker_config',workerCfg);exchangeRate=Number(document.getElementById('cfgExchangeRate').value)||exchangeRate||1;LS.set('linn_exchange_rate',exchangeRate);syncSettingsToFs();showToast('Saved & synced to Firestore','ok');updateSystemStatus()}
 function loadApiSettingsForm(){document.getElementById('cfgWorkerBase').value=workerCfg.base;document.getElementById('cfgAdminToken').value=workerCfg.adminToken;document.getElementById('cfgExchangeRate').value=exchangeRate||''}
 
 async function mainApi(path,{method='GET',body=null,idempotency=null}={}){
@@ -585,7 +679,7 @@ async function placeOrderViaApi(record){
 
 async function approveOrder(id){
   const o=orders.find(x=>x.id===id);if(!o)return;
-  try{await placeOrderViaApi(o);saveAll();fsSet('orders',o.id,o);renderOrdersTable();renderDashboard();notifyTelegramOrder(o);showToast('Order approved and placed via API — status: '+o.status,'ok')}
+  try{await placeOrderViaApi(o);saveAll();fsSet('orders',o.id,o);renderOrdersTable();renderDashboard();notifyTelegramOrder(o,'✅ Order approved');showToast('Order approved and placed via API — status: '+o.status,'ok')}
   catch(err){o.status='FAILED';o.lastError=err.message;saveAll();fsSet('orders',o.id,o);renderOrdersTable();showToast('Approve failed: '+err.message,'bad')}
 }
 function confirmOrder(id){approveOrder(id)}
@@ -814,30 +908,33 @@ async function confirmImport(){
   showToast('"'+name+'" saved — now showing in the store','ok');
 }
 
-/* ============ USER LIST (derived live from real store orders) ============ */
+/* ============ USER LIST (Firestore users + customers from orders) ============ */
 function renderUsersTable(){
   const tb=document.querySelector('#usersTable tbody');
   const byName={};
+  usersCol.forEach(u=>{const name=(u.name||u.displayName||u.username||u.email||u.id||'').toString().trim();if(!name)return;const created=u.createdAt&&u.createdAt.toDate?u.createdAt.toDate():(u.createdAt?new Date(u.createdAt):null);byName[name.toLowerCase()]={name,sub:[u.email,u.phone].filter(Boolean).join(' · '),count:0,total:0,last:created&&!isNaN(created)?created:null}});
   orders.forEach(o=>{
-    const name=(o.customer||'').trim();if(!name)return;
+    const name=(o.customer||'').trim();if(!name)return;const key=name.toLowerCase();
     const amt=parseFloat((o.amountLabel||'0').toString().replace(/[^0-9.]/g,''))||0;
     const created=o.createdAt?new Date(o.createdAt):null;
-    if(!byName[name])byName[name]={name,count:0,total:0,last:null};
-    byName[name].count++;byName[name].total+=amt;
-    if(created&&(!byName[name].last||created>byName[name].last))byName[name].last=created;
+    if(!byName[key])byName[key]={name,sub:'',count:0,total:0,last:null};
+    byName[key].count++;byName[key].total+=amt;
+    if(created&&!isNaN(created)&&(!byName[key].last||created>byName[key].last))byName[key].last=created;
   });
   const list=Object.values(byName).sort((a,b)=>(b.last?b.last.getTime():0)-(a.last?a.last.getTime():0));
-  if(!list.length){tb.innerHTML='<tr class="empty-row"><td colspan="4">No customers yet — user list fills in automatically once orders come in.</td></tr>';return}
-  tb.innerHTML=list.map(u=>'<tr><td>'+esc(u.name)+'</td><td>'+u.count+'</td><td>'+u.total.toLocaleString()+'</td><td>'+(u.last?u.last.toLocaleDateString():'-')+'</td></tr>').join('');
+  if(!list.length){tb.innerHTML='<tr class="empty-row"><td colspan="4">No customers yet.</td></tr>';return}
+  tb.innerHTML=list.map(u=>'<tr><td>'+esc(u.name)+(u.sub?'<br><small style="color:var(--muted)">'+esc(u.sub)+'</small>':'')+'</td><td>'+u.count+'</td><td>'+u.total.toLocaleString()+'</td><td>'+(u.last?u.last.toLocaleDateString():'-')+'</td></tr>').join('');
 }
 
 /* ============ PAYMENTS (Firestore, falls back to local) ============ */
-function openPaymentModal(){document.getElementById('payMethodName').value='';document.getElementById('payAccName').value='';document.getElementById('payAccNo').value='';document.getElementById('paymentModal').classList.add('show')}
+let payImageData='';
+function onPayImage(inp){const f=inp.files&&inp.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{const img=new Image();img.onload=()=>{const sc=Math.min(1,320/Math.max(img.width,img.height));const c=document.createElement('canvas');c.width=Math.round(img.width*sc);c.height=Math.round(img.height*sc);c.getContext('2d').drawImage(img,0,0,c.width,c.height);payImageData=c.toDataURL('image/png');const pv=document.getElementById('payImagePreview');pv.src=payImageData;pv.classList.remove('hide')};img.onerror=()=>showToast('Image ဖတ်မရပါ','bad');img.src=r.result};r.readAsDataURL(f)}
+function openPaymentModal(){payImageData='';document.getElementById('payImage').value='';document.getElementById('payImagePreview').classList.add('hide');document.getElementById('payMethodName').value='';document.getElementById('payAccName').value='';document.getElementById('payAccNo').value='';document.getElementById('paymentModal').classList.add('show')}
 function savePaymentMethod(){const name=document.getElementById('payMethodName').value.trim();if(!name){showToast('Method name required','bad');return}
-  const p={id:'PM-'+Date.now().toString(36),name,accName:document.getElementById('payAccName').value.trim(),accNo:document.getElementById('payAccNo').value.trim()};
+  const p={id:'PM-'+Date.now().toString(36),name,accName:document.getElementById('payAccName').value.trim(),accNo:document.getElementById('payAccNo').value.trim(),image:payImageData};
   paymentMethods.unshift(p);saveAll();fsSet('paymentMethods',p.id,p);closeModal('paymentModal');renderPaymentsTable();showToast('Payment method added','ok')}
 function renderPaymentsTable(){const tb=document.querySelector('#paymentsTable tbody');if(!paymentMethods.length){tb.innerHTML='<tr class="empty-row"><td colspan="4">No payment methods yet.</td></tr>';return}
-  tb.innerHTML=paymentMethods.map(p=>'<tr><td>'+esc(p.name)+'</td><td>'+esc(p.accName||'-')+'</td><td>'+esc(p.accNo||'-')+'</td><td><button class="link-btn" onclick="deletePayment(\''+p.id+'\')">Delete</button></td></tr>').join('')}
+  tb.innerHTML=paymentMethods.map(p=>'<tr><td><div style="display:flex;align-items:center;gap:9px">'+thumbHtml(p.image)+'<span>'+esc(p.name)+'</span></div></td><td>'+esc(p.accName||'-')+'</td><td>'+esc(p.accNo||'-')+'</td><td><button class="link-btn" onclick="deletePayment(\''+p.id+'\')">Delete</button></td></tr>').join('')}
 function deletePayment(id){paymentMethods=paymentMethods.filter(p=>p.id!==id);saveAll();fsDelete('paymentMethods',id);renderPaymentsTable();showToast('Payment method removed','ok')}
 
 /* ============ INIT ============ */
@@ -859,7 +956,7 @@ renderGamesTable();
 renderUsersTable();
 renderPaymentsTable();
 renderLogsTable();
-document.getElementById('adminMain').style.display='none';initFirebase(true);
+bootAuth();
 </script>
 </body>
 </html>
