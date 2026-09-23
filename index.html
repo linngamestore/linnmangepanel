@@ -18,6 +18,8 @@ button{cursor:pointer;border:0;color:inherit}
 .topbar h1{font-size:19px;margin:0}
 .topbar p{font-size:12px;color:var(--muted);margin:3px 0 0}
 .icon-btn{width:40px;height:40px;border:1px solid var(--line);background:rgba(255,255,255,.05);border-radius:12px}
+.game-thumb{width:34px;height:34px;border-radius:9px;object-fit:cover;background:var(--panel2);border:1px solid var(--line);display:block}
+.game-thumb-fallback{width:34px;height:34px;border-radius:9px;background:var(--panel2);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:14px}
 .btn{padding:11px 16px;border-radius:12px;font-weight:700;font-size:13px;transition:.18s}
 .btn:active{transform:scale(.97)}
 .btn-primary{background:linear-gradient(135deg,var(--pink),#d136b4 50%,var(--purple));box-shadow:0 8px 24px rgba(255,79,163,.2)}
@@ -111,11 +113,27 @@ button{cursor:pointer;border:0;color:inherit}
 .spinner{width:13px;height:13px;border-radius:50%;border:2px solid rgba(255,255,255,.2);border-top-color:currentColor;display:inline-block;animation:spin .7s linear infinite;vertical-align:-2px}
 @keyframes spin{to{transform:rotate(360deg)}}
 .empty-row td{text-align:center;color:var(--muted);padding:28px 10px}
-@media(max-width:760px){.admin-shell{grid-template-columns:1fr}.admin-menu{position:static;display:flex;overflow:auto;gap:5px}.admin-menu button{white-space:nowrap;width:auto}.stat-grid{grid-template-columns:1fr 1fr}.form-grid{grid-template-columns:1fr}.form-grid .field{grid-column:1/-1}}
+.game-price-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:13px}
+.game-price-card{background:rgba(255,255,255,.045);border:1px solid var(--line);border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:11px;min-width:0}
+.game-price-card-head{display:flex;align-items:center;gap:10px;min-width:0}
+.game-price-card-head .info{min-width:0;flex:1}
+.game-price-card-head .info b{display:block;font-size:13px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.game-price-card-head .info small{display:block;color:var(--muted);font-size:11px;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sync-grid{display:flex;align-items:center;gap:4px;background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:12px;padding:5px}
+.sync-grid .stepper-btn{width:30px;height:30px;border-radius:8px;background:rgba(255,255,255,.08);border:1px solid var(--line);font-size:16px;font-weight:700;flex:none;line-height:1;color:var(--text)}
+.sync-grid .stepper-btn:active{transform:scale(.92)}
+.sync-grid input{flex:1;min-width:0;width:0;text-align:center;background:transparent;border:0;color:var(--text);font-size:13px;font-weight:700;padding:0}
+.sync-grid input:focus{outline:none}
+.sync-grid .pct{color:var(--muted);font-size:12px;flex:none}
+.game-price-card .card-actions{display:flex;gap:7px;flex-wrap:wrap}
+.game-price-card .card-actions .btn{flex:1;min-width:70px;white-space:nowrap}
+@media(max-width:760px){.admin-shell{grid-template-columns:1fr}.admin-menu{position:static;display:flex;overflow:auto;gap:5px}.admin-menu button{white-space:nowrap;width:auto}.stat-grid{grid-template-columns:1fr 1fr}.form-grid{grid-template-columns:1fr}.form-grid .field{grid-column:1/-1}.topbar{gap:8px}.topbar h1{font-size:16px}}
+@media(max-width:480px){.stat-grid{grid-template-columns:1fr}[style*="grid-template-columns:1fr 1fr 1fr"]{grid-template-columns:1fr!important}.kv{grid-template-columns:1fr}.action-links{gap:6px}.admin-table{font-size:10.5px}.markup-input{width:46px!important}.game-price-grid{grid-template-columns:1fr 1fr}.section-head{flex-direction:column;align-items:stretch}.section-head>div:last-child{width:100%}.section-head .btn{flex:1}}
+@media(max-width:360px){.game-price-grid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
-<div class="modal-backdrop" id="adminLoginGate" style="z-index:200"><div class="modal small"><div class="modal-head"><h2>🔒 Admin Login</h2></div><div class="modal-body"><div class="notice info">Firestore ထဲက Orders/Users/Payments/Coupons data တွေကို admin account ဖြင့် sign-in မှသာ ကြည့်/ပြင်နိုင်ပါမည်။</div><div class="field"><label>Email</label><input id="adminEmail" type="email" autocomplete="username" placeholder="admin@yourstore.com" /></div><div class="field"><label>Password</label><input id="adminPassword" type="password" autocomplete="current-password" placeholder="••••••••" /></div><div class="notice danger hide" id="adminLoginError"></div><button class="btn btn-primary" style="width:100%" onclick="signInAdmin()">Login</button></div></div></div>
+<div class="modal-backdrop" id="adminLoginGate" style="z-index:200"><div class="modal small"><div class="modal-head"><h2>🔒 Admin Login</h2></div><div class="modal-body"><div class="notice info">Firestore ထဲက Orders/Users/Payments data တွေကို admin account ဖြင့် sign-in မှသာ ကြည့်/ပြင်နိုင်ပါမည်။</div><div class="field"><label>Email</label><input id="adminEmail" type="email" autocomplete="username" placeholder="admin@yourstore.com" /></div><div class="field"><label>Password</label><input id="adminPassword" type="password" autocomplete="current-password" placeholder="••••••••" /></div><div class="notice danger hide" id="adminLoginError"></div><button class="btn btn-primary" style="width:100%" onclick="signInAdmin()">Login</button></div></div></div>
 <main class="main" id="adminMain">
   <header class="topbar">
     <a class="back-link" href="index.html">← Back to store</a>
@@ -131,11 +149,9 @@ button{cursor:pointer;border:0;color:inherit}
       <button class="active" data-sec="dashboard">▦ Dashboard</button>
       <button data-sec="orders">▤ Orders</button>
       <button data-sec="games">◈ Games</button>
-      <button data-sec="servers">⌁ Servers / Regions</button>
-      <button data-sec="packages">▣ Packages &amp; Services</button>
+      <button data-sec="packages">▣ Packages</button>
       <button data-sec="users">♙ Users</button>
       <button data-sec="payments">◉ Payments</button>
-      <button data-sec="coupons">♢ Coupons / Promotions</button>
       <button data-sec="settings">⚙ Settings</button>
       <button data-sec="logs">▥ Activity Logs</button>
     </div>
@@ -183,20 +199,13 @@ button{cursor:pointer;border:0;color:inherit}
         <div class="panel">
           <div class="section-head">
             <div><h2>Supported Games</h2><p>GET /v1/games — synced directly from G2Bulk</p></div>
-            <button class="btn btn-soft" id="syncGamesBtn" onclick="syncGames()">⟳ Sync from G2Bulk</button>
+            <div style="display:flex;gap:9px;flex-wrap:wrap">
+              <button class="btn btn-soft" id="syncGamesBtn" onclick="syncGames()">⟳ Sync Games</button>
+              <button class="btn btn-primary" id="publishAllBtn" onclick="publishAllGames()">⚡ Sync All Prices</button>
+            </div>
           </div>
-          <div class="table-wrap"><table class="admin-table" id="gamesTable"><thead><tr><th>Code</th><th>Name</th><th>Actions</th></tr></thead><tbody></tbody></table></div>
-        </div>
-      </section>
-
-      <!-- SERVERS -->
-      <section class="view-sec" data-view="servers">
-        <div class="panel">
-          <div class="section-head"><div><h2>Servers / Regions</h2><p>POST /v1/games/servers for a chosen game</p></div></div>
-          <div class="field" style="max-width:320px"><label>Game</label><select id="serverGameSelect"></select></div>
-          <button class="btn btn-soft" onclick="loadServers()">Load Server List</button>
-          <div class="notice info" style="margin-top:14px">403 ပြန်လာလျှင် ဒီ game အတွက် server ID မလိုအပ်ကြောင်း ဖြစ်ပါသည် — error မဟုတ်ပါ။</div>
-          <div class="table-wrap" style="margin-top:10px"><table class="admin-table" id="serversTable"><thead><tr><th>Server ID</th><th>Name</th></tr></thead><tbody></tbody></table></div>
+          <div class="notice info">Card တစ်ခုချင်းစီရဲ့ Sync grid ထဲမှာ −/+ ဖြင့် % ချိန်ညှိနိုင်ပါတယ် (ဥပမာ 5 ထားပါ)။ "Sync" နှိပ်ရင် G2Bulk ရဲ့ live catalogue price ကို import လုပ်ပြီး အဲ့ game ရဲ့ package မှန်သမျှကို ထားထားတဲ့ % အတိုင်း အလိုအလျောက် တွက်ကာ Firestore <code>games</code> collection ထဲ ရေးပေးပါမည် (store.html ကနေ တစ်ဆင့် ပြပေးပါမည်)။</div>
+          <div class="game-price-grid" id="gamesGrid"></div>
         </div>
       </section>
 
@@ -207,14 +216,6 @@ button{cursor:pointer;border:0;color:inherit}
           <div class="field" style="max-width:320px"><label>Game</label><select id="catalogueGameSelect"></select></div>
           <button class="btn btn-soft" onclick="loadCatalogue()">Load Live Catalogue</button>
           <div class="table-wrap" style="margin-top:10px"><table class="admin-table" id="catalogueTable"><thead><tr><th>Item</th><th>Price</th><th>Stock</th></tr></thead><tbody></tbody></table></div>
-        </div>
-        <div class="panel">
-          <div class="section-head">
-            <div><h2>SMM Services</h2><p>action=services — SMM-compatible panel catalogue</p></div>
-            <button class="btn btn-soft" onclick="syncSmmServices()">⟳ Sync Services</button>
-          </div>
-          <div class="field" style="max-width:320px"><label>Filter by category (optional)</label><input id="smmCategoryFilter" placeholder="e.g. PUBG Mobile" /></div>
-          <div class="table-wrap"><table class="admin-table" id="smmServicesTable"><thead><tr><th>Service ID</th><th>Name</th><th>Category</th><th>Rate (USD)</th><th>Min/Max</th></tr></thead><tbody></tbody></table></div>
         </div>
       </section>
 
@@ -248,17 +249,6 @@ button{cursor:pointer;border:0;color:inherit}
         </div>
       </section>
 
-      <!-- COUPONS -->
-      <section class="view-sec" data-view="coupons">
-        <div class="panel">
-          <div class="section-head">
-            <div><h2>Coupons / Promotions</h2><p>Local discount codes for the storefront</p></div>
-            <button class="btn btn-primary" onclick="openCouponModal()">+ Add Coupon</button>
-          </div>
-          <div class="table-wrap"><table class="admin-table" id="couponsTable"><thead><tr><th>Code</th><th>Discount</th><th>Expiry</th><th>Status</th><th>Actions</th></tr></thead><tbody></tbody></table></div>
-        </div>
-      </section>
-
       <!-- SETTINGS -->
       <section class="view-sec" data-view="settings">
         <div class="panel">
@@ -276,7 +266,7 @@ button{cursor:pointer;border:0;color:inherit}
           <div id="settingsResult"></div>
         </div>
         <div class="panel">
-          <div class="section-head"><div><h2>🔥 Firebase (Firestore)</h2><p>Orders / Users / Payments / Coupons / Logs ကို Firestore ထဲမှာ real-time သိမ်းမည်</p></div></div>
+          <div class="section-head"><div><h2>🔥 Firebase (Firestore)</h2><p>Orders / Users / Payments / Logs ကို Firestore ထဲမှာ real-time သိမ်းမည်</p></div></div>
           <div class="notice success">✓ Firebase project <code>linngametopupstore</code> ကို ဒီ admin panel ထဲမှာ တိုက်ရိုက် ချိတ်ဆက်ထားပြီးပါပြီ — config ကို manual paste လုပ်စရာ မလိုတော့ပါ။ Authentication → Sign-in method → Email/Password ကို enable လုပ်ပြီး admin account တစ်ခု (Authentication → Users → Add user) ဖန်တီးထားရုံပဲ လိုပါတော့တယ်။</div>
         </div>
         <div class="panel">
@@ -291,7 +281,6 @@ button{cursor:pointer;border:0;color:inherit}
             <div><b>Transactions</b><span>GET /v1/transactions</span></div>
             <div><b>Supported games</b><span>GET /v1/games</span></div>
             <div><b>Game input fields</b><span>POST /v1/games/fields</span></div>
-            <div><b>Game servers</b><span>POST /v1/games/servers</span></div>
             <div><b>Player ID validate</b><span>POST /v1/games/checkPlayerId</span></div>
             <div><b>Catalogue</b><span>GET /v1/games/:code/catalogue</span></div>
             <div><b>ETA</b><span>POST /v1/games/eta</span></div>
@@ -420,18 +409,6 @@ button{cursor:pointer;border:0;color:inherit}
   </div>
 </div>
 
-<div class="modal-backdrop" id="couponModal">
-  <div class="modal">
-    <div class="modal-head"><h2>+ Coupon</h2><button class="close" onclick="closeModal('couponModal')">×</button></div>
-    <div class="modal-body">
-      <div class="field"><label>Code</label><input id="couponCode" placeholder="e.g. LINN10" /></div>
-      <div class="field"><label>Discount %</label><input id="couponDiscount" type="number" min="1" max="100" value="10" /></div>
-      <div class="field"><label>Expiry date</label><input id="couponExpiry" type="date" /></div>
-      <button class="btn btn-primary" style="width:100%" onclick="saveCoupon()">Save Coupon</button>
-    </div>
-  </div>
-</div>
-
 <div class="toast-wrap" id="toastWrap"></div>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -450,33 +427,34 @@ let db=null;
 let orders=LS.get('linn_orders',[]);
 let games=LS.get('linn_games',[]);
 let catalogueCache=LS.get('linn_catalogue',{});
-let smmServices=LS.get('linn_smm_services',[]);
 let users=LS.get('linn_users',[]);
 let paymentMethods=LS.get('linn_payment_methods',[]);
-let coupons=LS.get('linn_coupons',[]);
 let logs=LS.get('linn_logs',[]);
 let currentOrderType='game';
 let orderFilter='ALL';
 
-function saveAll(){LS.set('linn_orders',orders);LS.set('linn_games',games);LS.set('linn_catalogue',catalogueCache);LS.set('linn_smm_services',smmServices);LS.set('linn_users',users);LS.set('linn_payment_methods',paymentMethods);LS.set('linn_coupons',coupons);LS.set('linn_logs',logs)}
+function saveAll(){LS.set('linn_orders',orders);LS.set('linn_games',games);LS.set('linn_catalogue',catalogueCache);LS.set('linn_users',users);LS.set('linn_payment_methods',paymentMethods);LS.set('linn_logs',logs)}
 
 /* ============ FIREBASE (Firestore + Auth) ============ */
 let authListenerAttached=false,fsUnsubscribers=[];
+const ADMIN_LOGIN_REQUIRED=false; // TEMP: login form skipped while testing — set to true to require sign-in again
 function initFirebase(silent){
   try{
+    if(typeof firebase==='undefined')throw new Error('Firebase SDK မ load ဖြစ်ပါ — internet connection စစ်ပါ');
     if(!firebase.apps.length)firebase.initializeApp(FIREBASE_CONFIG);
     db=firebase.firestore();
     if(!authListenerAttached){authListenerAttached=true;firebase.auth().onAuthStateChanged(handleAdminAuthState)}
-  }catch(err){db=null;if(!silent)showToast('Firebase init failed: '+err.message,'bad')}
+    setTimeout(()=>{const main=document.getElementById('adminMain');const gate=document.getElementById('adminLoginGate');if(main&&main.style.display==='none'&&gate&&!gate.classList.contains('show'))handleAdminAuthState(null)},5000);
+  }catch(err){db=null;handleAdminAuthState(null);if(!silent)showToast('Firebase init failed: '+err.message,'bad')}
 }
 function handleAdminAuthState(user){
   const gate=document.getElementById('adminLoginGate');
   const main=document.getElementById('adminMain');
   const logoutBtn=document.getElementById('adminLogoutBtn');
-  if(user){
+  if(user||!ADMIN_LOGIN_REQUIRED){
     if(gate)gate.classList.remove('show');
     if(main)main.style.display='';
-    if(logoutBtn)logoutBtn.classList.remove('hide');
+    if(logoutBtn)logoutBtn.classList.toggle('hide',!user);
     attachFirestoreListeners();
   }else{
     detachFirestoreListeners();
@@ -500,7 +478,6 @@ function attachFirestoreListeners(){
   fsUnsubscribers.push(db.collection('orders').orderBy('createdAt','desc').limit(300).onSnapshot(snap=>{orders=snap.docs.map(d=>d.data());renderOrdersTable();renderDashboard()},err=>showToast('orders listener: '+err.message,'bad')));
   fsUnsubscribers.push(db.collection('users').onSnapshot(snap=>{users=snap.docs.map(d=>d.data());renderUsersTable()},err=>showToast('users listener: '+err.message,'bad')));
   fsUnsubscribers.push(db.collection('paymentMethods').onSnapshot(snap=>{paymentMethods=snap.docs.map(d=>d.data());renderPaymentsTable()},err=>showToast('payments listener: '+err.message,'bad')));
-  fsUnsubscribers.push(db.collection('coupons').onSnapshot(snap=>{coupons=snap.docs.map(d=>d.data());renderCouponsTable()},err=>showToast('coupons listener: '+err.message,'bad')));
   fsUnsubscribers.push(db.collection('logs').orderBy('time','desc').limit(150).onSnapshot(snap=>{logs=snap.docs.map(d=>d.data());renderLogsTable()},err=>showToast('logs listener: '+err.message,'bad')));
 }
 function detachFirestoreListeners(){fsUnsubscribers.forEach(u=>{try{u()}catch(e){}});fsUnsubscribers=[]}
@@ -518,11 +495,10 @@ document.getElementById('adminMenu').addEventListener('click',e=>{
   const sec=btn.dataset.sec;
   document.querySelectorAll('.view-sec').forEach(v=>v.classList.toggle('active',v.dataset.view===sec));
   if(sec==='games')renderGamesTable();
-  if(sec==='servers'||sec==='packages')populateGameSelects();
+  if(sec==='packages')populateGameSelects();
   if(sec==='logs')renderLogsTable();
   if(sec==='users')renderUsersTable();
   if(sec==='payments')renderPaymentsTable();
-  if(sec==='coupons')renderCouponsTable();
   if(sec==='orders')renderOrdersTable();
 });
 
@@ -754,25 +730,72 @@ function viewOrder(id){
 
 /* ============ GAMES ============ */
 function gameOptionsHtml(){return games.map(g=>'<option value="'+esc(g.code)+'">'+esc(g.name||g.code)+'</option>').join('')}
-function populateGameSelects(){const a=document.getElementById('serverGameSelect');const b=document.getElementById('catalogueGameSelect');if(a)a.innerHTML=gameOptionsHtml()||'<option value="">Sync games first</option>';if(b)b.innerHTML=gameOptionsHtml()||'<option value="">Sync games first</option>'}
+function populateGameSelects(){const b=document.getElementById('catalogueGameSelect');if(b)b.innerHTML=gameOptionsHtml()||'<option value="">Sync games first</option>'}
 
 async function syncGames(){
   const btn=document.getElementById('syncGamesBtn');btn.disabled=true;btn.innerHTML='<span class="spinner"></span> Syncing…';
   try{
     const data=await mainApi('games');
     const list=Array.isArray(data)?data:(data.games||data.data||[]);
-    games=list.map(g=>({code:g.code||g.game||g.id||g.slug||String(g),name:g.name||g.title||g.code||String(g)}));
+    const prevByCode={};games.forEach(g=>{prevByCode[g.code]=g});
+    games=list.map(g=>{const code=g.code||g.game||g.id||g.slug||String(g);const prev=prevByCode[code];return {code,name:g.name||g.title||g.code||String(g),image:g.image_url||g.image||g.icon_url||g.icon||g.cover_url||g.cover||g.logo_url||g.logo||g.thumbnail||(prev&&prev.image)||'',markup:prev?prev.markup||0:0,published:prev?!!prev.published:false}});
     saveAll();renderGamesTable();populateGameSelects();showToast('Synced '+games.length+' games from G2Bulk','ok');
   }catch(err){showToast('Sync failed: '+err.message,'bad')}
   btn.disabled=false;btn.innerHTML='⟳ Sync from G2Bulk';
 }
+function setGameMarkup(code,val){const g=games.find(x=>x.code===code);if(!g)return;let n=parseFloat(val);if(isNaN(n))n=0;g.markup=n;saveAll();const inp=document.getElementById('markup-'+code);if(inp)inp.value=n}
+function adjustGameMarkup(code,delta){const g=games.find(x=>x.code===code);if(!g)return;let n=Math.round((((Number(g.markup)||0)+delta))*100)/100;g.markup=n;saveAll();const inp=document.getElementById('markup-'+code);if(inp)inp.value=n}
 function renderGamesTable(){
-  const tb=document.querySelector('#gamesTable tbody');
-  if(!games.length){tb.innerHTML='<tr class="empty-row"><td colspan="3">No games synced yet — click "Sync from G2Bulk".</td></tr>';return}
-  tb.innerHTML=games.map(g=>'<tr><td>'+esc(g.code)+'</td><td>'+esc(g.name)+'</td><td class="action-links">'+
-    '<button class="link-btn" onclick="viewGameFields(\''+esc(g.code)+'\')">Fields</button>'+
-    '<button class="link-btn" onclick="viewGameCatalogue(\''+esc(g.code)+'\')">Catalogue</button>'+
-    '</td></tr>').join('');
+  const grid=document.getElementById('gamesGrid');
+  if(!games.length){grid.innerHTML='<div class="empty-row" style="padding:32px 10px;text-align:center;color:var(--muted);grid-column:1/-1">No games synced yet — click "Sync Games".</div>';return}
+  grid.innerHTML=games.map(g=>{
+    const thumb=g.image?'<img class="game-thumb" src="'+esc(g.image)+'" alt="" onerror="this.outerHTML=\'<div class=&quot;game-thumb-fallback&quot;>🎮</div>\'" />':'<div class="game-thumb-fallback">🎮</div>';
+    return '<div class="game-price-card">'+
+      '<div class="game-price-card-head">'+thumb+
+        '<div class="info"><b>'+esc(g.name)+(g.published?' <span class="status completed" style="margin-left:4px">Live</span>':'')+'</b><small>'+esc(g.code)+'</small></div>'+
+      '</div>'+
+      '<div class="sync-grid">'+
+        '<button class="stepper-btn" type="button" onclick="adjustGameMarkup(\''+esc(g.code)+'\',-1)">−</button>'+
+        '<input id="markup-'+esc(g.code)+'" type="number" class="markup-input" step="1" value="'+(g.markup||0)+'" onchange="setGameMarkup(\''+esc(g.code)+'\',this.value)" />'+
+        '<span class="pct">%</span>'+
+        '<button class="stepper-btn" type="button" onclick="adjustGameMarkup(\''+esc(g.code)+'\',1)">+</button>'+
+      '</div>'+
+      '<div class="card-actions">'+
+        '<button class="btn btn-primary btn-sm" onclick="publishGame(\''+esc(g.code)+'\')">⟳ Sync</button>'+
+        '<button class="btn btn-soft btn-sm" onclick="viewGameCatalogue(\''+esc(g.code)+'\')">Catalogue</button>'+
+        '<button class="btn btn-soft btn-sm" onclick="viewGameFields(\''+esc(g.code)+'\')">Fields</button>'+
+      '</div>'+
+    '</div>';
+  }).join('');
+}
+async function publishGame(code,silent){
+  const game=games.find(g=>g.code===code);
+  if(!game){if(!silent)showToast('Game not found','bad');return 0}
+  if(!db){if(!silent)showToast('Firebase not connected yet','bad');return 0}
+  try{
+    let data=catalogueCache[code];
+    if(!data){data=await mainApi('games/'+encodeURIComponent(code)+'/catalogue');catalogueCache[code]=data;saveAll()}
+    const list=Array.isArray(data)?data:(data.items||data.data||[]);
+    const markup=Number(game.markup)||0;
+    const packages=list.map(it=>{const base=Number(it.price!==undefined?it.price:(it.unit_price!==undefined?it.unit_price:(it.amount!==undefined?it.amount:(it.denomination_price!==undefined?it.denomination_price:(it.value!==undefined?it.value:(it.cost!==undefined?it.cost:(it.face_value||0)))))))||0;const price=markup?Math.round((base*(1+markup/100))*100)/100:base;return {name:String(it.name||it.catalogue_name||it.title||'-'),basePrice:base,price,image:it.image_url||it.image||game.image||''}});
+    await db.collection('games').doc(code).set({code,name:game.name,image:game.image||'',markup,packages,updatedAt:new Date().toISOString()},{merge:true});
+    game.published=true;saveAll();renderGamesTable();
+    if(!silent)showToast('Synced "'+game.name+'" — '+packages.length+' packages'+(markup?(' ('+(markup>0?'+':'')+markup+'%)'):''),'ok');
+    return packages.length;
+  }catch(err){if(!silent)showToast('Sync failed: '+err.message,'bad');return 0}
+}
+async function publishAllGames(){
+  if(!games.length){showToast('Sync games first','bad');return}
+  if(!db){showToast('Firebase not connected yet','bad');return}
+  const btn=document.getElementById('publishAllBtn');btn.disabled=true;btn.innerHTML='<span class="spinner"></span> Syncing…';
+  let ok=0,fail=0;
+  for(const g of games){
+    const count=await publishGame(g.code,true);
+    if(count>0)ok++;else fail++;
+    await new Promise(r=>setTimeout(r,350));
+  }
+  btn.disabled=false;btn.innerHTML='⚡ Sync All Prices';
+  showToast('Sync finished — '+ok+' game(s) synced'+(fail?(', '+fail+' failed'):''),fail?'bad':'ok');
 }
 async function viewGameFields(code){
   try{const data=await mainApi('games/fields',{method:'POST',body:{game:code}});
@@ -793,25 +816,7 @@ async function viewGameCatalogue(code){
   }catch(err){showToast('Failed: '+err.message,'bad')}
 }
 
-/* ============ SERVERS ============ */
-async function loadServers(){
-  const code=document.getElementById('serverGameSelect').value;
-  if(!code){showToast('Pick a game first','bad');return}
-  const tb=document.querySelector('#serversTable tbody');tb.innerHTML='<tr class="empty-row"><td colspan="2"><span class="spinner"></span> Loading…</td></tr>';
-  try{
-    const url=workerCfg.base+'/main/games/servers';
-    logActivity('POST',url,undefined,undefined);
-    const res=await fetch(url,{method:'POST',headers:{'X-Admin-Token':workerCfg.adminToken,'Content-Type':'application/json'},body:JSON.stringify({game:code})});
-    const data=await res.json().catch(()=>({}));
-    logResult(res.status,res.status===200);
-    if(res.status===403){tb.innerHTML='<tr class="empty-row"><td colspan="2">This game does not require a server ID.</td></tr>';return}
-    if(!res.ok){tb.innerHTML='<tr class="empty-row"><td colspan="2">Failed: '+esc(data.message||res.status)+'</td></tr>';return}
-    const list=Array.isArray(data)?data:(data.servers||data.data||[]);
-    tb.innerHTML=list.length?list.map(s=>'<tr><td>'+esc(s.id!==undefined?s.id:(s.server_id||'-'))+'</td><td>'+esc(s.name||s.title||'-')+'</td></tr>').join(''):'<tr class="empty-row"><td colspan="2">No servers returned.</td></tr>';
-  }catch(err){tb.innerHTML='<tr class="empty-row"><td colspan="2">Network error.</td></tr>'}
-}
-
-/* ============ PACKAGES / CATALOGUE / SMM SERVICES ============ */
+/* ============ PACKAGES / CATALOGUE ============ */
 async function loadCatalogue(){
   const code=document.getElementById('catalogueGameSelect').value;
   if(!code){showToast('Pick a game first','bad');return}
@@ -820,15 +825,6 @@ async function loadCatalogue(){
     const list=Array.isArray(data)?data:(data.items||data.data||[]);
     tb.innerHTML=list.length?list.map(it=>'<tr><td>'+esc(it.name||it.catalogue_name||it.title||'-')+'</td><td>'+esc(it.price!==undefined?it.price:(it.face_value||'-'))+'</td><td>'+esc(it.stock!==undefined?it.stock:'-')+'</td></tr>').join(''):'<tr class="empty-row"><td colspan="3">No items returned.</td></tr>';
   }catch(err){tb.innerHTML='<tr class="empty-row"><td colspan="3">Failed: '+esc(err.message)+'</td></tr>'}
-}
-async function syncSmmServices(){
-  const tb=document.querySelector('#smmServicesTable tbody');tb.innerHTML='<tr class="empty-row"><td colspan="5"><span class="spinner"></span> Loading…</td></tr>';
-  const category=document.getElementById('smmCategoryFilter').value.trim();
-  try{const params=category?{category}:{};const data=await smmApi('services',params);
-    smmServices=Array.isArray(data)?data:(data.services||[]);saveAll();
-    tb.innerHTML=smmServices.length?smmServices.map(s=>'<tr><td>'+esc(s.service)+'</td><td>'+esc(s.name)+'</td><td>'+esc(s.category)+'</td><td>'+esc(s.rate)+'</td><td>'+esc(s.min)+' / '+esc(s.max)+'</td></tr>').join(''):'<tr class="empty-row"><td colspan="5">No services returned.</td></tr>';
-    showToast('Synced '+smmServices.length+' SMM services','ok');
-  }catch(err){tb.innerHTML='<tr class="empty-row"><td colspan="5">Failed: '+esc(err.message)+'</td></tr>';showToast('Failed: '+err.message,'bad')}
 }
 
 /* ============ USERS (Firestore, falls back to local) ============ */
@@ -849,16 +845,6 @@ function renderPaymentsTable(){const tb=document.querySelector('#paymentsTable t
   tb.innerHTML=paymentMethods.map(p=>'<tr><td>'+esc(p.name)+'</td><td>'+esc(p.accName||'-')+'</td><td>'+esc(p.accNo||'-')+'</td><td><button class="link-btn" onclick="deletePayment(\''+p.id+'\')">Delete</button></td></tr>').join('')}
 function deletePayment(id){paymentMethods=paymentMethods.filter(p=>p.id!==id);saveAll();fsDelete('paymentMethods',id);renderPaymentsTable();showToast('Payment method removed','ok')}
 
-/* ============ COUPONS (Firestore, falls back to local) ============ */
-function openCouponModal(){document.getElementById('couponCode').value='';document.getElementById('couponDiscount').value='10';document.getElementById('couponExpiry').value='';document.getElementById('couponModal').classList.add('show')}
-function saveCoupon(){const code=document.getElementById('couponCode').value.trim().toUpperCase();if(!code){showToast('Coupon code required','bad');return}
-  const c={id:'C-'+Date.now().toString(36),code,discount:parseFloat(document.getElementById('couponDiscount').value)||0,expiry:document.getElementById('couponExpiry').value};
-  coupons.unshift(c);saveAll();fsSet('coupons',c.id,c);closeModal('couponModal');renderCouponsTable();showToast('Coupon added','ok')}
-function renderCouponsTable(){const tb=document.querySelector('#couponsTable tbody');if(!coupons.length){tb.innerHTML='<tr class="empty-row"><td colspan="5">No coupons yet.</td></tr>';return}
-  const today=new Date().toISOString().slice(0,10);
-  tb.innerHTML=coupons.map(c=>{const expired=c.expiry&&c.expiry<today;return '<tr><td>'+esc(c.code)+'</td><td>'+esc(c.discount)+'%</td><td>'+esc(c.expiry||'-')+'</td><td><span class="status '+(expired?'failed':'completed')+'">'+(expired?'Expired':'Active')+'</span></td><td><button class="link-btn" onclick="deleteCoupon(\''+c.id+'\')">Delete</button></td></tr>'}).join('')}
-function deleteCoupon(id){coupons=coupons.filter(c=>c.id!==id);saveAll();fsDelete('coupons',id);renderCouponsTable();showToast('Coupon removed','ok')}
-
 /* ============ INIT ============ */
 applyTheme();
 loadApiSettingsForm();
@@ -869,7 +855,6 @@ populateGameSelects();
 renderGamesTable();
 renderUsersTable();
 renderPaymentsTable();
-renderCouponsTable();
 renderLogsTable();
 document.getElementById('adminMain').style.display='none';initFirebase(true);
 </script>
