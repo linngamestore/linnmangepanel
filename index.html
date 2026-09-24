@@ -409,7 +409,7 @@ input[type=file]{display:none}
       </div>
       <div id="importStep2" style="display:none">
         <div class="game-price-card" id="importCurrencyCard" style="margin-bottom:14px"></div>
-        <div class="table-wrap"><table class="admin-table" id="importPackagesTable"><thead><tr><th>Item</th><th>Cost (locked)</th><th>Price</th></tr></thead><tbody></tbody></table></div>
+        <div class="table-wrap"><table class="admin-table" id="importPackagesTable"><thead><tr><th>Item</th><th>Image</th><th>Cost (locked)</th><th>Price</th></tr></thead><tbody></tbody></table></div>
         <div style="display:grid;grid-template-columns:1fr 2fr;gap:9px;margin-top:16px">
           <button class="btn btn-soft" onclick="backToImportSearch()">← Back</button>
           <button class="btn btn-primary" onclick="confirmImport()">Confirm / Done — Save to Store</button>
@@ -857,6 +857,7 @@ async function selectImportItem(id){
   document.getElementById('importStep2').style.display='block';
   document.getElementById('importCurrencyCard').innerHTML='<div class="empty-row" style="padding:20px;text-align:center;color:var(--muted)"><span class="spinner"></span> Fetching provider price…</div>';
   document.querySelector('#importPackagesTable tbody').innerHTML='';
+  const defaultImage=it.image_url||it.image||it.icon_url||it.cover_url||'';
   try{
     const rate=Number(exchangeRate)||1;
     let rawData;
@@ -865,14 +866,14 @@ async function selectImportItem(id){
       const data=await mainApi('games/'+encodeURIComponent(code)+'/catalogue');
       rawData=data;
       const list=Array.isArray(data)?data:(data.items||data.data||data.list||data.result||data.packages||data.catalogues||data.catalogue||data.catalog||data.denominations||[]);
-      importPackages=list.map(x=>{const base=Number(x.price!==undefined?x.price:(x.unit_price!==undefined?x.unit_price:(x.amount!==undefined?x.amount:(x.face_value!==undefined?x.face_value:(x.value||0)))))||0;const cost=Math.round(base*rate*100)/100;return{name:String(x.name||x.catalogue_name||x.title||x.label||x.sku||'-'),baseUsd:base,cost,price:cost}});
+      importPackages=list.map(x=>{const base=Number(x.price!==undefined?x.price:(x.unit_price!==undefined?x.unit_price:(x.amount!==undefined?x.amount:(x.face_value!==undefined?x.face_value:(x.value||0)))))||0;const cost=Math.round(base*rate*100)/100;return{name:String(x.name||x.catalogue_name||x.title||x.label||x.sku||'-'),baseUsd:base,cost,price:cost,image:defaultImage}});
     }else{
       const pid=it.id;
       const data=await mainApi('products/'+encodeURIComponent(pid));
       rawData=data;
       const base=Number(data.unit_price!==undefined?data.unit_price:(data.face_value!==undefined?data.face_value:(it.unit_price||0)))||0;
       const cost=Math.round(base*rate*100)/100;
-      importPackages=[{name:String(data.title||it.name||it.title||'-'),baseUsd:base,cost,price:cost}];
+      importPackages=[{name:String(data.title||it.name||it.title||'-'),baseUsd:base,cost,price:cost,image:defaultImage}];
     }
     renderImportCard(it,rate);renderImportPackages();
     if(!importPackages.length){
@@ -901,11 +902,13 @@ function renderImportPackages(){
   const tb=document.querySelector('#importPackagesTable tbody');
   tb.innerHTML=importPackages.map((p,i)=>
     '<tr><td>'+esc(p.name)+'</td>'+
+    '<td><div style="display:flex;align-items:center;gap:6px"><img src="'+esc(p.image||'')+'" alt="" style="width:30px;height:30px;border-radius:7px;object-fit:cover;background:rgba(255,255,255,.06);flex:none" onerror="this.style.visibility=\'hidden\'" /><input value="'+esc(p.image||'')+'" placeholder="Image URL" style="width:120px;background:rgba(255,255,255,.06);border:1px solid var(--line);border-radius:8px;padding:7px;color:var(--text);font-size:10.5px" onchange="setImportImage('+i+',this.value,this)" /></div></td>'+
     '<td><input value="'+p.cost+'" disabled style="width:92px;background:rgba(255,255,255,.03);border:1px solid var(--line);border-radius:8px;padding:7px;color:var(--muted)" /></td>'+
     '<td><input type="number" step="0.01" value="'+p.price+'" style="width:92px;background:rgba(255,255,255,.06);border:1px solid var(--line);border-radius:8px;padding:7px;color:var(--text)" onchange="setImportPrice('+i+',this.value)" /></td></tr>'
   ).join('');
 }
 function setImportPrice(i,val){let n=parseFloat(val);if(isNaN(n))n=importPackages[i].cost;importPackages[i].price=n}
+function setImportImage(i,val,inputEl){importPackages[i].image=val.trim();const img=inputEl&&inputEl.previousElementSibling;if(img){img.style.visibility='visible';img.src=importPackages[i].image}}
 function backToImportSearch(){
   if(importEditMode){closeImportModal();return}
   document.getElementById('importStep1').style.display='block';
