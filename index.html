@@ -14,14 +14,16 @@ body{margin:0;background:radial-gradient(circle at 78% -10%,rgba(155,108,255,.25
 button,input,select,textarea{font:inherit}
 button{cursor:pointer;border:0;color:inherit}
 .main{max-width:1080px;margin:0 auto;padding:17px 15px 40px}
-.topbar{display:flex;align-items:center;gap:12px;margin-bottom:20px;flex-wrap:wrap;position:sticky;top:env(safe-area-inset-top,0px);z-index:40;background:linear-gradient(135deg,rgba(155,108,255,.16),rgba(255,79,163,.09)),rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.12);border-radius:22px;box-shadow:0 12px 34px rgba(60,20,90,.18),inset 0 1px 0 rgba(255,255,255,.07);padding:12px 16px;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);transition:transform .85s cubic-bezier(.22,.61,.36,1),opacity .85s ease}
+.topbar{display:flex;align-items:center;gap:9px;margin-bottom:13px;flex-wrap:wrap;position:sticky;top:env(safe-area-inset-top,0px);z-index:40;background:linear-gradient(135deg,rgba(155,108,255,.16),rgba(255,79,163,.09)),rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.12);border-radius:17px;box-shadow:0 10px 26px rgba(60,20,90,.16),inset 0 1px 0 rgba(255,255,255,.07);padding:7px 12px;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);transition:transform .85s cubic-bezier(.22,.61,.36,1),opacity .85s ease}
 .theme-light .topbar{background:linear-gradient(135deg,rgba(155,108,255,.14),rgba(255,79,163,.08)),rgba(255,255,255,.6);box-shadow:0 12px 34px rgba(140,90,190,.16),inset 0 1px 0 rgba(255,255,255,.6)}
 .topbar.header-hidden{transform:translateY(-130%);opacity:0}
 .back-link{display:inline-flex;align-items:center;gap:6px;color:var(--muted);text-decoration:none;font-size:12.5px;background:rgba(255,255,255,.06);border:1px solid var(--line);padding:9px 13px;border-radius:11px}
 .back-link:hover{color:var(--text)}
 .topbar h1{font-size:19px;margin:0}
 .topbar p{font-size:12px;color:var(--muted);margin:3px 0 0}
-.icon-btn{width:40px;height:40px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.07);border-radius:14px}
+.icon-btn{width:32px;height:32px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.07);border-radius:11px}
+.topbar .btn{padding:8px 13px;font-size:12px}
+.topbar .status{padding:5px 9px;font-size:9.5px}
 .game-thumb{width:34px;height:34px;border-radius:11px;object-fit:cover;background:var(--panel2);border:1px solid var(--line);display:block}
 .game-thumb-fallback{width:34px;height:34px;border-radius:11px;background:var(--panel2);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:14px}
 .btn{padding:11px 18px;border-radius:16px;font-weight:700;font-size:13px;transition:.18s;position:relative}
@@ -169,6 +171,20 @@ button{cursor:pointer;border:0;color:inherit}
 .theme-light .modal,.theme-light .modal-head,.theme-light .toast{background:linear-gradient(135deg,rgba(255,255,255,.9),rgba(255,255,255,.6))!important}
 .modal-head{border-radius:0;border-width:0 0 1px 0!important}
 .btn-soft{background:linear-gradient(180deg,var(--glass-hi),transparent 60%),var(--glass)!important;border:1px solid var(--glass-b)!important;box-shadow:inset 0 1px 0 var(--glass-hi)}
+.icon-btn,.close,.back-link{background:linear-gradient(180deg,var(--glass-hi),transparent 60%),var(--glass)!important;border:1px solid var(--glass-b)!important;backdrop-filter:blur(14px) saturate(170%);-webkit-backdrop-filter:blur(14px) saturate(170%);box-shadow:inset 0 1px 0 var(--glass-hi)}
+.icon-btn:hover,.close:hover,.back-link:hover{border-color:rgba(255,255,255,.32)!important}
+.pill,.radio-opt,.game-thumb-fallback,.sync-grid .stepper-btn,.toast-ico{background:linear-gradient(180deg,var(--glass-hi),transparent 60%),var(--glass)!important;border:1px solid var(--glass-b)!important;backdrop-filter:blur(12px) saturate(170%);-webkit-backdrop-filter:blur(12px) saturate(170%);box-shadow:inset 0 1px 0 var(--glass-hi)}
+.pill.active,.radio-opt.active{background:linear-gradient(135deg,rgba(255,79,163,.5),rgba(255,79,163,.24))!important;border-color:rgba(255,255,255,.32)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.4),0 8px 20px rgba(255,79,163,.2)}
+.code-box{background:linear-gradient(160deg,rgba(255,255,255,.06),transparent 60%),rgba(10,7,18,.5)!important;border:1px solid var(--glass-b)!important;backdrop-filter:blur(14px) saturate(150%);-webkit-backdrop-filter:blur(14px) saturate(150%);box-shadow:inset 0 1px 0 rgba(255,255,255,.1)}
+.admin-table thead th{position:sticky;top:0;background:linear-gradient(180deg,rgba(25,20,42,.85),rgba(25,20,42,.6))!important;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.theme-light .admin-table thead th{background:linear-gradient(180deg,rgba(255,255,255,.92),rgba(255,255,255,.7))!important}
+#bannersGrid>div{background:linear-gradient(150deg,var(--glass-hi),transparent 55%),var(--glass)!important;border:1px solid var(--glass-b)!important;backdrop-filter:blur(16px) saturate(170%);-webkit-backdrop-filter:blur(16px) saturate(170%);box-shadow:inset 0 1px 0 var(--glass-hi),0 8px 20px rgba(60,20,90,.12)}
+#bannersGrid button{background:rgba(20,15,32,.45)!important;backdrop-filter:blur(10px) saturate(170%);-webkit-backdrop-filter:blur(10px) saturate(170%);border:1px solid var(--glass-b)!important}
+.upload-box{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:4px}
+.upload-label{display:inline-flex;align-items:center;gap:6px;padding:10px 14px;border-radius:12px;font-size:11.5px;font-weight:700;color:#ffd2e7;cursor:pointer;background:linear-gradient(180deg,var(--glass-hi),transparent 60%),var(--glass);border:1px dashed var(--glass-b);backdrop-filter:blur(14px) saturate(170%);-webkit-backdrop-filter:blur(14px) saturate(170%);box-shadow:inset 0 1px 0 var(--glass-hi);transition:.2s}
+.upload-label:hover{border-color:rgba(255,79,163,.6)}
+.upload-filename{font-size:10.5px;color:var(--muted);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+input[type=file]{display:none}
 /* login */
 #adminLoginGate{background:radial-gradient(circle at 20% 20%,rgba(255,79,163,.45),transparent 40%),radial-gradient(circle at 85% 80%,rgba(111,231,255,.4),transparent 40%),radial-gradient(circle at 70% 15%,rgba(155,108,255,.5),transparent 40%),#150f26;backdrop-filter:none}
 .login-card{width:min(380px,100%);text-align:center;padding:34px 26px 26px;border-radius:32px;background:linear-gradient(145deg,rgba(255,255,255,.26),rgba(255,255,255,.06)),rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.35);backdrop-filter:blur(30px) saturate(190%);-webkit-backdrop-filter:blur(30px) saturate(190%);box-shadow:0 30px 80px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.5);color:#fff;animation:pop .3s ease-out}
@@ -200,8 +216,8 @@ button{cursor:pointer;border:0;color:inherit}
       <button data-sec="games"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="11" rx="5"/><path d="M7 10.5v4M5 12.5h4" stroke-linecap="round"/><circle cx="16" cy="10.5" r="1" fill="currentColor"/><circle cx="18.5" cy="13" r="1" fill="currentColor"/></svg> Game List</button>
       <button data-sec="users"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="3.5"/><path d="M4.5 20c1.4-3.8 4.3-5.5 7.5-5.5s6.1 1.7 7.5 5.5" stroke-linecap="round"/></svg> User List</button>
       <button data-sec="payments"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2.5" y="5.5" width="19" height="13" rx="2.5"/><path d="M2.5 9.5h19" stroke-linecap="round"/><path d="M6 14.5h4" stroke-linecap="round"/></svg> Payments</button>
+      <button data-sec="branding"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="9" r="1.6"/><path d="M21 15.5l-5.5-5.5-9.5 9.5" stroke-linecap="round" stroke-linejoin="round"/></svg> Branding</button>
       <button data-sec="settings"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 13.5a1.8 1.8 0 0 0 .36 1.98l.07.07a2.17 2.17 0 1 1-3.07 3.07l-.07-.07a1.8 1.8 0 0 0-1.98-.36 1.8 1.8 0 0 0-1.09 1.65v.2a2.17 2.17 0 1 1-4.34 0v-.1a1.8 1.8 0 0 0-1.18-1.65 1.8 1.8 0 0 0-1.98.36l-.07.07a2.17 2.17 0 1 1-3.07-3.07l.07-.07a1.8 1.8 0 0 0 .36-1.98 1.8 1.8 0 0 0-1.65-1.09h-.2a2.17 2.17 0 1 1 0-4.34h.1a1.8 1.8 0 0 0 1.65-1.18 1.8 1.8 0 0 0-.36-1.98l-.07-.07a2.17 2.17 0 1 1 3.07-3.07l.07.07a1.8 1.8 0 0 0 1.98.36h.09a1.8 1.8 0 0 0 1.09-1.65v-.2a2.17 2.17 0 1 1 4.34 0v.1a1.8 1.8 0 0 0 1.09 1.65h.09a1.8 1.8 0 0 0 1.98-.36l.07-.07a2.17 2.17 0 1 1 3.07 3.07l-.07.07a1.8 1.8 0 0 0-.36 1.98v.09a1.8 1.8 0 0 0 1.65 1.09h.2a2.17 2.17 0 1 1 0 4.34h-.1a1.8 1.8 0 0 0-1.65 1.09z"/></svg> Settings</button>
-      <button data-sec="logs"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h4l2-6 4 12 2-6h6" stroke-linecap="round" stroke-linejoin="round"/></svg> Activity Logs</button>
     </div>
 
     <div>
@@ -259,7 +275,7 @@ button{cursor:pointer;border:0;color:inherit}
           <div class="section-head">
             <div><h2>User List</h2><p>Customers pulled automatically from store orders</p></div>
           </div>
-          <div class="table-wrap"><table class="admin-table" id="usersTable"><thead><tr><th>Customer</th><th>Orders</th><th>Total Spent</th><th>Last Order</th></tr></thead><tbody></tbody></table></div>
+          <div class="table-wrap"><table class="admin-table" id="usersTable"><thead><tr><th>Customer</th><th>User ID</th><th>Linked</th><th>Orders</th><th>Total Spent</th><th>Last Order</th></tr></thead><tbody></tbody></table></div>
         </div>
       </section>
 
@@ -279,6 +295,33 @@ button{cursor:pointer;border:0;color:inherit}
             <button class="btn btn-primary" onclick="openPaymentModal()">+ Add Method</button>
           </div>
           <div class="table-wrap"><table class="admin-table" id="paymentsTable"><thead><tr><th>Method</th><th>Account Name</th><th>Account No.</th><th>Actions</th></tr></thead><tbody></tbody></table></div>
+        </div>
+      </section>
+
+      <!-- BRANDING -->
+      <section class="view-sec" data-view="branding">
+        <div class="panel">
+          <div class="section-head"><div><h2>🖼️ Store Logo</h2><p>Sidebar / header logo — PNG with transparent background works best, any shape ok (not forced into a square)</p></div></div>
+          <div class="field" style="margin-bottom:0">
+            <label>Logo Image</label>
+            <input id="storeLogoInput" type="file" accept="image/png,image/webp,image/jpeg" onchange="onStoreLogo(this)" />
+            <div class="upload-box"><label for="storeLogoInput" class="upload-label">⇧ Choose Logo Image</label><span id="storeLogoInputName" class="upload-filename">No file chosen</span></div>
+          </div>
+          <div id="storeLogoPreviewWrap" class="hide" style="display:flex;align-items:center;gap:14px;margin-top:12px">
+            <div style="width:64px;height:64px;flex:none;display:flex;align-items:center;justify-content:center;background:repeating-conic-gradient(#2a2340 0% 25%,#19142a 0% 50%) 0 0/16px 16px;border-radius:14px;border:1px solid var(--line)">
+              <img id="storeLogoPreview" alt="" style="max-width:88%;max-height:88%;width:auto;height:auto;object-fit:contain" />
+            </div>
+            <div><button class="btn btn-soft btn-sm" onclick="removeStoreLogo()">Remove Logo</button></div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="section-head">
+            <div><h2>🎞️ Banners</h2><p>Home page slide banners — ဘယ်နှစ်ပုံမဆို စိတ်ကြိုက် ထည့်နိုင်သည် (image upload ပါ, link မလို)</p></div>
+            <button class="btn btn-primary btn-sm" onclick="document.getElementById('bannerInput').click()">+ Add Banner</button>
+          </div>
+          <input id="bannerInput" type="file" accept="image/png,image/webp,image/jpeg" class="hide" onchange="onBannerUpload(this)" />
+          <div id="bannersGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px"></div>
+          <div class="notice info" id="bannersEmpty">Banner မထည့်ရသေးပါ — "+ Add Banner" ကိုနှိပ်ပြီး ပုံတင်ပါ</div>
         </div>
       </section>
 
@@ -328,16 +371,6 @@ button{cursor:pointer;border:0;color:inherit}
         </div>
       </section>
 
-      <!-- LOGS -->
-      <section class="view-sec" data-view="logs">
-        <div class="panel">
-          <div class="section-head">
-            <div><h2>Activity Logs</h2><p>Every API call made from this admin panel (last 150)</p></div>
-            <button class="btn btn-soft" onclick="clearLogs()">Clear Logs</button>
-          </div>
-          <div class="table-wrap"><table class="admin-table" id="logsTable"><thead><tr><th>Time</th><th>Method</th><th>Endpoint / Action</th><th>Result</th></tr></thead><tbody></tbody></table></div>
-        </div>
-      </section>
     </div>
   </div>
 </main>
@@ -393,7 +426,7 @@ button{cursor:pointer;border:0;color:inherit}
       <div class="field"><label>Method name (e.g. KBZPay, Wave Money)</label><input id="payMethodName" placeholder="Method" /></div>
       <div class="field"><label>Account name</label><input id="payAccName" placeholder="Name" /></div>
       <div class="field"><label>Account number</label><input id="payAccNo" placeholder="Number" /></div>
-      <div class="field"><label>Image (logo / QR)</label><input id="payImage" type="file" accept="image/*" onchange="onPayImage(this)" /><img id="payImagePreview" class="hide" alt="" style="width:72px;height:72px;object-fit:cover;border-radius:16px;border:1px solid var(--glass-b);margin-top:6px" /></div>
+      <div class="field"><label>Image (logo / QR)</label><input id="payImage" type="file" accept="image/*" onchange="onPayImage(this)" /><div class="upload-box"><label for="payImage" class="upload-label">⇧ Choose Image</label><span id="payImageName" class="upload-filename">No file chosen</span></div><img id="payImagePreview" class="hide" alt="" style="width:72px;height:72px;object-fit:cover;border-radius:16px;border:1px solid var(--glass-b);margin-top:6px" /></div>
       <button class="btn btn-primary" style="width:100%" onclick="savePaymentMethod()">Save Method</button>
     </div>
   </div>
@@ -424,6 +457,7 @@ let users=LS.get('linn_users',[]);
 let paymentMethods=LS.get('linn_payment_methods',[]);
 let logs=LS.get('linn_logs',[]);
 let exchangeRate=LS.get('linn_exchange_rate',1);
+let storeLogo=LS.get('linn_store_logo','');
 let orderFilter='ALL';
 
 function saveAll(){LS.set('linn_orders',orders);LS.set('linn_games',games);LS.set('linn_vouchers',voucherProducts);LS.set('linn_catalogue',catalogueCache);LS.set('linn_users',users);LS.set('linn_payment_methods',paymentMethods);LS.set('linn_logs',logs)}
@@ -507,19 +541,21 @@ function attachFirestoreListeners(){
   },err=>showToast('orders: '+err.message,'bad')));
   fsUnsubscribers.push(db.collection('users').onSnapshot(snap=>{usersCol=snap.docs.map(d=>({id:d.id,...d.data()}));renderUsersTable()},err=>showToast('users: '+err.message,'bad')));
   fsUnsubscribers.push(db.collection('paymentMethods').onSnapshot(snap=>{paymentMethods=snap.docs.map(d=>({id:d.id,...d.data()}));renderPaymentsTable()},err=>showToast('payments: '+err.message,'bad')));
+  fsUnsubscribers.push(db.collection('banners').onSnapshot(snap=>{banners=snap.docs.map(d=>({id:d.id,...d.data()}));LS.set('linn_banners',banners);renderBannersGrid()},err=>showToast('banners: '+err.message,'bad')));
   fsUnsubscribers.push(db.collection('logs').limit(150).onSnapshot(snap=>{logs=snap.docs.map(d=>d.data()).sort((a,b)=>String(b.time).localeCompare(String(a.time)));renderLogsTable()},err=>showToast('logs: '+err.message,'bad')));
   fsUnsubscribers.push(db.collection('settings').doc('admin').onSnapshot(doc=>{
     if(!doc.exists)return;const d=doc.data();
     if(d.workerBase){workerCfg.base=d.workerBase;LS.set('linn_worker_config',workerCfg)}
     if(d.adminToken){workerCfg.adminToken=d.adminToken;LS.set('linn_worker_config',workerCfg)}
     if(d.exchangeRate){exchangeRate=Number(d.exchangeRate)||exchangeRate;LS.set('linn_exchange_rate',exchangeRate)}
+    if(d.storeLogo!==undefined&&d.storeLogo!==storeLogo){storeLogo=d.storeLogo||'';LS.set('linn_store_logo',storeLogo);renderStoreLogoPreview()}
     telegram={enabled:d.tgEnabled!==false,base:d.tgBase||telegram.base};LS.set('linn_telegram',telegram);
     loadApiSettingsForm();updateSystemStatus();
   },err=>showToast('settings: '+err.message,'bad')));
   fsUnsubscribers.push(db.collection('games').onSnapshot(snap=>{if(snap.size){games=snap.docs.map(d=>d.data());renderGamesTable()}}));
   fsUnsubscribers.push(db.collection('vouchers').onSnapshot(snap=>{if(snap.size){voucherProducts=snap.docs.map(d=>d.data());renderGamesTable()}}));
 }
-function syncSettingsToFs(){fsSet('settings','admin',{workerBase:workerCfg.base,adminToken:workerCfg.adminToken||'',exchangeRate:exchangeRate,tgBase:telegram.base||'',tgEnabled:telegram.enabled!==false,updatedAt:new Date().toISOString()})}
+function syncSettingsToFs(){fsSet('settings','admin',{workerBase:workerCfg.base,adminToken:workerCfg.adminToken||'',exchangeRate:exchangeRate,tgBase:telegram.base||'',tgEnabled:telegram.enabled!==false,storeLogo:storeLogo||'',updatedAt:new Date().toISOString()})}
 function detachFirestoreListeners(){fsUnsubscribers.forEach(u=>{try{u()}catch(e){}});fsUnsubscribers=[]}
 function fsSet(collection,id,data){if(!db)return;const clean=JSON.parse(JSON.stringify(data));db.collection(collection).doc(String(id)).set(clean,{merge:true}).catch(err=>showToast('Firestore write failed: '+err.message,'bad'))}
 function fsDelete(collection,id){if(!db)return;db.collection(collection).doc(String(id)).delete().catch(err=>showToast('Firestore delete failed: '+err.message,'bad'))}
@@ -912,7 +948,7 @@ async function confirmImport(){
 function renderUsersTable(){
   const tb=document.querySelector('#usersTable tbody');
   const byName={};
-  usersCol.forEach(u=>{const name=(u.name||u.displayName||u.username||u.email||u.id||'').toString().trim();if(!name)return;const created=u.createdAt&&u.createdAt.toDate?u.createdAt.toDate():(u.createdAt?new Date(u.createdAt):null);byName[name.toLowerCase()]={name,sub:[u.email,u.phone].filter(Boolean).join(' · '),count:0,total:0,last:created&&!isNaN(created)?created:null}});
+  usersCol.forEach(u=>{const name=(u.name||u.displayName||u.username||u.email||u.id||'').toString().trim();if(!name)return;const created=u.createdAt&&u.createdAt.toDate?u.createdAt.toDate():(u.createdAt?new Date(u.createdAt):null);byName[name.toLowerCase()]={name,id:u.id,sub:[u.email,u.phone].filter(Boolean).join(' · '),count:0,total:0,last:created&&!isNaN(created)?created:null,google:!!u.googleLinked,googleEmail:u.googleEmail||'',telegram:!!u.telegramLinked,telegramUsername:u.telegramUsername||'',email:!!u.emailLinked}});
   orders.forEach(o=>{
     const name=(o.customer||'').trim();if(!name)return;const key=name.toLowerCase();
     const amt=parseFloat((o.amountLabel||'0').toString().replace(/[^0-9.]/g,''))||0;
@@ -922,14 +958,108 @@ function renderUsersTable(){
     if(created&&!isNaN(created)&&(!byName[key].last||created>byName[key].last))byName[key].last=created;
   });
   const list=Object.values(byName).sort((a,b)=>(b.last?b.last.getTime():0)-(a.last?a.last.getTime():0));
-  if(!list.length){tb.innerHTML='<tr class="empty-row"><td colspan="4">No customers yet.</td></tr>';return}
-  tb.innerHTML=list.map(u=>'<tr><td>'+esc(u.name)+(u.sub?'<br><small style="color:var(--muted)">'+esc(u.sub)+'</small>':'')+'</td><td>'+u.count+'</td><td>'+u.total.toLocaleString()+'</td><td>'+(u.last?u.last.toLocaleDateString():'-')+'</td></tr>').join('');
+  if(!list.length){tb.innerHTML='<tr class="empty-row"><td colspan="6">No customers yet.</td></tr>';return}
+  const linkBadges=u=>{
+    if(!u.id)return '<span style="color:var(--muted)">-</span>';
+    const chip=(on,label,title)=>'<span title="'+esc(title)+'" style="display:inline-block;margin-right:4px;padding:1px 6px;border-radius:6px;font-size:10.5px;background:'+(on?'rgba(97,230,161,.16);color:var(--green)':'rgba(255,255,255,.08);color:var(--muted)')+'">'+label+'</span>';
+    return chip(u.google,'G',u.google?('Google — '+(u.googleEmail||'linked')):'Google — not linked')
+      +chip(u.telegram,'T',u.telegram?('Telegram — @'+(u.telegramUsername||'linked')):'Telegram — not linked')
+      +chip(u.email,'E',u.email?'Email — linked':'Email — not linked');
+  };
+  tb.innerHTML=list.map(u=>'<tr><td>'+esc(u.name)+(u.sub?'<br><small style="color:var(--muted)">'+esc(u.sub)+'</small>':'')+'</td><td><small style="color:var(--muted)">'+(u.id?esc(u.id):'-')+'</small></td><td>'+linkBadges(u)+'</td><td>'+u.count+'</td><td>'+u.total.toLocaleString()+'</td><td>'+(u.last?u.last.toLocaleDateString():'-')+'</td></tr>').join('');
+}
+
+/* ============ STORE LOGO (Settings → Store Logo, shown in sidebar) ============ */
+function onStoreLogo(inp){
+  const f=inp.files&&inp.files[0];if(!f)return;
+  const nameEl=document.getElementById('storeLogoInputName');if(nameEl)nameEl.textContent=f.name;
+  const r=new FileReader();
+  r.onload=()=>{
+    const img=new Image();
+    img.onload=()=>{
+      const sc=Math.min(1,320/Math.max(img.width,img.height));
+      const c=document.createElement('canvas');
+      c.width=Math.round(img.width*sc);c.height=Math.round(img.height*sc);
+      c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+      storeLogo=c.toDataURL('image/png');
+      LS.set('linn_store_logo',storeLogo);
+      renderStoreLogoPreview();
+      syncSettingsToFs();
+      showToast('Store logo saved — now showing in the sidebar','ok');
+    };
+    img.onerror=()=>showToast('Image ဖတ်မရပါ','bad');
+    img.src=r.result;
+  };
+  r.readAsDataURL(f);
+}
+function removeStoreLogo(){
+  storeLogo='';document.getElementById('storeLogoInput').value='';
+  const nameEl=document.getElementById('storeLogoInputName');if(nameEl)nameEl.textContent='No file chosen';
+  LS.set('linn_store_logo','');
+  renderStoreLogoPreview();
+  syncSettingsToFs();
+  showToast('Store logo removed','ok');
+}
+function renderStoreLogoPreview(){
+  const wrap=document.getElementById('storeLogoPreviewWrap');
+  const img=document.getElementById('storeLogoPreview');
+  if(wrap&&img){
+    if(storeLogo){img.src=storeLogo;wrap.classList.remove('hide')}
+    else{img.src='';wrap.classList.add('hide')}
+  }
+  applyStoreLogoBranding();
+}
+function applyStoreLogoBranding(){
+  const mark=document.querySelector('.login-logo');
+  if(!mark)return;
+  if(storeLogo){
+    mark.style.background='none';mark.style.boxShadow='none';
+    mark.innerHTML='<img src="'+storeLogo+'" alt="Logo" style="max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain" />';
+  }else{
+    mark.style.background='';mark.style.boxShadow='';
+    mark.innerHTML='🎮';
+  }
+}
+
+/* ============ BANNERS (Settings → Branding, Home page slide banners) ============ */
+let banners=LS.get('linn_banners',[]);
+function onBannerUpload(inp){
+  const f=inp.files&&inp.files[0];if(!f)return;
+  const r=new FileReader();
+  r.onload=()=>{
+    const img=new Image();
+    img.onload=()=>{
+      const sc=Math.min(1,900/Math.max(img.width,img.height));
+      const c=document.createElement('canvas');
+      c.width=Math.round(img.width*sc);c.height=Math.round(img.height*sc);
+      c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+      const image=c.toDataURL('image/jpeg',0.82);
+      const b={id:'BN-'+Date.now().toString(36)+Math.random().toString(36).slice(2,6),image,order:Date.now()};
+      banners.push(b);LS.set('linn_banners',banners);renderBannersGrid();fsSet('banners',b.id,b);
+      inp.value='';showToast('Banner added','ok');
+    };
+    img.onerror=()=>showToast('Image ဖတ်မရပါ','bad');
+    img.src=r.result;
+  };
+  r.readAsDataURL(f);
+}
+function deleteBanner(id){
+  banners=banners.filter(b=>b.id!==id);LS.set('linn_banners',banners);renderBannersGrid();fsDelete('banners',id);showToast('Banner removed','ok');
+}
+function renderBannersGrid(){
+  const grid=document.getElementById('bannersGrid');
+  const empty=document.getElementById('bannersEmpty');
+  if(!grid)return;
+  const sorted=banners.slice().sort((a,b)=>(a.order||0)-(b.order||0));
+  if(!sorted.length){grid.innerHTML='';if(empty)empty.classList.remove('hide');return}
+  if(empty)empty.classList.add('hide');
+  grid.innerHTML=sorted.map(b=>'<div style="position:relative;border-radius:16px;overflow:hidden;aspect-ratio:16/9"><img src="'+b.image+'" alt="" style="width:100%;height:100%;object-fit:cover;display:block" /><button onclick="deleteBanner(\''+b.id+'\')" title="Remove" style="position:absolute;top:6px;right:6px;width:26px;height:26px;border-radius:9px;color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px">✕</button></div>').join('');
 }
 
 /* ============ PAYMENTS (Firestore, falls back to local) ============ */
 let payImageData='';
-function onPayImage(inp){const f=inp.files&&inp.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{const img=new Image();img.onload=()=>{const sc=Math.min(1,320/Math.max(img.width,img.height));const c=document.createElement('canvas');c.width=Math.round(img.width*sc);c.height=Math.round(img.height*sc);c.getContext('2d').drawImage(img,0,0,c.width,c.height);payImageData=c.toDataURL('image/png');const pv=document.getElementById('payImagePreview');pv.src=payImageData;pv.classList.remove('hide')};img.onerror=()=>showToast('Image ဖတ်မရပါ','bad');img.src=r.result};r.readAsDataURL(f)}
-function openPaymentModal(){payImageData='';document.getElementById('payImage').value='';document.getElementById('payImagePreview').classList.add('hide');document.getElementById('payMethodName').value='';document.getElementById('payAccName').value='';document.getElementById('payAccNo').value='';document.getElementById('paymentModal').classList.add('show')}
+function onPayImage(inp){const f=inp.files&&inp.files[0];if(!f)return;const nameEl=document.getElementById('payImageName');if(nameEl)nameEl.textContent=f.name;const r=new FileReader();r.onload=()=>{const img=new Image();img.onload=()=>{const sc=Math.min(1,320/Math.max(img.width,img.height));const c=document.createElement('canvas');c.width=Math.round(img.width*sc);c.height=Math.round(img.height*sc);c.getContext('2d').drawImage(img,0,0,c.width,c.height);payImageData=c.toDataURL('image/png');const pv=document.getElementById('payImagePreview');pv.src=payImageData;pv.classList.remove('hide')};img.onerror=()=>showToast('Image ဖတ်မရပါ','bad');img.src=r.result};r.readAsDataURL(f)}
+function openPaymentModal(){payImageData='';document.getElementById('payImage').value='';document.getElementById('payImageName').textContent='No file chosen';document.getElementById('payImagePreview').classList.add('hide');document.getElementById('payMethodName').value='';document.getElementById('payAccName').value='';document.getElementById('payAccNo').value='';document.getElementById('paymentModal').classList.add('show')}
 function savePaymentMethod(){const name=document.getElementById('payMethodName').value.trim();if(!name){showToast('Method name required','bad');return}
   const p={id:'PM-'+Date.now().toString(36),name,accName:document.getElementById('payAccName').value.trim(),accNo:document.getElementById('payAccNo').value.trim(),image:payImageData};
   paymentMethods.unshift(p);saveAll();fsSet('paymentMethods',p.id,p);closeModal('paymentModal');renderPaymentsTable();showToast('Payment method added','ok')}
@@ -949,6 +1079,8 @@ function handleHeaderScroll(){
 window.addEventListener('scroll',handleHeaderScroll,{passive:true});
 applyTheme();
 loadApiSettingsForm();
+renderStoreLogoPreview();
+renderBannersGrid();
 updateSystemStatus();
 renderDashboard();
 renderOrdersTable();
