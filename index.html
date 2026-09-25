@@ -583,7 +583,7 @@
            makes the browser recomposite it properly every frame. */
         .header { background-color: var(--surface); padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; box-shadow: 0 1px 0 var(--border-glass), 0 8px 24px -12px rgba(0,0,0,0.25); border-bottom: 1px solid var(--fill-soft); transform: translateZ(0); will-change: transform; }
         .logo { color: var(--text-primary); font-size: 20px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
-        .logo-icon { background: var(--accent); color: white; padding: 4px; border-radius: 6px; display: flex; width: 26px; height: 26px; }
+        .logo-icon { background: var(--accent); color: white; padding: 4px; border-radius: 6px; display: flex; width: 32px; height: 32px; }
         .logo-icon.has-custom-logo { padding: 0; background: transparent; overflow: hidden; }
         .header-icon { background: var(--fill-soft); width: 36px; height: 36px; border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; }
 
@@ -3565,9 +3565,6 @@
                         <input type="text" id="edit-game-g2bulk-idcheck-code" placeholder="e.g. mobile-legends" style="text-transform:none;">
                         <p style="font-size:11px;color:var(--text-muted);margin-top:-4px;">FazerCards ID check ခ်လုပ်မရရင် (unsupported or down) ဒီ G2Bulk code ကို အသုံးပြုပြီး player name ကိုပဲ ပြပေးမယ် — order ကတော့ FazerCards ကနေပဲ ဆက်ဆောင်ရွက်ပါမယ်။</p>
                     </div>
-                         /api/products?game_code=... -> GET /api/create_order
-                         (reference required + unique, game_zone_id optional
-                    
 
                     <!-- FazerCards Gift Cards: a separate part of FazerCards'
                          catalog (GET /api/v2/giftcards → GET
@@ -11547,6 +11544,12 @@
             // Animated GIFs would lose their animation if re-encoded via canvas
             // (canvas only ever captures a single frame) - upload those as-is.
             if (file.type === 'image/gif') return file;
+            // PNGs (logos, icons) are commonly transparent. JPEG has no alpha
+            // channel, so re-encoding a transparent PNG as JPEG used to leave
+            // the transparent areas filled in solid black. Re-encode PNGs as
+            // PNG instead — still resized/downscaled, just without dropping
+            // the alpha channel.
+            const outType = file.type === 'image/png' ? 'image/png' : 'image/jpeg';
             try {
                 const bitmap = await createImageBitmap(file);
                 let { width, height } = bitmap;
@@ -11562,13 +11565,14 @@
                 ctx.drawImage(bitmap, 0, 0, width, height);
                 bitmap.close?.();
 
-                const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', quality));
+                const blob = await new Promise(resolve => canvas.toBlob(resolve, outType, quality));
                 if (!blob) return file; // toBlob can resolve null on decode failure - keep the original
                 // Only actually swap in the compressed version if it's smaller -
                 // a tiny already-optimized source image shouldn't get bigger.
                 if (blob.size >= file.size) return file;
-                const newName = file.name.replace(/\.\w+$/, '') + '.jpg';
-                return new File([blob], newName, { type: 'image/jpeg' });
+                const newExt = outType === 'image/png' ? '.png' : '.jpg';
+                const newName = file.name.replace(/\.\w+$/, '') + newExt;
+                return new File([blob], newName, { type: outType });
             } catch (err) {
                 console.warn('Image compression skipped, uploading original:', err);
                 return file;
