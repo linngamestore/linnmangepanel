@@ -18,7 +18,7 @@
         var ERUDA_DEFAULT_ON = true;
         (function () {
             try {
-                if (ERUDA_DEFAULT_ON || location.hash === '#debug' || localStorage.getItem('pca_debug') === '1') {
+                if (ERUDA_DEFAULT_ON || location.hash === '#debug' || localStorage.getItem('linn_debug') === '1') {
                     var s = document.createElement('script');
                     s.src = 'https://cdn.jsdelivr.net/npm/eruda@3';
                     s.onload = function () { if (window.eruda) eruda.init(); };
@@ -44,7 +44,7 @@
         // ============================================================
         (function () {
             'use strict';
-            var KEY = 'pca_usage_v1';
+            var KEY = 'linn_usage_v1';
             // Free-tier daily limits used for the progress bars (edit if you're on a paid plan)
             var QUOTA = { reads: 50000, writes: 20000, cf: 100000 };
             // Add any custom domain that is routed through Cloudflare, e.g. ['api.mystore.com']
@@ -75,7 +75,7 @@
                         entry(st.fs.src, label, zeroFs)[kind] += count;
                     });
                     dirty = true;
-                    if (window.__pcaConnPulse) window.__pcaConnPulse();
+                    if (window.__linnConnPulse) window.__linnConnPulse();
                 } catch (e) { /* never break the app for a counter */ }
             }
             function cfBump(label, ms, failed) {
@@ -87,7 +87,7 @@
                     });
                     if (ms > cfMax) cfMax = ms;
                     dirty = true;
-                    if (window.__pcaConnPulse) window.__pcaConnPulse();
+                    if (window.__linnConnPulse) window.__linnConnPulse();
                 } catch (e) { /* ignore */ }
             }
 
@@ -222,7 +222,7 @@
                 render();
             }
 
-            window.PCAUsage = {
+            window.LinnUsage = {
                 fsRead: function (count, label) { fsBump('r', count, label); },
                 fsWrite: function (count, label) { fsBump('w', count, label); },
                 fsDelete: function (count, label) { fsBump('d', count, label); },
@@ -244,7 +244,7 @@
         })();
     </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PCA Store - Admin</title>
+    <title>LINN GAME STORE - Admin</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap');
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; -webkit-tap-highlight-color: transparent; }
@@ -631,7 +631,7 @@
         /* Connection status chip — dot + text label next to the clock, with
            four states driven from updateConnectionStatus() / setConnStatus():
            connecting (amber, on load / reconnect), updating (blue, pulses
-           briefly on real Firestore/Worker activity — see __pcaConnPulse
+           briefly on real Firestore/Worker activity — see __linnConnPulse
            hooked into the usage-meter's fsBump/cfBump), connected (green,
            steady), offline (red, together with the #offline-banner strip). */
         .conn-status { display: flex; align-items: center; gap: 6px; padding: 5px 10px 5px 8px; border-radius: 999px; background: var(--fill-soft); border: 1px solid var(--border-glass); flex-shrink: 0; }
@@ -1771,7 +1771,7 @@
         // rest of the time, based on the device's local clock.
         (function () {
             try {
-                var saved = localStorage.getItem('pca-admin-theme');
+                var saved = localStorage.getItem('linn-admin-theme');
                 var pref = saved || 'auto';
                 var resolved = pref;
                 if (pref === 'auto') {
@@ -1941,7 +1941,7 @@
         <div class="logo" id="store-switcher-btn">
             <div class="logo-icon" id="header-logo-icon">
                 <svg class="ui-icon" id="header-logo-default-icon" style="width:18px;height:18px;"><use href="#icon-shield"></use></svg>
-                <img id="header-logo-img" src="" alt="PCA Store" loading="lazy" decoding="async" style="display:none;width:100%;height:100%;object-fit:cover;border-radius:6px;">
+                <img id="header-logo-img" src="" alt="LINN GAME STORE" loading="lazy" decoding="async" style="display:none;width:100%;height:100%;object-fit:cover;border-radius:6px;">
             </div>
         </div>
         <div id="header-clock" title="Local time">
@@ -2190,12 +2190,12 @@
 
             <!-- REQUEST USAGE — how many Firestore operations and Cloudflare Worker
                  requests this admin panel is making (today, this device). Fed by
-                 window.PCAUsage (head script + Firestore wrappers in the module script). -->
+                 window.LinnUsage (head script + Firestore wrappers in the module script). -->
             <div class="dash-section-label" style="display:flex;align-items:center;justify-content:space-between;">
                 <span>Request Usage · Today</span>
                 <div style="display:flex;gap:6px;">
-                    <button class="btn btn-outline" style="flex:unset; padding: 3px 10px; font-size:11px;" onclick="window.PCAUsage && window.PCAUsage.update && window.PCAUsage.update(); var b=this; var t=b.textContent; b.textContent='✓ Updated'; setTimeout(function(){ b.textContent=t; }, 900);">↻ Update</button>
-                    <button class="btn btn-outline" style="flex:unset; padding: 3px 10px; font-size:11px;" onclick="window.PCAUsage && window.PCAUsage.reset()">Reset</button>
+                    <button class="btn btn-outline" style="flex:unset; padding: 3px 10px; font-size:11px;" onclick="window.LinnUsage && window.LinnUsage.update && window.LinnUsage.update(); var b=this; var t=b.textContent; b.textContent='✓ Updated'; setTimeout(function(){ b.textContent=t; }, 900);">↻ Update</button>
+                    <button class="btn btn-outline" style="flex:unset; padding: 3px 10px; font-size:11px;" onclick="window.LinnUsage && window.LinnUsage.reset()">Reset</button>
                 </div>
             </div>
             <div class="usage-grid" id="usage-grid">
@@ -3793,7 +3793,7 @@
                 <input type="hidden" id="edit-coupon-original-code">
                 <label>Code</label>
                 <div style="display:flex;gap:8px;">
-                    <input type="text" id="edit-coupon-code" placeholder="e.g. PCA2026" style="flex:1;text-transform:uppercase;" maxlength="24">
+                    <input type="text" id="edit-coupon-code" placeholder="e.g. LINN2026" style="flex:1;text-transform:uppercase;" maxlength="24">
                     <button type="button" class="btn btn-outline" style="flex:unset;padding:10px 14px;" onclick="generateCouponCode()">Generate</button>
                 </div>
 
@@ -4089,12 +4089,12 @@
 
         // The saved preference (what the user picked - may be 'auto').
         function getThemePreference() {
-            try { return localStorage.getItem('pca-admin-theme') || 'auto'; } catch (e) { return 'auto'; }
+            try { return localStorage.getItem('linn-admin-theme') || 'auto'; } catch (e) { return 'auto'; }
         }
 
         function applyTheme(themeId, persist = true) {
             if (persist) {
-                try { localStorage.setItem('pca-admin-theme', themeId); } catch (e) {}
+                try { localStorage.setItem('linn-admin-theme', themeId); } catch (e) {}
             }
             const resolved = themeId === 'auto' ? resolveAutoTheme() : themeId;
             // Briefly let every themed surface crossfade to the new colors
@@ -4163,7 +4163,7 @@
         // dot+text chip next to the header clock, with four states:
         //   connecting - shown on load and right after coming back online
         //   updating   - pulses briefly on real Firestore/Worker activity
-        //                (see __pcaConnPulse, called from the usage-meter's
+        //                (see __linnConnPulse, called from the usage-meter's
         //                fsBump/cfBump wrappers, so it reflects actual traffic)
         //   connected  - steady state once online and idle
         //   offline    - navigator.onLine is false
@@ -4181,7 +4181,7 @@
         // Called from fsBump/cfBump on every real Firestore read/write or
         // Cloudflare Worker request, so "Updating" reflects actual traffic
         // rather than a fake timer.
-        window.__pcaConnPulse = function () {
+        window.__linnConnPulse = function () {
             if (!navigator.onLine) return;
             setConnStatus('updating');
             clearTimeout(connPulseTimer);
@@ -4257,7 +4257,7 @@
             window.scrollTo(0,0);
             if ((pageId === 'dashboard' || pageId === 'order-list') && window.loadDashboardStats) window.loadDashboardStats();
             if (pageId === 'analytics' && window.renderAnalytics) window.renderAnalytics();
-            if (pageId === 'dashboard' && window.PCAUsage) window.PCAUsage.render();
+            if (pageId === 'dashboard' && window.LinnUsage) window.LinnUsage.render();
             // Cloudflare/Firestore usage no longer auto-loads (saves Worker requests); use the Refresh buttons.
             if (pageId === 'g2bulk' && window.refreshG2BulkBalance) window.refreshG2BulkBalance();
             if (['order-list', 'analytics', 'user-list'].includes(pageId) && window.ensureOrdersLoaded) window.ensureOrdersLoaded();
@@ -4815,8 +4815,8 @@
         // below keep the ORIGINAL names (getDoc, setDoc, onSnapshot, ...) so every
         // existing call site - here and in the earlier script via window.* - is
         // counted without any other code changing. Behaviour is identical; each
-        // wrapper just reports to window.PCAUsage (defined in <head>) afterwards.
-        const _usage = window.PCAUsage || { fsRead() {}, fsWrite() {}, fsDelete() {}, listenerOpen() {}, listenerClose() {} };
+        // wrapper just reports to window.LinnUsage (defined in <head>) afterwards.
+        const _usage = window.LinnUsage || { fsRead() {}, fsWrite() {}, fsDelete() {}, listenerOpen() {}, listenerClose() {} };
 
         // "orders", "settings/presence", "users/notifications" - top-level collection
         // (plus the doc id for the singleton `settings` docs) so the breakdown stays short.
@@ -5034,7 +5034,7 @@
         // plan needed). Uploads go through the imgbb-functions Cloudflare Worker
         // instead of calling api.imgbb.com directly, so the ImgBB API key stays
         // server-side (same pattern as store.html) instead of sitting in this file.
-        const IMGBB_UPLOAD_URL = 'https://linngamestore.linngamestore.workers.dev';
+        const IMGBB_UPLOAD_URL = 'https://imgbb-function.linngamestore.workers.dev';
 
         // gamestore-auth-worker: the customer-facing pcagamestore_bot Worker
         // (separate from ADMIN_SYNC_WORKER_URL below, which is the admin/order
@@ -5338,7 +5338,7 @@
         // as the new account immediately is exactly what should happen.
         // The adminUsernames doc itself is written from inside
         // routeAfterAuth() once Auth confirms the sign-in (see the
-        // __pcaBootstrapFirstAdmin marker there), not here, since
+        // __linnBootstrapFirstAdmin marker there), not here, since
         // onAuthStateChanged can fire before this function's own code
         // continues after the await below.
         async function createFirstAdmin() {
@@ -5372,14 +5372,14 @@
                     btn.innerText = 'Create Admin Account';
                     return;
                 }
-                const email = `${username}.${Date.now()}@admin.pcastore.local`;
-                window.__pcaBootstrapFirstAdmin = { username, email, role: 'full' };
+                const email = `${username}.${Date.now()}@admin.linngamestore.local`;
+                window.__linnBootstrapFirstAdmin = { username, email, role: 'full' };
                 await createUserWithEmailAndPassword(auth, email, password);
                 // onAuthStateChanged -> routeAfterAuth() writes the adminUsernames doc
                 // and unlocks the panel.
             } catch (e) {
                 console.error('First admin setup error:', e);
-                window.__pcaBootstrapFirstAdmin = null;
+                window.__linnBootstrapFirstAdmin = null;
                 errEl.textContent = 'Failed to create admin: ' + (e.code || e.message || 'unknown error');
                 errEl.style.display = 'block';
                 btn.disabled = false;
@@ -5409,7 +5409,7 @@
             catch (e) { return false; }
         }
         function adminPushEnabled() {
-            try { return adminPushSupported() && Notification.permission === 'granted' && localStorage.getItem('pca_admin_push_opt_in') === '1'; }
+            try { return adminPushSupported() && Notification.permission === 'granted' && localStorage.getItem('linn_admin_push_opt_in') === '1'; }
             catch (e) { return false; }
         }
         function renderAdminPushToggleUI() {
@@ -5454,7 +5454,7 @@
         async function toggleAdminPushNotifications(checked) {
             if (!adminPushSupported()) { renderAdminPushToggleUI(); return; }
             if (!checked) {
-                try { localStorage.setItem('pca_admin_push_opt_in', '0'); } catch (e) {}
+                try { localStorage.setItem('linn_admin_push_opt_in', '0'); } catch (e) {}
                 renderAdminPushToggleUI();
                 return;
             }
@@ -5464,14 +5464,14 @@
                 return;
             }
             if (Notification.permission === 'granted') {
-                try { localStorage.setItem('pca_admin_push_opt_in', '1'); } catch (e) {}
+                try { localStorage.setItem('linn_admin_push_opt_in', '1'); } catch (e) {}
                 await registerAdminFcmToken();
                 renderAdminPushToggleUI();
                 return;
             }
             const result = await Notification.requestPermission();
             if (result === 'granted') {
-                try { localStorage.setItem('pca_admin_push_opt_in', '1'); } catch (e) {}
+                try { localStorage.setItem('linn_admin_push_opt_in', '1'); } catch (e) {}
                 await registerAdminFcmToken();
             } else {
                 window.showToast('Notifications permission was not granted', 'fail');
@@ -6095,7 +6095,7 @@
             btn.disabled = true;
             btn.innerText = 'Creating...';
             try {
-                const email = `${username}.${Date.now()}@admin.pcastore.local`;
+                const email = `${username}.${Date.now()}@admin.linngamestore.local`;
                 await createUserWithEmailAndPassword(adminCreationAuth, email, password);
                 await setDoc(doc(db, "adminUsernames", username), {
                     email,
@@ -6157,7 +6157,7 @@
         }
         window.toggleSecretVisibility = toggleSecretVisibility;
 
-        const REMEMBER_USERNAME_KEY = 'pca_admin_remember_username';
+        const REMEMBER_USERNAME_KEY = 'linn_admin_remember_username';
 
         // ---------- Failed-attempt lockout (brute-force friction) ----------
         // Applies to the username/password step. Tracked in localStorage (not sessionStorage) so a refresh or
@@ -6165,7 +6165,7 @@
         // (30s -> 60s -> 120s ... capped at 10 min) instead of a single fixed
         // delay, so repeated automated attempts get progressively slower
         // rather than just retrying every 30s forever.
-        const LOCKOUT_KEY_PREFIX = 'pca_lockout_';
+        const LOCKOUT_KEY_PREFIX = 'linn_lockout_';
         const LOCKOUT_MAX_ATTEMPTS = 5;
         const LOCKOUT_BASE_SECONDS = 30;
         const LOCKOUT_MAX_SECONDS = 600;
@@ -6353,9 +6353,9 @@
         async function routeAfterAuth(user) {
             // First-admin bootstrap: right after createFirstAdmin() signs this
             // brand-new account in, write its username mapping before lookup.
-            if (window.__pcaBootstrapFirstAdmin && window.__pcaBootstrapFirstAdmin.email === user.email) {
-                const boot = window.__pcaBootstrapFirstAdmin;
-                window.__pcaBootstrapFirstAdmin = null;
+            if (window.__linnBootstrapFirstAdmin && window.__linnBootstrapFirstAdmin.email === user.email) {
+                const boot = window.__linnBootstrapFirstAdmin;
+                window.__linnBootstrapFirstAdmin = null;
                 try {
                     await setDoc(doc(db, "adminUsernames", boot.username), {
                         email: boot.email,
@@ -7263,7 +7263,7 @@
                             player_id: order.playerId,
                             server_id: order.serverId || undefined,
                             charname: order.charName || undefined,
-                            remark: `PCA Store order ${orderId}#${sub.index}`,
+                            remark: `LINN GAME STORE order ${orderId}#${sub.index}`,
                             callback_url: callbackUrl
                         })
                     });
@@ -10230,7 +10230,7 @@
         // other: last-known games render instantly with zero reads, and only a
         // reload past the TTL (or the explicit Refresh button, which always forces
         // a real fetch) touches Firestore.
-        const GAMES_CACHE_KEY = 'pca_admin_games_cache_v1';
+        const GAMES_CACHE_KEY = 'linn_admin_games_cache_v1';
         const GAMES_CACHE_TTL_MS = 3 * 60 * 1000; // long enough to absorb quick reloads, short enough that stale prices never linger
         let gamesLoadPromise = null, gamesLoadedAt = 0, _gamesRefetchTimer = null;
         function loadGames(silent, forceFresh) {
@@ -11798,7 +11798,7 @@
         }
         function onReorderSizeInput(sizePct) {
             applyReorderSize(sizePct);
-            try { localStorage.setItem('pca-admin-reorder-size', sizePct); } catch (e) {}
+            try { localStorage.setItem('linn-admin-reorder-size', sizePct); } catch (e) {}
         }
         window.onReorderSizeInput = onReorderSizeInput;
 
@@ -11806,7 +11806,7 @@
             reorderGameIds = Object.keys(GAMES).sort(gameSortKey);
             renderGameReorderGrid();
             let savedSize = 100;
-            try { savedSize = Number(localStorage.getItem('pca-admin-reorder-size')) || 100; } catch (e) {}
+            try { savedSize = Number(localStorage.getItem('linn-admin-reorder-size')) || 100; } catch (e) {}
             const slider = document.getElementById('reorder-size-slider');
             if (slider) slider.value = savedSize;
             applyReorderSize(savedSize);
@@ -12356,7 +12356,7 @@
 
         function generateCouponCode() {
             const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // no O/0/I/1 (easy to misread)
-            let code = 'PCA';
+            let code = 'LINN';
             for (let i = 0; i < 6; i++) code += chars[Math.floor(Math.random() * chars.length)];
             document.getElementById('edit-coupon-code').value = code;
         }
@@ -12581,7 +12581,7 @@
                 o.status || '',
                 o.paymentMethod || ''
             ]);
-            exportToCSV(`pca-orders-${Date.now()}.csv`, headers, csvRows);
+            exportToCSV(`linn-orders-${Date.now()}.csv`, headers, csvRows);
             logAdminActivity('Exported Orders CSV', `${rows.length} rows`);
         }
         window.exportOrdersCSV = exportOrdersCSV;
@@ -12604,7 +12604,7 @@
             let y = 56;
 
             doc.setFont('helvetica', 'bold'); doc.setFontSize(20);
-            doc.text('PCA Store', marginX, y);
+            doc.text('LINN GAME STORE', marginX, y);
             doc.setFontSize(12); doc.setFont('helvetica', 'normal'); doc.setTextColor(90);
             doc.text('INVOICE', pageWidth - marginX, y, { align: 'right' });
             doc.setTextColor(0);
@@ -12642,7 +12642,7 @@
 
             y += 50;
             doc.setFontSize(9); doc.setFont('helvetica', 'normal'); doc.setTextColor(140);
-            doc.text('This is a computer-generated invoice from PCA Store.', marginX, y);
+            doc.text('This is a computer-generated invoice from LINN GAME STORE.', marginX, y);
 
             doc.save(`invoice-${orderId}.pdf`);
             logAdminActivity('Downloaded invoice PDF', orderId);
@@ -12670,7 +12670,7 @@
                     u.lastSeen ? u.lastSeen.toDate().toLocaleString() : ''
                 ];
             });
-            exportToCSV(`pca-users-${Date.now()}.csv`, headers, csvRows);
+            exportToCSV(`linn-users-${Date.now()}.csv`, headers, csvRows);
             logAdminActivity('Exported Users CSV', `${ids.length} rows`);
         }
         window.exportUsersCSV = exportUsersCSV;
@@ -12703,7 +12703,7 @@
                 t.paymentMethod || '',
                 t.status || ''
             ]);
-            exportToCSV(`pca-transactions-${Date.now()}.csv`, headers, csvRows);
+            exportToCSV(`linn-transactions-${Date.now()}.csv`, headers, csvRows);
             logAdminActivity('Exported Transactions CSV', `${rows.length} rows`);
         }
         window.exportTopupsCSV = exportTopupsCSV;
@@ -14860,7 +14860,7 @@
             try {
                 const res = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
                     method: 'POST', headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ chat_id: chatId, text: '✅ PCA Store admin panel connected — this chat will receive new orders.' })
+                    body: JSON.stringify({ chat_id: chatId, text: '✅ LINN GAME STORE admin panel connected — this chat will receive new orders.' })
                 });
                 const data = await res.json();
                 if (data.ok) {
