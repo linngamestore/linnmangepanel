@@ -5459,6 +5459,29 @@
         // Leave both blank to use the normal username/password login screen.
         const AUTO_ADMIN_LOGIN = { username: '', password: '' };
 
+        // Starts the authenticated portion of the panel exactly once per sign-in.
+        // Settings-only listeners remain lazy and are attached by
+        // subscribeTabListeners() when Settings is opened.
+        function startAdminApp() {
+            listenBranding();
+            listenG2Bulk();
+            listenFazerCard();
+            listenJCPlays();
+            listenTelegramBot();
+            listenAdminBroadcastSecret();
+            listenTabAccessSettings();
+            listenAdminAccounts();
+            listenAutoUpdatePricesSetting();
+            listenGames();
+            applyRoleRestrictions();
+            showPage('dashboard');
+            runLoginSecurityCheck();
+            startAdminHeartbeat();
+            startLossFixScheduler();
+            startOrderArchiveScheduler();
+            startDailySummaryScheduler();
+        }
+
         // ---------- Admin Login gate ----------
         // The "Login OFF" mode (settings/adminAuth.loginEnabled, toggleable
         // from this panel) has been removed. It relied only on Firestore
@@ -6336,7 +6359,6 @@
                 currentAdminIP = null;
                 currentAdminRole = 'full';
                 window.currentAdminPermissions = null;
-                activityLogListenerAttached = false;
                 tryAutoAdminLogin().then((ok) => {
                     if (!ok) loginScreen.classList.remove('hidden');
                 });
@@ -7071,7 +7093,34 @@
         }
         window.clearOrderDateRange = clearOrderDateRange;
 
-        
+        async function startProcessing(orderId, btnElement) {
+            const order = ORDERS[orderId];
+            if (!order) {
+                window.showToast('Order is no longer in the loaded list. Refresh Orders and try again.', 'fail');
+                return;
+            }
+            try {
+                if (order.g2bulkGameCode && order.g2bulkCatalogueName) {
+                    return await placeG2BulkOrder(orderId, order, btnElement);
+                }
+                if (order.jcplaysProductId) {
+                    return await placeJCPlaysOrder(orderId, order, btnElement);
+                }
+                if (order.g2bulkVoucherProductId) {
+                    return await placeG2BulkVoucherOrder(orderId, order, btnElement);
+                }
+                if (order.fazercardCategoryId && order.fazercardOfferId) {
+                    return await placeFazerCardOrder(orderId, order, btnElement);
+                }
+                return await fulfillManually(orderId, btnElement);
+            } catch (error) {
+                console.error('Start processing error:', error);
+                window.showToast(error.message || 'Could not start processing this order.', 'fail');
+                if (btnElement) { btnElement.disabled = false; btnElement.innerText = 'Start Processing'; }
+                return 'error';
+            }
+        }
+        window.startProcessing = startProcessing;
 
         // Fallback for G2Bulk/JCPlays-linked Pending orders: skips the auto-fulfill
         // API entirely and moves the order straight to Processing, same as a plain
@@ -13524,6 +13573,9 @@
                 console.error("Social links listener error:", error);
             });
         }
+        // Keep the existing module implementation available to the legacy
+        // settings call path as well as subscribeTabListeners().
+        window.listenSocialLinks = listenSocialLinks;
 
         // Local preview only - the actual ImgBB upload happens in
         // saveSocialLinks(), same lazy-upload pattern as the game/payment
@@ -14259,8 +14311,15 @@
         
 
         // Combined refresher for the Analytics "API Balances" grid - fires all
-        // provider balance checks in parallel.
-        
+        // provider balance checks in parallel. Each provider owns its own UI
+        // and error handling, so one failed provider cannot block the others.
+        async function refreshAllApiBalances() {
+            await Promise.allSettled([
+                refreshG2BulkBalance(true),
+                refreshJCPlaysBalance(true),
+                refreshFazerCardBalance()
+            ]);
+        }
         window.refreshAllApiBalances = refreshAllApiBalances;
 
         // ---------- Telegram Order Bot ----------
@@ -15242,7 +15301,21 @@
         // in the list). Doesn't touch the actual input values here - those
         // are only blanked for the non-selected provider at Save time, so
         // just clicking between tabs to look around never loses anything.
-        
+        function setFulfillProvider(provider) {
+            const allowed = ['manual', 'g2bulk', 'fazercard', 'g2bulk_voucher', 'jcplays', 'fazercard_giftcard'];
+            currentFulfillProvider = allowed.includes(provider) ? provider : 'manual';
+            document.querySelectorAll('#fulfill-provider-tabs .pkg-type-tab').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.provider === currentFulfillProvider);
+            });
+            const direct = ['manual', 'g2bulk', 'fazercard'].includes(currentFulfillProvider);
+            const voucher = ['g2bulk_voucher', 'jcplays', 'fazercard_giftcard'].includes(currentFulfillProvider);
+            document.querySelectorAll('#fulfill-group-direct').forEach(el => { el.style.display = direct ? 'block' : 'none'; });
+            document.querySelectorAll('#fulfill-group-voucher').forEach(el => { el.style.display = voucher ? 'block' : 'none'; });
+            refreshPackageRowProviderVisibility();
+            refreshCheckPricesBtn();
+            if (currentFulfillProvider === 'g2bulk_voucher') onVoucherCategoryChange();
+            else stopVoucherEditorStockRefresh();
+        }
         window.setFulfillProvider = setFulfillProvider;
 
         // Shows only the fulfillment tab group that matches which sidebar
@@ -15361,8 +15434,19 @@
         // Which "kind" is actually active right now - folds provider +
         // subtab into a single key so every other picker helper below can
         // just switch on one string instead of re-deriving this each time.
-        
-        
+        function gamePickerKind() {
+            if (gamePickerProvider === 'jcplays') return 'jcplays';
+            if (gamePickerProvider === 'fazercard_giftcard') return 'fazercard_giftcard';
+            if (gamePickerProvider === 'fazercard') return 'fazercard';
+            return gamePickerSubtab === 'voucher' ? 'g2bulk_voucher' : 'g2bulk';
+        }
+        function gamePickerFieldId(kind) {
+            return kind === 'jcplays' ? 'edit-game-jcplays-code'
+                : kind === 'fazercard_giftcard' ? 'edit-game-fazercard-giftcard-category'
+                : kind === 'fazercard' ? 'edit-game-fazercard-category'
+                : kind === 'g2bulk_voucher' ? 'edit-game-voucher-category'
+                : 'edit-game-g2bulk-code';
+        }
 
         // Deterministic accent color per game name, used behind its initials
         // whenever no cover image is available (e.g. most JCPlays entries).
@@ -15397,10 +15481,49 @@
         // Updates the picker button's thumbnail + label to reflect whatever
         // code is currently in the hidden/manual input for that kind
         // ('g2bulk' | 'jcplays' | 'voucher').
-        
+        function refreshPickerButton(kind) {
+            const fieldId = gamePickerFieldId(kind);
+            const code = document.getElementById(fieldId)?.value || '';
+            const prefix = kind === 'jcplays' ? 'jcplays' : kind === 'g2bulk_voucher' ? 'voucher' : kind === 'fazercard_giftcard' ? 'fazercard_giftcard' : kind === 'fazercard' ? 'fazercard' : 'g2bulk';
+            const label = document.getElementById(prefix + '-picker-display');
+            const thumb = document.getElementById(prefix + '-picker-thumb');
+            const item = gamePickerItems.find(x => String(x.code) === String(code));
+            if (label) { label.textContent = item ? item.name : (code || '-- Not linked (manual fulfillment) --'); label.classList.toggle('muted', !code); }
+            if (thumb) {
+                thumb.innerHTML = item?.image ? `<img src="${escapeHtml(item.image)}" alt="" loading="lazy">` : (item ? escapeHtml(pickerInitials(item.name)) : '');
+                thumb.style.background = item?.image ? '' : (item ? pickerColorFor(item.name) : '');
+            }
+        }
         window.refreshPickerButton = refreshPickerButton;
 
-        
+        async function loadGamePickerList(forceRefresh = false) {
+            const kind = gamePickerKind();
+            const grid = document.getElementById('game-picker-grid');
+            const overlay = document.getElementById('game-picker-modal-overlay');
+            if (overlay) overlay.classList.add('show');
+            if (grid) grid.innerHTML = '<div class="game-picker-loading">Loading...</div>';
+            try {
+                if (kind === 'jcplays') {
+                    const items = await fetchJCPlaysProductsList(forceRefresh);
+                    gamePickerItems = items.map(x => ({ ...x, name: x.name || x.code }));
+                } else if (kind === 'g2bulk_voucher') {
+                    await fetchG2BulkCategoriesList(forceRefresh);
+                    gamePickerItems = voucherPickerItems();
+                } else if (kind === 'fazercard_giftcard') {
+                    gamePickerItems = await fetchFazerCardGiftCardCategories(forceRefresh);
+                } else if (kind === 'fazercard') {
+                    gamePickerItems = await fetchFazerCardTopupsList(forceRefresh);
+                } else {
+                    const games = await fetchG2BulkGamesList(forceRefresh);
+                    gamePickerItems = games.map(g => ({ code: String(g.code || g.id || g.name), name: g.name || g.title || g.code, image: g.image || g.image_url || '' }));
+                }
+                renderGamePickerGrid(document.getElementById('game-picker-search')?.value || '');
+            } catch (error) {
+                console.error('Game picker load error:', error);
+                if (grid) grid.innerHTML = `<div class="game-picker-empty-msg">${escapeHtml(error.message || 'Could not load games.')}</div>`;
+            }
+        }
+        window.loadGamePickerList = loadGamePickerList;
 
         // provider: 'g2bulk' | 'jcplays'. subtab (only used for 'g2bulk')
         // picks which list the modal opens on: 'direct' (Games, top-up by
@@ -15436,7 +15559,9 @@
         // list is currently active - G2Bulk's games, or its voucher
         // categories - so newly-added items on G2Bulk's side show up
         // immediately, instead of only after a full page reload.
-        
+        async function refreshGamePickerList() {
+            return loadGamePickerList(true);
+        }
         window.refreshGamePickerList = refreshGamePickerList;
 
         function closeGamePicker() {
@@ -15522,7 +15647,20 @@
         }
         window.toggleFazerCardBulkMode = toggleFazerCardBulkMode;
 
-        
+        function selectGamePickerItem(code, name) {
+            const kind = gamePickerKind();
+            const field = document.getElementById(gamePickerFieldId(kind));
+            if (field) {
+                field.value = code || '';
+                field.dispatchEvent(new Event('input', { bubbles: true }));
+                field.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+            refreshPickerButton(kind);
+            refreshCheckPricesBtn();
+            if (kind === 'g2bulk_voucher') onVoucherCategoryChange();
+            if (kind === 'fazercard_giftcard') onFazerCardGiftCardCategoryChange();
+            closeGamePicker();
+        }
         window.selectGamePickerItem = selectGamePickerItem;
 
         function lockGameNameField() {
@@ -16776,7 +16914,19 @@
         window.refreshJCPlaysBalance = refreshJCPlaysBalance;
 
         // ---------- Dashboard wallet card refresh (both G2Bulk + JCPlays) ----------
-        
+        async function refreshDashboardWallets() {
+            const btn = document.getElementById('dash-wallet-refresh-btn');
+            const originalText = btn ? btn.innerText : '';
+            if (btn) { btn.disabled = true; btn.innerText = '...'; }
+            try {
+                await Promise.allSettled([
+                    refreshG2BulkBalance(true),
+                    refreshJCPlaysBalance(true)
+                ]);
+            } finally {
+                if (btn) { btn.disabled = false; btn.innerText = originalText; }
+            }
+        }
         window.refreshDashboardWallets = refreshDashboardWallets;
 
         // ---------- JCPlays denomination lookup (helper for the game editor) ----------
