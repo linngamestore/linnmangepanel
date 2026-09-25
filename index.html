@@ -567,34 +567,10 @@
             border: 1px solid rgba(255,255,255,0.55) !important; box-shadow: none !important;
             -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
         }
-        .mfa-secret-box {
+        .code-secret-box {
             background: rgba(255,255,255,0.32); border: 1px solid rgba(255,255,255,0.55); border-radius: 12px; padding: 14px; text-align: center; margin-bottom: 10px; word-break: break-all;
             -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
         }
-        .mfa-secret-box span { font-family: 'Courier New', monospace; font-size: 15px; font-weight: 600; letter-spacing: 1px; color: var(--lg-brass); }
-        /* Segmented 6-digit OTP input — replaces the old single free-text field.
-           Bigger tap targets and auto-advance make entry far less error-prone
-           on mobile than a single 6-char box, and it accepts a full paste
-           dropped into any of the boxes. */
-        .otp-group { display: flex; gap: 8px; justify-content: center; margin-bottom: 12px; }
-        .otp-box {
-            width: 15%; max-width: 44px; aspect-ratio: 1 / 1; padding: 0; text-align: center;
-            font-size: 19px; font-weight: 700; font-family: 'Courier New', monospace; letter-spacing: 0;
-            border: 1px solid rgba(255,255,255,0.55); background: rgba(255,255,255,0.3);
-            color: var(--lg-text); border-radius: 12px; transition: border-color 0.15s ease, background 0.15s ease;
-            -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
-        }
-        .otp-box:focus { outline: none; border-color: rgba(79,70,229,0.55); background: rgba(255,255,255,0.55); }
-        .otp-box.otp-filled { border-color: rgba(79,70,229,0.4); background: rgba(255,255,255,0.5); }
-        .otp-paste-btn {
-            width: 100%; display: flex; align-items: center; justify-content: center; gap: 7px;
-            padding: 10px; margin-bottom: 16px; border-radius: 12px; font-weight: 600; font-size: 13px;
-            border: 1px solid rgba(79,70,229,0.3); background: rgba(255,255,255,0.28); color: var(--lg-brass); cursor: pointer;
-            -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
-            transition: background 0.15s ease;
-        }
-        .otp-paste-btn:hover { background: rgba(255,255,255,0.5); }
-        .otp-paste-btn svg { width: 15px; height: 15px; }
 
 
         /* Header */
@@ -1808,17 +1784,11 @@
             }
         })();
     </script>
-    <!-- QR code renderer for Authenticator (TOTP) enrollment — scanning a QR
-         avoids the manual-typo / cut-off-secret problem you get from typing
-         a long Base32 key into an authenticator app by hand. -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
 
-    <!-- Login gate: nothing in the admin panel loads until this passes.
-         Steps: password -> (verify email if needed) -> TOTP enroll (first time)
-         or TOTP challenge (already enrolled) -> app unlocks. -->
+    <!-- Login gate: nothing in the admin panel loads until Firebase confirms a signed-in admin. -->
     <div id="login-screen" class="hidden">
         <!-- Static gradient-mesh backdrop (decorative only, no motion) -->
         <div class="login-mesh" aria-hidden="true"></div>
@@ -1828,15 +1798,10 @@
                     <svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M8.5 8.2c0-1.2 1.1-2.2 2.5-2.2s2.5 1 2.5 2.2c0 2.4-5 1.8-5 4.3 0 1.2 1.1 2.2 2.5 2.2s2.5-1 2.5-2.2"></path></svg>
                 </div>
 
-                <!-- Step 0: shown instead of the normal login form only when the
-                     adminUsernames collection is completely empty (brand-new
-                     deployment, zero admins yet) — see checkFirstAdminSetup()
-                     and createFirstAdmin() below. Creates the very first admin
-                     account, then hands off into the normal TOTP enrollment
-                     step (step-mfa-enroll) to finish setup. -->
+                <!-- First-admin bootstrap form, shown only when no admin account exists yet. -->
                 <div id="step-first-admin-setup" style="display:none;">
                     <h2>First Admin Setup</h2>
-                    <p class="sub">No admin account exists yet. Create the first one to get started — you'll set up your Authenticator app right after.</p>
+                    <p class="sub">No admin account exists yet. Create the first one to get started.</p>
                     <p id="first-admin-error" class="login-msg-error"></p>
                     <form id="first-admin-form" onsubmit="createFirstAdmin(); return false;">
                         <label for="first-admin-username">Username</label>
@@ -1877,62 +1842,9 @@
                     </form>
                 </div>
 
-                <!-- Step 3a: first-time TOTP enrollment -->
-                <div id="step-mfa-enroll" style="display:none;">
-                    <h2>Set Up Authenticator</h2>
-                    <p class="sub">Scan this QR with Google Authenticator / Authy, then enter the 6-digit code it shows.</p>
-                    <div id="mfa-qr-box" style="display:flex;justify-content:center;padding:12px;background:#fff;border-radius:12px;margin:10px 0;">
-                        <div id="mfa-qr-code"></div>
-                    </div>
-                    <p class="login-msg-hint" style="text-align:center;">Can't scan? <button type="button" onclick="toggleMfaManualKey()" style="background:none;border:none;color:var(--lg-brass);font-size:12px;font-weight:600;cursor:pointer;padding:0;">Enter key manually</button></p>
-                    <div class="mfa-secret-box" id="mfa-secret-box" style="display:none;">
-                        <span id="mfa-secret-key">—</span>
-                        <button type="button" class="login-secondary-btn" style="margin-top:8px;padding:6px 14px;font-size:12px;" onclick="copyMfaSecret('mfa-secret-key', this)">Copy key</button>
-                    </div>
-                    <p class="login-msg-hint">Account name: <b id="mfa-account-name">—</b> · Issuer: PCA Store Admin</p>
-                    <p id="mfa-enroll-error" class="login-msg-error"></p>
-                    <label>6-digit code</label>
-                    <div class="otp-group" id="mfa-enroll-otp">
-                        <input type="text" class="otp-box" inputmode="numeric" maxlength="1" autocomplete="one-time-code">
-                        <input type="text" class="otp-box" inputmode="numeric" maxlength="1">
-                        <input type="text" class="otp-box" inputmode="numeric" maxlength="1">
-                        <input type="text" class="otp-box" inputmode="numeric" maxlength="1">
-                        <input type="text" class="otp-box" inputmode="numeric" maxlength="1">
-                        <input type="text" class="otp-box" inputmode="numeric" maxlength="1">
-                    </div>
-                    <input type="hidden" id="mfa-enroll-code">
-                    <button type="button" class="otp-paste-btn" onclick="pasteOtpCode('mfa-enroll-otp','mfa-enroll-code')">
-                        <svg class="ui-icon"><use href="#icon-copy"></use></svg> Paste code
-                    </button>
-                    <button type="button" id="mfa-enroll-btn" onclick="confirmMfaEnrollment()">Confirm &amp; Enable</button>
-                    <button type="button" class="login-secondary-btn" onclick="backToLogin()">Cancel</button>
-                </div>
-
-                <!-- Step 3b: TOTP challenge on subsequent sign-ins -->
-                <div id="step-mfa-challenge" style="display:none;">
-                    <h2>Enter Authenticator Code</h2>
-                    <p class="sub">Open your authenticator app and enter the current 6-digit code.</p>
-                    <p id="mfa-challenge-error" class="login-msg-error"></p>
-                    <label>6-digit code</label>
-                    <div class="otp-group" id="mfa-challenge-otp">
-                        <input type="text" class="otp-box" inputmode="numeric" maxlength="1" autocomplete="one-time-code">
-                        <input type="text" class="otp-box" inputmode="numeric" maxlength="1">
-                        <input type="text" class="otp-box" inputmode="numeric" maxlength="1">
-                        <input type="text" class="otp-box" inputmode="numeric" maxlength="1">
-                        <input type="text" class="otp-box" inputmode="numeric" maxlength="1">
-                        <input type="text" class="otp-box" inputmode="numeric" maxlength="1">
-                    </div>
-                    <input type="hidden" id="mfa-challenge-code">
-                    <button type="button" class="otp-paste-btn" onclick="pasteOtpCode('mfa-challenge-otp','mfa-challenge-code')">
-                        <svg class="ui-icon"><use href="#icon-copy"></use></svg> Paste code
-                    </button>
-                    <button type="button" id="mfa-challenge-btn" onclick="confirmMfaChallenge()">Verify &amp; Sign In</button>
-                    <button type="button" class="login-secondary-btn" onclick="backToLogin()">Cancel</button>
-                </div>
-
                 <p class="login-footnote">
                     <svg class="ui-icon"><use href="#icon-lock"></use></svg>
-                    Secured with 2-step verification
+                    Secured with Firebase authentication
                 </p>
             </div>
         </div>
@@ -2106,7 +2018,7 @@
         </div>
     </div>
 
-    <!-- My Account Modal: self-service avatar / 2FA / Telegram link for the
+    <!-- My Account Modal: self-service avatar / Telegram link for the
          CURRENTLY SIGNED-IN admin only, reachable from the header icon
          regardless of role — unlike the Admin Accounts card in Settings
          (Full Access only), this never lists or touches any other admin,
@@ -2133,13 +2045,6 @@
                     </div>
                 </div>
                 <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px 0;border-top:1px solid var(--border-glass);">
-                    <div>
-                        <span style="font-size:12.5px;font-weight:600;color:var(--text-primary);display:block;">2FA</span>
-                        <span id="my-account-2fa-status" style="font-size:11px;color:var(--text-muted);"></span>
-                    </div>
-                    <button type="button" onclick="closeMyAccountModal(); resetAdminTotp(currentAdminUsername)" style="background:none;border:none;color:var(--accent);font-size:12px;font-weight:600;cursor:pointer;padding:0;">Reset 2FA</button>
-                </div>
-                <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px 0;border-top:1px solid var(--border-glass);">
                     <div style="min-width:0;">
                         <span style="font-size:12.5px;font-weight:600;color:var(--text-primary);display:flex;align-items:center;gap:5px;">
                             <svg class="ui-icon" style="width:13px;height:13px;flex-shrink:0;color:#229ED9;"><use href="#icon-send"></use></svg>
@@ -2149,76 +2054,6 @@
                     </div>
                     <span id="my-account-telegram-action"></span>
                 </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- API Keys re-auth gate: a fresh Authenticator code is required every
-         time the API Keys page is opened (see showPage's api-docs branch /
-         openApiKeysMfaGate), even within an already-signed-in session —
-         these keys can spend real money, so a login-time code alone isn't
-         enough. Uses the same OTP box widget as the login flow's MFA step. -->
-    <div class="modal-overlay" id="apikeys-mfa-modal-overlay" onclick="if(event.target===this) closeApiKeysMfaGate()">
-        <div class="modal-box" style="max-width:380px;">
-            <div class="modal-header">
-                <h3>Verify to Continue</h3>
-                <div class="modal-close" onclick="closeApiKeysMfaGate()"><svg class="ui-icon" style="width:16px;"><use href="#icon-close"></use></svg></div>
-            </div>
-            <div class="modal-body">
-                <p style="font-size:13px;color:var(--text-secondary);margin:0 0 14px;">Opening API Keys needs a fresh Authenticator code every time — these keys can spend real money.</p>
-                <p id="apikeys-mfa-error" class="login-msg-error" style="display:none;"></p>
-                <label style="font-size:12px;color:var(--text-muted);display:block;margin-bottom:6px;">6-digit code</label>
-                <div class="otp-group" id="apikeys-mfa-otp">
-                    <input type="text" class="otp-box" inputmode="numeric" maxlength="1" autocomplete="one-time-code">
-                    <input type="text" class="otp-box" inputmode="numeric" maxlength="1">
-                    <input type="text" class="otp-box" inputmode="numeric" maxlength="1">
-                    <input type="text" class="otp-box" inputmode="numeric" maxlength="1">
-                    <input type="text" class="otp-box" inputmode="numeric" maxlength="1">
-                    <input type="text" class="otp-box" inputmode="numeric" maxlength="1">
-                </div>
-                <input type="hidden" id="apikeys-mfa-code">
-                <button type="button" class="otp-paste-btn" onclick="pasteOtpCode('apikeys-mfa-otp','apikeys-mfa-code')">
-                    <svg class="ui-icon"><use href="#icon-copy"></use></svg> Paste code
-                </button>
-                <button type="button" class="btn btn-primary" style="width:100%;margin-top:12px;" id="apikeys-mfa-btn" onclick="confirmApiKeysMfa()">Verify</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- API Keys 2FA setup/regenerate: generates a NEW shared secret (separate
-         from any admin's personal login 2FA), shows its QR so it can be
-         scanned into an Authenticator app, and only saves it once a code
-         from that new secret is confirmed — so an owner can never lock
-         everyone out with a secret nobody actually captured. -->
-    <div class="modal-overlay" id="apikeys-setup-modal-overlay" onclick="if(event.target===this) closeApiKeysMfaSetup()">
-        <div class="modal-box" style="max-width:380px;">
-            <div class="modal-header">
-                <h3>API Keys 2FA</h3>
-                <div class="modal-close" onclick="closeApiKeysMfaSetup()"><svg class="ui-icon" style="width:16px;"><use href="#icon-close"></use></svg></div>
-            </div>
-            <div class="modal-body">
-                <p id="apikeys-setup-warning" style="font-size:12px;color:var(--warning, #d97706);margin:0 0 12px;display:none;">Regenerating replaces the current code — every admin will need to re-scan the new QR before they can open API Keys again.</p>
-                <p style="font-size:12.5px;color:var(--text-secondary);margin:0 0 12px;">Scan this into an Authenticator app (Google Authenticator, etc.), then confirm with the code it shows.</p>
-                <div id="apikeys-setup-qr-box" style="display:flex;justify-content:center;padding:12px;background:#fff;border-radius:12px;margin:0 0 10px;">
-                    <div id="apikeys-setup-qr-code"></div>
-                </div>
-                <button type="button" class="login-secondary-btn" style="margin-bottom:10px;" onclick="toggleApiKeysSetupManualKey()">Can't scan? Enter key manually</button>
-                <div class="mfa-secret-box" id="apikeys-setup-secret-box" style="display:none;"><span id="apikeys-setup-secret-text"></span></div>
-                <p id="apikeys-setup-error" class="login-msg-error" style="display:none;"></p>
-                <label style="font-size:12px;color:var(--text-muted);display:block;margin-bottom:6px;">Confirm with the 6-digit code</label>
-                <div class="otp-group" id="apikeys-setup-otp">
-                    <input type="text" class="otp-box" inputmode="numeric" maxlength="1" autocomplete="one-time-code">
-                    <input type="text" class="otp-box" inputmode="numeric" maxlength="1">
-                    <input type="text" class="otp-box" inputmode="numeric" maxlength="1">
-                    <input type="text" class="otp-box" inputmode="numeric" maxlength="1">
-                    <input type="text" class="otp-box" inputmode="numeric" maxlength="1">
-                    <input type="text" class="otp-box" inputmode="numeric" maxlength="1">
-                </div>
-                <input type="hidden" id="apikeys-setup-code">
-                <button type="button" class="otp-paste-btn" onclick="pasteOtpCode('apikeys-setup-otp','apikeys-setup-code')">
-                    <svg class="ui-icon"><use href="#icon-copy"></use></svg> Paste code
-                </button>
-                <button type="button" class="btn btn-primary" style="width:100%;margin-top:12px;" id="apikeys-setup-btn" onclick="confirmApiKeysMfaSetup()">Confirm &amp; Save</button>
             </div>
         </div>
     </div>
@@ -2780,10 +2615,6 @@
                     <div id="roles-overview-list" style="display:flex;flex-direction:column;"></div>
                 </div>
             </div>
-
-            <!-- Admin Accounts: list every admin (username, email, 2FA status,
-                 last login) plus a count, and a way to add a new admin. Full
-                 Access only — see canManageAdmins() / renderAdminAccountsList. -->
             <div class="admin-card" style="margin-top:14px;" id="admin-accounts-card">
                 <div style="display:flex;justify-content:space-between;align-items:center;cursor:pointer;" onclick="toggleAdminAccounts()">
                     <div style="display:flex;align-items:center;gap:8px;">
@@ -2822,26 +2653,9 @@
                 </div>
             </div>
 
-            <!-- API Keys 2FA: the shared Authenticator code every admin must
-                 enter (fresh, every time) to open the API Keys page — a
-                 separate secret from anyone's personal login 2FA. Full
-                 Access only — see canManageAdmins() / listenApiKeysMfaSecret. -->
-            <div class="admin-card" style="margin-top:14px;" id="apikeys-mfa-card">
-                <div style="display:flex;justify-content:space-between;align-items:center;">
-                    <div style="display:flex;align-items:center;gap:8px;">
-                        <svg class="ui-icon" style="width:18px;height:18px;color:var(--text-secondary);"><use href="#icon-key"></use></svg>
-                        <span style="font-size:15px;font-weight: 600;">API Keys 2FA</span>
-                    </div>
-                    <button class="btn btn-outline" id="apikeys-mfa-setup-btn" style="flex:unset;padding:6px 12px;font-size:12px;white-space:nowrap;" onclick="openApiKeysMfaSetup()">Set Up</button>
-                </div>
-                <p style="font-size:12px;color:var(--text-secondary);margin:10px 0 0;">A separate Authenticator code — not anyone's personal login code — required every time the API Keys page is opened, by whichever admin opens it. <span id="apikeys-mfa-status" style="font-weight:600;color:var(--text-primary);"></span></p>
-            </div>
         </div>
 
-        <!-- Add Admin Modal: create a new admin login (username + temp
-             password), then immediately show a scannable QR so their
-             Authenticator app is set up on the spot — no manual retyping of
-             a long secret, which is where truncated / wrong codes come from. -->
+        <!-- Add Admin Modal: create a new admin login (username + temporary password). -->
         <div class="modal-overlay" id="add-admin-modal-overlay" onclick="if(event.target===this) closeAddAdminModal()">
             <div class="modal-box">
                 <div class="modal-header">
@@ -2878,26 +2692,12 @@
                             <option value="full">Full Access (everything)</option>
                             <option value="product" selected>Product Admin (top-ups only)</option>
                         </select>
-                        <p style="font-size:12px;color:var(--text-secondary);margin-top:10px;">The new admin can sign in with this username/password right away, and should scan the Authenticator QR shown next before sharing it. Access can be changed later from this list.</p>
+                        <p style="font-size:12px;color:var(--text-secondary);margin-top:10px;">The new admin can sign in with this username/password right away. Access can be changed later from this list.</p>
                         <p id="add-admin-error" class="login-msg-error" style="display:none;"></p>
-                    </div>
-                    <!-- Step 2: QR to scan -->
-                    <div id="add-admin-step-qr" style="display:none;text-align:center;">
-                        <p style="font-size:13px;color:var(--text-secondary);margin-bottom:10px;">Scan this with the new admin's Authenticator app (Google Authenticator / Authy) now, while their account is open on screen.</p>
-                        <div style="display:flex;justify-content:center;padding:12px;background:#fff;border-radius:12px;margin:10px 0;">
-                            <div id="new-admin-qr-code"></div>
-                        </div>
-                        <p class="login-msg-hint">Can't scan? <button type="button" onclick="toggleNewAdminManualKey()" style="background:none;border:none;color:var(--accent);font-size:12px;font-weight:600;cursor:pointer;padding:0;">Enter key manually</button></p>
-                        <div class="mfa-secret-box" id="new-admin-secret-box" style="display:none;">
-                            <span id="new-admin-secret-key">—</span>
-                            <button type="button" class="login-secondary-btn" style="margin-top:8px;padding:6px 14px;font-size:12px;" onclick="copyMfaSecret('new-admin-secret-key', this)">Copy key</button>
-                        </div>
-                        <p style="font-size:12.5px;color:var(--text-secondary);margin-top:10px;">Username: <b id="new-admin-final-username">—</b></p>
                     </div>
                 </div>
                 <div class="modal-footer">
                     <button class="btn btn-primary" id="create-admin-btn" onclick="createNewAdmin()">Create Admin</button>
-                    <button class="btn btn-outline" id="done-admin-btn" style="display:none;" onclick="closeAddAdminModal()">Done</button>
                 </div>
             </div>
         </div>
@@ -2921,7 +2721,7 @@
                 </div>
                 <div class="modal-body">
                     <p style="font-size:13px;color:var(--text-secondary);line-height:1.5;margin-bottom:16px;">Open the Support Chat bot in Telegram and send this code:</p>
-                    <div class="mfa-secret-box" style="font-size:28px;font-weight:700;letter-spacing:4px;padding:18px;">
+                    <div class="code-secret-box" style="font-size:28px;font-weight:700;letter-spacing:4px;padding:18px;">
                         <span id="telegram-link-code">------</span>
                     </div>
                     <p style="font-size:12px;color:var(--text-muted);text-align:center;margin-top:10px;">as <code style="background:var(--fill-soft);padding:2px 6px;border-radius:5px;">/link <span id="telegram-link-code-inline">------</span></code></p>
@@ -4386,15 +4186,7 @@
             return !!(group && perm[group] === true);
         }
         window.pageGrantedByPermission = pageGrantedByPermission;
-        function showPage(pageId, skipApiKeysGate) {
-            // API Keys holds every third-party credential the store spends
-            // real money through (G2Bulk/FazerCards/etc.) — even for
-            // an already-signed-in Full Access admin, require a fresh
-            // Authenticator code every single time this page is opened
-            // (see openApiKeysMfaGate/confirmApiKeysMfa), not just once at
-            // login. skipApiKeysGate=true is only ever passed by
-            // confirmApiKeysMfa() itself, right after a code just verified.
-            if (pageId === 'api-docs' && !skipApiKeysGate) { openApiKeysMfaGate(); return; }
+        function showPage(pageId) {
             // Admin Broadcast (Notify) removed — send anyone still routed here to Settings.
             if (pageId === 'notify-list') pageId = 'settings';
             const grantedByPermission = pageGrantedByPermission(pageId);
@@ -4672,7 +4464,7 @@
         const SETTINGS_CARDS_OWNER_ONLY = [
             'settings-card-sociallinks', 'settings-card-flashsale',
             'settings-card-branding', 'settings-card-walletexpire', 'settings-card-receiptstyle',
-            'settings-card-autoprice', 'settings-card-adminlogin', 'roles-overview-card', 'admin-accounts-card', 'tab-access-card', 'apikeys-mfa-card'
+            'settings-card-autoprice', 'settings-card-adminlogin', 'roles-overview-card', 'admin-accounts-card', 'tab-access-card'
         ];
         function applySettingsCardVisibility() {
             const isOwner = currentAdminRole === 'full';
@@ -5290,9 +5082,7 @@
 
         // telegram-order Worker: server-side admin auth helpers. Two jobs:
         //  - /admin-login-lookup  { username } -> { ok, email }  (replaces the
-        //    old browser-side getDoc(adminUsernames/{username}) read, which
-        //    exposed every admin's totpSecret + permissions to anyone typing
-        //    a username into the login box before signing in.)
+        //    old browser-side getDoc(adminUsernames/{username}) read.)
         //  - /admin-sync-claims   (Bearer <full admin's ID token>) -> sets
         //    {admin:true, adminRole} custom claims from each admin's `role`
         //    field, and mirrors provider enabled/disabled flags into the
@@ -5302,8 +5092,7 @@
         const ADMIN_SYNC_WORKER_URL = 'https://linnmanagebot.linngamestore.workers.dev';
 
         // POST { username } to the Worker instead of reading adminUsernames
-        // directly from the browser. Returns { ok, email } only - never
-        // totpSecret / permissions / telegram fields. Network or non-200
+        // directly from the browser. Returns { ok, email } only. Network or non-200
         // responses are treated the same as "not found" so callers keep
         // their existing generic error handling.
         async function lookupAdminEmailByUsername(username) {
@@ -5535,12 +5324,10 @@
                     return;
                 }
                 const email = `${username}.${Date.now()}@admin.pcastore.local`;
-                pendingUsername = username;
                 window.__pcaBootstrapFirstAdmin = { username, email, role: 'full' };
                 await createUserWithEmailAndPassword(auth, email, password);
-                // onAuthStateChanged -> routeAfterAuth() takes it from here:
-                // writes the adminUsernames doc, then drops into the normal
-                // TOTP enrollment step (step-mfa-enroll).
+                // onAuthStateChanged -> routeAfterAuth() writes the adminUsernames doc
+                // and unlocks the panel.
             } catch (e) {
                 console.error('First admin setup error:', e);
                 window.__pcaBootstrapFirstAdmin = null;
@@ -5652,7 +5439,6 @@
         // that require request.auth != null on every admin-only collection —
         // this screen alone is just UX, the rules are what actually enforce it.
         let adminAppStarted = false;
-        let pendingUsername = null;
         // Resolved once per session at login (see routeAfterAuth) and reused by
         // the Activity Log and IP login-alert features below so every write
         // knows exactly which admin made it.
@@ -5668,20 +5454,9 @@
         // routeAfterAuth() and kept live-in-sync by listenAdminAccounts().
         window.currentAdminPermissions = null;
         let currentAdminIP = null;
-        let pendingEnrollSecret = null;
 
-        // ---------- Admin Login screen removed ----------
-        // Fill in an existing admin's username + password below and the panel
-        // signs itself in silently on every load — no login form, no
-        // Authenticator prompt. Firebase Auth itself is still required behind
-        // the scenes (Firestore's security rules depend on it), it's just no
-        // longer something a human has to do by hand.
-        //
-        // If this admin hasn't finished Authenticator (TOTP) enrollment yet,
-        // a fresh secret is generated and saved automatically the first time
-        // this runs — nothing to scan or type in.
-        //
-        // Leave both blank to fall back to the normal login screen.
+        // Optional silent sign-in for deployments that configure credentials here.
+        // Leave both blank to use the normal username/password login screen.
         const AUTO_ADMIN_LOGIN = { username: '', password: '' };
 
         // ---------- Admin Login gate ----------
@@ -5735,7 +5510,6 @@
                     applyRoleRestrictions();
                 }
                 renderAdminAccountsList();
-                // Keep the My Account modal's Telegram/2FA status live too,
                 // if it happens to be open (e.g. right after a link/reset
                 // completes) — same live-update pattern as the Admin
                 // Accounts card above, just for whichever admin is signed in.
@@ -5804,7 +5578,6 @@
             }
             const rows = [...ADMIN_ACCOUNTS].sort((a, b) => a.username.localeCompare(b.username));
             container.innerHTML = rows.map(a => {
-                const has2fa = !!a.totpSecret;
                 const lastLogin = a.lastLoginAt?.toDate ? a.lastLoginAt.toDate().toLocaleString() : 'Never';
                 const isYou = a.username === currentAdminUsername;
                 const initial = escapeHtml((a.username || '?').trim().charAt(0).toUpperCase() || '?');
@@ -5854,8 +5627,6 @@
                             </div>
                         </div>
                         <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0;" onclick="event.stopPropagation()">
-                            <span style="font-size:10.5px;font-weight: 600;padding:3px 8px;border-radius:6px;white-space:nowrap;background:${has2fa ? 'var(--accent-soft)' : 'var(--danger-soft)'};color:${has2fa ? 'var(--accent)' : 'var(--danger)'};">${has2fa ? '2FA enabled' : 'Not set up yet'}</span>
-                            <button type="button" onclick="resetAdminTotp('${a.username.replace(/'/g, "\\'")}')" style="background:none;border:none;color:var(--accent);font-size:11px;font-weight:600;cursor:pointer;padding:0;">Reset 2FA</button>
                             ${canRevoke ? `<button type="button" onclick="revokeAdmin('${a.username.replace(/'/g, "\\'")}')" style="background:none;border:none;color:var(--danger);font-size:11px;font-weight:600;cursor:pointer;padding:0;">Revoke</button>` : ''}
                         </div>
                     </div>
@@ -6050,42 +5821,6 @@
         }
         window.revokeAdmin = revokeAdmin;
 
-        // Regenerates a fresh, correctly-formed TOTP secret for an existing
-        // admin and re-opens the QR step of the Add Admin modal so it can be
-        // re-scanned. Needed both as a normal "lost my phone" flow, and to
-        // repair any admin created before the randomBase32Secret fix (those
-        // had a malformed, non-standard-length secret that authenticator
-        // apps could reject as invalid/too short on scan or manual entry).
-        function resetAdminTotp(username) {
-            if (!canManageAdmins() && username !== currentAdminUsername) { window.showToast('Only Full Access admins can reset another admin\'s 2FA.', 'fail'); return; }
-            window.showActionDialog({
-                type: 'delete',
-                title: `Reset 2FA for "${username}"?`,
-                message: 'Their current Authenticator code stops working immediately. A fresh QR will be shown here to re-pair the app.',
-                confirmText: 'Reset 2FA',
-                onConfirm: async () => {
-                    try {
-                        const totpSecret = randomBase32Secret();
-                        await setDoc(doc(db, "adminUsernames", username), { totpSecret }, { merge: true });
-                        await logAdminActivity('Reset 2FA', username);
-                        document.getElementById('new-admin-secret-key').textContent = totpSecret;
-                        document.getElementById('new-admin-final-username').textContent = username;
-                        renderMfaQrCode(totpSecret, username, 'new-admin-qr-code');
-                        document.getElementById('add-admin-step-form').style.display = 'none';
-                        document.getElementById('add-admin-step-qr').style.display = '';
-                        document.getElementById('create-admin-btn').style.display = 'none';
-                        document.getElementById('done-admin-btn').style.display = '';
-                        document.getElementById('add-admin-modal-overlay').classList.add('show');
-                        window.showToast('2FA reset — scan the new QR ✓', 'success');
-                    } catch (e) {
-                        console.error('Reset 2FA error:', e);
-                        window.showToast('Failed to reset 2FA.', 'fail');
-                    }
-                }
-            });
-        }
-        window.resetAdminTotp = resetAdminTotp;
-
         // ---------- Telegram linking (per-admin support-chat routing) ----------
         // Self-service: generates a short-lived 6-digit code on the CALLING
         // admin's own adminUsernames doc (never someone else's — a Full
@@ -6185,10 +5920,9 @@
         // ---------- My Account modal (self-service, all roles) ----------
         // Reuses the same self-service-gated functions the Admin Accounts
         // card (Full Access only) uses for its own row — handleAdminAvatarSelect,
-        // resetAdminTotp, openTelegramLinkModal/unlinkAdminTelegram already
-        // only allow acting on currentAdminUsername when the caller isn't a
-        // Full Access admin, so calling them here with currentAdminUsername
-        // is exactly as safe as the existing "this is you" card. This modal
+        // openTelegramLinkModal/unlinkAdminTelegram already only allow acting
+        // on currentAdminUsername when the caller isn't a Full Access admin.
+        // This modal
         // never reads or shows any OTHER admin's row, and has no path into
         // Settings/API-key content, so opening it up to every role adds no
         // new exposure.
@@ -6205,8 +5939,6 @@
             document.getElementById('my-account-username').innerText = currentAdminUsername || '—';
             document.getElementById('my-account-role').innerText = roleLabels[me.role || 'full'] || 'Full Access';
 
-            const has2fa = !!me.totpSecret;
-            document.getElementById('my-account-2fa-status').innerText = has2fa ? '2FA enabled' : 'Not set up yet';
 
             const telegramLinked = !!me.telegramChatId;
             document.getElementById('my-account-telegram-status').innerText = telegramLinked
@@ -6249,10 +5981,6 @@
             if (roleToggle) roleToggle.querySelectorAll('.role-toggle-opt').forEach(b => b.classList.toggle('active', b.dataset.value === 'product'));
             document.getElementById('add-admin-error').style.display = 'none';
             document.getElementById('add-admin-step-form').style.display = '';
-            document.getElementById('add-admin-step-qr').style.display = 'none';
-            document.getElementById('new-admin-secret-box').style.display = 'none';
-            document.getElementById('create-admin-btn').style.display = '';
-            document.getElementById('done-admin-btn').style.display = 'none';
             document.getElementById('add-admin-modal-overlay').classList.add('show');
         }
         window.openAddAdminModal = openAddAdminModal;
@@ -6263,16 +5991,8 @@
         }
         window.closeAddAdminModal = closeAddAdminModal;
 
-        function toggleNewAdminManualKey() {
-            const box = document.getElementById('new-admin-secret-box');
-            if (box) box.style.display = box.style.display === 'none' ? '' : 'none';
-        }
-        window.toggleNewAdminManualKey = toggleNewAdminManualKey;
-
         // Creates the new admin's Firebase Auth account (via the isolated
-        // adminCreationAuth instance) and their adminUsernames doc, with the
-        // TOTP secret generated and saved immediately — so the QR shown right
-        // after is already the real, final secret, not a placeholder.
+        // adminCreationAuth instance) and their adminUsernames doc.
         async function createNewAdmin() {
             const usernameInput = document.getElementById('new-admin-username');
             const passwordInput = document.getElementById('new-admin-password');
@@ -6304,10 +6024,8 @@
             try {
                 const email = `${username}.${Date.now()}@admin.pcastore.local`;
                 await createUserWithEmailAndPassword(adminCreationAuth, email, password);
-                const totpSecret = randomBase32Secret();
                 await setDoc(doc(db, "adminUsernames", username), {
                     email,
-                    totpSecret,
                     role,
                     createdBy: currentAdminUsername || 'unknown',
                     createdAt: serverTimestamp()
@@ -6317,14 +6035,7 @@
                 // claims right away, instead of waiting for the next
                 // scheduled sync.
                 callAdminSyncClaims();
-                // Step 2: show the QR right away so it can be scanned on the spot.
-                document.getElementById('new-admin-secret-key').textContent = totpSecret;
-                document.getElementById('new-admin-final-username').textContent = username;
-                renderMfaQrCode(totpSecret, username, 'new-admin-qr-code');
-                document.getElementById('add-admin-step-form').style.display = 'none';
-                document.getElementById('add-admin-step-qr').style.display = '';
-                document.getElementById('create-admin-btn').style.display = 'none';
-                document.getElementById('done-admin-btn').style.display = '';
+                closeAddAdminModal();
                 window.showToast('Admin created ✓', 'success');
             } catch (e) {
                 console.error('Failed to create admin:', e);
@@ -6340,393 +6051,11 @@
         function resetGateLocked() {
             document.getElementById('login-box').style.display = '';
             document.getElementById('step-login').style.display = '';
-            document.getElementById('step-mfa-enroll').style.display = 'none';
-            document.getElementById('step-mfa-challenge').style.display = 'none';
             document.getElementById('login-password').value = '';
-            clearOtpGroup('mfa-enroll-otp', 'mfa-enroll-code');
-            clearOtpGroup('mfa-challenge-otp', 'mfa-challenge-code');
             applyRememberedUsername();
             applyLockoutUI('login', 'login-btn', 'login-error', 'Sign In');
         }
 
-        // ---------- TOTP (Google Authenticator compatible), pure Web Crypto ----------
-        const BASE32_ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
-        // 20 random bytes -> 32-char Base32 secret (160 bits), the same size
-        // Google Authenticator itself generates. Bits are zero-padded to a
-        // full 5-bit group before encoding so no entropy/characters get
-        // silently dropped — the old version truncated the last partial
-        // group, producing a malformed (non-RFC4648-length) secret that
-        // some authenticator apps rejected as "too short" on manual entry.
-        function randomBase32Secret(length = 20) {
-            const bytes = crypto.getRandomValues(new Uint8Array(length));
-            let bits = '';
-            for (const b of bytes) bits += b.toString(2).padStart(8, '0');
-            const padLen = (5 - (bits.length % 5)) % 5;
-            bits += '0'.repeat(padLen);
-            let out = '';
-            for (let i = 0; i < bits.length; i += 5) out += BASE32_ALPHABET[parseInt(bits.substr(i, 5), 2)];
-            return out;
-        }
-        function base32ToBytes(base32) {
-            const clean = base32.replace(/=+$/, '').toUpperCase();
-            let bits = '';
-            for (const c of clean) {
-                const idx = BASE32_ALPHABET.indexOf(c);
-                if (idx === -1) continue;
-                bits += idx.toString(2).padStart(5, '0');
-            }
-            const bytes = [];
-            for (let i = 0; i + 8 <= bits.length; i += 8) bytes.push(parseInt(bits.substr(i, 8), 2));
-            return new Uint8Array(bytes);
-        }
-        async function hotp(secretBytes, counter) {
-            const counterBuf = new ArrayBuffer(8);
-            const view = new DataView(counterBuf);
-            view.setUint32(0, Math.floor(counter / 2 ** 32));
-            view.setUint32(4, counter % (2 ** 32));
-            const key = await crypto.subtle.importKey('raw', secretBytes, { name: 'HMAC', hash: 'SHA-1' }, false, ['sign']);
-            const sig = new Uint8Array(await crypto.subtle.sign('HMAC', key, counterBuf));
-            const offset = sig[sig.length - 1] & 0x0f;
-            const code = ((sig[offset] & 0x7f) << 24) | ((sig[offset + 1] & 0xff) << 16) | ((sig[offset + 2] & 0xff) << 8) | (sig[offset + 3] & 0xff);
-            return (code % 1000000).toString().padStart(6, '0');
-        }
-        async function totpCode(secretBase32, forTimeMs = Date.now(), step = 30) {
-            const counter = Math.floor(forTimeMs / 1000 / step);
-            return hotp(base32ToBytes(secretBase32), counter);
-        }
-        async function verifyTotpCode(secretBase32, code, window = 1, step = 30) {
-            const now = Date.now();
-            for (let w = -window; w <= window; w++) {
-                if ((await totpCode(secretBase32, now + w * step * 1000, step)) === code) return true;
-            }
-            return false;
-        }
-
-        // Builds the standard otpauth:// URI that every authenticator app
-        // (Google Authenticator, Authy, etc.) understands, and renders it as
-        // a scannable QR code into the given container element. Scanning
-        // this avoids someone having to hand-type the long Base32 secret
-        // (which is exactly where truncated / mistyped codes come from).
-        const TOTP_ISSUER = 'PCA Store Admin';
-        let mfaQrInstance = null;
-        function buildOtpauthUri(secretBase32, accountName) {
-            const label = encodeURIComponent(`${TOTP_ISSUER}:${accountName || 'admin'}`);
-            const issuer = encodeURIComponent(TOTP_ISSUER);
-            return `otpauth://totp/${label}?secret=${secretBase32}&issuer=${issuer}&algorithm=SHA1&digits=6&period=30`;
-        }
-        function renderMfaQrCode(secretBase32, accountName, containerId = 'mfa-qr-code') {
-            const container = document.getElementById(containerId);
-            if (!container) return;
-            container.innerHTML = '';
-            try {
-                new QRCode(container, {
-                    text: buildOtpauthUri(secretBase32, accountName),
-                    width: 180,
-                    height: 180,
-                    correctLevel: QRCode.CorrectLevel.M
-                });
-            } catch (e) {
-                console.error('QR render error:', e);
-                container.innerHTML = '<p style="font-size:12px;color:var(--danger);">QR unavailable — use the manual key below.</p>';
-            }
-        }
-        window.renderMfaQrCode = renderMfaQrCode;
-
-        // ---------- API Keys 2FA (shared secret, separate from login MFA) ----------
-        // A single Firestore-stored secret that gates the API Keys page,
-        // independent of any admin's personal login TOTP secret. Whoever
-        // opens the page — any Full Access admin, on any device, on a brand
-        // new session — must produce a current code from THIS secret, fresh,
-        // every time (see showPage's api-docs branch). Any Full Access admin
-        // can view its status, but only the admin who originally set it up
-        // (apiKeysMfaSetBy) may regenerate it — see openApiKeysMfaSetup.
-        let apiKeysMfaSecret = null;
-        let apiKeysMfaSetBy = null;
-        let pendingApiKeysMfaSecret = null;
-
-        function listenApiKeysMfaSecret() {
-            onSnapshot(doc(db, "settings", "apiKeysMfa"), (snap) => {
-                const data = snap.exists() ? snap.data() : null;
-                apiKeysMfaSecret = data ? data.secret : null;
-                apiKeysMfaSetBy = data ? data.setBy : null;
-                renderApiKeysMfaCard();
-            }, (error) => { console.error('API Keys MFA listener error:', error); });
-        }
-        window.listenApiKeysMfaSecret = listenApiKeysMfaSecret;
-
-        function renderApiKeysMfaCard() {
-            const statusEl = document.getElementById('apikeys-mfa-status');
-            const btn = document.getElementById('apikeys-mfa-setup-btn');
-            if (!statusEl || !btn) return;
-            // Before anything's set up, any Full Access admin who gets there
-            // first may do the initial setup (they become the setter). Once
-            // set, only that admin may regenerate — everyone else just sees
-            // status, with the button hidden.
-            const canRegen = !apiKeysMfaSecret || apiKeysMfaSetBy === currentAdminUsername;
-            if (!apiKeysMfaSecret) {
-                statusEl.textContent = 'Not set up yet — nobody can open API Keys until this is set up.';
-            } else if (apiKeysMfaSetBy === currentAdminUsername) {
-                statusEl.textContent = 'Currently set up by you.';
-            } else {
-                statusEl.textContent = `Currently set up by ${apiKeysMfaSetBy || 'another admin'} — only they can regenerate it.`;
-            }
-            btn.innerText = apiKeysMfaSecret ? 'Regenerate' : 'Set Up';
-            btn.style.display = canRegen ? '' : 'none';
-        }
-        window.renderApiKeysMfaCard = renderApiKeysMfaCard;
-
-        // ----- Verify-to-open gate (shown every time showPage('api-docs') runs) -----
-        function openApiKeysMfaGate() {
-            if (!apiKeysMfaSecret) {
-                window.showToast('Set up API Keys 2FA in Settings first.', 'fail');
-                return;
-            }
-            const errEl = document.getElementById('apikeys-mfa-error');
-            if (errEl) errEl.style.display = 'none';
-            const otpGroup = document.getElementById('apikeys-mfa-otp');
-            if (otpGroup) otpGroup.querySelectorAll('.otp-box').forEach(b => { b.value = ''; b.classList.remove('otp-filled'); });
-            document.getElementById('apikeys-mfa-code').value = '';
-            if (applyLockoutUI('apikeys-mfa', 'apikeys-mfa-btn', 'apikeys-mfa-error', 'Verify')) {
-                document.getElementById('apikeys-mfa-modal-overlay').classList.add('show');
-                return;
-            }
-            document.getElementById('apikeys-mfa-modal-overlay').classList.add('show');
-            setTimeout(() => document.querySelector('#apikeys-mfa-otp .otp-box')?.focus(), 50);
-        }
-        window.openApiKeysMfaGate = openApiKeysMfaGate;
-
-        function closeApiKeysMfaGate() {
-            document.getElementById('apikeys-mfa-modal-overlay').classList.remove('show');
-        }
-        window.closeApiKeysMfaGate = closeApiKeysMfaGate;
-
-        // 3 wrong codes locks this out for a flat 1 hour (not the 5-attempt
-        // exponential backoff used for login) — see registerFailedAttempt's
-        // optional overrides.
-        async function confirmApiKeysMfa() {
-            const code = document.getElementById('apikeys-mfa-code').value.trim();
-            const errEl = document.getElementById('apikeys-mfa-error');
-            const btn = document.getElementById('apikeys-mfa-btn');
-            errEl.style.display = 'none';
-            if (applyLockoutUI('apikeys-mfa', 'apikeys-mfa-btn', 'apikeys-mfa-error', 'Verify')) return;
-            if (!/^\d{6}$/.test(code)) { errEl.textContent = 'Enter the 6-digit code.'; errEl.style.display = 'block'; return; }
-            btn.disabled = true; btn.innerText = 'Verifying...';
-            try {
-                const ok = apiKeysMfaSecret && await verifyTotpCode(apiKeysMfaSecret, code);
-                if (!ok) {
-                    registerFailedAttempt('apikeys-mfa', 3, 3600, 3600);
-                    if (!applyLockoutUI('apikeys-mfa', 'apikeys-mfa-btn', 'apikeys-mfa-error', 'Verify')) {
-                        errEl.textContent = 'Wrong code.';
-                        errEl.style.display = 'block';
-                        btn.disabled = false; btn.innerText = 'Verify';
-                    }
-                    return;
-                }
-                clearLockout('apikeys-mfa');
-                btn.disabled = false; btn.innerText = 'Verify';
-                closeApiKeysMfaGate();
-                showPage('api-docs', true);
-            } catch (e) {
-                console.error('API Keys MFA verify error:', e);
-                errEl.textContent = 'Something went wrong. Try again.';
-                errEl.style.display = 'block';
-                btn.disabled = false; btn.innerText = 'Verify';
-            }
-        }
-        window.confirmApiKeysMfa = confirmApiKeysMfa;
-
-        // ----- Set up / regenerate (Full Access only, from Settings) -----
-        // Anyone Full Access can do the FIRST setup (no owner yet); after
-        // that, only apiKeysMfaSetBy may regenerate — everyone else is
-        // blocked here even if they reach this call directly, not just by
-        // the hidden button in renderApiKeysMfaCard.
-        function openApiKeysMfaSetup() {
-            if (!canManageAdmins()) { window.showToast('Only Full Access admins can manage this.', 'fail'); return; }
-            if (apiKeysMfaSecret && apiKeysMfaSetBy && apiKeysMfaSetBy !== currentAdminUsername) {
-                window.showToast(`Only ${apiKeysMfaSetBy} can regenerate this.`, 'fail');
-                return;
-            }
-            pendingApiKeysMfaSecret = randomBase32Secret();
-            document.getElementById('apikeys-setup-warning').style.display = apiKeysMfaSecret ? 'block' : 'none';
-            document.getElementById('apikeys-setup-secret-box').style.display = 'none';
-            document.getElementById('apikeys-setup-secret-text').innerText = pendingApiKeysMfaSecret;
-            document.getElementById('apikeys-setup-error').style.display = 'none';
-            const otpGroup = document.getElementById('apikeys-setup-otp');
-            otpGroup.querySelectorAll('.otp-box').forEach(b => { b.value = ''; b.classList.remove('otp-filled'); });
-            document.getElementById('apikeys-setup-code').value = '';
-            renderMfaQrCode(pendingApiKeysMfaSecret, 'API Keys', 'apikeys-setup-qr-code');
-            document.getElementById('apikeys-setup-modal-overlay').classList.add('show');
-        }
-        window.openApiKeysMfaSetup = openApiKeysMfaSetup;
-
-        function closeApiKeysMfaSetup() {
-            document.getElementById('apikeys-setup-modal-overlay').classList.remove('show');
-            pendingApiKeysMfaSecret = null;
-        }
-        window.closeApiKeysMfaSetup = closeApiKeysMfaSetup;
-
-        function toggleApiKeysSetupManualKey() {
-            const box = document.getElementById('apikeys-setup-secret-box');
-            if (box) box.style.display = box.style.display === 'none' ? '' : 'none';
-        }
-        window.toggleApiKeysSetupManualKey = toggleApiKeysSetupManualKey;
-
-        // Only persists the new secret once a code generated FROM it is
-        // confirmed — otherwise a mistyped/unscanned QR could lock every
-        // admin, owner included, out of API Keys.
-        async function confirmApiKeysMfaSetup() {
-            const code = document.getElementById('apikeys-setup-code').value.trim();
-            const errEl = document.getElementById('apikeys-setup-error');
-            const btn = document.getElementById('apikeys-setup-btn');
-            errEl.style.display = 'none';
-            if (!pendingApiKeysMfaSecret) { closeApiKeysMfaSetup(); return; }
-            if (!/^\d{6}$/.test(code)) { errEl.textContent = 'Enter the 6-digit code.'; errEl.style.display = 'block'; return; }
-            btn.disabled = true; btn.innerText = 'Verifying...';
-            try {
-                const ok = await verifyTotpCode(pendingApiKeysMfaSecret, code);
-                if (!ok) {
-                    errEl.textContent = 'Wrong code — make sure you scanned the QR above.';
-                    errEl.style.display = 'block';
-                    btn.disabled = false; btn.innerText = 'Confirm & Save';
-                    return;
-                }
-                await setDoc(doc(db, "settings", "apiKeysMfa"), { secret: pendingApiKeysMfaSecret, updatedAt: Date.now(), setBy: currentAdminUsername }, { merge: true });
-                window.showToast('API Keys 2FA saved.', 'success');
-                closeApiKeysMfaSetup();
-            } catch (e) {
-                console.error('API Keys MFA setup error:', e);
-                errEl.textContent = 'Something went wrong. Try again.';
-                errEl.style.display = 'block';
-                btn.disabled = false; btn.innerText = 'Confirm & Save';
-                return;
-            }
-            btn.disabled = false; btn.innerText = 'Confirm & Save';
-        }
-        window.confirmApiKeysMfaSetup = confirmApiKeysMfaSetup;
-
-        // Copies the exact secret text so it can be pasted into an authenticator
-        // app instead of hand-typed — hand-typing a 16-char Base32 string is
-        // where dropped/duplicated characters (and "key too short" errors) come from.
-        async function copyMfaSecret(spanId, btnEl) {
-            const text = document.getElementById(spanId)?.textContent?.trim();
-            if (!text || text === '—') return;
-            try {
-                await navigator.clipboard.writeText(text);
-            } catch (e) {
-                // Clipboard API unavailable (non-HTTPS/old browser) — fallback via a temp textarea.
-                const ta = document.createElement('textarea');
-                ta.value = text;
-                ta.style.position = 'fixed';
-                ta.style.opacity = '0';
-                document.body.appendChild(ta);
-                ta.select();
-                try { document.execCommand('copy'); } catch (e2) {}
-                document.body.removeChild(ta);
-            }
-            if (btnEl) {
-                const original = btnEl.textContent;
-                btnEl.textContent = 'Copied!';
-                setTimeout(() => { btnEl.textContent = original; }, 1500);
-            }
-        }
-        window.copyMfaSecret = copyMfaSecret;
-
-        // ---------- Segmented 6-digit OTP input (enroll + challenge screens) ----------
-        function fillOtpBoxes(boxes, digits) {
-            boxes.forEach((b, i) => { b.value = digits[i] || ''; b.classList.toggle('otp-filled', !!digits[i]); });
-        }
-        // Empties every digit box in an OTP group (and its hidden combined
-        // value), so a wrong/used code never has to be deleted by hand —
-        // the boxes are ready for a fresh code as soon as they're shown again.
-        function clearOtpGroup(groupId, hiddenId) {
-            const group = document.getElementById(groupId);
-            const hidden = document.getElementById(hiddenId);
-            if (!group) return;
-            const boxes = [...group.querySelectorAll('.otp-box')];
-            boxes.forEach(b => { b.value = ''; b.classList.remove('otp-filled'); });
-            if (hidden) hidden.value = '';
-            boxes[0]?.focus();
-        }
-        window.clearOtpGroup = clearOtpGroup;
-        function setupOtpGroup(groupId, hiddenId) {
-            const group = document.getElementById(groupId);
-            const hidden = document.getElementById(hiddenId);
-            if (!group || !hidden) return;
-            const boxes = [...group.querySelectorAll('.otp-box')];
-            // Auto-submit: once all 6 boxes are filled, click the matching submit
-            // button automatically so the person doesn't have to tap it themselves.
-            // Maps each OTP group id to the id of the button that should fire.
-            const AUTO_SUBMIT_BTN = {
-                'mfa-enroll-otp': 'mfa-enroll-btn',
-                'mfa-challenge-otp': 'mfa-challenge-btn',
-                'apikeys-mfa-otp': 'apikeys-mfa-btn',
-                'apikeys-setup-otp': 'apikeys-setup-btn'
-            };
-            const maybeAutoSubmit = () => {
-                const code = boxes.map(b => b.value).join('');
-                if (code.length !== 6 || !/^\d{6}$/.test(code)) return;
-                const btnId = AUTO_SUBMIT_BTN[groupId];
-                const btn = btnId && document.getElementById(btnId);
-                if (btn && !btn.disabled) btn.click();
-            };
-            const sync = () => { hidden.value = boxes.map(b => b.value).join(''); };
-            boxes.forEach((box, i) => {
-                box.addEventListener('input', () => {
-                    box.value = box.value.replace(/[^0-9]/g, '').slice(-1);
-                    box.classList.toggle('otp-filled', !!box.value);
-                    if (box.value && boxes[i + 1]) boxes[i + 1].focus();
-                    sync();
-                    maybeAutoSubmit();
-                });
-                box.addEventListener('keydown', (e) => {
-                    if (e.key === 'Backspace' && !box.value && boxes[i - 1]) boxes[i - 1].focus();
-                });
-                // Pasting into any box distributes the whole code across all six.
-                box.addEventListener('paste', (e) => {
-                    e.preventDefault();
-                    const text = (e.clipboardData || window.clipboardData).getData('text').replace(/[^0-9]/g, '').slice(0, 6);
-                    if (!text) return;
-                    fillOtpBoxes(boxes, text);
-                    sync();
-                    (boxes[Math.min(text.length, 6) - 1] || boxes[5]).focus();
-                    maybeAutoSubmit();
-                });
-            });
-        }
-        // Explicit "Paste code" button — reads the clipboard directly, for when
-        // the person would rather tap once than paste into a tiny digit box.
-        async function pasteOtpCode(groupId, hiddenId) {
-            const group = document.getElementById(groupId);
-            const boxes = [...group.querySelectorAll('.otp-box')];
-            try {
-                const text = await navigator.clipboard.readText();
-                const digits = text.replace(/[^0-9]/g, '').slice(0, 6);
-                if (!digits) return;
-                fillOtpBoxes(boxes, digits);
-                document.getElementById(hiddenId).value = digits;
-                (boxes[Math.min(digits.length, 6) - 1] || boxes[0]).focus();
-            } catch (e) {
-                // Clipboard read blocked (permissions / non-HTTPS) — focus the first
-                // box so the person can paste manually with a long-press or Ctrl/Cmd+V.
-                boxes[0]?.focus();
-            }
-        }
-        window.setupOtpGroup = setupOtpGroup;
-        window.pasteOtpCode = pasteOtpCode;
-        document.addEventListener('DOMContentLoaded', () => {
-            setupOtpGroup('mfa-enroll-otp', 'mfa-enroll-code');
-            setupOtpGroup('mfa-challenge-otp', 'mfa-challenge-code');
-            setupOtpGroup('apikeys-mfa-otp', 'apikeys-mfa-code');
-            setupOtpGroup('apikeys-setup-otp', 'apikeys-setup-code');
-        });
-
-        function toggleMfaManualKey() {
-            const box = document.getElementById('mfa-secret-box');
-            if (box) box.style.display = box.style.display === 'none' ? '' : 'none';
-        }
-        window.toggleMfaManualKey = toggleMfaManualKey;
-
-        // ---------- Login form UI helpers: password eye-toggle, remember-me,
         // forgot-password ----------
         function toggleLoginPasswordVisibility(inputId, btnEl) {
             const input = document.getElementById(inputId);
@@ -6758,8 +6087,7 @@
         const REMEMBER_USERNAME_KEY = 'pca_admin_remember_username';
 
         // ---------- Failed-attempt lockout (brute-force friction) ----------
-        // Applies to both the username/password step and the TOTP challenge
-        // step. Tracked in localStorage (not sessionStorage) so a refresh or
+        // Applies to the username/password step. Tracked in localStorage (not sessionStorage) so a refresh or
         // new tab can't be used to reset the counter. Lockout escalates
         // (30s -> 60s -> 120s ... capped at 10 min) instead of a single fixed
         // delay, so repeated automated attempts get progressively slower
@@ -6785,9 +6113,6 @@
             setLockoutState(scope, { count: 0, lockUntil: 0 });
             if (lockoutTimers[scope]) { clearInterval(lockoutTimers[scope]); delete lockoutTimers[scope]; }
         }
-        // maxAttempts/baseSeconds/maxSeconds default to the shared login
-        // lockout constants; callers with their own policy (e.g. the flat
-        // 3-attempts/1-hour rule for API Keys 2FA) pass overrides.
         function registerFailedAttempt(scope, maxAttempts = LOCKOUT_MAX_ATTEMPTS, baseSeconds = LOCKOUT_BASE_SECONDS, maxSeconds = LOCKOUT_MAX_SECONDS) {
             const state = getLockoutState(scope);
             state.count = (state.count || 0) + 1;
@@ -6894,7 +6219,7 @@
                 // admin's username is mapped to their real sign-in email via
                 // the Worker's /admin-login-lookup endpoint (backed by the
                 // "adminUsernames/{username}" doc, but only ever returning
-                // the email - never totpSecret/permissions/telegram fields
+                // the email - never permissions/telegram fields
                 // to the browser).
                 const email = await lookupAdminEmailByUsername(username);
                 if (!email) {
@@ -6911,11 +6236,10 @@
                     }
                     return;
                 }
-                pendingUsername = username;
                 await signInWithEmailAndPassword(auth, email, password);
                 // Correct credentials — clear this device's lockout counter.
                 clearLockout('login');
-                // onAuthStateChanged -> routeAfterAuth() takes it from here (TOTP step)
+                // onAuthStateChanged -> routeAfterAuth() unlocks the app
             } catch (error) {
                 // Logged for developers only; the on-screen message stays
                 // generic so a failed attempt never reveals whether the
@@ -6947,26 +6271,15 @@
         }
         window.handleAdminLogout = handleAdminLogout;
 
-        function backToLogin() {
-            signOut(auth).catch(() => {});
-            pendingUsername = null;
-            pendingEnrollSecret = null;
-            resetGateLocked();
-        }
-        window.backToLogin = backToLogin;
-
         function unlockAdminApp() {
-            sessionStorage.setItem('pca_mfa_ok', '1');
             document.getElementById('login-screen').classList.add('hidden');
             if (!adminAppStarted) { adminAppStarted = true; startAdminApp(); }
         }
 
-        // ---------- Step 2/3: TOTP enroll (first time) or challenge (returning) ----------
+        // ---------- Resolve signed-in admin and unlock the panel ----------
         async function routeAfterAuth(user) {
             // First-admin bootstrap: right after createFirstAdmin() signs this
-            // brand-new account in, there is no adminUsernames doc for it yet -
-            // write it here before the normal lookup below, which needs it to
-            // find the role and (later) the TOTP secret. See createFirstAdmin().
+            // brand-new account in, write its username mapping before lookup.
             if (window.__pcaBootstrapFirstAdmin && window.__pcaBootstrapFirstAdmin.email === user.email) {
                 const boot = window.__pcaBootstrapFirstAdmin;
                 window.__pcaBootstrapFirstAdmin = null;
@@ -6983,126 +6296,18 @@
                 }
             }
 
-            // Resolve the admin's username from their email up front, before the
-            // early-return below, so it's always available for the Activity Log
-            // and login-alert features - including on a page refresh where the
-            // TOTP step is skipped entirely.
             try {
                 const uq = query(collection(db, "adminUsernames"), where("email", "==", user.email));
                 const usnap = await getDocs(uq);
                 if (!usnap.empty) {
                     currentAdminUsername = usnap.docs[0].id;
-                    // Role & Permission system removed: every signed-in admin now
-                    // always gets Full Access, regardless of what's stored.
                     currentAdminRole = 'full';
                     window.currentAdminPermissions = null;
                 }
             } catch (e) { console.error('Admin username lookup error:', e); }
 
-            if (sessionStorage.getItem('pca_mfa_ok') === '1') { unlockAdminApp(); return; }
-
-            let totpSecret = null;
-            try {
-                const q = query(collection(db, "adminUsernames"), where("email", "==", user.email));
-                const snap = await getDocs(q);
-                if (!snap.empty) {
-                    const d = snap.docs[0];
-                    pendingUsername = d.id;
-                    totpSecret = d.data().totpSecret || null;
-                }
-            } catch (e) { console.error('MFA lookup error:', e); }
-
-            // Admin Login screen removed: when auto sign-in is configured
-            // (see AUTO_ADMIN_LOGIN above), finish the Authenticator step
-            // silently instead of showing the QR/code screen — enroll a
-            // fresh secret automatically if this admin has none yet.
-            if (AUTO_ADMIN_LOGIN.username && AUTO_ADMIN_LOGIN.password) {
-                if (!totpSecret && pendingUsername) {
-                    const newSecret = randomBase32Secret();
-                    try { await setDoc(doc(db, "adminUsernames", pendingUsername), { totpSecret: newSecret }, { merge: true }); } catch (e) { console.error(e); }
-                }
-                unlockAdminApp();
-                return;
-            }
-
-            document.getElementById('step-login').style.display = 'none';
-            if (totpSecret) {
-                document.getElementById('step-mfa-enroll').style.display = 'none';
-                clearOtpGroup('mfa-challenge-otp', 'mfa-challenge-code');
-                document.getElementById('step-mfa-challenge').style.display = '';
-                applyLockoutUI('mfa', 'mfa-challenge-btn', 'mfa-challenge-error', 'Verify & Sign In');
-            } else {
-                pendingEnrollSecret = randomBase32Secret();
-                document.getElementById('mfa-secret-key').textContent = pendingEnrollSecret;
-                document.getElementById('mfa-account-name').textContent = pendingUsername || user.email || '—';
-                document.getElementById('mfa-secret-box').style.display = 'none';
-                renderMfaQrCode(pendingEnrollSecret, pendingUsername || user.email);
-                document.getElementById('step-mfa-challenge').style.display = 'none';
-                clearOtpGroup('mfa-enroll-otp', 'mfa-enroll-code');
-                document.getElementById('step-mfa-enroll').style.display = '';
-            }
+            unlockAdminApp();
         }
-
-        async function confirmMfaEnrollment() {
-            const code = document.getElementById('mfa-enroll-code').value.trim();
-            const errEl = document.getElementById('mfa-enroll-error');
-            const btn = document.getElementById('mfa-enroll-btn');
-            errEl.style.display = 'none';
-            if (!/^\d{6}$/.test(code)) { errEl.textContent = 'Enter the 6-digit code.'; errEl.style.display = 'block'; return; }
-            btn.disabled = true; btn.innerText = 'Verifying...';
-            try {
-                const ok = await verifyTotpCode(pendingEnrollSecret, code);
-                if (!ok) {
-                    errEl.textContent = 'Wrong code. Check your phone\'s clock and try again.';
-                    errEl.style.display = 'block';
-                    btn.disabled = false; btn.innerText = 'Confirm & Enable';
-                    clearOtpGroup('mfa-enroll-otp', 'mfa-enroll-code');
-                    return;
-                }
-                await setDoc(doc(db, "adminUsernames", pendingUsername), { totpSecret: pendingEnrollSecret }, { merge: true });
-                unlockAdminApp();
-            } catch (e) {
-                console.error('MFA enroll error:', e);
-                errEl.textContent = 'Something went wrong. Try again.';
-                errEl.style.display = 'block';
-                btn.disabled = false; btn.innerText = 'Confirm & Enable';
-            }
-        }
-        window.confirmMfaEnrollment = confirmMfaEnrollment;
-
-        async function confirmMfaChallenge() {
-            const code = document.getElementById('mfa-challenge-code').value.trim();
-            const errEl = document.getElementById('mfa-challenge-error');
-            const btn = document.getElementById('mfa-challenge-btn');
-            errEl.style.display = 'none';
-            if (applyLockoutUI('mfa', 'mfa-challenge-btn', 'mfa-challenge-error', 'Verify & Sign In')) return;
-            if (!/^\d{6}$/.test(code)) { errEl.textContent = 'Enter the 6-digit code.'; errEl.style.display = 'block'; return; }
-            btn.disabled = true; btn.innerText = 'Verifying...';
-            try {
-                const q = query(collection(db, "adminUsernames"), where("email", "==", auth.currentUser.email));
-                const snap = await getDocs(q);
-                const secret = !snap.empty ? snap.docs[0].data().totpSecret : null;
-                const ok = secret && await verifyTotpCode(secret, code);
-                if (!ok) {
-                    registerFailedAttempt('mfa');
-                    if (!applyLockoutUI('mfa', 'mfa-challenge-btn', 'mfa-challenge-error', 'Verify & Sign In')) {
-                        errEl.textContent = 'Wrong code.';
-                        errEl.style.display = 'block';
-                        btn.disabled = false; btn.innerText = 'Verify & Sign In';
-                    }
-                    clearOtpGroup('mfa-challenge-otp', 'mfa-challenge-code');
-                    return;
-                }
-                clearLockout('mfa');
-                unlockAdminApp();
-            } catch (e) {
-                console.error('MFA challenge error:', e);
-                errEl.textContent = 'Something went wrong. Try again.';
-                errEl.style.display = 'block';
-                btn.disabled = false; btn.innerText = 'Verify & Sign In';
-            }
-        }
-        window.confirmMfaChallenge = confirmMfaChallenge;
 
         async function tryAutoAdminLogin() {
             if (!AUTO_ADMIN_LOGIN.username || !AUTO_ADMIN_LOGIN.password) return false;
@@ -7110,7 +6315,6 @@
                 const username = AUTO_ADMIN_LOGIN.username.trim().toLowerCase();
                 const email = await lookupAdminEmailByUsername(username);
                 if (!email) { console.error('Auto admin login: username not found.'); return false; }
-                pendingUsername = username;
                 await signInWithEmailAndPassword(auth, email, AUTO_ADMIN_LOGIN.password);
                 return true;
             } catch (e) {
@@ -7127,7 +6331,6 @@
                 routeAfterAuth(user);
             } else {
                 adminAppStarted = false;
-                sessionStorage.removeItem('pca_mfa_ok');
                 resetGateLocked();
                 currentAdminUsername = null;
                 currentAdminIP = null;
