@@ -1825,6 +1825,30 @@
                     <svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M8.5 8.2c0-1.2 1.1-2.2 2.5-2.2s2.5 1 2.5 2.2c0 2.4-5 1.8-5 4.3 0 1.2 1.1 2.2 2.5 2.2s2.5-1 2.5-2.2"></path></svg>
                 </div>
 
+                <!-- Step 0: shown instead of the normal login form only when the
+                     adminUsernames collection is completely empty (brand-new
+                     deployment, zero admins yet) — see checkFirstAdminSetup()
+                     and createFirstAdmin() below. Creates the very first admin
+                     account, then hands off into the normal TOTP enrollment
+                     step (step-mfa-enroll) to finish setup. -->
+                <div id="step-first-admin-setup" style="display:none;">
+                    <h2>First Admin Setup</h2>
+                    <p class="sub">No admin account exists yet. Create the first one to get started — you'll set up your Authenticator app right after.</p>
+                    <p id="first-admin-error" class="login-msg-error"></p>
+                    <form id="first-admin-form" onsubmit="createFirstAdmin(); return false;">
+                        <label for="first-admin-username">Username</label>
+                        <input type="text" id="first-admin-username" autocomplete="username" placeholder="Choose a username" autocapitalize="none" autocorrect="off" style="margin-bottom:18px;">
+                        <label for="first-admin-password">Password</label>
+                        <div class="field-wrap has-toggle">
+                            <input type="password" id="first-admin-password" autocomplete="new-password" placeholder="At least 6 characters">
+                            <button type="button" class="pw-toggle-btn" onclick="toggleLoginPasswordVisibility('first-admin-password', this)" tabindex="-1" aria-label="Show password">
+                                <svg class="ui-icon"><use href="#icon-eye"></use></svg>
+                            </button>
+                        </div>
+                        <button type="submit" id="first-admin-btn" style="margin-top:16px;">Create Admin Account</button>
+                    </form>
+                </div>
+
                 <!-- Step 1: email + password -->
                 <div id="step-login">
                     <h2>Login</h2>
@@ -5440,6 +5464,90 @@
         // explicitly signs out or clears site data — never just from closing the app.
         setPersistence(auth, browserLocalPersistence).catch((e) => console.error('Auth persistence error:', e));
 
+        // ---------- First admin bootstrap ----------
+        // On a brand-new deployment the adminUsernames collection is empty,
+        // so the normal login form is a dead end (nothing to look up, and
+        // "Add Admin" itself requires being logged in already). Swap in the
+        // "First Admin Setup" step instead whenever that collection is
+        // empty; once any admin exists this never shows again for anyone.
+        // getCountFromServer is a metadata-only aggregation query - it does
+        // NOT bill/count as reading every doc, so this is cheap even if the
+        // check somehow ran a lot.
+        (async function checkFirstAdminSetup() {
+            try {
+                const snap = await _fsGetCount(collection(db, "adminUsernames"));
+                if (snap.data().count === 0) {
+                    const loginStep = document.getElementById('step-login');
+                    const firstAdminStep = document.getElementById('step-first-admin-setup');
+                    if (loginStep) loginStep.style.display = 'none';
+                    if (firstAdminStep) firstAdminStep.style.display = '';
+                }
+            } catch (e) {
+                // Offline, or Firestore rules haven't been opened up for this
+                // check yet - fail safe by leaving the normal login form shown.
+                console.error('First-admin check failed:', e);
+            }
+        })();
+
+        // Creates the very first admin account when no admin exists yet.
+        // Deliberately uses the MAIN `auth` instance (not the isolated
+        // adminCreationAuth used by createNewAdmin() later) - there is no
+        // existing admin session here that needs protecting, and signing in
+        // as the new account immediately is exactly what should happen.
+        // The adminUsernames doc itself is written from inside
+        // routeAfterAuth() once Auth confirms the sign-in (see the
+        // __pcaBootstrapFirstAdmin marker there), not here, since
+        // onAuthStateChanged can fire before this function's own code
+        // continues after the await below.
+        async function createFirstAdmin() {
+            const usernameInput = document.getElementById('first-admin-username');
+            const passwordInput = document.getElementById('first-admin-password');
+            const errEl = document.getElementById('first-admin-error');
+            const btn = document.getElementById('first-admin-btn');
+            const username = usernameInput.value.trim().toLowerCase();
+            const password = passwordInput.value;
+            errEl.style.display = 'none';
+            if (!username || !/^[a-z0-9_.]{3,}$/.test(username)) {
+                errEl.textContent = 'Username: at least 3 characters, letters/numbers/._ only.';
+                errEl.style.display = 'block';
+                return;
+            }
+            if (!password || password.length < 6) {
+                errEl.textContent = 'Password must be at least 6 characters.';
+                errEl.style.display = 'block';
+                return;
+            }
+            btn.disabled = true;
+            btn.innerText = 'Creating...';
+            try {
+                // Re-check right before writing, in case someone else finished
+                // setup in another tab/device in the meantime.
+                const snap = await _fsGetCount(collection(db, "adminUsernames"));
+                if (snap.data().count > 0) {
+                    errEl.textContent = 'An admin has already been set up — refresh this page and sign in normally.';
+                    errEl.style.display = 'block';
+                    btn.disabled = false;
+                    btn.innerText = 'Create Admin Account';
+                    return;
+                }
+                const email = `${username}.${Date.now()}@admin.pcastore.local`;
+                pendingUsername = username;
+                window.__pcaBootstrapFirstAdmin = { username, email, role: 'full' };
+                await createUserWithEmailAndPassword(auth, email, password);
+                // onAuthStateChanged -> routeAfterAuth() takes it from here:
+                // writes the adminUsernames doc, then drops into the normal
+                // TOTP enrollment step (step-mfa-enroll).
+            } catch (e) {
+                console.error('First admin setup error:', e);
+                window.__pcaBootstrapFirstAdmin = null;
+                errEl.textContent = 'Failed to create admin: ' + (e.code || e.message || 'unknown error');
+                errEl.style.display = 'block';
+                btn.disabled = false;
+                btn.innerText = 'Create Admin Account';
+            }
+        }
+        window.createFirstAdmin = createFirstAdmin;
+
         // ---------- Admin push notifications (FCM) ----------
         // Same idea as Store.html's customer push toggle, but the token is
         // saved to adminDevices/{token} instead of a users/{id} doc, and
@@ -6832,6 +6940,26 @@
 
         // ---------- Step 2/3: TOTP enroll (first time) or challenge (returning) ----------
         async function routeAfterAuth(user) {
+            // First-admin bootstrap: right after createFirstAdmin() signs this
+            // brand-new account in, there is no adminUsernames doc for it yet -
+            // write it here before the normal lookup below, which needs it to
+            // find the role and (later) the TOTP secret. See createFirstAdmin().
+            if (window.__pcaBootstrapFirstAdmin && window.__pcaBootstrapFirstAdmin.email === user.email) {
+                const boot = window.__pcaBootstrapFirstAdmin;
+                window.__pcaBootstrapFirstAdmin = null;
+                try {
+                    await setDoc(doc(db, "adminUsernames", boot.username), {
+                        email: boot.email,
+                        role: boot.role,
+                        createdBy: 'bootstrap',
+                        createdAt: serverTimestamp()
+                    });
+                    callAdminSyncClaims();
+                } catch (e) {
+                    console.error('First admin bootstrap write failed:', e);
+                }
+            }
+
             // Resolve the admin's username from their email up front, before the
             // early-return below, so it's always available for the Activity Log
             // and login-alert features - including on a page refresh where the
@@ -7655,7 +7783,7 @@
                                 </div>
                                 ${data.serverRegion ? `<p><b>Server:</b> <span class="highlight-id">${data.serverRegion}</span></p>` : ''}
                                 ${data.location ? `<p><b>Order Location:</b> <a href="https://www.google.com/maps?q=${data.location.lat},${data.location.lng}" target="_blank" style="color:var(--accent);">View on Map</a></p>` : ''}
-                                ${data.receiptUrl ? `<p><b>Receipt:</b> <a href="${escapeHtml(data.receiptUrl)}" target="_blank" style="color:var(--accent);">View Screenshot</a></p><img src="${escapeHtml(data.receiptUrl)}" loading="lazy" decoding="async" style="width:100%;max-height:180px;object-fit:contain;border-radius:8px;background:var(--bg-subtle);margin-top:6px;">` : ''
+                                ${data.receiptUrl ? `<p><b>Receipt:</b> <a href="${escapeHtml(data.receiptUrl)}" target="_blank" style="color:var(--accent);">View Screenshot</a></p><img src="${escapeHtml(data.receiptUrl)}" loading="lazy" decoding="async" style="width:100%;max-height:180px;object-fit:contain;border-radius:8px;background:var(--bg-subtle);margin-top:6px;">` : ''}
                                 ${Array.isArray(data.deliveredCodes) && data.deliveredCodes.length ? `<div style="margin-top:8px;padding:10px;background:var(--fill-soft);border-radius:8px;">
                                     <div style="font-size:11px;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.3px;margin-bottom:6px;">Delivered Voucher Code${data.deliveredCodes.length > 1 ? 's' : ''} — copy &amp; send to customer</div>
                                     ${data.deliveredCodes.map(c => `<div class="mono" style="font-size:13px;padding:4px 0;word-break:break-all;">${escapeHtml(String(c))}</div>`).join('')}
@@ -13474,7 +13602,7 @@
                                 </div>
                             </div>
                             ${o.serverRegion ? `<p><b>Server:</b> <span class="highlight-id">${o.serverRegion}</span></p>` : ''}
-                            ${o.receiptUrl ? `<p><b>Receipt:</b> <a href="${escapeHtml(o.receiptUrl)}" target="_blank" style="color:var(--accent);">View Screenshot</a></p><img src="${escapeHtml(o.receiptUrl)}" loading="lazy" decoding="async" style="width:100%;max-height:180px;object-fit:contain;border-radius:8px;background:var(--bg-subtle);margin-top:6px;">` : ''
+                            ${o.receiptUrl ? `<p><b>Receipt:</b> <a href="${escapeHtml(o.receiptUrl)}" target="_blank" style="color:var(--accent);">View Screenshot</a></p><img src="${escapeHtml(o.receiptUrl)}" loading="lazy" decoding="async" style="width:100%;max-height:180px;object-fit:contain;border-radius:8px;background:var(--bg-subtle);margin-top:6px;">` : ''}
                         </div>
                     </div>
                 `;
