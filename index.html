@@ -8,14 +8,17 @@
          debugging. Loaded as a plain script (not type="module") so it still
          runs even if the main Firebase module script below fails entirely. -->
     <script>
-        // Debug console (eruda) is now OPT-IN. It used to load unpinned from a CDN on
-        // every visit, which put third-party code (and a full inspector) inside the
-        // page that holds the admin session and the provider API keys.
-        // To use it: open the panel with #debug at the end of the URL (or run
-        // localStorage.setItem('pca_debug','1') once). It stays off for everyone else.
+        // Debug console (eruda) — turned ON by default for now so errors are
+        // visible right on the phone (tap the floating button in the corner →
+        // Console tab). Note: this loads a third-party inspector script from
+        // a CDN on every visit, which isn't something you'd normally want
+        // permanently on an admin panel holding provider API keys — once
+        // debugging is done, consider setting ERUDA_DEFAULT_ON back to false
+        // below (it can still be turned on per-device with #debug in the URL).
+        var ERUDA_DEFAULT_ON = true;
         (function () {
             try {
-                if (location.hash === '#debug' || localStorage.getItem('pca_debug') === '1') {
+                if (ERUDA_DEFAULT_ON || location.hash === '#debug' || localStorage.getItem('pca_debug') === '1') {
                     var s = document.createElement('script');
                     s.src = 'https://cdn.jsdelivr.net/npm/eruda@3';
                     s.onload = function () { if (window.eruda) eruda.init(); };
@@ -1816,7 +1819,7 @@
     <!-- Login gate: nothing in the admin panel loads until this passes.
          Steps: password -> (verify email if needed) -> TOTP enroll (first time)
          or TOTP challenge (already enrolled) -> app unlocks. -->
-    <div id="login-screen">
+    <div id="login-screen" class="hidden">
         <!-- Static gradient-mesh backdrop (decorative only, no motion) -->
         <div class="login-mesh" aria-hidden="true"></div>
         <div class="login-card" id="login-box">
@@ -2635,7 +2638,7 @@
                 </div>
             </div>
 
-            <div class="admin-card" id="settings-card-walletexpire" style="margin-top:14px;">
+            <div class="admin-card" id="settings-card-walletexpire" style="margin-top:14px;display:none;">
                 <div style="display:flex;justify-content:space-between;align-items:center;cursor:pointer;" onclick="toggleWalletExpireSettings()">
                     <span style="font-size:15px;font-weight: 600;">Wallet Top Up Auto-Expire</span>
                     <svg class="ui-icon" id="wallet-expire-chevron" style="width:18px;height:18px;color:var(--text-secondary);transition:transform 0.2s;"><use href="#icon-chevron-down"></use></svg>
@@ -2751,7 +2754,7 @@
                             <span class="toggle-slider"></span>
                         </label>
                     </div>
-                    <p id="admin-login-status" style="font-size:12px;color:var(--text-secondary);margin:10px 0 4px;">Login is always required — this can no longer be turned off.</p>
+                    <p id="admin-login-status" style="font-size:12px;color:var(--text-secondary);margin:10px 0 4px;">No login screen anymore — the panel signs itself in automatically using the credentials set in AUTO_ADMIN_LOGIN in the code.</p>
                 </div>
             </div>
 
@@ -2763,7 +2766,7 @@
                  enforce access — see renderRolesOverview() — so it can never
                  drift out of sync with the real behaviour. Full Access only,
                  same as Admin Accounts below. -->
-            <div class="admin-card" style="margin-top:14px;" id="roles-overview-card">
+            <div class="admin-card" style="margin-top:14px;display:none;" id="roles-overview-card">
                 <div style="display:flex;justify-content:space-between;align-items:center;cursor:pointer;" onclick="toggleRolesOverview()">
                     <div style="display:flex;align-items:center;gap:8px;">
                         <svg class="ui-icon" style="width:18px;height:18px;color:var(--text-secondary);"><use href="#icon-shield"></use></svg>
@@ -2804,7 +2807,7 @@
                  sidebar sections from non-owner admins (Product/Account),
                  on top of the fixed role rules above. Full Access only —
                  see canManageAdmins() / renderTabAccessSettings(). -->
-            <div class="admin-card" style="margin-top:14px;" id="tab-access-card">
+            <div class="admin-card" style="margin-top:14px;display:none;" id="tab-access-card">
                 <div style="display:flex;justify-content:space-between;align-items:center;cursor:pointer;" onclick="toggleTabAccess()">
                     <div style="display:flex;align-items:center;gap:8px;">
                         <svg class="ui-icon" style="width:18px;height:18px;color:var(--text-secondary);"><use href="#icon-shield"></use></svg>
@@ -4392,6 +4395,8 @@
             // login. skipApiKeysGate=true is only ever passed by
             // confirmApiKeysMfa() itself, right after a code just verified.
             if (pageId === 'api-docs' && !skipApiKeysGate) { openApiKeysMfaGate(); return; }
+            // Admin Broadcast (Notify) removed — send anyone still routed here to Settings.
+            if (pageId === 'notify-list') pageId = 'settings';
             const grantedByPermission = pageGrantedByPermission(pageId);
             if (currentAdminRole === 'product' && PRODUCT_ROLE_BLOCKED_PAGES.includes(pageId) && !grantedByPermission) pageId = 'dashboard';
             // Owner-disabled Tab Access re-check: even a direct showPage(...)
@@ -4487,7 +4492,6 @@
             ]},
             setting: { title: 'Setting', items: [
                 { label: 'General', icon: '#icon-gear', run: () => showPage('settings') },
-                { label: 'Notify', icon: '#icon-bell', run: () => showPage('notify-list') },
                 { label: 'Ticker', icon: '#icon-megaphone', run: () => showPage('ticker-list') }
             ]}
         };
@@ -5666,6 +5670,20 @@
         let currentAdminIP = null;
         let pendingEnrollSecret = null;
 
+        // ---------- Admin Login screen removed ----------
+        // Fill in an existing admin's username + password below and the panel
+        // signs itself in silently on every load — no login form, no
+        // Authenticator prompt. Firebase Auth itself is still required behind
+        // the scenes (Firestore's security rules depend on it), it's just no
+        // longer something a human has to do by hand.
+        //
+        // If this admin hasn't finished Authenticator (TOTP) enrollment yet,
+        // a fresh secret is generated and saved automatically the first time
+        // this runs — nothing to scan or type in.
+        //
+        // Leave both blank to fall back to the normal login screen.
+        const AUTO_ADMIN_LOGIN = { username: '', password: '' };
+
         // ---------- Admin Login gate ----------
         // The "Login OFF" mode (settings/adminAuth.loginEnabled, toggleable
         // from this panel) has been removed. It relied only on Firestore
@@ -5675,7 +5693,10 @@
         // disabled checkbox in the HTML above).
         function renderAdminLoginStatus() {
             const status = document.getElementById('admin-login-status');
-            if (status) status.textContent = 'Login is always required to open this panel.';
+            const configured = !!(AUTO_ADMIN_LOGIN.username && AUTO_ADMIN_LOGIN.password);
+            if (status) status.textContent = configured
+                ? 'Signed in automatically — no login screen shown.'
+                : 'AUTO_ADMIN_LOGIN is not filled in yet, so the login screen still appears.';
         }
         window.renderAdminLoginStatus = renderAdminLoginStatus;
 
@@ -5878,7 +5899,9 @@
         let adminPermissionsPending = {};  // { 'group-dashboard': true/false, ... }
 
         function openAdminPermissionsModal(username) {
-            if (!canManageAdmins()) { window.showToast('Only Full Access admins can change access permissions.', 'fail'); return; }
+            // Role & Permission system removed — every admin has full access now.
+            window.showToast('Every admin now has full access — permissions are no longer used.', 'info');
+            return;
             const admin = ADMIN_ACCOUNTS.find(a => a.username === username);
             if (!admin) return;
             adminPermissionsTarget = username;
@@ -6969,8 +6992,10 @@
                 const usnap = await getDocs(uq);
                 if (!usnap.empty) {
                     currentAdminUsername = usnap.docs[0].id;
-                    currentAdminRole = usnap.docs[0].data().role || 'full';
-                    window.currentAdminPermissions = usnap.docs[0].data().permissions || null;
+                    // Role & Permission system removed: every signed-in admin now
+                    // always gets Full Access, regardless of what's stored.
+                    currentAdminRole = 'full';
+                    window.currentAdminPermissions = null;
                 }
             } catch (e) { console.error('Admin username lookup error:', e); }
 
@@ -6986,6 +7011,19 @@
                     totpSecret = d.data().totpSecret || null;
                 }
             } catch (e) { console.error('MFA lookup error:', e); }
+
+            // Admin Login screen removed: when auto sign-in is configured
+            // (see AUTO_ADMIN_LOGIN above), finish the Authenticator step
+            // silently instead of showing the QR/code screen — enroll a
+            // fresh secret automatically if this admin has none yet.
+            if (AUTO_ADMIN_LOGIN.username && AUTO_ADMIN_LOGIN.password) {
+                if (!totpSecret && pendingUsername) {
+                    const newSecret = randomBase32Secret();
+                    try { await setDoc(doc(db, "adminUsernames", pendingUsername), { totpSecret: newSecret }, { merge: true }); } catch (e) { console.error(e); }
+                }
+                unlockAdminApp();
+                return;
+            }
 
             document.getElementById('step-login').style.display = 'none';
             if (totpSecret) {
@@ -7066,6 +7104,21 @@
         }
         window.confirmMfaChallenge = confirmMfaChallenge;
 
+        async function tryAutoAdminLogin() {
+            if (!AUTO_ADMIN_LOGIN.username || !AUTO_ADMIN_LOGIN.password) return false;
+            try {
+                const username = AUTO_ADMIN_LOGIN.username.trim().toLowerCase();
+                const email = await lookupAdminEmailByUsername(username);
+                if (!email) { console.error('Auto admin login: username not found.'); return false; }
+                pendingUsername = username;
+                await signInWithEmailAndPassword(auth, email, AUTO_ADMIN_LOGIN.password);
+                return true;
+            } catch (e) {
+                console.error('Auto admin login failed:', e);
+                return false;
+            }
+        }
+
         onAuthStateChanged(auth, (user) => {
             const loginScreen = document.getElementById('login-screen');
             const loginBtn = document.getElementById('login-btn');
@@ -7075,13 +7128,15 @@
             } else {
                 adminAppStarted = false;
                 sessionStorage.removeItem('pca_mfa_ok');
-                loginScreen.classList.remove('hidden');
                 resetGateLocked();
                 currentAdminUsername = null;
                 currentAdminIP = null;
                 currentAdminRole = 'full';
                 window.currentAdminPermissions = null;
                 activityLogListenerAttached = false;
+                tryAutoAdminLogin().then((ok) => {
+                    if (!ok) loginScreen.classList.remove('hidden');
+                });
             }
         });
 
@@ -9088,6 +9143,7 @@
         // Pending requests and expires them. Cheap no-op when the feature
         // is off or nothing has aged out yet.
         function checkWalletTopupAutoExpire(items) {
+            return; // Wallet Top Up Auto-Expire feature removed.
             if (!walletExpireSettingsLoaded || !WALLET_TOPUP_EXPIRY_ENABLED) return;
             const cutoffMs = Date.now() - WALLET_TOPUP_EXPIRY_DAYS * 24 * 60 * 60 * 1000;
             Object.values(items).forEach(t => {
