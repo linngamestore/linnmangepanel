@@ -17401,7 +17401,7 @@
             onSnapshot(doc(db, "settings", "jcplays"), (docSnap) => {
                 const data = docSnap.exists() ? docSnap.data() : {};
                 document.getElementById('jcplays-base-url').value = data.baseUrl || 'https://jcplays.com/smilecoin/api';
-                document.getElementById('jcplays-proxy-url').value = data.proxyUrl || 'https://jcplays-provider.linngamestore.workers.dev';
+                document.getElementById('jcplays-proxy-url').value = data.proxyUrl || 'https://jcplays-provider.linngamestore.workers.dev/jcplays-proxy';
                 document.getElementById('jcplays-uid').value = data.uid || '';
                 document.getElementById('jcplays-email').value = data.email || '';
                 document.getElementById('jcplays-mkey').value = data.mKey || '';
