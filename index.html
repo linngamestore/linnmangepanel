@@ -2423,8 +2423,57 @@
                         <span id="social-tiktok-remove" style="font-size:11px;color:var(--danger);cursor:pointer;display:none;" onclick="removeSocialImage('tiktok')">Remove image</span>
                     </div>
 
+                    <div style="border-top:1px solid var(--fill-soft);margin:4px 0 14px;padding-top:14px;">
+                        <span style="font-size:13px;font-weight:600;">Support Contact (Header Icons)</span>
+                        <p style="font-size:11.5px;color:var(--text-secondary);margin:4px 0 12px;">Messenger နဲ့ Telegram username ကိုပဲ ထည့်ပါ (link တစ်ခုလုံး မလိုပါ) - Store ရဲ့ header ပေါ်က Support icon တွေအတွက် ဖြစ်ပါတယ်။</p>
+
+                        <label style="font-size:13px;font-weight: 500;color:var(--text-secondary);">Messenger Username</label>
+                        <div style="display:flex;gap:8px;align-items:center;margin:6px 0 4px;">
+                            <div class="pkg-img-preview" style="width:44px;height:44px;" onclick="document.getElementById('social-supportMessenger-file').click()">
+                                <img class="pkg-img-tag" id="social-supportMessenger-img-tag" src="" loading="lazy" decoding="async" style="display:none;">
+                                <span class="pkg-img-placeholder" id="social-supportMessenger-img-placeholder">+ Icon</span>
+                            </div>
+                            <input type="text" id="social-supportMessenger" placeholder="yourpage (m.me/yourpage)" style="flex:1;padding:10px;border:1px solid var(--fill-soft);border-radius:8px;font-size:14px;">
+                            <input type="file" id="social-supportMessenger-file" accept="image/*" style="display:none;" onchange="previewSocialImage(event,'supportMessenger')">
+                        </div>
+                        <div style="display:flex;justify-content:flex-end;margin:0 0 12px;">
+                            <span id="social-supportMessenger-remove" style="font-size:11px;color:var(--danger);cursor:pointer;display:none;" onclick="removeSocialImage('supportMessenger')">Remove image</span>
+                        </div>
+
+                        <label style="font-size:13px;font-weight: 500;color:var(--text-secondary);">Telegram Username</label>
+                        <div style="display:flex;gap:8px;align-items:center;margin:6px 0 4px;">
+                            <div class="pkg-img-preview" style="width:44px;height:44px;" onclick="document.getElementById('social-supportTelegram-file').click()">
+                                <img class="pkg-img-tag" id="social-supportTelegram-img-tag" src="" loading="lazy" decoding="async" style="display:none;">
+                                <span class="pkg-img-placeholder" id="social-supportTelegram-img-placeholder">+ Icon</span>
+                            </div>
+                            <input type="text" id="social-supportTelegram" placeholder="yourchannel (t.me/yourchannel)" style="flex:1;padding:10px;border:1px solid var(--fill-soft);border-radius:8px;font-size:14px;">
+                            <input type="file" id="social-supportTelegram-file" accept="image/*" style="display:none;" onchange="previewSocialImage(event,'supportTelegram')">
+                        </div>
+                        <div style="display:flex;justify-content:flex-end;margin:0 0 12px;">
+                            <span id="social-supportTelegram-remove" style="font-size:11px;color:var(--danger);cursor:pointer;display:none;" onclick="removeSocialImage('supportTelegram')">Remove image</span>
+                        </div>
+                    </div>
+
                     <p id="social-upload-status" style="font-size:12px;color:var(--text-secondary);display:none;margin:0 0 10px;"></p>
                     <button class="btn btn-primary" id="save-social-btn" onclick="saveSocialLinks()">Save Social Links</button>
+                </div>
+            </div>
+
+            <div class="admin-card" id="settings-card-homebanner" style="margin-top:14px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;cursor:pointer;" onclick="toggleHomeBannerSettings()">
+                    <span style="font-size:15px;font-weight: 600;">Home Banner Carousel</span>
+                    <svg class="ui-icon" id="homebanner-chevron" style="width:18px;height:18px;color:var(--text-secondary);transition:transform 0.2s;"><use href="#icon-chevron-down"></use></svg>
+                </div>
+                <div id="homebanner-body" style="display:none;margin-top:12px;">
+                    <p style="font-size:12px;color:var(--text-secondary);margin:0 0 12px;">Images shown in the swipeable carousel at the top of the store's Home page (16:9). Add one or more; customers see them in this order.</p>
+                    <label class="img-update-box ratio-banner" id="homebanner-update-box" for="edit-homebanner-file">
+                        <div class="img-update-icon"><svg class="ui-icon"><use href="#icon-camera"></use></svg></div>
+                        <span class="img-update-label">Add Banner Images</span>
+                    </label>
+                    <input type="file" id="edit-homebanner-file" class="img-update-input" accept="image/*" multiple onchange="previewHomeBanners(event)">
+                    <p id="homebanner-upload-status" style="font-size:12px;color:var(--text-secondary);display:none;"></p>
+                    <div id="homebanner-gallery" class="game-banner-gallery" aria-label="Home banner images"></div>
+                    <button class="btn btn-primary" id="save-homebanner-btn" style="margin-top:10px;" onclick="saveHomeBanners()">Save Home Banners</button>
                 </div>
             </div>
 
@@ -5464,6 +5513,7 @@
         // subscribeTabListeners() when Settings is opened.
         function startAdminApp() {
             listenBranding();
+            listenHomeBanners();
             listenG2Bulk();
             listenFazerCard();
             listenJCPlays();
@@ -7205,7 +7255,7 @@
 
                 let data;
                 try {
-                    const res = await fetch(`https://g2bulk-provider.linngamestore.workers.dev/v1/games/${encodeURIComponent(order.g2bulkGameCode)}/order`, {
+                    const res = await fetch(`https://api.g2bulk.com/v1/games/${encodeURIComponent(order.g2bulkGameCode)}/order`, {
                         method: 'POST',
                         headers: { 'X-API-Key': G2BULK_SETTINGS.apiKey, 'X-Idempotency-Key': sub.idempotencyKey, 'Content-Type': 'application/json' },
                         body: JSON.stringify({
@@ -7348,7 +7398,7 @@
 
                 for (const sub of subOrders) {
                     if (sub.result || !sub.g2bulkOrderId) continue; // already terminal, or never got an id
-                    const res = await fetch('https://g2bulk-provider.linngamestore.workers.dev/v1/games/order/status', {
+                    const res = await fetch('https://api.g2bulk.com/v1/games/order/status', {
                         method: 'POST',
                         headers: { 'X-API-Key': G2BULK_SETTINGS.apiKey, 'Content-Type': 'application/json' },
                         body: JSON.stringify({ order_id: sub.g2bulkOrderId })
@@ -7852,7 +7902,7 @@
             // FazerCards regardless of which provider resolved the name.
             if (!playerName && linkedGame && linkedGame.g2bulkIdCheckCode) {
                 try {
-                    const res = await fetch('https://g2bulk-provider.linngamestore.workers.dev/v1/games/checkPlayerId', {
+                    const res = await fetch('https://api.g2bulk.com/v1/games/checkPlayerId', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ game: linkedGame.g2bulkIdCheckCode, user_id: order.playerId, server_id: order.serverId || undefined })
@@ -7959,7 +8009,7 @@
 
             let data;
             try {
-                const res = await fetch(`https://g2bulk-provider.linngamestore.workers.dev/v1/products/${encodeURIComponent(order.g2bulkVoucherProductId)}/purchase`, {
+                const res = await fetch(`https://api.g2bulk.com/v1/products/${encodeURIComponent(order.g2bulkVoucherProductId)}/purchase`, {
                     method: 'POST',
                     headers: { 'X-API-Key': G2BULK_SETTINGS.apiKey, 'X-Idempotency-Key': idempotencyKey, 'Content-Type': 'application/json' },
                     body: JSON.stringify({ quantity: order.quantity || 1 })
@@ -8022,7 +8072,7 @@
                 return;
             }
             try {
-                const url = pollUrl.startsWith('http') ? pollUrl : `https://g2bulk-provider.linngamestore.workers.dev${pollUrl}`;
+                const url = pollUrl.startsWith('http') ? pollUrl : `https://api.g2bulk.com${pollUrl}`;
                 const res = await fetch(url, { headers: { 'X-API-Key': G2BULK_SETTINGS.apiKey } });
                 const data = await res.json().catch(() => ({}));
 
@@ -9770,7 +9820,7 @@
             let changed = 0;
             try {
                 if (g.g2bulkCode) {
-                    const res = await fetch(`https://g2bulk-provider.linngamestore.workers.dev/v1/games/${encodeURIComponent(g.g2bulkCode)}/catalogue`);
+                    const res = await fetch(`https://api.g2bulk.com/v1/games/${encodeURIComponent(g.g2bulkCode)}/catalogue`);
                     const data = await res.json();
                     if (data.success) {
                         const liveByName = new Map((data.catalogues || []).map(c => [c.name, Math.round(c.amount * rate)]));
@@ -9834,7 +9884,7 @@
             let outCount = 0;
             try {
                 if (g.g2bulkCode) {
-                    const res = await fetch(`https://g2bulk-provider.linngamestore.workers.dev/v1/games/${encodeURIComponent(g.g2bulkCode)}/catalogue`);
+                    const res = await fetch(`https://api.g2bulk.com/v1/games/${encodeURIComponent(g.g2bulkCode)}/catalogue`);
                     const data = await res.json();
                     if (data.success) {
                         const liveNames = new Set((data.catalogues || []).map(c => c.name));
@@ -9967,7 +10017,7 @@
 
                 if (g.g2bulkCode) {
                     try {
-                        const res = await fetch(`https://g2bulk-provider.linngamestore.workers.dev/v1/games/${encodeURIComponent(g.g2bulkCode)}/catalogue`);
+                        const res = await fetch(`https://api.g2bulk.com/v1/games/${encodeURIComponent(g.g2bulkCode)}/catalogue`);
                         const data = await res.json();
                         if (!data.success) throw new Error(data.message || 'Check failed');
                         sources.push({ keyField: 'g2bulk', liveByKey: new Map((data.catalogues || []).map(c => [c.name, Math.round(c.amount * rate)])) });
@@ -10043,7 +10093,7 @@
             const sources = [];
             if (g.g2bulkCode) {
                 try {
-                    const res = await fetch(`https://g2bulk-provider.linngamestore.workers.dev/v1/games/${encodeURIComponent(g.g2bulkCode)}/catalogue`);
+                    const res = await fetch(`https://api.g2bulk.com/v1/games/${encodeURIComponent(g.g2bulkCode)}/catalogue`);
                     const data = await res.json();
                     if (data.success) sources.push({ keyField: 'g2bulk', liveByKey: new Map((data.catalogues || []).map(c => [c.name, Math.round(c.amount * rate)])) });
                 } catch (error) { console.error('Auto price update — G2Bulk fetch error:', gameId, error); }
@@ -13475,15 +13525,29 @@
         }
         window.saveTierSettings = saveTierSettings;
 
-        // ---------- Social Links (shown as icons on the Store app's Profile page) ----------
+        // ---------- Social Links (shown as icons on the Store app's Profile page), ----------
+        // plus the "Support Contact" username/icon fields for the Messenger &
+        // Telegram buttons shown in the Store app's header.
         let socialListenerAttached = false;
         // Per-platform icon image the admin is about to upload (null = keep
         // whatever's already saved), and a separate flag for "explicitly
         // removed" so Save knows to clear that field instead of leaving it
         // untouched. Store.html falls back to its own default icon/color
         // whenever a platform has no uploaded image.
-        let editingSocialImageFiles = { facebook: null, telegram: null, tiktok: null };
-        let removedSocialImages = { facebook: false, telegram: false, tiktok: false };
+        let editingSocialImageFiles = { facebook: null, telegram: null, tiktok: null, supportMessenger: null, supportTelegram: null };
+        let removedSocialImages = { facebook: false, telegram: false, tiktok: false, supportMessenger: false, supportTelegram: false };
+        // Platform list for the "Support Contact (Header Icons)" fields - these
+        // store a bare username (e.g. "yourpage"), not a full URL, since
+        // store.html builds the m.me/t.me link itself. Accepts a pasted full
+        // URL or a leading "@" too and normalizes it down to just the username.
+        const SUPPORT_CONTACT_PLATFORMS = { supportMessenger: /^(https?:\/\/)?(www\.)?m\.me\//i, supportTelegram: /^(https?:\/\/)?(www\.)?t\.me\//i };
+        function normalizeSupportUsername(raw, platform) {
+            let v = (raw || '').trim();
+            const prefixRe = SUPPORT_CONTACT_PLATFORMS[platform];
+            if (prefixRe) v = v.replace(prefixRe, '');
+            v = v.replace(/^@/, '').replace(/\/+$/, '');
+            return v;
+        }
 
         // datetime-local inputs use the browser's local time zone with no
         // offset info, so both directions here go through the local Date
@@ -13552,7 +13616,9 @@
                 document.getElementById('social-facebook').value = data.facebook || '';
                 document.getElementById('social-telegram').value = data.telegram || '';
                 document.getElementById('social-tiktok').value = data.tiktok || '';
-                ['facebook', 'telegram', 'tiktok'].forEach(platform => {
+                document.getElementById('social-supportMessenger').value = data.supportMessenger || '';
+                document.getElementById('social-supportTelegram').value = data.supportTelegram || '';
+                ['facebook', 'telegram', 'tiktok', 'supportMessenger', 'supportTelegram'].forEach(platform => {
                     // Don't clobber an image the admin just picked but hasn't saved yet.
                     if (editingSocialImageFiles[platform]) return;
                     const url = data[`${platform}Image`] || '';
@@ -13611,6 +13677,8 @@
             const facebook = document.getElementById('social-facebook').value.trim();
             const telegram = document.getElementById('social-telegram').value.trim();
             const tiktok = document.getElementById('social-tiktok').value.trim();
+            const supportMessenger = normalizeSupportUsername(document.getElementById('social-supportMessenger').value, 'supportMessenger');
+            const supportTelegram = normalizeSupportUsername(document.getElementById('social-supportTelegram').value, 'supportTelegram');
 
             const btn = document.getElementById('save-social-btn');
             const originalText = btn.innerText;
@@ -13618,8 +13686,8 @@
             btn.innerText = 'Saving...';
 
             try {
-                const data = { facebook, telegram, tiktok };
-                for (const platform of ['facebook', 'telegram', 'tiktok']) {
+                const data = { facebook, telegram, tiktok, supportMessenger, supportTelegram };
+                for (const platform of ['facebook', 'telegram', 'tiktok', 'supportMessenger', 'supportTelegram']) {
                     if (editingSocialImageFiles[platform]) {
                         data[`${platform}Image`] = await uploadImageToImgBB(editingSocialImageFiles[platform], 'social-upload-status');
                     } else if (removedSocialImages[platform]) {
@@ -13628,8 +13696,10 @@
                     // else: leave that field alone (merge:true keeps the saved value)
                 }
                 await setDoc(doc(db, "settings", "social"), data, { merge: true });
-                editingSocialImageFiles = { facebook: null, telegram: null, tiktok: null };
-                removedSocialImages = { facebook: false, telegram: false, tiktok: false };
+                document.getElementById('social-supportMessenger').value = supportMessenger;
+                document.getElementById('social-supportTelegram').value = supportTelegram;
+                editingSocialImageFiles = { facebook: null, telegram: null, tiktok: null, supportMessenger: null, supportTelegram: null };
+                removedSocialImages = { facebook: false, telegram: false, tiktok: false, supportMessenger: false, supportTelegram: false };
                 logAdminActivity('Saved social links');
                 window.showToast('Social links saved!', 'success');
             } catch (error) {
@@ -13802,6 +13872,97 @@
             }
         }
         window.saveLogo = saveLogo;
+
+        // ---------- Home Banner Carousel (settings/homeBanners, images: [url, ...]) ----------
+        // Store.html reads this doc and builds the Home-page carousel slides from
+        // it (falling back to its own default /banners/*.jpg if the doc is empty),
+        // so the order of `images` here is the order customers see them in.
+        let editingHomeBannerFiles = [];
+        let editingHomeBannerUrls = [];
+        let homeBannerListenerAttached = false;
+
+        function toggleHomeBannerSettings() {
+            const body = document.getElementById('homebanner-body');
+            const chevron = document.getElementById('homebanner-chevron');
+            const isOpen = body.style.display === 'block';
+            body.style.display = isOpen ? 'none' : 'block';
+            chevron.style.transform = isOpen ? 'rotate(0deg)' : 'rotate(180deg)';
+        }
+        window.toggleHomeBannerSettings = toggleHomeBannerSettings;
+
+        function renderHomeBannerGallery() {
+            const gallery = document.getElementById('homebanner-gallery');
+            if (!gallery) return;
+            const urls = editingHomeBannerUrls.slice();
+            gallery.innerHTML = urls.map((url, i) => `<div class="game-banner-thumb" data-index="${i}"><img src="${url}" loading="lazy" decoding="async" alt="Banner ${i + 1}"><button type="button" onclick="removeHomeBannerImage(${i})" aria-label="Remove banner">×</button></div>`).join('');
+        }
+
+        function removeHomeBannerImage(index) {
+            editingHomeBannerUrls.splice(index, 1);
+            editingHomeBannerFiles.splice(index, 1);
+            renderHomeBannerGallery();
+        }
+        window.removeHomeBannerImage = removeHomeBannerImage;
+
+        function previewHomeBanners(e) {
+            const files = Array.from(e.target.files || []).filter(f => f.type.startsWith('image/'));
+            if (!files.length) return;
+            files.forEach(file => {
+                editingHomeBannerFiles.push(file);
+                const reader = new FileReader();
+                reader.onload = ev => { editingHomeBannerUrls.push(ev.target.result); renderHomeBannerGallery(); };
+                reader.readAsDataURL(file);
+            });
+            e.target.value = '';
+        }
+        window.previewHomeBanners = previewHomeBanners;
+
+        function listenHomeBanners() {
+            if (homeBannerListenerAttached) return;
+            homeBannerListenerAttached = true;
+            onSnapshot(doc(db, "settings", "homeBanners"), (docSnap) => {
+                const data = docSnap.exists() ? docSnap.data() : {};
+                editingHomeBannerUrls = Array.isArray(data.images) ? data.images.slice() : [];
+                editingHomeBannerFiles = editingHomeBannerUrls.map(() => null); // null = already-uploaded URL, not a pending File
+                renderHomeBannerGallery();
+            }, (error) => {
+                console.error("Home banner listener error:", error);
+            });
+        }
+
+        async function saveHomeBanners() {
+            const btn = document.getElementById('save-homebanner-btn');
+            const originalText = btn.innerText;
+            btn.disabled = true;
+            btn.innerText = 'Saving...';
+            try {
+                const finalUrls = [];
+                for (let i = 0; i < editingHomeBannerUrls.length; i++) {
+                    const file = editingHomeBannerFiles[i];
+                    if (file) {
+                        // Pending local file (data: URL preview) — upload it now.
+                        const uploaded = await uploadImageToImgBB(file, 'homebanner-upload-status');
+                        finalUrls.push(uploaded);
+                    } else {
+                        // Already a hosted URL from a previous save — keep as-is.
+                        finalUrls.push(editingHomeBannerUrls[i]);
+                    }
+                }
+                await setDoc(doc(db, "settings", "homeBanners"), { images: finalUrls }, { merge: true });
+                editingHomeBannerUrls = finalUrls;
+                editingHomeBannerFiles = finalUrls.map(() => null);
+                renderHomeBannerGallery();
+                logAdminActivity('Updated home banner carousel', `${finalUrls.length} image(s)`);
+                window.showToast('Home banners updated!', 'success');
+            } catch (error) {
+                console.error("Save home banners error:", error);
+                window.showToast(error.message || 'Failed to update home banners.', 'fail');
+            } finally {
+                btn.disabled = false;
+                btn.innerText = originalText;
+            }
+        }
+        window.saveHomeBanners = saveHomeBanners;
 
         // ---------- G2Bulk API Key (stored in Firestore, not hardcoded - see saveG2BulkKey) ----------
         let g2bulkListenerAttached = false;
@@ -14344,7 +14505,7 @@
         async function fetchLiveG2BulkBalance() {
             if (!G2BULK_SETTINGS.apiKey) return null;
             try {
-                const res = await fetch('https://g2bulk-provider.linngamestore.workers.dev/api/v2', {
+                const res = await fetch('https://api.g2bulk.com/api/v2', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ key: G2BULK_SETTINGS.apiKey, action: 'balance' })
@@ -14746,7 +14907,7 @@
             g2bulkBalanceLastFetchedAt = Date.now();
 
             try {
-                const res = await fetch('https://g2bulk-provider.linngamestore.workers.dev/api/v2', {
+                const res = await fetch('https://api.g2bulk.com/api/v2', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ key: G2BULK_SETTINGS.apiKey, action: 'balance' })
@@ -14854,7 +15015,7 @@
             listEl.innerHTML = '<p class="empty-msg">Loading...</p>';
 
             try {
-                const res = await fetch('https://g2bulk-provider.linngamestore.workers.dev/v1/transactions?page=1&limit=20', {
+                const res = await fetch('https://api.g2bulk.com/v1/transactions?page=1&limit=20', {
                     headers: { 'X-API-Key': G2BULK_SETTINGS.apiKey }
                 });
                 const data = await res.json();
@@ -14896,7 +15057,7 @@
 
         async function fetchG2BulkGamesList(forceRefresh = false) {
             if (G2BULK_GAMES_LIST && !forceRefresh) return G2BULK_GAMES_LIST;
-            const res = await fetch('https://g2bulk-provider.linngamestore.workers.dev/v1/games');
+            const res = await fetch('https://api.g2bulk.com/v1/games');
             const data = await res.json();
             if (!data.success) throw new Error(data.message || 'Failed to load G2Bulk games list');
             G2BULK_GAMES_LIST = data.games || [];
@@ -14946,7 +15107,7 @@
             (games || []).forEach(g => {
                 const key = normalizeGameName(g.name);
                 if (!key) return;
-                const image = g.image_url ? (/^https?:\/\//.test(g.image_url) ? g.image_url : 'https://g2bulk-provider.linngamestore.workers.dev' + g.image_url) : '';
+                const image = g.image_url ? (/^https?:\/\//.test(g.image_url) ? g.image_url : 'https://api.g2bulk.com' + g.image_url) : '';
                 if (image && !index.has(key)) index.set(key, image);
             });
             G2BULK_IMAGE_INDEX = index;
@@ -14959,7 +15120,7 @@
             return (name || '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim().split(' ').filter(w => w.length >= 3);
         }
         function g2bulkImageUrl(g) {
-            return g.image_url ? (/^https?:\/\//.test(g.image_url) ? g.image_url : 'https://g2bulk-provider.linngamestore.workers.dev' + g.image_url) : '';
+            return g.image_url ? (/^https?:\/\//.test(g.image_url) ? g.image_url : 'https://api.g2bulk.com' + g.image_url) : '';
         }
         function imageForGameName(name) {
             if (!G2BULK_IMAGE_INDEX) return '';
@@ -15071,7 +15232,7 @@
         // game needs (e.g. ["userid","serverid"]); POST /v1/games/servers
         // returns the server list for games that have one, or a 403 meaning
         // "no server needed" (not an error - see G2Bulk's docs at
-        // https://g2bulk-provider.linngamestore.workers.dev/docs#games). Fetched during
+        // https://api.g2bulk.com/docs#games). Fetched during
         // importG2BulkCatalogue and saved onto the game doc as
         // pair above, so store.html's renderServerIdField already knows how
         // to render a select for either provider without extra changes.
@@ -15474,7 +15635,7 @@
                 code: String(c.id),
                 name: c.title,
                 count: c.product_count,
-                image: c.image_url ? (/^https?:\/\//.test(c.image_url) ? c.image_url : 'https://g2bulk-provider.linngamestore.workers.dev' + c.image_url) : ''
+                image: c.image_url ? (/^https?:\/\//.test(c.image_url) ? c.image_url : 'https://api.g2bulk.com' + c.image_url) : ''
             }));
         }
 
@@ -15705,11 +15866,11 @@
             statusEl.style.color = 'var(--text-muted)';
             statusEl.innerText = 'Checking G2Bulk API for "' + code + '"...';
             try {
-                const fieldsRes = await fetch('https://g2bulk-provider.linngamestore.workers.dev/v1/games/fields', {
+                const fieldsRes = await fetch('https://api.g2bulk.com/v1/games/fields', {
                     method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ game: code })
                 });
                 const fieldsData = await fieldsRes.json();
-                const serversRes = await fetch('https://g2bulk-provider.linngamestore.workers.dev/v1/games/servers', {
+                const serversRes = await fetch('https://api.g2bulk.com/v1/games/servers', {
                     method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ game: code })
                 });
                 const serversData = await serversRes.json();
@@ -15742,7 +15903,7 @@
             statusEl.innerText = '';
 
             try {
-                const res = await fetch(`https://g2bulk-provider.linngamestore.workers.dev/v1/games/${encodeURIComponent(code)}/catalogue`);
+                const res = await fetch(`https://api.g2bulk.com/v1/games/${encodeURIComponent(code)}/catalogue`);
                 const data = await res.json();
                 if (!data.success) throw new Error(data.message || 'Import failed');
 
@@ -15785,7 +15946,7 @@
                 // answer instead of leaving it to the admin - same
                 // on-when-needed/off-when-not behavior as the FazerCards and
                 try {
-                    const fieldsRes = await fetch('https://g2bulk-provider.linngamestore.workers.dev/v1/games/fields', {
+                    const fieldsRes = await fetch('https://api.g2bulk.com/v1/games/fields', {
                         method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ game: code })
                     });
                     const fieldsData = await fieldsRes.json();
@@ -15813,7 +15974,7 @@
                         // Server ID field (pendingG2BulkServerMode stays null)
                         // if that ever happens despite /fields saying otherwise.
                         try {
-                            const serversRes = await fetch('https://g2bulk-provider.linngamestore.workers.dev/v1/games/servers', {
+                            const serversRes = await fetch('https://api.g2bulk.com/v1/games/servers', {
                                 method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ game: code })
                             });
                             const serversData = await serversRes.json();
@@ -16120,7 +16281,7 @@
         let G2BULK_CATEGORIES_LIST = null;
         async function fetchG2BulkCategoriesList(forceRefresh = false) {
             if (G2BULK_CATEGORIES_LIST && !forceRefresh) return G2BULK_CATEGORIES_LIST;
-            const res = await fetch('https://g2bulk-provider.linngamestore.workers.dev/v1/category');
+            const res = await fetch('https://api.g2bulk.com/v1/category');
             const data = await res.json();
             if (!data.success) throw new Error(data.message || 'Failed to load G2Bulk categories');
             G2BULK_CATEGORIES_LIST = data.categories || [];
@@ -16165,7 +16326,7 @@
             statusEl.innerText = '';
 
             try {
-                const res = await fetch(`https://g2bulk-provider.linngamestore.workers.dev/v1/category/${encodeURIComponent(categoryId)}`);
+                const res = await fetch(`https://api.g2bulk.com/v1/category/${encodeURIComponent(categoryId)}`);
                 const data = await res.json();
                 if (!data.success) throw new Error(data.message || 'Import failed');
 
@@ -16329,7 +16490,7 @@
                     g2bulkCategoryCache.set(categoryId, { data: sharedData, ts: Date.now() });
                     return sharedData;
                 }
-                return fetch(`https://g2bulk-provider.linngamestore.workers.dev/v1/category/${encodeURIComponent(categoryId)}`)
+                return fetch(`https://api.g2bulk.com/v1/category/${encodeURIComponent(categoryId)}`)
                     .then(res => res.json())
                     .then(data => {
                         g2bulkCategoryCache.set(categoryId, { data, ts: Date.now() });
@@ -16450,7 +16611,7 @@
                     });
                 } else {
                     if (g2bulkCodeVal) {
-                        const res = await fetch(`https://g2bulk-provider.linngamestore.workers.dev/v1/games/${encodeURIComponent(g2bulkCodeVal)}/catalogue`);
+                        const res = await fetch(`https://api.g2bulk.com/v1/games/${encodeURIComponent(g2bulkCodeVal)}/catalogue`);
                         const data = await res.json();
                         if (!data.success) throw new Error(data.message || 'Check failed');
                         const liveByName = new Map((data.catalogues || []).map(c => [c.name, Math.round(c.amount * rate)]));
@@ -16655,7 +16816,7 @@
             statusEl.innerText = 'Checking key...';
 
             try {
-                const res = await fetch('https://g2bulk-provider.linngamestore.workers.dev/v1/getMe', {
+                const res = await fetch('https://api.g2bulk.com/v1/getMe', {
                     headers: { 'X-API-Key': apiKey }
                 });
                 const data = await res.json();
