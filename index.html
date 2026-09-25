@@ -11213,7 +11213,33 @@
         // completely different catalogue/import flow), so while the
         // Vouchers tab is open every row falls back to the single shared
         // voucherId field instead, exactly as before.
-        
+        function refreshPackageRowProviderVisibility() {
+            const list = document.getElementById('edit-packages-list');
+            if (!list) return;
+            list.querySelectorAll('.package-row').forEach(row => {
+                const g2bulkField = row.querySelector('.pkg-g2bulk');
+                const jcplaysField = row.querySelector('.pkg-jcplays');
+                const voucherField = row.querySelector('.pkg-voucher-id');
+                const fazercardField = row.querySelector('.pkg-fazercard');
+                const fazercardGiftCardField = row.querySelector('.pkg-fazercard-giftcard-id');
+                [g2bulkField, jcplaysField, voucherField, fazercardField, fazercardGiftCardField].forEach(f => { if (f) f.style.display = 'none'; });
+
+                if (gameListTab === 'voucher') {
+                    if (voucherField) voucherField.style.display = '';
+                    return;
+                }
+
+                const provider = row.querySelector('.pkg-provider')?.value || 'manual';
+                if (provider === 'g2bulk') {
+                    if (g2bulkField) g2bulkField.style.display = '';
+                } else if (provider === 'jcplays') {
+                    if (jcplaysField) jcplaysField.style.display = '';
+                } else if (provider === 'fazercard') {
+                    if (fazercardField) fazercardField.style.display = '';
+                    if (fazercardGiftCardField) fazercardGiftCardField.style.display = '';
+                }
+            });
+        }
         window.refreshPackageRowProviderVisibility = refreshPackageRowProviderVisibility;
 
         // Uploads a package's card image to ImgBB the moment it's picked, showing
