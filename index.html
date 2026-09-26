@@ -1773,10 +1773,10 @@
                     <p id="first-admin-error" class="login-msg-error"></p>
                     <form id="first-admin-form" onsubmit="createFirstAdmin(); return false;">
                         <label for="first-admin-username">Username</label>
-                        <input type="text" id="first-admin-username" autocomplete="username" placeholder="Choose a username" autocapitalize="none" autocorrect="off" style="margin-bottom:18px;">
+                        <input type="text" id="first-admin-username" autocomplete="username" placeholder="Enter Username" autocapitalize="none" autocorrect="off" style="margin-bottom:18px;">
                         <label for="first-admin-password">Password</label>
                         <div class="field-wrap has-toggle">
-                            <input type="password" id="first-admin-password" autocomplete="new-password" placeholder="At least 6 characters">
+                            <input type="password" id="first-admin-password" autocomplete="new-password" placeholder="Enter Password">
                             <button type="button" class="pw-toggle-btn" onclick="toggleLoginPasswordVisibility('first-admin-password', this)" tabindex="-1" aria-label="Show password">
                                 <svg class="ui-icon"><use href="#icon-eye"></use></svg>
                             </button>
@@ -1791,13 +1791,13 @@
                     <p id="login-error" class="login-msg-error"></p>
                     <form id="login-form" onsubmit="handleAdminLogin(); return false;">
                         <label for="login-username">Username</label>
-                        <input type="text" id="login-username" autocomplete="username" placeholder="Enter your username" autocapitalize="none" autocorrect="off" style="margin-bottom:18px;">
+                        <input type="text" id="login-username" autocomplete="username" placeholder="Enter Username" autocapitalize="none" autocorrect="off" style="margin-bottom:18px;">
                         <div class="field-row">
                             <label for="login-password" style="margin-bottom:0;">Password</label>
                             <button type="button" class="forgot-link" onclick="handleForgotPassword()">Forgot password?</button>
                         </div>
                         <div class="field-wrap has-toggle">
-                            <input type="password" id="login-password" autocomplete="current-password" placeholder="••••••••">
+                            <input type="password" id="login-password" autocomplete="current-password" placeholder="Enter Password">
                             <button type="button" class="pw-toggle-btn" onclick="toggleLoginPasswordVisibility('login-password', this)" tabindex="-1" aria-label="Show password">
                                 <svg class="ui-icon"><use href="#icon-eye"></use></svg>
                             </button>
@@ -2357,7 +2357,7 @@
                             <img class="pkg-img-tag" id="social-facebook-img-tag" src="" loading="lazy" decoding="async" style="display:none;">
                             <span class="pkg-img-placeholder" id="social-facebook-img-placeholder">+ Icon</span>
                         </div>
-                        <input type="text" id="social-facebook" placeholder="https://facebook.com/yourpage" style="flex:1;padding:10px;border:1px solid var(--border-glass);background:var(--bg-subtle-2);color:var(--text-primary);border-radius:12px;font-size:14px;font-family:inherit;box-sizing:border-box;">
+                        <input type="text" id="social-facebook" placeholder="Enter Facebook Page URL" style="flex:1;padding:10px;border:1px solid var(--border-glass);background:var(--bg-subtle-2);color:var(--text-primary);border-radius:12px;font-size:14px;font-family:inherit;box-sizing:border-box;">
                         <input type="file" id="social-facebook-file" accept="image/*" style="display:none;" onchange="previewSocialImage(event,'facebook')">
                     </div>
                     <div style="display:flex;justify-content:flex-end;margin:0 0 12px;">
@@ -2370,7 +2370,7 @@
                             <img class="pkg-img-tag" id="social-telegram-img-tag" src="" loading="lazy" decoding="async" style="display:none;">
                             <span class="pkg-img-placeholder" id="social-telegram-img-placeholder">+ Icon</span>
                         </div>
-                        <input type="text" id="social-telegram" placeholder="https://t.me/yourchannel" style="flex:1;padding:10px;border:1px solid var(--border-glass);background:var(--bg-subtle-2);color:var(--text-primary);border-radius:12px;font-size:14px;font-family:inherit;box-sizing:border-box;">
+                        <input type="text" id="social-telegram" placeholder="Enter Telegram Channel URL" style="flex:1;padding:10px;border:1px solid var(--border-glass);background:var(--bg-subtle-2);color:var(--text-primary);border-radius:12px;font-size:14px;font-family:inherit;box-sizing:border-box;">
                         <input type="file" id="social-telegram-file" accept="image/*" style="display:none;" onchange="previewSocialImage(event,'telegram')">
                     </div>
                     <div style="display:flex;justify-content:flex-end;margin:0 0 12px;">
@@ -2383,7 +2383,7 @@
                             <img class="pkg-img-tag" id="social-tiktok-img-tag" src="" loading="lazy" decoding="async" style="display:none;">
                             <span class="pkg-img-placeholder" id="social-tiktok-img-placeholder">+ Icon</span>
                         </div>
-                        <input type="text" id="social-tiktok" placeholder="https://tiktok.com/@yourhandle" style="flex:1;padding:10px;border:1px solid var(--border-glass);background:var(--bg-subtle-2);color:var(--text-primary);border-radius:12px;font-size:14px;font-family:inherit;box-sizing:border-box;">
+                        <input type="text" id="social-tiktok" placeholder="Enter TikTok URL" style="flex:1;padding:10px;border:1px solid var(--border-glass);background:var(--bg-subtle-2);color:var(--text-primary);border-radius:12px;font-size:14px;font-family:inherit;box-sizing:border-box;">
                         <input type="file" id="social-tiktok-file" accept="image/*" style="display:none;" onchange="previewSocialImage(event,'tiktok')">
                     </div>
                     <div style="display:flex;justify-content:flex-end;margin:0 0 12px;">
@@ -2400,7 +2400,7 @@
                                 <img class="pkg-img-tag" id="social-supportMessenger-img-tag" src="" loading="lazy" decoding="async" style="display:none;">
                                 <span class="pkg-img-placeholder" id="social-supportMessenger-img-placeholder">+ Icon</span>
                             </div>
-                            <input type="text" id="social-supportMessenger" placeholder="yourpage (m.me/yourpage)" style="flex:1;padding:10px;border:1px solid var(--border-glass);background:var(--bg-subtle-2);color:var(--text-primary);border-radius:12px;font-size:14px;font-family:inherit;box-sizing:border-box;">
+                            <input type="text" id="social-supportMessenger" placeholder="Enter Messenger Page" style="flex:1;padding:10px;border:1px solid var(--border-glass);background:var(--bg-subtle-2);color:var(--text-primary);border-radius:12px;font-size:14px;font-family:inherit;box-sizing:border-box;">
                             <input type="file" id="social-supportMessenger-file" accept="image/*" style="display:none;" onchange="previewSocialImage(event,'supportMessenger')">
                         </div>
                         <div style="display:flex;justify-content:flex-end;margin:0 0 12px;">
@@ -2413,7 +2413,7 @@
                                 <img class="pkg-img-tag" id="social-supportTelegram-img-tag" src="" loading="lazy" decoding="async" style="display:none;">
                                 <span class="pkg-img-placeholder" id="social-supportTelegram-img-placeholder">+ Icon</span>
                             </div>
-                            <input type="text" id="social-supportTelegram" placeholder="yourchannel (t.me/yourchannel)" style="flex:1;padding:10px;border:1px solid var(--border-glass);background:var(--bg-subtle-2);color:var(--text-primary);border-radius:12px;font-size:14px;font-family:inherit;box-sizing:border-box;">
+                            <input type="text" id="social-supportTelegram" placeholder="Enter Telegram Username" style="flex:1;padding:10px;border:1px solid var(--border-glass);background:var(--bg-subtle-2);color:var(--text-primary);border-radius:12px;font-size:14px;font-family:inherit;box-sizing:border-box;">
                             <input type="file" id="social-supportTelegram-file" accept="image/*" style="display:none;" onchange="previewSocialImage(event,'supportTelegram')">
                         </div>
                         <div style="display:flex;justify-content:flex-end;margin:0 0 12px;">
@@ -2494,7 +2494,7 @@
                 </div>
                 <div id="admin-broadcast-secret-body" style="display:none;margin-top:12px;">
                     <p style="font-size:12px;color:var(--text-secondary);margin:0 0 12px;">Shared secret between this panel and the pcastore Worker (pcagamestore_bot) — used to authorize customer Telegram DMs (order status updates) and the /admin/broadcast announcement. Pick any long random string; changing it here takes effect immediately, no redeploy needed.</p>
-                    <input type="text" id="admin-broadcast-secret" placeholder="Long random string" style="width:100%;padding:10px;border:1px solid var(--border-glass);background:var(--bg-subtle-2);color:var(--text-primary);border-radius:12px;font-size:14px;box-sizing:border-box;margin:0 0 14px;font-family:monospace;">
+                    <input type="text" id="admin-broadcast-secret" placeholder="Enter Secret Key" style="width:100%;padding:10px;border:1px solid var(--border-glass);background:var(--bg-subtle-2);color:var(--text-primary);border-radius:12px;font-size:14px;box-sizing:border-box;margin:0 0 14px;font-family:monospace;">
                     <button class="btn btn-primary" id="save-admin-broadcast-secret-btn" style="width:100%;" onclick="saveAdminBroadcastSecret()">Save</button>
                 </div>
             </div>
@@ -2593,9 +2593,9 @@
                     <!-- Step 1: details -->
                     <div id="add-admin-step-form">
                         <label>Username</label>
-                        <input type="text" id="new-admin-username" placeholder="username" autocapitalize="none" autocorrect="off" autocomplete="off">
+                        <input type="text" id="new-admin-username" placeholder="Enter Username" autocapitalize="none" autocorrect="off" autocomplete="off">
                         <label style="margin-top:14px;">Temporary Password</label>
-                        <input type="password" id="new-admin-password" placeholder="At least 6 characters" autocomplete="new-password">
+                        <input type="password" id="new-admin-password" placeholder="Enter Password" autocomplete="new-password">
                         <p style="font-size:12px;color:var(--text-secondary);margin-top:10px;">The new admin can sign in with this username/password right away and gets full access to the panel.</p>
                         <p id="add-admin-error" class="login-msg-error" style="display:none;"></p>
                     </div>
@@ -2743,7 +2743,7 @@
             <div style="display:flex; align-items:center; gap:8px; margin-bottom:14px;">
                 <div class="admin-search-wrap" style="flex:1; margin-bottom:0;">
                     <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                    <input type="text" id="game-search" placeholder="Search games by name or server..." autocomplete="off" oninput="renderAdminGamesList()" onkeydown="if(event.key==='Enter'){ event.preventDefault(); renderAdminGamesList(); }">
+                    <input type="text" id="game-search" placeholder="Search Games..." autocomplete="off" oninput="renderAdminGamesList()" onkeydown="if(event.key==='Enter'){ event.preventDefault(); renderAdminGamesList(); }">
                 </div>
                 <button type="button" class="search-go-btn" onclick="renderAdminGamesList()" title="Search" aria-label="Search">
                     <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
@@ -2837,7 +2837,7 @@
 
             <div class="admin-search-wrap">
                 <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                <input type="text" id="order-search" placeholder="Search by game, customer, phone, player ID, order ID..." autocomplete="off" oninput="renderOrdersList()">
+                <input type="text" id="order-search" placeholder="Search Orders..." autocomplete="off" oninput="renderOrdersList()">
             </div>
             <div class="date-filter-wrap">
                 <button type="button" class="date-filter-trigger" id="order-date-trigger" onclick="openDateRangeModal('order')" aria-label="Filter by date">
@@ -2880,8 +2880,8 @@
             </h2>
 
             <div class="quick-topup-grid">
-                <input type="text" id="manual-topup-uid" placeholder="Customer UID or email" autocomplete="off" autocapitalize="off" spellcheck="false" oninput="window.onManualTopupUidInput && window.onManualTopupUidInput()">
-                <input type="number" id="manual-topup-amount" placeholder="Amount (MMK)" inputmode="numeric">
+                <input type="text" id="manual-topup-uid" placeholder="Enter Customer UID or Email" autocomplete="off" autocapitalize="off" spellcheck="false" oninput="window.onManualTopupUidInput && window.onManualTopupUidInput()">
+                <input type="number" id="manual-topup-amount" placeholder="Enter Amount" inputmode="numeric">
                 <!-- Live "is this user registered?" result for whatever is typed in the UID/email box -->
                 <div id="manual-topup-user-status" class="topup-user-chip" style="display:none;"></div>
                 <button type="button" class="btn btn-primary" id="manual-topup-submit-btn" onclick="submitManualTopup(this)">Top Up</button>
@@ -2896,7 +2896,7 @@
 
             <div class="admin-search-wrap">
                 <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                <input type="text" id="topup-search" placeholder="Search by name, UID, phone, or amount..." autocomplete="off" oninput="renderTopupsList()">
+                <input type="text" id="topup-search" placeholder="Search Top-ups..." autocomplete="off" oninput="renderTopupsList()">
             </div>
             <div class="date-filter-wrap">
                 <button type="button" class="date-filter-trigger" id="topup-date-trigger" onclick="openDateRangeModal('topup')" aria-label="Filter by date">
@@ -2958,14 +2958,14 @@
                 </select>
                 <div id="notif-target-user-wrap" style="display:none;">
                     <label style="font-size:13px;font-weight: 500;color:var(--text-secondary);">User ID</label>
-                    <input type="text" id="notif-target-user" placeholder="e.g. guest_ab12cd34" style="width:100%;padding:10px;border:1px solid var(--border-glass);background:var(--bg-subtle-2);color:var(--text-primary);border-radius:12px;font-size:14px;font-family:inherit;box-sizing:border-box;margin:6px 0 12px;">
+                    <input type="text" id="notif-target-user" placeholder="Enter User ID" style="width:100%;padding:10px;border:1px solid var(--border-glass);background:var(--bg-subtle-2);color:var(--text-primary);border-radius:12px;font-size:14px;font-family:inherit;box-sizing:border-box;margin:6px 0 12px;">
                 </div>
                 <label style="font-size:13px;font-weight: 500;color:var(--text-secondary);">Title</label>
-                <input type="text" id="notif-title" placeholder="e.g. Server Maintenance" style="width:100%;padding:10px;border:1px solid var(--border-glass);background:var(--bg-subtle-2);color:var(--text-primary);border-radius:12px;font-size:14px;font-family:inherit;box-sizing:border-box;margin:6px 0 12px;">
+                <input type="text" id="notif-title" placeholder="Enter Title" style="width:100%;padding:10px;border:1px solid var(--border-glass);background:var(--bg-subtle-2);color:var(--text-primary);border-radius:12px;font-size:14px;font-family:inherit;box-sizing:border-box;margin:6px 0 12px;">
                 <label style="font-size:13px;font-weight: 500;color:var(--text-secondary);">Intro</label>
-                <input type="text" id="notif-intro" placeholder="Short preview shown in the notification list" style="width:100%;padding:10px;border:1px solid var(--border-glass);background:var(--bg-subtle-2);color:var(--text-primary);border-radius:12px;font-size:14px;font-family:inherit;box-sizing:border-box;margin:6px 0 12px;">
+                <input type="text" id="notif-intro" placeholder="Enter Short Preview" style="width:100%;padding:10px;border:1px solid var(--border-glass);background:var(--bg-subtle-2);color:var(--text-primary);border-radius:12px;font-size:14px;font-family:inherit;box-sizing:border-box;margin:6px 0 12px;">
                 <label style="font-size:13px;font-weight: 500;color:var(--text-secondary);">Details</label>
-                <textarea id="notif-details" placeholder="Full announcement shown when the user opens the notification..." rows="5" style="width:100%;box-sizing:border-box;padding:10px;border:1px solid var(--border-glass);background:var(--bg-subtle-2);color:var(--text-primary);border-radius:12px;font-size:14px;margin:6px 0 12px;font-family:inherit;resize:vertical;"></textarea>
+                <textarea id="notif-details" placeholder="Enter Announcement Details" rows="5" style="width:100%;box-sizing:border-box;padding:10px;border:1px solid var(--border-glass);background:var(--bg-subtle-2);color:var(--text-primary);border-radius:12px;font-size:14px;margin:6px 0 12px;font-family:inherit;resize:vertical;"></textarea>
                 <button class="btn btn-primary" id="send-notif-btn" onclick="sendNotification()">Send to All Users</button>
             </div>
             <h2 class="title-header" style="margin-top:20px;">Sent History</h2>
@@ -2980,7 +2980,7 @@
             <h2 class="title-header">Store Ticker</h2>
             <div class="admin-card">
                 <label style="font-size:13px;font-weight: 500;color:var(--text-secondary);">New message</label>
-                <input type="text" id="ticker-text" placeholder="e.g. Shop open daily 9AM - 9PM" maxlength="120" style="width:100%;padding:10px;border:1px solid var(--border-glass);background:var(--bg-subtle-2);color:var(--text-primary);border-radius:12px;font-size:14px;font-family:inherit;box-sizing:border-box;margin:6px 0 12px;">
+                <input type="text" id="ticker-text" placeholder="Enter Ticker Text" maxlength="120" style="width:100%;padding:10px;border:1px solid var(--border-glass);background:var(--bg-subtle-2);color:var(--text-primary);border-radius:12px;font-size:14px;font-family:inherit;box-sizing:border-box;margin:6px 0 12px;">
                 <button class="btn btn-primary" id="add-ticker-btn" onclick="addAnnouncement()">Add to Ticker</button>
             </div>
             <h2 class="title-header" style="margin-top:20px;">Current Messages</h2>
@@ -3006,7 +3006,7 @@
             </h2>
             <div class="admin-search-wrap">
                 <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                <input type="text" id="user-search" placeholder="Search users by name, ID, or phone..." autocomplete="off" oninput="renderAdminUsersList()">
+                <input type="text" id="user-search" placeholder="Search Users..." autocomplete="off" oninput="renderAdminUsersList()">
             </div>
             <div id="admin-users-container" class="users-grid">
                 <p class="empty-msg">Loading users...</p>
@@ -3064,7 +3064,7 @@
 
                 <h3 class="detail-section-title" style="margin-top:16px;">Deduct From Wallet</h3>
                 <div style="display:flex;gap:8px;">
-                    <input type="number" id="ud-deduct-amount" placeholder="Amount (MMK)" inputmode="numeric" style="flex:1;padding:12px 14px;border:1.5px solid var(--border-dashed);border-radius:10px;font-size:15px;background:var(--surface);color:var(--text-primary);">
+                    <input type="number" id="ud-deduct-amount" placeholder="Enter Amount" inputmode="numeric" style="flex:1;padding:12px 14px;border:1.5px solid var(--border-dashed);border-radius:10px;font-size:15px;background:var(--surface);color:var(--text-primary);">
                     <button class="btn btn-outline" style="flex:0 0 auto;padding:10px 16px;" onclick="deductCurrentUserWallet()">Deduct</button>
                 </div>
 
@@ -3081,7 +3081,7 @@
                 </div>
 
                 <h3 class="detail-section-title" style="margin-top:16px;">Admin Note</h3>
-                <textarea id="ud-admin-note" placeholder="Private note about this customer (only visible here)..." rows="2" style="width:100%;box-sizing:border-box;padding:10px;border:1px solid var(--border-glass);background:var(--bg-subtle-2);color:var(--text-primary);border-radius:12px;font-size:14px;font-family:inherit;resize:vertical;"></textarea>
+                <textarea id="ud-admin-note" placeholder="Enter Note" rows="2" style="width:100%;box-sizing:border-box;padding:10px;border:1px solid var(--border-glass);background:var(--bg-subtle-2);color:var(--text-primary);border-radius:12px;font-size:14px;font-family:inherit;resize:vertical;"></textarea>
                 <button class="btn btn-outline" style="margin-top:8px;padding:7px 14px;font-size:12px;" onclick="saveUserAdminNote()">Save Note</button>
 
                 <div style="display:flex;gap:8px;margin-top:20px;">
@@ -3159,10 +3159,10 @@
                         <svg class="ui-icon"><use href="#icon-lock"></use></svg> Unlock to edit
                     </button>
                 </div>
-                <input type="text" id="edit-game-name" placeholder="e.g. Mobile Legends">
+                <input type="text" id="edit-game-name" placeholder="Enter Game Name">
 
                 <label>Server / Region <span style="font-weight:400;color:var(--text-muted);">(optional)</span></label>
-                <input type="text" id="edit-game-server-name" placeholder="e.g. Malaysia Server (leave blank if only one server)">
+                <input type="text" id="edit-game-server-name" placeholder="Enter Server Name">
                 <div id="server-variant-thumbs" style="display:none;"></div>
 
                 <label>Game Category</label>
@@ -3170,7 +3170,7 @@
                 <div class="category-chip-select" id="game-category-select"></div>
 
                 <label>Description <span style="font-weight:400;color:var(--text-muted);">(optional — shown to customers under the game banner)</span></label>
-                <textarea id="edit-game-description" rows="4" placeholder="e.g. Mobile Legends: Bang Bang is a 5v5 MOBA. Diamonds are delivered instantly to your in-game ID after payment is confirmed." style="width:100%;padding:10px;border-radius:12px;border:1px solid var(--border-glass);background:var(--bg-subtle-2);color:var(--text-primary);font-size:14px;font-family:inherit;resize:vertical;box-sizing:border-box;"></textarea>
+                <textarea id="edit-game-description" rows="4" placeholder="Enter Description" style="width:100%;padding:10px;border-radius:12px;border:1px solid var(--border-glass);background:var(--bg-subtle-2);color:var(--text-primary);font-size:14px;font-family:inherit;resize:vertical;box-sizing:border-box;"></textarea>
 
                 <!-- App deep-link fields: purely optional. When set, Store.html
                      shows a "Game ဖွင့်မယ်" button on the game detail page and
@@ -3184,15 +3184,15 @@
                 <div style="display:none;margin:4px 0 2px;padding:12px;background:var(--fill-soft);border-radius:12px;border:1px solid var(--fill-soft);">
                     <p style="font-size:11px;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.3px;margin-bottom:8px;">App Link (optional)</p>
                     <label style="margin-top:0;">Android Package <span style="font-weight:400;color:var(--text-muted);">(e.g. com.mobile.legends)</span></label>
-                    <input type="text" id="edit-game-app-android-package" placeholder="com.mobile.legends">
+                    <input type="text" id="edit-game-app-android-package" placeholder="Enter Android Package Name">
                     <label>Android Scheme <span style="font-weight:400;color:var(--text-muted);">(custom URL scheme, without "://")</span></label>
-                    <input type="text" id="edit-game-app-android-scheme" placeholder="e.g. mlbb">
+                    <input type="text" id="edit-game-app-android-scheme" placeholder="Enter Android Scheme">
                     <label>Android Store URL <span style="font-weight:400;color:var(--text-muted);">(optional — auto-built from package name if blank)</span></label>
-                    <input type="text" id="edit-game-app-android-store-url" placeholder="https://play.google.com/store/apps/details?id=...">
+                    <input type="text" id="edit-game-app-android-store-url" placeholder="Enter Play Store URL">
                     <label>iOS Scheme <span style="font-weight:400;color:var(--text-muted);">(custom URL scheme, without "://")</span></label>
-                    <input type="text" id="edit-game-app-ios-scheme" placeholder="e.g. mlbb">
+                    <input type="text" id="edit-game-app-ios-scheme" placeholder="Enter iOS Scheme">
                     <label>iOS Store URL</label>
-                    <input type="text" id="edit-game-app-ios-store-url" placeholder="https://apps.apple.com/app/...">
+                    <input type="text" id="edit-game-app-ios-store-url" placeholder="Enter App Store URL">
                 </div>
 
                 <div class="switch-row">
@@ -3287,7 +3287,7 @@
                             <div class="pkg-type-tabs">
                                 <button type="button" class="pkg-type-tab" data-provider="g2bulk" onclick="setFulfillProvider('g2bulk')">G2Bulk</button>
                                 <button type="button" class="pkg-type-tab" data-provider="fazercard" onclick="setFulfillProvider('fazercard')">FazerCards</button>
-                                
+                                <button type="button" class="pkg-type-tab" data-provider="software" onclick="setFulfillProvider('software')">Software</button>
                                 <button type="button" class="pkg-type-tab active" data-provider="manual" onclick="setFulfillProvider('manual')">Manual</button>
                             </div>
                         </div>
@@ -3322,7 +3322,7 @@
                             <svg class="picker-btn-chevron ui-icon"><use href="#icon-chevron-down"></use></svg>
                         </div>
                         <div style="display:flex;gap:8px;margin-top:6px;">
-                            <input type="text" id="edit-game-jcplays-code" placeholder="or type a custom product code" style="flex:1;" oninput="onJCPlaysCodeTyped()">
+                            <input type="text" id="edit-game-jcplays-code" placeholder="Enter Product Code" style="flex:1;" oninput="onJCPlaysCodeTyped()">
                             <button type="button" class="btn btn-outline" id="jcplays-import-btn" style="flex:unset;padding:8px 10px;font-size:12px;" onclick="importJCPlaysCatalogue()">Import</button>
                         </div>
                         <p id="jcplays-denom-status" style="font-size:11px;color:var(--text-muted);margin-top:-4px;white-space:pre-wrap;"></p>
@@ -3369,7 +3369,7 @@
                         </div>
                         <p id="fazercard-import-status" style="font-size:11px;color:var(--text-muted);margin-top:-4px;white-space:pre-wrap;"></p>
                         <label style="margin-top:10px;">G2Bulk ID-Check Code <span style="font-weight:400;color:var(--text-muted);">(optional fallback)</span></label>
-                        <input type="text" id="edit-game-g2bulk-idcheck-code" placeholder="e.g. mobile-legends" style="text-transform:none;">
+                        <input type="text" id="edit-game-g2bulk-idcheck-code" placeholder="Enter Game Code" style="text-transform:none;">
                         <p style="font-size:11px;color:var(--text-muted);margin-top:-4px;">FazerCards ID check ခ်လုပ်မရရင် (unsupported or down) ဒီ G2Bulk code ကို အသုံးပြုပြီး player name ကိုပဲ ပြပေးမယ် — order ကတော့ FazerCards ကနေပဲ ဆက်ဆောင်ရွက်ပါမယ်။</p>
                     </div>
 
@@ -3455,7 +3455,7 @@
                 </div>
 
                 <label>Change (%)</label>
-                <input type="number" id="bulk-pkg-percent" placeholder="e.g. 5 or -10" style="width:100%;padding:10px;border:1px solid var(--border-glass);background:var(--bg-subtle-2);color:var(--text-primary);border-radius:12px;font-size:14px;font-family:inherit;box-sizing:border-box;">
+                <input type="number" id="bulk-pkg-percent" placeholder="Enter Percent" style="width:100%;padding:10px;border:1px solid var(--border-glass);background:var(--bg-subtle-2);color:var(--text-primary);border-radius:12px;font-size:14px;font-family:inherit;box-sizing:border-box;">
             </div>
             <div class="modal-footer">
                 <button class="btn btn-outline" onclick="closeBulkPkgModal()" style="flex:1;">Cancel</button>
@@ -3481,7 +3481,7 @@
             <div class="game-picker-search-wrap" style="display:flex;gap:8px;align-items:center;">
                 <div style="position:relative;flex:1;">
                     <svg viewBox="0 0 24 24" style="position:absolute;left:11px;top:50%;transform:translateY(-50%);width:16px;height:16px;color:var(--text-muted);fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                    <input type="text" id="game-picker-search" placeholder="Search game name..." autocomplete="off" oninput="filterGamePicker(this.value)" style="width:100%;padding:10px 12px 10px 34px;border:1px solid var(--border-glass);border-radius:12px;font-size:14px;background:var(--bg-subtle-2);color:var(--text-primary);box-sizing:border-box;">
+                    <input type="text" id="game-picker-search" placeholder="Search Games..." autocomplete="off" oninput="filterGamePicker(this.value)" style="width:100%;padding:10px 12px 10px 34px;border:1px solid var(--border-glass);border-radius:12px;font-size:14px;background:var(--bg-subtle-2);color:var(--text-primary);box-sizing:border-box;">
                 </div>
                 <span id="game-picker-count" style="font-size:12.5px;font-weight:600;color:var(--text-muted);background:var(--fill-soft);padding:9px 10px;border-radius:100px;white-space:nowrap;flex-shrink:0;"></span>
                 <button type="button" class="btn btn-outline" id="game-picker-update-btn" onclick="refreshGamePickerList()" style="flex:unset;padding:10px 14px;font-size:13px;white-space:nowrap;">Update</button>
@@ -3516,7 +3516,7 @@
             <p id="add-server-picker-hint" style="font-size:12.5px;color:var(--text-muted);margin:-4px 0 12px;">Pick the Direct game to add another server for. It opens a fresh entry with the same Name/Image/Category — name the server, then Import its packages from G2Bulk.</p>
             <div class="game-picker-search-wrap">
                 <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                <input type="text" id="add-server-picker-search" placeholder="Search game name..." autocomplete="off" oninput="filterAddServerPicker(this.value)">
+                <input type="text" id="add-server-picker-search" placeholder="Search Games..." autocomplete="off" oninput="filterAddServerPicker(this.value)">
             </div>
             <div class="game-picker-grid" id="add-server-picker-grid"></div>
         </div>
@@ -3534,13 +3534,13 @@
             <div class="modal-body">
                 <input type="hidden" id="edit-payment-id">
                 <label>Method Name</label>
-                <input type="text" id="edit-payment-name" placeholder="e.g. KBZ Pay, Wave Pay">
+                <input type="text" id="edit-payment-name" placeholder="Enter Payment Method Name">
                 <label>Account Number</label>
-                <input type="text" id="edit-payment-number" placeholder="e.g. 09123456789">
+                <input type="text" id="edit-payment-number" placeholder="Enter Phone Number">
                 <label>Account Name</label>
-                <input type="text" id="edit-payment-accountname" placeholder="e.g. Mg Mg Aung">
+                <input type="text" id="edit-payment-accountname" placeholder="Enter Account Name">
                 <label>Availability Note (shown to customers)</label>
-                <input type="text" id="edit-payment-availability" placeholder="e.g. Reviewed 7:00 AM - 12:00 AM, or Available 24/7">
+                <input type="text" id="edit-payment-availability" placeholder="Enter Availability">
                 <p style="font-size:12px;color:var(--text-secondary);margin-top:-6px;">Shown under this method at checkout so customers know when a receipt will be reviewed. Leave blank to hide.</p>
 
                 <label>Logo Image (optional)</label>
@@ -3592,26 +3592,26 @@
             <div class="modal-body">
 
                 <label>Base URL</label>
-                <input type="text" id="jcplays-base-url" placeholder="https://jcplays.com/smilecoin/api">
+                <input type="text" id="jcplays-base-url" placeholder="Enter API Base URL">
 
                 <label>Proxy URL <span style="font-weight:400;color:var(--text-muted);">(your Cloudflare Worker's /jcplays-proxy route)</span></label>
-                <input type="text" id="jcplays-proxy-url" placeholder="https://your-worker.workers.dev/jcplays-proxy" autocomplete="off">
+                <input type="text" id="jcplays-proxy-url" placeholder="Enter Proxy URL" autocomplete="off">
                 <p style="font-size:11.5px;color:var(--text-muted);margin-top:-6px;">Required — JCPlays doesn't send CORS headers, so requests can't go straight from this browser to jcplays.com. They're signed and forwarded through this Worker route instead.</p>
 
                 <label>UID</label>
-                <input type="text" id="jcplays-uid" placeholder="e.g. 5b4a2416-5dce-48bf-8a46-138b2e8a020a" autocomplete="off">
+                <input type="text" id="jcplays-uid" placeholder="Enter UID" autocomplete="off">
 
                 <label>Email</label>
-                <input type="text" id="jcplays-email" placeholder="your account email" autocomplete="off">
+                <input type="text" id="jcplays-email" placeholder="Enter Email" autocomplete="off">
 
                 <label>M_KEY (API Key)</label>
                 <div class="secret-field-wrap">
-                    <input type="text" id="jcplays-mkey" class="secret-input" placeholder="your_m_key_here" autocomplete="off" data-lpignore="true" data-1p-ignore data-bwignore="true" data-form-type="other">
+                    <input type="text" id="jcplays-mkey" class="secret-input" placeholder="Enter M-Key" autocomplete="off" data-lpignore="true" data-1p-ignore data-bwignore="true" data-form-type="other">
                     <button type="button" class="secret-toggle-btn" tabindex="-1" aria-label="Show" onclick="toggleSecretVisibility('jcplays-mkey', this)"><svg class="ui-icon"><use href="#icon-eye"></use></svg></button>
                 </div>
 
                 <label>Low Balance Alert <span style="font-weight:400;color:var(--text-muted);">(points, 0 = off)</span></label>
-                <input type="number" id="jcplays-low-balance-alert" placeholder="e.g. 5000" step="1" min="0" title="Header will show a warning when the smile points balance drops below this amount">
+                <input type="number" id="jcplays-low-balance-alert" placeholder="Enter Alert Amount" step="1" min="0" title="Header will show a warning when the smile points balance drops below this amount">
 
                 <div class="switch-row" style="margin-top:14px;">
                     <span class="switch-label" style="flex:1;font-weight:400;">Enabled — turn off to fully hide JCPlays (nav tab, wallet card, game-link picker) everywhere in the app</span>
@@ -3641,24 +3641,24 @@
             <div class="modal-body">
                 <label>API Key</label>
                 <div class="secret-field-wrap">
-                    <input type="text" id="g2bulk-api-key" class="secret-input" placeholder="your_api_key_here" autocomplete="off" data-lpignore="true" data-1p-ignore data-bwignore="true" data-form-type="other">
+                    <input type="text" id="g2bulk-api-key" class="secret-input" placeholder="Enter API Key" autocomplete="off" data-lpignore="true" data-1p-ignore data-bwignore="true" data-form-type="other">
                     <button type="button" class="secret-toggle-btn" tabindex="-1" aria-label="Show" onclick="toggleSecretVisibility('g2bulk-api-key', this)"><svg class="ui-icon"><use href="#icon-eye"></use></svg></button>
                 </div>
                 <p id="g2bulk-status" style="font-size:12px;color:var(--text-secondary);display:none;margin-top:4px;"></p>
                 <div id="g2bulk-result-grid" style="display:none;"></div>
 
                 <label>USD → MMK Rate</label>
-                <input type="number" id="g2bulk-usd-rate" placeholder="e.g. 4500" step="1">
+                <input type="number" id="g2bulk-usd-rate" placeholder="Enter USD Rate" step="1">
 
                 <label>Low Balance Alert <span style="font-weight:400;color:var(--text-muted);">(USD, 0 = off)</span></label>
-                <input type="number" id="g2bulk-low-balance-alert" placeholder="e.g. 20" step="1" min="0" title="Header will show a warning when the wallet balance drops below this amount">
+                <input type="number" id="g2bulk-low-balance-alert" placeholder="Enter Alert Amount" step="1" min="0" title="Header will show a warning when the wallet balance drops below this amount">
 
                 <label>Webhook URL <span style="font-weight:400;color:var(--text-muted);">(optional)</span></label>
-                <input type="text" id="g2bulk-webhook-url" placeholder="https://your-worker.workers.dev/g2bulk-webhook" autocomplete="off">
+                <input type="text" id="g2bulk-webhook-url" placeholder="Enter Webhook URL" autocomplete="off">
 
                 <label>Webhook Secret</label>
                 <div class="secret-field-wrap">
-                    <input type="text" id="g2bulk-webhook-secret" class="secret-input" placeholder="your_random_secret_here" autocomplete="off" data-lpignore="true" data-1p-ignore data-bwignore="true" data-form-type="other">
+                    <input type="text" id="g2bulk-webhook-secret" class="secret-input" placeholder="Enter Webhook Secret" autocomplete="off" data-lpignore="true" data-1p-ignore data-bwignore="true" data-form-type="other">
                     <button type="button" class="secret-toggle-btn" tabindex="-1" aria-label="Show" onclick="toggleSecretVisibility('g2bulk-webhook-secret', this)"><svg class="ui-icon"><use href="#icon-eye"></use></svg></button>
                 </div>
 
@@ -3689,20 +3689,20 @@
             <div class="modal-body">
                 <label>API Key</label>
                 <div class="secret-field-wrap">
-                    <input type="text" id="fazercard-api-key" class="secret-input" placeholder="your_api_key_here" autocomplete="off" data-lpignore="true" data-1p-ignore data-bwignore="true" data-form-type="other">
+                    <input type="text" id="fazercard-api-key" class="secret-input" placeholder="Enter API Key" autocomplete="off" data-lpignore="true" data-1p-ignore data-bwignore="true" data-form-type="other">
                     <button type="button" class="secret-toggle-btn" tabindex="-1" aria-label="Show" onclick="toggleSecretVisibility('fazercard-api-key', this)"><svg class="ui-icon"><use href="#icon-eye"></use></svg></button>
                 </div>
                 <p id="fazercard-status" style="font-size:12px;color:var(--text-secondary);display:none;margin-top:4px;"></p>
                 <div id="fazercard-result-grid" style="display:none;"></div>
 
                 <label>Proxy URL <span style="font-weight:400;color:var(--text-muted);">(optional — only if direct calls get CORS-blocked)</span></label>
-                <input type="text" id="fazercard-proxy-url" placeholder="https://your-worker.workers.dev/fazercard-proxy" autocomplete="off">
+                <input type="text" id="fazercard-proxy-url" placeholder="Enter Proxy URL" autocomplete="off">
                 <p style="font-size:11.5px;color:var(--text-muted);margin-top:-6px;">Leave blank to call api.fzr.cards directly from this browser (like G2Bulk). Only fill this in if Verify Key fails with a network/CORS error — then it needs a Worker route like JCPlays.</p>
                 <label>USD → MMK Rate <span style="font-weight:400;color:var(--text-muted);">(for catalogue import Cost conversion)</span></label>
-                <input type="number" id="fazercard-usd-rate" placeholder="e.g. 4500" step="1">
+                <input type="number" id="fazercard-usd-rate" placeholder="Enter USD Rate" step="1">
 
                 <label>Low Balance Alert <span style="font-weight:400;color:var(--text-muted);">(USD, 0 = off)</span></label>
-                <input type="number" id="fazercard-low-balance-alert" placeholder="e.g. 20" step="1" min="0" title="Header will show a warning when the wallet balance drops below this amount">
+                <input type="number" id="fazercard-low-balance-alert" placeholder="Enter Alert Amount" step="1" min="0" title="Header will show a warning when the wallet balance drops below this amount">
 
                 <div class="switch-row" style="margin-top:14px;">
                     <span class="switch-label" style="flex:1;font-weight:400;">Enabled — turn off to fully hide FazerCards (wallet card, game-link picker) everywhere in the app</span>
@@ -3720,7 +3720,7 @@
                      so we never try to read it back — just display whatever the
                      last regenerate call returned. -->
                 <label style="margin-top:16px;border-top:1px solid var(--border);padding-top:14px;">Webhook URL <span style="font-weight:400;color:var(--text-muted);">(FazerCards pushes order/delivery events here)</span></label>
-                <input type="text" id="fazercard-webhook-url" placeholder="https://your-worker.workers.dev/fazercard-webhook" autocomplete="off">
+                <input type="text" id="fazercard-webhook-url" placeholder="Enter Webhook URL" autocomplete="off">
                 <div class="switch-row" style="margin-top:8px;">
                     <span class="switch-label" style="flex:1;font-weight:400;">Webhook enabled</span>
                     <label class="toggle-switch" style="flex-shrink:0;">
@@ -3767,24 +3767,24 @@
 
                 <label>Bot Token</label>
                 <div class="secret-field-wrap">
-                    <input type="text" id="tg-bot-token" class="secret-input" placeholder="123456789:AAExxxxxxxxxxxxxxxxxxxxxxxxxxxxx" autocomplete="off" data-lpignore="true" data-1p-ignore data-bwignore="true" data-form-type="other">
+                    <input type="text" id="tg-bot-token" class="secret-input" placeholder="Enter Bot Token" autocomplete="off" data-lpignore="true" data-1p-ignore data-bwignore="true" data-form-type="other">
                     <button type="button" class="secret-toggle-btn" tabindex="-1" aria-label="Show" onclick="toggleSecretVisibility('tg-bot-token', this)"><svg class="ui-icon"><use href="#icon-eye"></use></svg></button>
                 </div>
 
                 <label>Chat ID</label>
-                <input type="text" id="tg-chat-id" placeholder="e.g. 123456789 or -100123456789" autocomplete="off">
+                <input type="text" id="tg-chat-id" placeholder="Enter Chat ID" autocomplete="off">
 
                 <label style="margin-top:14px;">Webhook URL <span style="font-weight:400;color:var(--text-muted);">(pca-telegram-bot Worker)</span></label>
-                <input type="text" id="tg-webhook-url" placeholder="https://your-worker.workers.dev/telegram-webhook" autocomplete="off">
+                <input type="text" id="tg-webhook-url" placeholder="Enter Webhook URL" autocomplete="off">
 
                 <label>Webhook Secret</label>
                 <div class="secret-field-wrap">
-                    <input type="text" id="tg-webhook-secret" class="secret-input" placeholder="your_random_secret_here" autocomplete="off" data-lpignore="true" data-1p-ignore data-bwignore="true" data-form-type="other">
+                    <input type="text" id="tg-webhook-secret" class="secret-input" placeholder="Enter Webhook Secret" autocomplete="off" data-lpignore="true" data-1p-ignore data-bwignore="true" data-form-type="other">
                     <button type="button" class="secret-toggle-btn" tabindex="-1" aria-label="Show" onclick="toggleSecretVisibility('tg-webhook-secret', this)"><svg class="ui-icon"><use href="#icon-eye"></use></svg></button>
                 </div>
 
                 <label style="margin-top:14px;">Bot Username <span style="font-weight:400;color:var(--text-muted);">(optional — for the "Open Telegram" link button)</span></label>
-                <input type="text" id="tg-bot-username" placeholder="YourBotName_bot (no @)" autocomplete="off">
+                <input type="text" id="tg-bot-username" placeholder="Enter Bot Username" autocomplete="off">
 
                 <div class="switch-row" style="margin-top:14px;">
                     <span class="switch-label" style="flex:1;font-weight:400;">Enabled — send new orders to Telegram automatically</span>
@@ -4616,7 +4616,16 @@
                         game: order.game || '',
                         status,
                         price: Number(order.price || 0),
-                        note: note || ''
+                        note: note || '',
+                        // Only used by the Worker to build the full details
+                        // block on the Success/confirm DM (User/User ID/In
+                        // Game ID/Server ID/Package) - harmless to always
+                        // send, the Worker ignores them for other statuses.
+                        userName: order.userName || '',
+                        userId: order.userId || '',
+                        inGameId: order.playerId || '',
+                        serverId: order.serverId || '',
+                        packageName: order.itemAmount || ''
                     })
                 });
             } catch (error) {
@@ -9790,7 +9799,7 @@
                                 <div class="pkg-card-close pkg-x-icon" onclick="collapsePackageRow(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></div>
                             </div>
                             <div class="pkg-row-top">
-                                <input type="text" class="pkg-amount" placeholder="e.g. 100 Diamonds" value="${amount}" style="flex:1;min-width:0;padding:8px;border:1px solid var(--border-glass);background:var(--bg-subtle-2);color:var(--text-primary);border-radius:8px;font-size:13px;font-family:inherit;box-sizing:border-box;">
+                                <input type="text" class="pkg-amount" placeholder="Enter Package Amount" value="${amount}" style="flex:1;min-width:0;padding:8px;border:1px solid var(--border-glass);background:var(--bg-subtle-2);color:var(--text-primary);border-radius:8px;font-size:13px;font-family:inherit;box-sizing:border-box;">
                             </div>
                             <div class="pkg-price-field">
                                 <label>Tab (ဒီ package ကို ထားမည့် tab)</label>
@@ -9849,11 +9858,11 @@
                                     <option value="fazercard" ${resolvedProvider === 'fazercard' ? 'selected' : ''}>FazerCards</option>
                                 </select>
                             </div>
-                            <input type="text" class="pkg-g2bulk" placeholder="G2Bulk catalogue name" value="${g2bulkName}" style="padding:7px 8px;border:1px solid var(--border-glass);background:var(--bg-subtle-2);color:var(--text-secondary);border-radius:8px;font-size:12px;font-family:inherit;box-sizing:border-box;display:none;">
-                            <input type="text" class="pkg-jcplays" placeholder="JCPlays Product ID" value="${jcplaysProductId}" style="padding:7px 8px;border:1px solid var(--border-glass);background:var(--bg-subtle-2);color:var(--text-secondary);border-radius:8px;font-size:12px;font-family:inherit;box-sizing:border-box;display:none;">
-                            <input type="text" class="pkg-voucher-id" placeholder="G2Bulk product ID" value="${voucherProductId}" style="padding:7px 8px;border:1px solid var(--border-glass);background:var(--bg-subtle-2);color:var(--text-secondary);border-radius:8px;font-size:12px;font-family:inherit;box-sizing:border-box;display:none;">
-                            <input type="text" class="pkg-fazercard" placeholder="FazerCards offer_id" value="${fazercardOfferId}" style="padding:7px 8px;border:1px solid var(--border-glass);background:var(--bg-subtle-2);color:var(--text-secondary);border-radius:8px;font-size:12px;font-family:inherit;box-sizing:border-box;display:none;">
-                            <input type="text" class="pkg-fazercard-giftcard-id" placeholder="FazerCards card_id" value="${fazercardGiftCardId}" style="padding:7px 8px;border:1px solid var(--border-glass);background:var(--bg-subtle-2);color:var(--text-secondary);border-radius:8px;font-size:12px;font-family:inherit;box-sizing:border-box;display:none;">
+                            <input type="text" class="pkg-g2bulk" placeholder="Enter Catalogue Name" value="${g2bulkName}" style="padding:7px 8px;border:1px solid var(--border-glass);background:var(--bg-subtle-2);color:var(--text-secondary);border-radius:8px;font-size:12px;font-family:inherit;box-sizing:border-box;display:none;">
+                            <input type="text" class="pkg-jcplays" placeholder="Enter Product ID" value="${jcplaysProductId}" style="padding:7px 8px;border:1px solid var(--border-glass);background:var(--bg-subtle-2);color:var(--text-secondary);border-radius:8px;font-size:12px;font-family:inherit;box-sizing:border-box;display:none;">
+                            <input type="text" class="pkg-voucher-id" placeholder="Enter Product ID" value="${voucherProductId}" style="padding:7px 8px;border:1px solid var(--border-glass);background:var(--bg-subtle-2);color:var(--text-secondary);border-radius:8px;font-size:12px;font-family:inherit;box-sizing:border-box;display:none;">
+                            <input type="text" class="pkg-fazercard" placeholder="Enter Offer ID" value="${fazercardOfferId}" style="padding:7px 8px;border:1px solid var(--border-glass);background:var(--bg-subtle-2);color:var(--text-secondary);border-radius:8px;font-size:12px;font-family:inherit;box-sizing:border-box;display:none;">
+                            <input type="text" class="pkg-fazercard-giftcard-id" placeholder="Enter Card ID" value="${fazercardGiftCardId}" style="padding:7px 8px;border:1px solid var(--border-glass);background:var(--bg-subtle-2);color:var(--text-secondary);border-radius:8px;font-size:12px;font-family:inherit;box-sizing:border-box;display:none;">
                             <span class="pkg-stock-badge"></span>
                             <div class="pkg-card-footer">
                                 <button type="button" class="pkg-card-save-btn" onclick="collapsePackageRow(this)">Save</button>
@@ -14374,12 +14383,18 @@
         // are only blanked for the non-selected provider at Save time, so
         // just clicking between tabs to look around never loses anything.
         function setFulfillProvider(provider) {
-            const allowed = ['manual', 'g2bulk', 'fazercard', 'g2bulk_voucher', 'jcplays', 'fazercard_giftcard'];
+            const allowed = ['manual', 'g2bulk', 'fazercard', 'g2bulk_voucher', 'jcplays', 'fazercard_giftcard', 'software'];
             currentFulfillProvider = allowed.includes(provider) ? provider : 'manual';
             document.querySelectorAll('#fulfill-provider-tabs .pkg-type-tab').forEach(btn => {
                 btn.classList.toggle('active', btn.dataset.provider === currentFulfillProvider);
             });
-            const direct = ['manual', 'g2bulk', 'fazercard'].includes(currentFulfillProvider);
+            // 'software' behaves exactly like 'manual' here (plain manual
+            // package rows, no linked-catalogue picker section below) - it
+            // just shows up under the Store's separate "Software" tab
+            // instead of the normal game grid (store.html filters on
+            // fulfillProvider === 'software'). Untick "Player ID Required"
+            // below for a software item since it doesn't need one.
+            const direct = ['manual', 'g2bulk', 'fazercard', 'software'].includes(currentFulfillProvider);
             const voucher = ['g2bulk_voucher', 'jcplays', 'fazercard_giftcard'].includes(currentFulfillProvider);
             document.querySelectorAll('#fulfill-group-direct').forEach(el => { el.style.display = direct ? 'block' : 'none'; });
             document.querySelectorAll('#fulfill-group-voucher').forEach(el => { el.style.display = voucher ? 'block' : 'none'; });
@@ -14748,6 +14763,50 @@
                 field.dispatchEvent(new Event('input', { bubbles: true }));
                 field.dispatchEvent(new Event('change', { bubbles: true }));
             }
+
+            // Auto-fill Game Name + Image/Banner from the provider's own
+            // catalogue entry (same idea as the FazerCards bulk importer and
+            // startAddServerForGame below) — but only when this is a brand
+            // new game (no edit-game-id yet) and only into fields the admin
+            // hasn't already touched, so relinking an existing game's
+            // provider code, or a name/image typed by hand, is never
+            // overwritten.
+            const isNewGame = !document.getElementById('edit-game-id').value;
+            if (isNewGame && code) {
+                const item = gamePickerItems.find(g => g.code === code);
+                const nameField = document.getElementById('edit-game-name');
+                if (nameField && !nameField.readOnly && !nameField.value.trim()) {
+                    const split = kind === 'fazercard' ? splitFazerCardRegionName(name) : null;
+                    nameField.value = split ? split.gameName : (name || '');
+                    if (split && split.serverName) {
+                        const serverField = document.getElementById('edit-game-server-name');
+                        if (serverField && !serverField.value.trim()) serverField.value = split.serverName;
+                    }
+                }
+                if (item && item.image && !editingImageFile) {
+                    const preview = document.getElementById('edit-game-preview');
+                    const updateBox = document.getElementById('game-img-update-box');
+                    const changeBadge = document.getElementById('game-img-update-change');
+                    if (preview) {
+                        preview.src = item.image;
+                        preview.style.display = 'block';
+                        updateBox.classList.add('has-image');
+                        changeBadge.style.display = 'flex';
+                        editingImageRemoteUrl = item.image; // save reuses this URL, no re-upload needed
+                    }
+                    if (!editingBannerImageFiles.length && !editingBannerImageUrls.length) {
+                        const bannerPreview = document.getElementById('edit-game-banner-preview');
+                        const bannerUpdateBox = document.getElementById('game-banner-update-box');
+                        const bannerChangeBadge = document.getElementById('game-banner-update-change');
+                        bannerPreview.src = item.image;
+                        bannerPreview.style.display = 'block';
+                        bannerUpdateBox.classList.add('has-image');
+                        bannerChangeBadge.style.display = 'flex';
+                        editingBannerImageUrls = [item.image];
+                    }
+                }
+            }
+
             refreshPickerButton(kind);
             refreshCheckPricesBtn();
             if (kind === 'g2bulk_voucher') onVoucherCategoryChange();
