@@ -10589,6 +10589,34 @@
 
                 pendingG2BulkServerMode = g.g2bulkServerMode || null;
                 pendingG2BulkServerOptions = Array.isArray(g.g2bulkServerOptions) ? g.g2bulkServerOptions.slice() : null;
+
+                // Re-fill the provider-link fields from the saved game so the
+                // right tab/picker/Import button state comes back on Edit —
+                // these used to only ever get reset in the "Add New Game"
+                // branch below, so editing an existing linked game silently
+                // showed whatever provider fields were left over from
+                // whatever was last open in the (shared) form, and the
+                // Import/Debug buttons never got told to re-check themselves.
+                document.getElementById('edit-game-g2bulk-code').value = g.g2bulkCode || '';
+                document.getElementById('g2bulk-import-status').innerText = '';
+                document.getElementById('edit-game-jcplays-code').value = g.jcplaysProduct || '';
+                document.getElementById('jcplays-denom-status').innerText = '';
+                document.getElementById('edit-game-voucher-category').value = g.g2bulkVoucherCategory || '';
+                document.getElementById('voucher-import-status').innerText = '';
+                document.getElementById('edit-game-fazercard-category').value = g.fazercardCategoryId || '';
+                document.getElementById('fazercard-import-status').innerText = '';
+                document.getElementById('edit-game-g2bulk-idcheck-code').value = g.g2bulkIdCheckCode || '';
+                pendingFazerCardFields = Array.isArray(g.fazercardFields) ? g.fazercardFields.slice() : [];
+                pendingFazerCardServerMode = g.fazercardServerMode || null;
+                pendingFazerCardServerOptions = Array.isArray(g.fazercardServerOptions) ? g.fazercardServerOptions.slice() : null;
+                document.getElementById('edit-game-fazercard-giftcard-category').value = g.fazercardGiftCategoryId || '';
+                document.getElementById('fazercard-giftcard-import-status').innerText = '';
+                setFulfillProvider(g.fulfillProvider || (gameListTab === 'voucher' ? 'g2bulk_voucher' : 'manual'));
+                onG2BulkGameChange();
+                onFazerCardGameChange();
+                onFazerCardGiftCardCategoryChange();
+                onVoucherCategoryChange();
+
                 deleteBtn.style.display = 'block';
                 renderServerVariantThumbs(gameId);
             } else {
