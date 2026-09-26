@@ -1147,14 +1147,27 @@
            it should ever need to shrink. */
         .modal-body > * { flex-shrink: 0; }
         .modal-body label { font-size: 13px; font-weight: 500; color: var(--text-secondary); }
-        .modal-body input[type="text"], .modal-body input[type="number"], .modal-body input[type="password"] { padding: 10px; border: 1px solid var(--border-glass); background: var(--bg-subtle-2); color: var(--text-primary); border-radius: 12px; font-size: 14px; }
+        .modal-body input[type="text"], .modal-body input[type="number"], .modal-body input[type="password"],
+        .modal-body select, .modal-body textarea {
+            width: 100%; box-sizing: border-box; padding: 10px; border: 1px solid var(--border-glass);
+            background: var(--bg-subtle-2); color: var(--text-primary); border-radius: 12px; font-size: 14px;
+            font-family: inherit;
+        }
+        /* Fallback so a bare <select>/<textarea> with no per-instance inline
+           style still matches the text-input look above instead of falling
+           back to the browser's unstyled native appearance (mismatched
+           radius/background/color was the main source of inputs looking
+           inconsistent across the admin panel). Elements that carry their
+           own inline style keep it (inline always wins over this rule),
+           which is why those inline styles were also normalized below to
+           the same radius/colors instead of being left as one-off values. */
         /* Native datetime-local pickers previously fell back to the browser's completely
            unstyled default box — no radius, no theme background, harsh
            black border on most Android browsers. Brought in line with the
            text/number/password inputs above; color-scheme + a filter on
            the calendar icon keep the native picker legible in dark themes
            too, since the icon glyph itself can't be recolored directly. */
-        .modal-body input[type="datetime-local"] { width: 100%; box-sizing: border-box; padding: 10px 12px; border: 1px solid var(--border-glass); background: var(--bg-subtle-2); color: var(--text-primary); border-radius: 12px; font-size: 13.5px; color-scheme: light; font-family: inherit; }
+        .modal-body input[type="datetime-local"] { width: 100%; box-sizing: border-box; padding: 10px 12px; border: 1px solid var(--border-glass); background: var(--bg-subtle-2); color: var(--text-primary); border-radius: 12px; font-size: 14px; color-scheme: light; font-family: inherit; }
         html[data-theme="dark"] .modal-body input[type="datetime-local"] { color-scheme: dark; }
         .modal-body input[type="datetime-local"]::-webkit-calendar-picker-indicator { padding: 4px; border-radius: 8px; cursor: pointer; opacity: 0.75; }
         .modal-body input[type="datetime-local"]::-webkit-calendar-picker-indicator:hover { opacity: 1; background: var(--accent-soft); }
@@ -1877,7 +1890,7 @@
                      (order Reject/Fail and top-up Reject dialogs). Clicking one fills
                      the note textarea below; admin can still edit before confirming. -->
                 <div id="action-dialog-templates" style="display:none;flex-wrap:wrap;gap:6px;margin-bottom:8px;"></div>
-                <textarea id="action-dialog-note" rows="3" style="width:100%;padding:10px;border:1px solid var(--fill-soft);border-radius:8px;font-size:14px;font-family:inherit;resize:vertical;"></textarea>
+                <textarea id="action-dialog-note" rows="3" style="width:100%;box-sizing:border-box;padding:10px;border:1px solid var(--border-glass);background:var(--bg-subtle-2);color:var(--text-primary);border-radius:12px;font-size:14px;font-family:inherit;resize:vertical;"></textarea>
             </div>
             <div class="dialog-actions">
                 <button class="btn btn-outline" id="action-dialog-cancel" onclick="window.closeActionDialog()">Cancel</button>
@@ -2343,7 +2356,7 @@
                             <img class="pkg-img-tag" id="social-facebook-img-tag" src="" loading="lazy" decoding="async" style="display:none;">
                             <span class="pkg-img-placeholder" id="social-facebook-img-placeholder">+ Icon</span>
                         </div>
-                        <input type="text" id="social-facebook" placeholder="https://facebook.com/yourpage" style="flex:1;padding:10px;border:1px solid var(--fill-soft);border-radius:8px;font-size:14px;">
+                        <input type="text" id="social-facebook" placeholder="https://facebook.com/yourpage" style="flex:1;padding:10px;border:1px solid var(--border-glass);background:var(--bg-subtle-2);color:var(--text-primary);border-radius:12px;font-size:14px;font-family:inherit;box-sizing:border-box;">
                         <input type="file" id="social-facebook-file" accept="image/*" style="display:none;" onchange="previewSocialImage(event,'facebook')">
                     </div>
                     <div style="display:flex;justify-content:flex-end;margin:0 0 12px;">
@@ -2356,7 +2369,7 @@
                             <img class="pkg-img-tag" id="social-telegram-img-tag" src="" loading="lazy" decoding="async" style="display:none;">
                             <span class="pkg-img-placeholder" id="social-telegram-img-placeholder">+ Icon</span>
                         </div>
-                        <input type="text" id="social-telegram" placeholder="https://t.me/yourchannel" style="flex:1;padding:10px;border:1px solid var(--fill-soft);border-radius:8px;font-size:14px;">
+                        <input type="text" id="social-telegram" placeholder="https://t.me/yourchannel" style="flex:1;padding:10px;border:1px solid var(--border-glass);background:var(--bg-subtle-2);color:var(--text-primary);border-radius:12px;font-size:14px;font-family:inherit;box-sizing:border-box;">
                         <input type="file" id="social-telegram-file" accept="image/*" style="display:none;" onchange="previewSocialImage(event,'telegram')">
                     </div>
                     <div style="display:flex;justify-content:flex-end;margin:0 0 12px;">
@@ -2369,7 +2382,7 @@
                             <img class="pkg-img-tag" id="social-tiktok-img-tag" src="" loading="lazy" decoding="async" style="display:none;">
                             <span class="pkg-img-placeholder" id="social-tiktok-img-placeholder">+ Icon</span>
                         </div>
-                        <input type="text" id="social-tiktok" placeholder="https://tiktok.com/@yourhandle" style="flex:1;padding:10px;border:1px solid var(--fill-soft);border-radius:8px;font-size:14px;">
+                        <input type="text" id="social-tiktok" placeholder="https://tiktok.com/@yourhandle" style="flex:1;padding:10px;border:1px solid var(--border-glass);background:var(--bg-subtle-2);color:var(--text-primary);border-radius:12px;font-size:14px;font-family:inherit;box-sizing:border-box;">
                         <input type="file" id="social-tiktok-file" accept="image/*" style="display:none;" onchange="previewSocialImage(event,'tiktok')">
                     </div>
                     <div style="display:flex;justify-content:flex-end;margin:0 0 12px;">
@@ -2386,7 +2399,7 @@
                                 <img class="pkg-img-tag" id="social-supportMessenger-img-tag" src="" loading="lazy" decoding="async" style="display:none;">
                                 <span class="pkg-img-placeholder" id="social-supportMessenger-img-placeholder">+ Icon</span>
                             </div>
-                            <input type="text" id="social-supportMessenger" placeholder="yourpage (m.me/yourpage)" style="flex:1;padding:10px;border:1px solid var(--fill-soft);border-radius:8px;font-size:14px;">
+                            <input type="text" id="social-supportMessenger" placeholder="yourpage (m.me/yourpage)" style="flex:1;padding:10px;border:1px solid var(--border-glass);background:var(--bg-subtle-2);color:var(--text-primary);border-radius:12px;font-size:14px;font-family:inherit;box-sizing:border-box;">
                             <input type="file" id="social-supportMessenger-file" accept="image/*" style="display:none;" onchange="previewSocialImage(event,'supportMessenger')">
                         </div>
                         <div style="display:flex;justify-content:flex-end;margin:0 0 12px;">
@@ -2399,7 +2412,7 @@
                                 <img class="pkg-img-tag" id="social-supportTelegram-img-tag" src="" loading="lazy" decoding="async" style="display:none;">
                                 <span class="pkg-img-placeholder" id="social-supportTelegram-img-placeholder">+ Icon</span>
                             </div>
-                            <input type="text" id="social-supportTelegram" placeholder="yourchannel (t.me/yourchannel)" style="flex:1;padding:10px;border:1px solid var(--fill-soft);border-radius:8px;font-size:14px;">
+                            <input type="text" id="social-supportTelegram" placeholder="yourchannel (t.me/yourchannel)" style="flex:1;padding:10px;border:1px solid var(--border-glass);background:var(--bg-subtle-2);color:var(--text-primary);border-radius:12px;font-size:14px;font-family:inherit;box-sizing:border-box;">
                             <input type="file" id="social-supportTelegram-file" accept="image/*" style="display:none;" onchange="previewSocialImage(event,'supportTelegram')">
                         </div>
                         <div style="display:flex;justify-content:flex-end;margin:0 0 12px;">
@@ -2457,7 +2470,7 @@
                 </div>
                 <div id="admin-broadcast-secret-body" style="display:none;margin-top:12px;">
                     <p style="font-size:12px;color:var(--text-secondary);margin:0 0 12px;">Shared secret between this panel and the pcastore Worker (pcagamestore_bot) — used to authorize customer Telegram DMs (order status updates) and the /admin/broadcast announcement. Pick any long random string; changing it here takes effect immediately, no redeploy needed.</p>
-                    <input type="text" id="admin-broadcast-secret" placeholder="Long random string" style="width:100%;padding:10px;border:1px solid var(--fill-soft);border-radius:8px;font-size:14px;margin:0 0 14px;font-family:monospace;">
+                    <input type="text" id="admin-broadcast-secret" placeholder="Long random string" style="width:100%;padding:10px;border:1px solid var(--border-glass);background:var(--bg-subtle-2);color:var(--text-primary);border-radius:12px;font-size:14px;box-sizing:border-box;margin:0 0 14px;font-family:monospace;">
                     <button class="btn btn-primary" id="save-admin-broadcast-secret-btn" style="width:100%;" onclick="saveAdminBroadcastSecret()">Save</button>
                 </div>
             </div>
@@ -2915,20 +2928,20 @@
             <h2 class="title-header">Send Notification</h2>
             <div class="admin-card">
                 <label style="font-size:13px;font-weight: 500;color:var(--text-secondary);">Send to</label>
-                <select id="notif-audience" onchange="onNotifAudienceChange()" style="width:100%;padding:10px;border:1px solid var(--fill-soft);border-radius:8px;font-size:14px;margin:6px 0 12px;">
+                <select id="notif-audience" onchange="onNotifAudienceChange()" style="width:100%;box-sizing:border-box;padding:10px;border:1px solid var(--border-glass);background:var(--bg-subtle-2);color:var(--text-primary);border-radius:12px;font-size:14px;font-family:inherit;margin:6px 0 12px;">
                     <option value="all">All Users</option>
                     <option value="user">Specific User (by ID)</option>
                 </select>
                 <div id="notif-target-user-wrap" style="display:none;">
                     <label style="font-size:13px;font-weight: 500;color:var(--text-secondary);">User ID</label>
-                    <input type="text" id="notif-target-user" placeholder="e.g. guest_ab12cd34" style="width:100%;padding:10px;border:1px solid var(--fill-soft);border-radius:8px;font-size:14px;margin:6px 0 12px;">
+                    <input type="text" id="notif-target-user" placeholder="e.g. guest_ab12cd34" style="width:100%;padding:10px;border:1px solid var(--border-glass);background:var(--bg-subtle-2);color:var(--text-primary);border-radius:12px;font-size:14px;font-family:inherit;box-sizing:border-box;margin:6px 0 12px;">
                 </div>
                 <label style="font-size:13px;font-weight: 500;color:var(--text-secondary);">Title</label>
-                <input type="text" id="notif-title" placeholder="e.g. Server Maintenance" style="width:100%;padding:10px;border:1px solid var(--fill-soft);border-radius:8px;font-size:14px;margin:6px 0 12px;">
+                <input type="text" id="notif-title" placeholder="e.g. Server Maintenance" style="width:100%;padding:10px;border:1px solid var(--border-glass);background:var(--bg-subtle-2);color:var(--text-primary);border-radius:12px;font-size:14px;font-family:inherit;box-sizing:border-box;margin:6px 0 12px;">
                 <label style="font-size:13px;font-weight: 500;color:var(--text-secondary);">Intro</label>
-                <input type="text" id="notif-intro" placeholder="Short preview shown in the notification list" style="width:100%;padding:10px;border:1px solid var(--fill-soft);border-radius:8px;font-size:14px;margin:6px 0 12px;">
+                <input type="text" id="notif-intro" placeholder="Short preview shown in the notification list" style="width:100%;padding:10px;border:1px solid var(--border-glass);background:var(--bg-subtle-2);color:var(--text-primary);border-radius:12px;font-size:14px;font-family:inherit;box-sizing:border-box;margin:6px 0 12px;">
                 <label style="font-size:13px;font-weight: 500;color:var(--text-secondary);">Details</label>
-                <textarea id="notif-details" placeholder="Full announcement shown when the user opens the notification..." rows="5" style="width:100%;padding:10px;border:1px solid var(--fill-soft);border-radius:8px;font-size:14px;margin:6px 0 12px;font-family:inherit;resize:vertical;"></textarea>
+                <textarea id="notif-details" placeholder="Full announcement shown when the user opens the notification..." rows="5" style="width:100%;box-sizing:border-box;padding:10px;border:1px solid var(--border-glass);background:var(--bg-subtle-2);color:var(--text-primary);border-radius:12px;font-size:14px;margin:6px 0 12px;font-family:inherit;resize:vertical;"></textarea>
                 <button class="btn btn-primary" id="send-notif-btn" onclick="sendNotification()">Send to All Users</button>
             </div>
             <h2 class="title-header" style="margin-top:20px;">Sent History</h2>
@@ -2943,7 +2956,7 @@
             <h2 class="title-header">Store Ticker</h2>
             <div class="admin-card">
                 <label style="font-size:13px;font-weight: 500;color:var(--text-secondary);">New message</label>
-                <input type="text" id="ticker-text" placeholder="e.g. Shop open daily 9AM - 9PM" maxlength="120" style="width:100%;padding:10px;border:1px solid var(--fill-soft);border-radius:8px;font-size:14px;margin:6px 0 12px;">
+                <input type="text" id="ticker-text" placeholder="e.g. Shop open daily 9AM - 9PM" maxlength="120" style="width:100%;padding:10px;border:1px solid var(--border-glass);background:var(--bg-subtle-2);color:var(--text-primary);border-radius:12px;font-size:14px;font-family:inherit;box-sizing:border-box;margin:6px 0 12px;">
                 <button class="btn btn-primary" id="add-ticker-btn" onclick="addAnnouncement()">Add to Ticker</button>
             </div>
             <h2 class="title-header" style="margin-top:20px;">Current Messages</h2>
@@ -3044,7 +3057,7 @@
                 </div>
 
                 <h3 class="detail-section-title" style="margin-top:16px;">Admin Note</h3>
-                <textarea id="ud-admin-note" placeholder="Private note about this customer (only visible here)..." rows="2" style="width:100%;padding:10px;border:1px solid var(--fill-soft);border-radius:8px;font-size:13px;font-family:inherit;resize:vertical;"></textarea>
+                <textarea id="ud-admin-note" placeholder="Private note about this customer (only visible here)..." rows="2" style="width:100%;box-sizing:border-box;padding:10px;border:1px solid var(--border-glass);background:var(--bg-subtle-2);color:var(--text-primary);border-radius:12px;font-size:14px;font-family:inherit;resize:vertical;"></textarea>
                 <button class="btn btn-outline" style="margin-top:8px;padding:7px 14px;font-size:12px;" onclick="saveUserAdminNote()">Save Note</button>
 
                 <div style="display:flex;gap:8px;margin-top:20px;">
@@ -3133,7 +3146,7 @@
                 <div class="category-chip-select" id="game-category-select"></div>
 
                 <label>Description <span style="font-weight:400;color:var(--text-muted);">(optional — shown to customers under the game banner)</span></label>
-                <textarea id="edit-game-description" rows="4" placeholder="e.g. Mobile Legends: Bang Bang is a 5v5 MOBA. Diamonds are delivered instantly to your in-game ID after payment is confirmed." style="width:100%;padding:11px 14px;border-radius:12px;border:1px solid var(--border-glass);background:var(--fill-soft);color:var(--text);font-size:14px;font-family:inherit;resize:vertical;box-sizing:border-box;"></textarea>
+                <textarea id="edit-game-description" rows="4" placeholder="e.g. Mobile Legends: Bang Bang is a 5v5 MOBA. Diamonds are delivered instantly to your in-game ID after payment is confirmed." style="width:100%;padding:10px;border-radius:12px;border:1px solid var(--border-glass);background:var(--bg-subtle-2);color:var(--text-primary);font-size:14px;font-family:inherit;resize:vertical;box-sizing:border-box;"></textarea>
 
                 <!-- App deep-link fields: purely optional. When set, Store.html
                      shows a "Game ဖွင့်မယ်" button on the game detail page and
@@ -3418,7 +3431,7 @@
                 </div>
 
                 <label>Change (%)</label>
-                <input type="number" id="bulk-pkg-percent" placeholder="e.g. 5 or -10" style="width:100%;padding:10px;border:1px solid var(--fill-soft);border-radius:8px;font-size:14px;">
+                <input type="number" id="bulk-pkg-percent" placeholder="e.g. 5 or -10" style="width:100%;padding:10px;border:1px solid var(--border-glass);background:var(--bg-subtle-2);color:var(--text-primary);border-radius:12px;font-size:14px;font-family:inherit;box-sizing:border-box;">
             </div>
             <div class="modal-footer">
                 <button class="btn btn-outline" onclick="closeBulkPkgModal()" style="flex:1;">Cancel</button>
@@ -9753,11 +9766,11 @@
                                 <div class="pkg-card-close pkg-x-icon" onclick="collapsePackageRow(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></div>
                             </div>
                             <div class="pkg-row-top">
-                                <input type="text" class="pkg-amount" placeholder="e.g. 100 Diamonds" value="${amount}" style="flex:1;min-width:0;padding:8px;border:1px solid var(--fill-soft);border-radius:6px;font-size:13px;">
+                                <input type="text" class="pkg-amount" placeholder="e.g. 100 Diamonds" value="${amount}" style="flex:1;min-width:0;padding:8px;border:1px solid var(--border-glass);background:var(--bg-subtle-2);color:var(--text-primary);border-radius:8px;font-size:13px;font-family:inherit;box-sizing:border-box;">
                             </div>
                             <div class="pkg-price-field">
                                 <label>Tab (ဒီ package ကို ထားမည့် tab)</label>
-                                <select class="pkg-tab-select" onchange="movePackageToTab(this)" style="width:100%;padding:8px;border:1px solid var(--fill-soft);border-radius:6px;font-size:13px;background:var(--surface);"></select>
+                                <select class="pkg-tab-select" onchange="movePackageToTab(this)" style="width:100%;box-sizing:border-box;padding:8px;border:1px solid var(--border-glass);border-radius:8px;font-size:13px;background:var(--bg-subtle-2);color:var(--text-primary);font-family:inherit;"></select>
                             </div>
                             <div class="pkg-row-media">
                                 <div class="pkg-img-preview" data-url="${image}" onclick="this.nextElementSibling.click()">
@@ -9785,7 +9798,7 @@
                             </div>
                             <div class="pkg-price-field">
                                 <label>Badge (Store ကတ်ပေါ်မှာ ⭐ tag ပြမည်)</label>
-                                <select class="pkg-badge" onchange="updatePkgSummaryBadge(this)" style="width:100%;padding:8px;border:1px solid var(--fill-soft);border-radius:6px;font-size:13px;background:var(--surface);">
+                                <select class="pkg-badge" onchange="updatePkgSummaryBadge(this)" style="width:100%;box-sizing:border-box;padding:8px;border:1px solid var(--border-glass);border-radius:8px;font-size:13px;background:var(--bg-subtle-2);color:var(--text-primary);font-family:inherit;">
                                     <option value="" ${badge !== 'top' && badge !== 'hot' ? 'selected' : ''}>None</option>
                                     <option value="top" ${badge === 'top' ? 'selected' : ''}>⭐ TOP</option>
                                     <option value="hot" ${badge === 'hot' ? 'selected' : ''}>⭐ HOT</option>
@@ -9793,30 +9806,30 @@
                             </div>
                             <div class="pkg-row-pricing">
                                 <div class="pkg-price-field">
-                                    <label>Cost (မသိမ်း — Store မှာ မပြပါ)</label>
-                                    <input type="number" class="pkg-cost" placeholder="0" value="${cost}" oninput="updatePackageProfit(this)" style="width:100%;padding:8px;border:1px solid var(--fill-soft);border-radius:6px;font-size:13px;">
+                                    <label>Cost (Auto update ဖြင့်သာ ပြောင်းမည် — Store မှာ မပြပါ)</label>
+                                    <input type="number" class="pkg-cost" placeholder="0" value="${cost}" oninput="updatePackageProfit(this)" readonly title="Cost ကို manual ပြင်လို့မရပါ — Provider ဈေးနှုန်း update ဖြစ်ရင် သူ့ဘာသာတော့ update လုပ်ပေးပါလိမ့်မယ်" style="width:100%;padding:8px;border:1px solid var(--border-glass);background:var(--bg-subtle-2);color:var(--text-primary);border-radius:8px;font-size:13px;font-family:inherit;box-sizing:border-box;opacity:0.75;cursor:not-allowed;">
                                     <button type="button" class="pkg-cost-update-btn" style="display:none;" onclick="applyCostUpdate(this)"></button>
                                 </div>
                                 <div class="pkg-price-field">
                                     <label>Price (Store မှာ ပြမည်)</label>
-                                    <input type="number" class="pkg-price" placeholder="0" value="${price}" oninput="updatePackageProfit(this)" onblur="enforceMinPriceMargin(this)" style="width:100%;padding:8px;border:1px solid var(--fill-soft);border-radius:6px;font-size:13px;">
+                                    <input type="number" class="pkg-price" placeholder="0" value="${price}" oninput="updatePackageProfit(this)" onblur="enforceMinPriceMargin(this)" style="width:100%;padding:8px;border:1px solid var(--border-glass);background:var(--bg-subtle-2);color:var(--text-primary);border-radius:8px;font-size:13px;font-family:inherit;box-sizing:border-box;">
                                 </div>
                                 <div class="pkg-profit-badge" title="Profit margin = (Price − Cost) / Cost">--</div>
                             </div>
                             <div class="pkg-provider-row" style="display:flex;align-items:center;gap:8px;">
                                 <label style="margin:0;font-size:11px;color:var(--text-muted);white-space:nowrap;">Auto-Fulfill</label>
-                                <select class="pkg-provider" onchange="refreshPackageRowProviderVisibility()" style="flex:1;padding:6px 8px;border:1px solid var(--fill-soft);border-radius:6px;font-size:12px;background:var(--surface);color:var(--text-primary);">
+                                <select class="pkg-provider" onchange="refreshPackageRowProviderVisibility()" style="flex:1;box-sizing:border-box;padding:8px;border:1px solid var(--border-glass);border-radius:8px;font-size:13px;background:var(--bg-subtle-2);color:var(--text-primary);font-family:inherit;">
                                     <option value="manual" ${resolvedProvider === 'manual' ? 'selected' : ''}>Manual (no auto-fulfill)</option>
                                     <option value="g2bulk" ${resolvedProvider === 'g2bulk' ? 'selected' : ''}>G2Bulk</option>
                                     <option value="jcplays" ${resolvedProvider === 'jcplays' ? 'selected' : ''}>JCPlays (Redeem Code)</option>
                                     <option value="fazercard" ${resolvedProvider === 'fazercard' ? 'selected' : ''}>FazerCards</option>
                                 </select>
                             </div>
-                            <input type="text" class="pkg-g2bulk" placeholder="G2Bulk catalogue name" value="${g2bulkName}" style="padding:7px 8px;border:1px solid var(--fill-soft);border-radius:6px;font-size:12px;color:var(--text-secondary);display:none;">
-                            <input type="text" class="pkg-jcplays" placeholder="JCPlays Product ID" value="${jcplaysProductId}" style="padding:7px 8px;border:1px solid var(--fill-soft);border-radius:6px;font-size:12px;color:var(--text-secondary);display:none;">
-                            <input type="text" class="pkg-voucher-id" placeholder="G2Bulk product ID" value="${voucherProductId}" style="padding:7px 8px;border:1px solid var(--fill-soft);border-radius:6px;font-size:12px;color:var(--text-secondary);display:none;">
-                            <input type="text" class="pkg-fazercard" placeholder="FazerCards offer_id" value="${fazercardOfferId}" style="padding:7px 8px;border:1px solid var(--fill-soft);border-radius:6px;font-size:12px;color:var(--text-secondary);display:none;">
-                            <input type="text" class="pkg-fazercard-giftcard-id" placeholder="FazerCards card_id" value="${fazercardGiftCardId}" style="padding:7px 8px;border:1px solid var(--fill-soft);border-radius:6px;font-size:12px;color:var(--text-secondary);display:none;">
+                            <input type="text" class="pkg-g2bulk" placeholder="G2Bulk catalogue name" value="${g2bulkName}" style="padding:7px 8px;border:1px solid var(--border-glass);background:var(--bg-subtle-2);color:var(--text-secondary);border-radius:8px;font-size:12px;font-family:inherit;box-sizing:border-box;display:none;">
+                            <input type="text" class="pkg-jcplays" placeholder="JCPlays Product ID" value="${jcplaysProductId}" style="padding:7px 8px;border:1px solid var(--border-glass);background:var(--bg-subtle-2);color:var(--text-secondary);border-radius:8px;font-size:12px;font-family:inherit;box-sizing:border-box;display:none;">
+                            <input type="text" class="pkg-voucher-id" placeholder="G2Bulk product ID" value="${voucherProductId}" style="padding:7px 8px;border:1px solid var(--border-glass);background:var(--bg-subtle-2);color:var(--text-secondary);border-radius:8px;font-size:12px;font-family:inherit;box-sizing:border-box;display:none;">
+                            <input type="text" class="pkg-fazercard" placeholder="FazerCards offer_id" value="${fazercardOfferId}" style="padding:7px 8px;border:1px solid var(--border-glass);background:var(--bg-subtle-2);color:var(--text-secondary);border-radius:8px;font-size:12px;font-family:inherit;box-sizing:border-box;display:none;">
+                            <input type="text" class="pkg-fazercard-giftcard-id" placeholder="FazerCards card_id" value="${fazercardGiftCardId}" style="padding:7px 8px;border:1px solid var(--border-glass);background:var(--bg-subtle-2);color:var(--text-secondary);border-radius:8px;font-size:12px;font-family:inherit;box-sizing:border-box;display:none;">
                             <span class="pkg-stock-badge"></span>
                             <div class="pkg-card-footer">
                                 <button type="button" class="pkg-card-save-btn" onclick="collapsePackageRow(this)">Save</button>
@@ -14257,6 +14270,27 @@
             const voucher = ['g2bulk_voucher', 'jcplays', 'fazercard_giftcard'].includes(currentFulfillProvider);
             document.querySelectorAll('#fulfill-group-direct').forEach(el => { el.style.display = direct ? 'block' : 'none'; });
             document.querySelectorAll('#fulfill-group-voucher').forEach(el => { el.style.display = voucher ? 'block' : 'none'; });
+            // Show only the provider-specific section (picker button + its
+            // fields) that matches the currently selected tab; hide the
+            // rest. Without this, picking G2Bulk/FazerCards/JCPlays/etc.
+            // only toggled the tab's active state and never actually
+            // revealed the linked-game picker underneath it.
+            const sectionByProvider = {
+                g2bulk: 'g2bulk-fulfill-section',
+                jcplays: 'jcplays-fulfill-section',
+                g2bulk_voucher: 'g2bulk-voucher-fulfill-section',
+                fazercard: 'fazercard-fulfill-section',
+                fazercard_giftcard: 'fazercard-giftcard-fulfill-section'
+            };
+            Object.values(sectionByProvider).forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.style.display = 'none';
+            });
+            const activeSectionId = sectionByProvider[currentFulfillProvider];
+            if (activeSectionId) {
+                const activeEl = document.getElementById(activeSectionId);
+                if (activeEl) activeEl.style.display = 'block';
+            }
             refreshPackageRowProviderVisibility();
             refreshCheckPricesBtn();
             if (currentFulfillProvider === 'g2bulk_voucher') onVoucherCategoryChange();
