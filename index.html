@@ -585,6 +585,7 @@
         .logo { color: var(--text-primary); font-size: 20px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
         .logo-icon { background: var(--accent); color: white; padding: 4px; border-radius: 6px; display: flex; width: 32px; height: 32px; }
         .logo-icon.has-custom-logo { padding: 0; background: transparent; overflow: hidden; }
+        .logo-icon img { transform-origin: center; transition: transform 0.15s ease; }
         .header-icon { background: var(--fill-soft); width: 36px; height: 36px; border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; }
 
         /* Blue flame indicator (next to logout) */
@@ -2460,6 +2461,29 @@
                     <input type="file" id="edit-logo-file" class="img-update-input" accept="image/*" onchange="previewLogoImage(event)">
                     <p id="logo-upload-status" style="font-size:12px;color:var(--text-secondary);display:none;"></p>
                     <button class="btn btn-primary" id="save-logo-btn" style="margin-top:10px;" onclick="saveLogo()">Save Logo</button>
+
+                    <!-- Logo Size: scales the logo image inside its fixed,
+                         overflow-hidden badge box (here and in the Store app
+                         header/drawer/onboarding) via CSS transform, so the
+                         header itself never resizes no matter how big or
+                         small the logo is set. The preview beside the
+                         slider mimics the real Store header badge (same
+                         49x49 size, transparent background, object-fit:
+                         contain) so Lin can dial in the size without
+                         opening Store.html to check. -->
+                    <div style="margin-top:16px;">
+                        <label style="font-size:12.5px;color:var(--text-secondary);display:flex;justify-content:space-between;">
+                            <span>Logo Size</span><span id="logo-scale-value">100%</span>
+                        </label>
+                        <div style="display:flex;align-items:center;gap:12px;margin-top:6px;">
+                            <input type="range" id="logo-scale-slider" min="1" max="100" value="100" style="flex:1;" oninput="previewLogoScale(this.value)" onchange="saveLogoScale(this.value)">
+                            <div id="logo-scale-preview-wrap" style="width:49px;height:49px;border-radius:12px;background:var(--fill-soft);display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;">
+                                <img id="logo-scale-preview-img" src="" alt="" style="width:100%;height:100%;object-fit:contain;transform-origin:center;transition:transform 0.15s ease;display:none;">
+                                <svg class="ui-icon" id="logo-scale-preview-default-icon" style="width:22px;height:22px;color:var(--text-secondary);"><use href="#icon-shield"></use></svg>
+                            </div>
+                        </div>
+                        <p style="font-size:11.5px;color:var(--text-secondary);margin-top:4px;">Preview shows the logo at actual Store header size.</p>
+                    </div>
                 </div>
             </div>
 
@@ -12619,7 +12643,67 @@
                 defaultIcon.style.display = '';
                 box.classList.remove('has-custom-logo');
             }
+            setLogoScalePreviewImage((data && data.logoUrl) || '');
+            applyLogoScale(data && data.logoScale);
         }
+
+        // Logo Size (1-100%): scales the logo image in place via CSS
+        // transform inside its fixed, overflow-hidden badge box — here, in
+        // the settings preview thumbnail, and in the Store app's header/
+        // drawer/onboarding logo slots — so the header itself never resizes
+        // no matter how the logo is scaled.
+        function setLogoScalePreviewImage(url) {
+            const img = document.getElementById('logo-scale-preview-img');
+            const defaultIcon = document.getElementById('logo-scale-preview-default-icon');
+            if (!img || !defaultIcon) return;
+            if (url) {
+                img.src = url;
+                img.style.display = 'block';
+                defaultIcon.style.display = 'none';
+            } else {
+                img.style.display = 'none';
+                defaultIcon.style.display = '';
+            }
+        }
+
+        function applyLogoScale(scale) {
+            const s = (typeof scale === 'number' && scale > 0) ? scale : 1;
+            const img = document.getElementById('header-logo-img');
+            if (img) img.style.transform = `scale(${s})`;
+            const previewImg = document.getElementById('logo-scale-preview-img');
+            if (previewImg) previewImg.style.transform = `scale(${s})`;
+            const slider = document.getElementById('logo-scale-slider');
+            const label = document.getElementById('logo-scale-value');
+            const pct = Math.round(s * 100);
+            if (slider) slider.value = pct;
+            if (label) label.textContent = pct + '%';
+        }
+
+        function previewLogoScale(val) {
+            const scaleCss = `scale(${val / 100})`;
+            const img = document.getElementById('header-logo-img');
+            if (img) img.style.transform = scaleCss;
+            const previewImg = document.getElementById('logo-scale-preview-img');
+            if (previewImg) previewImg.style.transform = scaleCss;
+            const label = document.getElementById('logo-scale-value');
+            if (label) label.textContent = val + '%';
+        }
+        window.previewLogoScale = previewLogoScale;
+
+        let logoScaleSaveTimer = null;
+        function saveLogoScale(val) {
+            clearTimeout(logoScaleSaveTimer);
+            logoScaleSaveTimer = setTimeout(async () => {
+                try {
+                    await setDoc(doc(db, "settings", "branding"), { logoScale: Number(val) / 100 }, { merge: true });
+                    logAdminActivity('Updated store logo size');
+                } catch (error) {
+                    console.error("Save logo scale error:", error);
+                    window.showToast('Failed to update logo size.', 'fail');
+                }
+            }, 400);
+        }
+        window.saveLogoScale = saveLogoScale;
 
         function toggleAdminLoginSettings() {
             const body = document.getElementById('admin-login-body');
@@ -12650,6 +12734,7 @@
                 img.style.display = 'block';
                 document.getElementById('logo-img-update-box').classList.add('has-image');
                 document.getElementById('logo-img-update-change').style.display = 'flex';
+                setLogoScalePreviewImage(ev.target.result);
             };
             reader.readAsDataURL(file);
         }
@@ -14667,6 +14752,8 @@
             refreshCheckPricesBtn();
             if (kind === 'g2bulk_voucher') onVoucherCategoryChange();
             if (kind === 'fazercard_giftcard') onFazerCardGiftCardCategoryChange();
+            if (kind === 'g2bulk') onG2BulkGameChange();
+            if (kind === 'fazercard') onFazerCardGameChange();
             closeGamePicker();
         }
         window.selectGamePickerItem = selectGamePickerItem;
