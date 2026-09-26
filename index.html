@@ -1148,8 +1148,7 @@
         .modal-body > * { flex-shrink: 0; }
         .modal-body label { font-size: 13px; font-weight: 500; color: var(--text-secondary); }
         .modal-body input[type="text"], .modal-body input[type="number"], .modal-body input[type="password"] { padding: 10px; border: 1px solid var(--border-glass); background: var(--bg-subtle-2); color: var(--text-primary); border-radius: 12px; font-size: 14px; }
-        /* Native datetime-local pickers (Coupon Starts At/Expiry, Flash Sale
-           End Time) previously fell back to the browser's completely
+        /* Native datetime-local pickers previously fell back to the browser's completely
            unstyled default box — no radius, no theme background, harsh
            black border on most Android browsers. Brought in line with the
            text/number/password inputs above; color-scheme + a filter on
@@ -1552,51 +1551,6 @@
         .pkg-type-opt.active { background: var(--surface); color: var(--accent); box-shadow: 0 1px 3px rgba(0,0,0,0.15); }
         .pkg-type-opt.active svg { opacity: 1; }
         .pkg-type-opt:active { transform: scale(0.96); }
-        /* Role picker (Add Admin / per-admin Access) — segmented toggle
-           replacing the old native <select>, same idea as .pkg-type-toggle
-           above but stacked vertically since each option needs a subtitle. */
-        .role-toggle { display: flex; flex-direction: column; gap: 6px; }
-        .role-toggle-opt {
-            display: flex; align-items: center; gap: 10px; width: 100%; box-sizing: border-box;
-            padding: 10px 12px; border: 1px solid var(--border-glass); background: var(--bg-subtle-2);
-            border-radius: 12px; cursor: pointer; text-align: left; transition: 0.15s ease; font-family: inherit;
-        }
-        .role-toggle-opt:active { transform: scale(0.98); }
-        .role-toggle-opt .role-toggle-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
-        .role-toggle-opt .role-toggle-title { font-size: 13.5px; font-weight: 600; color: var(--text-primary); }
-        .role-toggle-opt .role-toggle-sub { font-size: 11.5px; color: var(--text-secondary); }
-        .role-toggle-opt .role-toggle-check {
-            width: 18px; height: 18px; flex-shrink: 0; border-radius: 50%; border: 1.5px solid var(--fill-soft);
-            display: flex; align-items: center; justify-content: center; transition: 0.15s ease;
-        }
-        .role-toggle-opt .role-toggle-check svg { width: 11px; height: 11px; stroke: #fff; stroke-width: 3; opacity: 0; transition: 0.15s ease; }
-        .role-toggle-opt.active { border-color: var(--accent); background: var(--accent-soft); }
-        .role-toggle-opt.active .role-toggle-title { color: var(--accent); }
-        .role-toggle-opt.active .role-toggle-check { background: var(--accent); border-color: var(--accent); }
-        .role-toggle-opt.active .role-toggle-check svg { opacity: 1; }
-        /* Compact variant used inline in the per-admin row (no subtitle line). */
-        .role-toggle.compact { flex-direction: row; gap: 4px; }
-        .role-toggle.compact .role-toggle-opt { flex: 1; padding: 6px 6px; border-radius: 8px; justify-content: center; gap: 4px; }
-        .role-toggle.compact .role-toggle-title { font-size: 10.5px; text-align: center; }
-        .role-toggle.compact .role-toggle-check { width: 13px; height: 13px; }
-        .role-toggle.compact .role-toggle-check svg { width: 8px; height: 8px; stroke-width: 4; }
-        /* Read-only state — shown to non-Full-Access admins so the current
-           access level is still visible but can't be tapped/changed
-           (see canManageAdmins()). Looks like a switched-off control. */
-        .role-toggle-opt[disabled] { cursor: not-allowed; opacity: 0.5; }
-        .role-toggle-opt[disabled].active { opacity: 0.85; }
-
-        /* ---- Roles & Permissions overview (Settings) ---- */
-        .roles-legend-chip { display: flex; gap: 8px; align-items: baseline; font-size: 12px; line-height: 1.4; }
-        .roles-legend-chip b { flex-shrink: 0; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 20px; background: var(--accent-soft); color: var(--accent); }
-        .roles-legend-chip span { color: var(--text-secondary); }
-        .roles-overview-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--fill-soft); }
-        .roles-overview-row:last-child { border-bottom: none; }
-        .roles-overview-row .roles-overview-label { font-size: 13px; font-weight: 600; color: var(--text-primary); }
-        .roles-overview-badges { display: flex; gap: 5px; flex-shrink: 0; }
-        .role-badge { font-size: 10.5px; font-weight: 700; padding: 3px 7px; border-radius: 6px; white-space: nowrap; display: flex; align-items: center; gap: 3px; }
-        .role-badge-on { background: var(--accent-soft); color: var(--accent); }
-        .role-badge-off { background: var(--fill-soft); color: var(--text-muted); opacity: 0.7; }
         .pkg-img-remove { flex-shrink: 0; font-size: 11px; color: var(--danger); cursor: pointer; white-space: nowrap; }
         .pkg-profit-badge.negative { background: var(--danger-soft); color: var(--danger-strong); }
         .pkg-cost-update-btn { margin-top: 4px; width: 100%; border: none; border-radius: 6px; padding: 5px 6px; font-size: 11px; font-weight: 600; color: #fff; background: #FF9500; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; animation: pkgUpdatePulse 1.4s ease-in-out infinite; }
@@ -2041,7 +1995,6 @@
                     </label>
                     <div style="min-width:0;">
                         <div id="my-account-username" style="font-size:15px;font-weight:600;color:var(--text-primary);"></div>
-                        <div id="my-account-role" style="font-size:11.5px;color:var(--text-muted);margin-top:2px;"></div>
                     </div>
                 </div>
                 <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px 0;border-top:1px solid var(--border-glass);">
@@ -2477,31 +2430,6 @@
                 </div>
             </div>
 
-            <div class="admin-card" id="settings-card-flashsale" style="margin-top:14px;">
-                <div style="display:flex;justify-content:space-between;align-items:center;cursor:pointer;" onclick="toggleFlashSaleSettings()">
-                    <span style="font-size:15px;font-weight: 600;">Flash Sale Banner</span>
-                    <svg class="ui-icon" id="flashsale-settings-chevron" style="width:18px;height:18px;color:var(--text-secondary);transition:transform 0.2s;"><use href="#icon-chevron-down"></use></svg>
-                </div>
-                <div id="flashsale-settings-body" style="display:none;margin-top:12px;">
-                    <p style="font-size:12px;color:var(--text-secondary);margin:0 0 12px;">A countdown banner shown at the top of the store's Home page while it's enabled and hasn't expired.</p>
-                    <label style="display:flex;align-items:center;gap:8px;">
-                        <input type="checkbox" id="flashsale-enabled" style="width:auto;">
-                        <span>Show banner on Home</span>
-                    </label>
-                    <label style="margin-top:12px;font-size:13px;font-weight: 500;color:var(--text-secondary);">Title</label>
-                    <input type="text" id="flashsale-title" placeholder="Flash Sale" style="width:100%;padding:10px;border:1px solid var(--fill-soft);border-radius:8px;font-size:14px;margin:6px 0 12px;">
-                    <label style="font-size:13px;font-weight: 500;color:var(--text-secondary);">Description</label>
-                    <input type="text" id="flashsale-desc" placeholder="20% off Mobile Legends diamonds" style="width:100%;padding:10px;border:1px solid var(--fill-soft);border-radius:8px;font-size:14px;margin:6px 0 12px;">
-                    <label style="font-size:13px;font-weight: 500;color:var(--text-secondary);">Linked Game <span style="font-weight:400;">(optional — tapping the banner opens this game)</span></label>
-                    <select id="flashsale-game-select" style="width:100%;padding:10px;border:1px solid var(--fill-soft);border-radius:8px;font-size:14px;margin:6px 0 12px;">
-                        <option value="">None</option>
-                    </select>
-                    <label style="font-size:13px;font-weight: 500;color:var(--text-secondary);">Ends At</label>
-                    <input type="datetime-local" id="flashsale-endtime" style="width:100%;padding:10px;border:1px solid var(--fill-soft);border-radius:8px;font-size:14px;margin:6px 0 14px;">
-                    <button class="btn btn-primary" id="save-flashsale-btn" onclick="saveFlashSaleSettings()">Save Flash Sale</button>
-                </div>
-            </div>
-
             <div class="admin-card" id="settings-card-branding" style="margin-top:14px;">
                 <div style="display:flex;justify-content:space-between;align-items:center;cursor:pointer;" onclick="toggleBrandingSettings()">
                     <span style="font-size:15px;font-weight: 600;">Store Logo</span>
@@ -2522,23 +2450,6 @@
                 </div>
             </div>
 
-            <div class="admin-card" id="settings-card-walletexpire" style="margin-top:14px;display:none;">
-                <div style="display:flex;justify-content:space-between;align-items:center;cursor:pointer;" onclick="toggleWalletExpireSettings()">
-                    <span style="font-size:15px;font-weight: 600;">Wallet Top Up Auto-Expire</span>
-                    <svg class="ui-icon" id="wallet-expire-chevron" style="width:18px;height:18px;color:var(--text-secondary);transition:transform 0.2s;"><use href="#icon-chevron-down"></use></svg>
-                </div>
-                <div id="wallet-expire-body" style="display:none;margin-top:12px;">
-                    <p style="font-size:12px;color:var(--text-secondary);margin:0 0 12px;">A "Pending" top up request nobody confirmed or rejected in time gets automatically marked "Rejected" (with an auto-note explaining why), so the queue doesn't fill up with stale requests. This check runs client-side whenever this admin panel's Wallet Top Ups page is open.</p>
-                    <label style="display:flex;align-items:center;gap:8px;">
-                        <input type="checkbox" id="wallet-expire-enabled" style="width:16px;height:16px;">
-                        <span style="font-size:13px;font-weight:500;">Enable auto-expire</span>
-                    </label>
-                    <label style="font-size:13px;font-weight: 500;color:var(--text-secondary);margin-top:12px;">Expire after (days)</label>
-                    <input type="number" id="wallet-expire-days" min="1" step="1" placeholder="3" style="width:100%;padding:10px;border:1px solid var(--fill-soft);border-radius:8px;font-size:14px;margin:6px 0 14px;">
-                    <button class="btn btn-primary" id="save-wallet-expire-btn" style="width:100%;" onclick="saveWalletExpireSettings()">Save</button>
-                </div>
-            </div>
-
             <div class="admin-card" id="settings-card-adminbroadcastsecret" style="margin-top:14px;">
                 <div style="display:flex;justify-content:space-between;align-items:center;cursor:pointer;" onclick="toggleAdminBroadcastSecretSettings()">
                     <span style="font-size:15px;font-weight: 600;">Admin Broadcast Secret</span>
@@ -2551,37 +2462,6 @@
                 </div>
             </div>
 
-            <div class="admin-card" id="settings-card-receiptstyle" style="margin-top:14px;">
-                <div style="display:flex;justify-content:space-between;align-items:center;cursor:pointer;" onclick="toggleReceiptStyleSettings()">
-                    <span style="font-size:15px;font-weight: 600;">Receipt Style</span>
-                    <svg class="ui-icon" id="receipt-style-chevron" style="width:18px;height:18px;color:var(--text-secondary);transition:transform 0.2s;"><use href="#icon-chevron-down"></use></svg>
-                </div>
-                <div id="receipt-style-body" style="display:none;margin-top:12px;">
-                    <div id="receipt-style-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;">
-                        <div class="receipt-style-option" data-style="minimal" onclick="selectReceiptStyle('minimal')" style="cursor:pointer;border:2px solid var(--border);border-radius:12px;overflow:hidden;background:#FFFFFF;">
-                            <div style="height:64px;background:#FFFFFF;position:relative;padding:8px;">
-                                <div style="width:60%;height:8px;background:#111827;border-radius:2px;"></div>
-                                <div style="width:40%;height:5px;background:#D1D5DB;border-radius:2px;margin-top:5px;"></div>
-                                <div style="width:100%;height:2px;background:#111827;margin-top:8px;"></div>
-                            </div>
-                            <div style="padding:6px 8px;font-size:11.5px;font-weight: 600;color:var(--text);text-align:center;background:var(--bg-subtle);">Minimal</div>
-                        </div>
-                        <div class="receipt-style-option" data-style="premium" onclick="selectReceiptStyle('premium')" style="cursor:pointer;border:2px solid var(--border);border-radius:12px;overflow:hidden;background:#FDF8F2;">
-                            <div style="height:64px;background:linear-gradient(180deg,#3B0764 0%,#3B0764 55%,#F2B705 60%,#FDF8F2 65%);position:relative;">
-                                <div style="width:20px;height:20px;border-radius:50%;background:#fff;position:absolute;left:50%;top:38%;transform:translate(-50%,-50%);"></div>
-                            </div>
-                            <div style="padding:6px 8px;font-size:11.5px;font-weight: 600;color:var(--text);text-align:center;background:var(--bg-subtle);">Premium</div>
-                        </div>
-                        <div class="receipt-style-option" data-style="dark" onclick="selectReceiptStyle('dark')" style="cursor:pointer;border:2px solid var(--border);border-radius:12px;overflow:hidden;background:#0F1626;">
-                            <div style="height:64px;background:#0B0F1A;position:relative;border-bottom:2px solid #22D3EE;">
-                                <div style="width:18px;height:18px;border-radius:50%;border:2px solid #22D3EE;position:absolute;left:50%;top:32%;transform:translate(-50%,-50%);"></div>
-                            </div>
-                            <div style="padding:6px 8px;font-size:11.5px;font-weight: 600;color:#E5E7EB;text-align:center;background:#0F1626;">Dark</div>
-                        </div>
-                    </div>
-                    <button class="btn btn-primary" id="save-receipt-style-btn" style="margin-top:12px;" onclick="saveReceiptStyle()">Save Receipt Style</button>
-                </div>
-            </div>
 
             <div class="admin-card" style="margin-top:14px;">
                 <div style="display:flex;justify-content:space-between;align-items:center;cursor:pointer;" onclick="togglePushNotificationSettings()">
@@ -2642,28 +2522,6 @@
                 </div>
             </div>
 
-            <!-- Roles & Permissions overview: read-only reference showing
-                 exactly what each built-in Access level (Full/Product/Account)
-                 sees by default, so an owner can check this before assigning
-                 a role instead of guessing. Pulled live from the same
-                 NAV_GROUPS_BY_ROLE / NAV_GROUP_LABELS constants that actually
-                 enforce access — see renderRolesOverview() — so it can never
-                 drift out of sync with the real behaviour. Full Access only,
-                 same as Admin Accounts below. -->
-            <div class="admin-card" style="margin-top:14px;display:none;" id="roles-overview-card">
-                <div style="display:flex;justify-content:space-between;align-items:center;cursor:pointer;" onclick="toggleRolesOverview()">
-                    <div style="display:flex;align-items:center;gap:8px;">
-                        <svg class="ui-icon" style="width:18px;height:18px;color:var(--text-secondary);"><use href="#icon-shield"></use></svg>
-                        <span style="font-size:15px;font-weight: 600;">Roles &amp; Permissions</span>
-                    </div>
-                    <svg class="ui-icon" id="roles-overview-chevron" style="width:18px;height:18px;color:var(--text-secondary);transition:transform 0.2s;"><use href="#icon-chevron-down"></use></svg>
-                </div>
-                <div id="roles-overview-body" style="display:none;margin-top:12px;">
-                    <p style="font-size:12px;color:var(--text-secondary);margin:0 0 12px;">What each Access level sees by default. A per-admin override below (tap their card) can grant or hide any section on top of this.</p>
-                    <div id="roles-overview-legend" style="display:flex;flex-direction:column;gap:6px;margin-bottom:14px;"></div>
-                    <div id="roles-overview-list" style="display:flex;flex-direction:column;"></div>
-                </div>
-            </div>
             <div class="admin-card" style="margin-top:14px;" id="admin-accounts-card">
                 <div style="display:flex;justify-content:space-between;align-items:center;cursor:pointer;" onclick="toggleAdminAccounts()">
                     <div style="display:flex;align-items:center;gap:8px;">
@@ -2680,25 +2538,6 @@
                     <div id="admin-accounts-list">
                         <p class="empty-msg">Loading admins...</p>
                     </div>
-                </div>
-            </div>
-
-            <!-- Tab Access: lets the store owner (Full Access) hide whole
-                 sidebar sections from non-owner admins (Product/Account),
-                 on top of the fixed role rules above. Full Access only —
-                 see canManageAdmins() / renderTabAccessSettings(). -->
-            <div class="admin-card" style="margin-top:14px;display:none;" id="tab-access-card">
-                <div style="display:flex;justify-content:space-between;align-items:center;cursor:pointer;" onclick="toggleTabAccess()">
-                    <div style="display:flex;align-items:center;gap:8px;">
-                        <svg class="ui-icon" style="width:18px;height:18px;color:var(--text-secondary);"><use href="#icon-shield"></use></svg>
-                        <span style="font-size:15px;font-weight: 600;">Tab Access</span>
-                    </div>
-                    <svg class="ui-icon" id="tab-access-chevron" style="width:18px;height:18px;color:var(--text-secondary);transition:transform 0.2s;"><use href="#icon-chevron-down"></use></svg>
-                </div>
-                <div id="tab-access-body" style="display:none;margin-top:12px;">
-                    <p style="font-size:12px;color:var(--text-secondary);margin:0 0 12px;">Choose which sidebar sections Product/Account admins can open. Full Access admins always see everything.</p>
-                    <div id="tab-access-list" style="display:flex;flex-direction:column;gap:2px;"></div>
-                    <button class="btn btn-primary" id="save-tab-access-btn" style="margin-top:10px;" onclick="saveTabAccessSettings()">Save Tab Access</button>
                 </div>
             </div>
 
@@ -2720,28 +2559,7 @@
                         <input type="text" id="new-admin-username" placeholder="username" autocapitalize="none" autocorrect="off" autocomplete="off">
                         <label style="margin-top:14px;">Temporary Password</label>
                         <input type="password" id="new-admin-password" placeholder="At least 6 characters" autocomplete="new-password">
-                        <label style="margin-top:14px;">Access</label>
-                        <div class="role-toggle" id="new-admin-role-toggle">
-                            <button type="button" class="role-toggle-opt" data-value="full" onclick="setNewAdminRole(this,'full')">
-                                <span class="role-toggle-check"><svg class="ui-icon"><use href="#icon-check"></use></svg></span>
-                                <span class="role-toggle-text">
-                                    <span class="role-toggle-title">Full Access</span>
-                                    <span class="role-toggle-sub">Everything</span>
-                                </span>
-                            </button>
-                            <button type="button" class="role-toggle-opt active" data-value="product" onclick="setNewAdminRole(this,'product')">
-                                <span class="role-toggle-check"><svg class="ui-icon"><use href="#icon-check"></use></svg></span>
-                                <span class="role-toggle-text">
-                                    <span class="role-toggle-title">Product Admin</span>
-                                    <span class="role-toggle-sub">Top-ups only</span>
-                                </span>
-                            </button>
-                        </div>
-                        <select id="new-admin-role" style="display:none;">
-                            <option value="full">Full Access (everything)</option>
-                            <option value="product" selected>Product Admin (top-ups only)</option>
-                        </select>
-                        <p style="font-size:12px;color:var(--text-secondary);margin-top:10px;">The new admin can sign in with this username/password right away. Access can be changed later from this list.</p>
+                        <p style="font-size:12px;color:var(--text-secondary);margin-top:10px;">The new admin can sign in with this username/password right away and gets full access to the panel.</p>
                         <p id="add-admin-error" class="login-msg-error" style="display:none;"></p>
                     </div>
                 </div>
@@ -2776,32 +2594,6 @@
                     <p style="font-size:12px;color:var(--text-muted);text-align:center;margin-top:10px;">as <code style="background:var(--fill-soft);padding:2px 6px;border-radius:5px;">/link <span id="telegram-link-code-inline">------</span></code></p>
                     <a id="telegram-link-open-btn" href="#" target="_blank" rel="noopener" class="btn btn-primary" style="display:none;margin-top:14px;text-decoration:none;text-align:center;">Open Telegram</a>
                     <p id="telegram-link-status" style="font-size:12.5px;color:var(--text-secondary);text-align:center;margin-top:14px;">Waiting for code · expires in <span id="telegram-link-countdown">5:00</span></p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Admin Permissions Modal: opened by tapping an admin's card in the
-             Admin Accounts list (Full Access only). Lets the owner toggle
-             each nav-group Access Permission on/off individually for that
-             one admin - saved to adminUsernames/{username}.permissions and
-             enforced in applyRoleRestrictions(). Full Access admins are
-             never restricted by this (see applyRoleRestrictions), so the
-             toggles are shown disabled with an explanatory note for them. -->
-        <div class="modal-overlay" id="admin-permissions-modal-overlay" onclick="if(event.target===this) closeAdminPermissionsModal()">
-            <div class="modal-box">
-                <div class="modal-header">
-                    <h3>Access Permission — <span id="admin-permissions-username">—</span></h3>
-                    <div class="modal-close" onclick="closeAdminPermissionsModal()">
-                        <svg class="ui-icon" style="width:18px;height:18px;"><use href="#icon-close"></use></svg>
-                    </div>
-                </div>
-                <div class="modal-body">
-                    <p id="admin-permissions-note" style="font-size:12px;color:var(--text-secondary);margin:0 0 12px;">Choose exactly which sections this admin can open. Off = hidden for them, even if their Access level would normally include it.</p>
-                    <div id="admin-permissions-list" style="display:flex;flex-direction:column;gap:2px;"></div>
-                </div>
-                <div class="modal-footer">
-                    <button class="btn btn-primary" id="save-admin-permissions-btn" onclick="saveAdminPermissions()">Save</button>
-                    <button class="btn btn-outline" onclick="closeAdminPermissionsModal()">Cancel</button>
                 </div>
             </div>
         </div>
@@ -3168,14 +2960,6 @@
             </div>
         </div>
 
-        <!-- COUPON CODES PAGE (Firebase Connected) -->
-        <div id="coupon-list" class="page-section">
-            <h2 class="title-header"><span>Coupons</span> <button class="btn btn-primary" style="flex:unset; padding: 4px 10px; font-size:12px;" onclick="openCouponEditor()">+ Add</button></h2>
-            <div id="admin-coupon-container">
-                <p class="empty-msg">Loading coupons...</p>
-            </div>
-        </div>
-
         <!-- USERS PAGE (Firebase Connected) -->
         <div id="user-list" class="page-section">
             <h2 class="title-header">
@@ -3319,20 +3103,6 @@
                 <p class="empty-msg">Loading tier settings...</p>
             </div>
             <button class="btn btn-primary" id="save-tiers-btn" style="margin-top:6px;" onclick="saveTierSettings()">Save Tier Limits</button>
-        </div>
-
-        <!-- ADMIN ACTIVITY LOG PAGE (Firebase Connected) — audit trail of admin
-             actions (who changed what, from which IP) written by
-             logAdminActivity() throughout the app. Read-only here; entries can't
-             be edited or deleted from the client. -->
-        <div id="activity-log" class="page-section">
-            <h2 class="title-header">Admin Activity Log</h2>
-            <div class="admin-search-wrap">
-                <input type="text" id="activity-log-filter" placeholder="Filter by admin username..." oninput="renderActivityLog()">
-            </div>
-            <div id="activity-log-container">
-                <p class="empty-msg">Loading activity...</p>
-            </div>
         </div>
 
     <div class="page-section" id="game-editor-page">
@@ -3773,75 +3543,6 @@
         </div>
     </div>
 
-    <!-- Coupon Editor Modal: discount code with an optional start/expiry
-         event window, total-use cap, and per-user use cap. Doc ID in
-         Firestore = the code itself (uppercased) so redemption lookups
-         (Store.html/worker.js, wired separately) are a single getDoc by
-         code with no query needed. -->
-    <div class="modal-overlay" id="coupon-editor-modal-overlay" onclick="if(event.target===this) closeCouponEditor()">
-        <div class="modal-box">
-            <div class="modal-header">
-                <h3 id="coupon-editor-title">Add Coupon</h3>
-                <div class="modal-close" onclick="closeCouponEditor()">
-                    <svg class="ui-icon" style="width:18px;height:18px;"><use href="#icon-close"></use></svg>
-                </div>
-            </div>
-            <div class="modal-body">
-                <input type="hidden" id="edit-coupon-original-code">
-                <label>Code</label>
-                <div style="display:flex;gap:8px;">
-                    <input type="text" id="edit-coupon-code" placeholder="e.g. LINN2026" style="flex:1;text-transform:uppercase;" maxlength="24">
-                    <button type="button" class="btn btn-outline" style="flex:unset;padding:10px 14px;" onclick="generateCouponCode()">Generate</button>
-                </div>
-
-                <label>Discount Type</label>
-                <select id="edit-coupon-type" onchange="onCouponTypeChange()">
-                    <option value="percent">Percent (%)</option>
-                    <option value="fixed">Fixed Amount (MMK)</option>
-                </select>
-
-                <label>Discount Value</label>
-                <input type="number" id="edit-coupon-value" min="0" placeholder="e.g. 10">
-
-                <div id="coupon-max-discount-row">
-                    <label>Max Discount Cap (MMK, optional)</label>
-                    <input type="number" id="edit-coupon-max-discount" min="0" placeholder="Leave blank for no cap">
-                </div>
-
-                <label>Starts At (optional — leave blank to start immediately)</label>
-                <input type="datetime-local" id="edit-coupon-starts">
-
-                <label>Expiry Date &amp; Time (optional)</label>
-                <input type="datetime-local" id="edit-coupon-expiry">
-
-                <label>Total Use Limit (optional)</label>
-                <input type="number" id="edit-coupon-maxuses" min="0" placeholder="Leave blank for unlimited">
-
-                <label>Per-User Use Limit</label>
-                <input type="number" id="edit-coupon-perlimit" min="0" placeholder="e.g. 1 (leave blank for unlimited)" value="1">
-
-                <label>Note (admin-only, optional)</label>
-                <input type="text" id="edit-coupon-note" placeholder="e.g. Facebook page promo, Sep 2026">
-
-                <div class="switch-row">
-                    <div>
-                        <span class="switch-label">Active</span>
-                    </div>
-                    <label class="toggle-switch">
-                        <input type="checkbox" id="edit-coupon-active" checked>
-                        <span class="toggle-slider"></span>
-                    </label>
-                </div>
-
-                <p id="coupon-used-count-note" style="font-size:12px;color:var(--text-secondary);display:none;margin-top:4px;"></p>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-danger" id="delete-coupon-btn" style="display:none;" onclick="deleteCurrentCoupon()">Delete</button>
-                <button class="btn btn-primary" id="save-coupon-btn" onclick="saveCoupon()">Save</button>
-            </div>
-        </div>
-    </div>
-
     <!-- JCPlays Settings Modal: SmileCoin-compatible credentials (Base URL, UID, Email, M_KEY) -->
     <div class="modal-overlay" id="jcplays-modal-overlay" onclick="if(event.target===this) closeJCPlaysModal()">
         <div class="modal-box">
@@ -4207,44 +3908,13 @@
         const PAGE_TO_NAV_GROUP = {
             'dashboard': 'group-dashboard', 'analytics': 'group-dashboard', 'order-list': 'group-dashboard',
             'g2bulk': 'group-api', 'jcplays': 'group-api', 'api-docs': 'group-api',
-            'payment-list': 'group-wallet', 'topup-list': 'group-wallet', 'coupon-list': 'group-wallet',
-            'user-list': 'group-userlist', 'tier-list': 'group-userlist', 'activity-log': 'group-userlist',
+            'payment-list': 'group-wallet', 'topup-list': 'group-wallet',
+            'user-list': 'group-userlist', 'tier-list': 'group-userlist',
             'settings': 'group-setting', 'notify-list': 'group-setting', 'ticker-list': 'group-setting'
         };
-        // Pages a 'product' role admin may NOT open — see applyRoleRestrictions().
-        // 'api-docs' is blocked for 'product' too — API Keys/docs are
-        // Full-Access-only regardless of role (see the 'API Keys' filter in
-        // renderNavGroupSheet below).
-        const PRODUCT_ROLE_BLOCKED_PAGES = ['api-docs'];
-        // Lets a per-admin Access Permission override (adminUsernames/{username}
-        // .permissions, set from the Admin Permissions modal — see
-        // openAdminPermissionsModal) grant a page the admin's preset Access
-        // level (full/product) wouldn't otherwise show, by bypassing
-        // the role-based redirects in showPage()/applyRoleRestrictions()
-        // below. 'api-docs' is deliberately excluded — it holds raw G2Bulk/
-        // JCPlays API keys/secrets, which stay Full-Access-only no matter
-        // what any toggle says, same as PRODUCT_ROLE_BLOCKED_PAGES already
-        // enforced before this feature existed.
-        function pageGrantedByPermission(pageId) {
-            if (!window.currentAdminPermissions || pageId === 'api-docs') return false;
-            const perm = window.currentAdminPermissions;
-            const group = PAGE_TO_NAV_GROUP[pageId];
-            return !!(group && perm[group] === true);
-        }
-        window.pageGrantedByPermission = pageGrantedByPermission;
         function showPage(pageId) {
             // Admin Broadcast (Notify) removed — send anyone still routed here to Settings.
             if (pageId === 'notify-list') pageId = 'settings';
-            const grantedByPermission = pageGrantedByPermission(pageId);
-            if (currentAdminRole === 'product' && PRODUCT_ROLE_BLOCKED_PAGES.includes(pageId) && !grantedByPermission) pageId = 'dashboard';
-            // Owner-disabled Tab Access re-check: even a direct showPage(...)
-            // call (stat-card onclick, old bookmark) can't land a non-Full
-            // admin on a group the owner has switched off — see
-            // isTabAllowedByOwner() / applyRoleRestrictions().
-            if (currentAdminRole !== 'full' && typeof isTabAllowedByOwner === 'function') {
-                const targetGroup = (typeof PAGE_TO_NAV_GROUP !== 'undefined' ? PAGE_TO_NAV_GROUP[pageId] : null);
-                if (targetGroup && !isTabAllowedByOwner(targetGroup) && pageId !== 'dashboard') pageId = 'dashboard';
-            }
             document.querySelectorAll('.page-section').forEach(p => p.classList.remove('active'));
             document.querySelectorAll('.nav-item').forEach(m => m.classList.remove('active'));
             document.getElementById(pageId).classList.add('active');
@@ -4264,7 +3934,7 @@
 
         // ---------- Lazy tab listeners ----------
         // Full-collection onSnapshot listeners (Users, Notifications, Ticker,
-        // Payment Methods, Coupons) used to all attach at login inside
+        // Payment Methods) used to all attach at login inside
         // startAdminApp(), so every one of them stayed open - and billing on
         // every doc change - for the whole session even on tabs an admin
         // never opened. Each listener already guards itself with a
@@ -4276,17 +3946,14 @@
             if (pageId === 'notify-list') listenNotifications();
             if (pageId === 'ticker-list') listenAnnouncementsAdmin();
             if (pageId === 'payment-list') listenPaymentMethods();
-            if (pageId === 'coupon-list') listenCoupons();
             // Settings page: three single-doc onSnapshot listeners that only
-            // ever fill in fields living inside #settings (Social Links,
-            // Flash Sale banner, Receipt style). Nothing outside that page
+            // ever fill in fields living inside #settings (Social Links).
+            // Nothing outside that page
             // reads their data, so - unlike Branding/Telegram/provider keys
             // below, which stay eager because other pages depend on them -
             // these are safe to defer until Settings is actually opened.
             if (pageId === 'settings') {
                 listenSocialLinks();
-                listenFlashSaleSettings();
-                listenReceiptStyle();
             }
             // Tier minimums: only used to compute/display the tier badge on
             // the User List (cards + CSV export) and the User Detail page
@@ -4315,8 +3982,7 @@
             ]},
             wallet: { title: 'Wallet', items: [
                 { label: 'Payment', icon: '#icon-wallet', run: () => showPage('payment-list') },
-                { label: 'Top Up', icon: '#icon-wallet', run: () => showPage('topup-list') },
-                { label: 'Coupons', icon: '#icon-tag', run: () => showPage('coupon-list') }
+                { label: 'Top Up', icon: '#icon-wallet', run: () => showPage('topup-list') }
             ]},
             api: { title: 'API', items: [
                 { label: 'G2Bulk', icon: '#icon-g2bulk', run: () => showPage('g2bulk'), dotId: 'g2bulk-nav-low-dot' },
@@ -4325,8 +3991,7 @@
             ]},
             userlist: { title: 'Userlist', items: [
                 { label: 'Userlist', icon: '#icon-users', run: () => showPage('user-list') },
-                { label: 'Tiers', icon: '#icon-trophy', run: () => showPage('tier-list') },
-                { label: 'Activity', icon: '#icon-shield', run: () => showPage('activity-log') }
+                { label: 'Tiers', icon: '#icon-trophy', run: () => showPage('tier-list') }
             ]},
             setting: { title: 'Setting', items: [
                 { label: 'General', icon: '#icon-gear', run: () => showPage('settings') },
@@ -4339,13 +4004,7 @@
             document.getElementById('nav-group-sheet-title').innerText = group.title;
             const list = document.getElementById('nav-group-sheet-list');
             list.innerHTML = '';
-            // "API Keys" (api-docs) holds the raw G2Bulk/JCPlays credentials,
-            // so it's hidden from anyone but a Full Access admin — see
-            // PRODUCT_ROLE_BLOCKED_PAGES for the matching direct-nav guard.
-            const items = (groupKey === 'api' && currentAdminRole !== 'full')
-                ? group.items.filter(it => it.label !== 'API Keys')
-                : group.items;
-            items.forEach(it => {
+            group.items.forEach(it => {
                 const btn = document.createElement('button');
                 btn.type = 'button';
                 btn.style.cssText = 'display:flex;align-items:center;gap:12px;width:100%;padding:13px 14px;border:1px solid var(--fill-soft);border-radius:12px;background:var(--surface);cursor:pointer;font-size:14px;font-weight:600;color:var(--text-primary);text-align:left;';
@@ -4368,195 +4027,6 @@
         window.openNavGroupSheet = openNavGroupSheet;
         window.closeNavGroupSheet = closeNavGroupSheet;
 
-        // ---------- Role-based access (Full / Product / Account) ----------
-        // Shows only the sidebar groups this admin's role is allowed to use,
-        // and moves them off any page (default-active 'dashboard', or a page
-        // left over from before a role change) that role can't see. This is a
-        // client-side UI gate only — Firestore rules are the real security
-        // boundary and should mirror this split before it's relied on for
-        // anything sensitive (flagged separately to the store owner).
-        const ALL_NAV_GROUPS = ['group-dashboard', 'group-game', 'group-wallet', 'group-api', 'group-userlist', 'group-setting'];
-        const NAV_GROUPS_BY_ROLE = {
-            full: ALL_NAV_GROUPS,
-            product: ['group-dashboard', 'group-game', 'group-wallet', 'group-api', 'group-userlist', 'group-setting']
-        };
-        // Which page a non-Full-Access admin lands on if the group they were
-        // sitting in gets switched off from underneath them (owner toggles
-        // Tab Access, or their role changes) — see applyRoleRestrictions().
-        const FALLBACK_PAGE_FOR_GROUP = {
-            'group-dashboard': 'dashboard', 'group-game': 'dashboard',
-            'group-wallet': 'payment-list', 'group-api': 'g2bulk', 'group-userlist': 'user-list',
-            'group-setting': 'settings'
-        };
-
-        // ---------- Owner-controlled Tab Access ----------
-        // settings/adminTabAccess: { groups: { 'group-dashboard': true, ... } }.
-        // A group missing from here (or true) is allowed; only an explicit
-        // false hides it. This only ever narrows what a Product admin's role
-        // would otherwise show — Full Access (the owner) is never restricted
-        // by it. See NAV_GROUPS_BY_ROLE above for the fixed per-role
-        // defaults this sits on top of.
-        const NAV_GROUP_LABELS = {
-            'group-dashboard': 'Dashboard', 'group-game': 'Game',
-            'group-wallet': 'Wallet', 'group-api': 'API', 'group-userlist': 'Userlist',
-            'group-setting': 'Setting'
-        };
-
-        // One-line description per built-in role, shown above the matrix.
-        // Purely descriptive text — NAV_GROUPS_BY_ROLE above is what's
-        // actually enforced; keep this in sync by hand if that ever changes.
-        const ROLE_DESCRIPTIONS = {
-            full: 'Sees and can manage everything, including other admins.',
-            product: 'Catalogue, orders, wallet &amp; API — no raw API keys.'
-        };
-        const ROLE_LABELS = { full: 'Full', product: 'Product' };
-
-        // Read-only reference table: which of the 3 built-in roles sees each
-        // sidebar section by default. Built straight from NAV_GROUPS_BY_ROLE /
-        // NAV_GROUP_LABELS (the same constants applyRoleRestrictions() itself
-        // reads), so this can never show something the app doesn't actually do.
-        // A per-admin override (Admin Accounts → tap a card) can still grant
-        // or hide any section on top of whatever this shows.
-        function renderRolesOverview() {
-            const legend = document.getElementById('roles-overview-legend');
-            if (legend) {
-                legend.innerHTML = Object.keys(ROLE_LABELS).map(role => `
-                    <div class="roles-legend-chip"><b>${ROLE_LABELS[role]}</b><span>${ROLE_DESCRIPTIONS[role]}</span></div>
-                `).join('');
-            }
-            const list = document.getElementById('roles-overview-list');
-            if (!list) return;
-            list.innerHTML = ALL_NAV_GROUPS.map(groupId => {
-                const badges = Object.keys(ROLE_LABELS).map(role => {
-                    const on = (NAV_GROUPS_BY_ROLE[role] || []).includes(groupId);
-                    return `<span class="role-badge ${on ? 'role-badge-on' : 'role-badge-off'}">${on ? '✓' : '✕'} ${ROLE_LABELS[role]}</span>`;
-                }).join('');
-                return `
-                <div class="roles-overview-row">
-                    <span class="roles-overview-label">${NAV_GROUP_LABELS[groupId] || groupId}</span>
-                    <div class="roles-overview-badges">${badges}</div>
-                </div>`;
-            }).join('');
-        }
-        window.renderRolesOverview = renderRolesOverview;
-
-        function toggleRolesOverview() {
-            const body = document.getElementById('roles-overview-body');
-            const chevron = document.getElementById('roles-overview-chevron');
-            const isOpen = body.style.display !== 'none';
-            body.style.display = isOpen ? 'none' : 'block';
-            chevron.style.transform = isOpen ? 'rotate(0deg)' : 'rotate(180deg)';
-        }
-        window.toggleRolesOverview = toggleRolesOverview;
-        let TAB_ACCESS_SETTINGS = {};
-        let tabAccessListenerAttached = false;
-        function isTabAllowedByOwner(groupId) {
-            return TAB_ACCESS_SETTINGS[groupId] !== false;
-        }
-        function listenTabAccessSettings() {
-            if (tabAccessListenerAttached) return;
-            tabAccessListenerAttached = true;
-            onSnapshot(doc(db, "settings", "adminTabAccess"), (snap) => {
-                TAB_ACCESS_SETTINGS = (snap.exists() && snap.data().groups) ? snap.data().groups : {};
-                renderTabAccessSettings();
-                applyRoleRestrictions();
-            }, (error) => console.error("Tab access settings error:", error));
-        }
-        function renderTabAccessSettings() {
-            const list = document.getElementById('tab-access-list');
-            if (!list) return;
-            list.innerHTML = ALL_NAV_GROUPS.map(id => `
-                <div class="switch-row" style="padding:8px 0;">
-                    <span class="switch-label">${NAV_GROUP_LABELS[id] || id}</span>
-                    <label class="toggle-switch">
-                        <input type="checkbox" data-group="${id}" ${isTabAllowedByOwner(id) ? 'checked' : ''}>
-                        <span class="toggle-slider"></span>
-                    </label>
-                </div>`).join('');
-        }
-        window.renderTabAccessSettings = renderTabAccessSettings;
-
-        function toggleTabAccess() {
-            const body = document.getElementById('tab-access-body');
-            const chevron = document.getElementById('tab-access-chevron');
-            const isOpen = body.style.display !== 'none';
-            body.style.display = isOpen ? 'none' : 'block';
-            chevron.style.transform = isOpen ? 'rotate(0deg)' : 'rotate(180deg)';
-        }
-        window.toggleTabAccess = toggleTabAccess;
-        async function saveTabAccessSettings() {
-            if (!canManageAdmins()) { window.showToast('Only Full Access admins can change tab access.', 'fail'); return; }
-            const list = document.getElementById('tab-access-list');
-            if (!list) return;
-            const groups = {};
-            list.querySelectorAll('input[type="checkbox"][data-group]').forEach(cb => { groups[cb.dataset.group] = cb.checked; });
-            try {
-                await setDoc(doc(db, "settings", "adminTabAccess"), { groups }, { merge: true });
-                await logAdminActivity('Updated tab access', JSON.stringify(groups));
-                window.showToast('Tab access saved ✓', 'success');
-            } catch (error) {
-                console.error('saveTabAccessSettings error:', error);
-                window.showToast('Failed to save tab access.', 'fail');
-            }
-        }
-        window.saveTabAccessSettings = saveTabAccessSettings;
-
-        // ---------- Settings ("General") page — owner-only cards ----------
-        // Non-owner admins (Product/Account role) who reach the Settings
-        // page only ever see the card every admin needs day-to-day
-        // (Push Notifications).
-        // Everything else — store branding, payments-adjacent settings,
-        // and admin/tab management itself — is owner (Full Access) only.
-        const SETTINGS_CARDS_OWNER_ONLY = [
-            'settings-card-sociallinks', 'settings-card-flashsale',
-            'settings-card-branding', 'settings-card-walletexpire', 'settings-card-receiptstyle',
-            'settings-card-autoprice', 'settings-card-adminlogin', 'roles-overview-card', 'admin-accounts-card', 'tab-access-card'
-        ];
-        function applySettingsCardVisibility() {
-            const isOwner = currentAdminRole === 'full';
-            SETTINGS_CARDS_OWNER_ONLY.forEach(id => {
-                const el = document.getElementById(id);
-                if (el) el.style.display = isOwner ? '' : 'none';
-            });
-        }
-        window.applySettingsCardVisibility = applySettingsCardVisibility;
-
-        function applyRoleRestrictions() {
-            const roleVisible = NAV_GROUPS_BY_ROLE[currentAdminRole] || ALL_NAV_GROUPS;
-            let visible = currentAdminRole === 'full' ? roleVisible : roleVisible.filter(isTabAllowedByOwner);
-            // Per-admin Access Permission overrides (adminUsernames/{username}.permissions,
-            // set from the Admin Permissions modal on that admin's card in the
-            // Admin Accounts list). Unlike the role default above, an explicit
-            // `true` here ADDS a group even outside this admin's preset Access
-            // level (full/product) — not just narrows it — so the owner can
-            // hand any single admin exactly the sections they need.
-            // An explicit `false` always revokes, even if the role would
-            // normally include it. Either way the owner's global Tab Access
-            // switch (isTabAllowedByOwner) still wins - it's a store-wide
-            // kill-switch, above any one admin's permissions. Missing/null
-            // permissions (not set yet, or Full Access - never restricted)
-            // means "no override, use role default" unchanged.
-            if (currentAdminRole !== 'full' && window.currentAdminPermissions) {
-                const perm = window.currentAdminPermissions;
-                visible = ALL_NAV_GROUPS.filter(id => {
-                    if (perm[id] === true) return isTabAllowedByOwner(id);
-                    if (perm[id] === false) return false;
-                    return visible.includes(id);
-                });
-            }
-            ALL_NAV_GROUPS.forEach(id => {
-                const el = document.getElementById(id);
-                if (el) el.style.display = visible.includes(id) ? '' : 'none';
-            });
-            applySettingsCardVisibility();
-            const activeEl = document.querySelector('.page-section.active');
-            const activeId = activeEl ? activeEl.id : null;
-            const activeGroup = PAGE_TO_NAV_GROUP[activeId] || null;
-            if (currentAdminRole !== 'full' && activeGroup && !visible.includes(activeGroup) && visible.length) {
-                showPage(FALLBACK_PAGE_FOR_GROUP[visible[0]] || 'dashboard');
-            }
-        }
-        window.applyRoleRestrictions = applyRoleRestrictions;
 
         // ---------- Single store (Store 1 / Store 2 switcher removed) ----------
         // The admin panel used to let the admin switch between two stores'
@@ -4787,15 +4257,6 @@
             chevron.style.transform = isOpen ? 'rotate(0deg)' : 'rotate(180deg)';
         }
         window.toggleSocialLinks = toggleSocialLinks;
-
-        function toggleFlashSaleSettings() {
-            const body = document.getElementById('flashsale-settings-body');
-            const chevron = document.getElementById('flashsale-settings-chevron');
-            const isOpen = body.style.display !== 'none';
-            body.style.display = isOpen ? 'none' : 'block';
-            chevron.style.transform = isOpen ? 'rotate(0deg)' : 'rotate(180deg)';
-        }
-        window.toggleFlashSaleSettings = toggleFlashSaleSettings;
 
         window.showInfoDialog = showInfoDialog;
     </script>
@@ -5158,11 +4619,12 @@
 
         // Re-syncs Firebase Auth custom claims (admin/adminRole) from
         // adminUsernames and refreshes settings/providerFlags. Must be called
-        // by a currently signed-in Full Access admin (their ID token is sent
-        // as a Bearer token - the Worker re-checks role=='full' against
-        // Firestore before doing anything). Best-effort: failures are logged
-        // but never block the UI action that triggered them, since the next
-        // successful sync (or the existing cron/manual paths) will catch up.
+        // by a currently signed-in admin (their ID token is sent as a Bearer
+        // token - the Worker re-checks they're still a listed admin against
+        // Firestore before doing anything; all admins are equal, no role
+        // gate). Best-effort: failures are logged but never block the UI
+        // action that triggered them, since the next successful sync (or the
+        // existing cron/manual paths) will catch up.
         async function callAdminSyncClaims() {
             try {
                 if (!auth.currentUser) return null;
@@ -5288,11 +4750,10 @@
         // makes the SDK detect that case and transparently fall back to
         // long-polling instead of hanging indefinitely.
         const db = initializeFirestore(app, { experimentalAutoDetectLongPolling: true });
-        // Exposed on window so the earlier, non-module <script> block (which
-        // defines listenTabAccessSettings()/saveTabAccessSettings() and calls
-        // these as bare identifiers) can resolve them - module top-level
-        // bindings are NOT visible to classic scripts otherwise, which was
-        // causing "ReferenceError: onSnapshot is not defined" there.
+        // Exposed on window so the earlier, non-module <script> block can
+        // resolve these as bare identifiers - module top-level bindings are
+        // NOT visible to classic scripts otherwise, which was causing
+        // "ReferenceError: onSnapshot is not defined" there.
         window.db = db;
         window.doc = doc;
         window.onSnapshot = onSnapshot;
@@ -5489,16 +4950,6 @@
         // the Activity Log and IP login-alert features below so every write
         // knows exactly which admin made it.
         let currentAdminUsername = null;
-        // 'full' (everything) or 'product' (top-up side only) — resolved
-        // from the signed-in admin's adminUsernames doc in routeAfterAuth().
-        // Admins created before this field existed have no `role` at all,
-        // which is treated as 'full' so nobody gets locked out by the upgrade.
-        window.currentAdminRole = 'full';
-        // Per-admin Access Permission overrides for the signed-in admin (see
-        // applyRoleRestrictions()) - null means no override saved yet, so the
-        // role's default group visibility applies unchanged. Loaded in
-        // routeAfterAuth() and kept live-in-sync by listenAdminAccounts().
-        window.currentAdminPermissions = null;
         let currentAdminIP = null;
 
         // Optional silent sign-in for deployments that configure credentials here.
@@ -5516,11 +4967,9 @@
             listenJCPlays();
             listenTelegramBot();
             listenAdminBroadcastSecret();
-            listenTabAccessSettings();
             listenAdminAccounts();
             listenAutoUpdatePricesSetting();
             listenGames();
-            applyRoleRestrictions();
             showPage('dashboard');
             runLoginSecurityCheck();
             startAdminHeartbeat();
@@ -5571,14 +5020,6 @@
             const q = query(collection(db, "adminUsernames"));
             onSnapshot(q, (snap) => {
                 ADMIN_ACCOUNTS = snap.docs.map(d => ({ username: d.id, ...d.data() }));
-                // If the owner changes MY OWN permissions while I'm signed in
-                // elsewhere, pick that up live - same idea as Tab Access
-                // above getting yanked out from under a signed-in admin.
-                const mine = ADMIN_ACCOUNTS.find(a => a.username === currentAdminUsername);
-                if (mine) {
-                    window.currentAdminPermissions = mine.permissions || null;
-                    applyRoleRestrictions();
-                }
                 renderAdminAccountsList();
                 // if it happens to be open (e.g. right after a link/reset
                 // completes) — same live-update pattern as the Admin
@@ -5626,16 +5067,6 @@
         window.handleAdminAvatarSelect = handleAdminAvatarSelect;
 
         function renderAdminAccountsList() {
-            const card = document.getElementById('admin-accounts-card');
-            const rolesCard = document.getElementById('roles-overview-card');
-            // Only a Full Access admin may see or manage the admin list at
-            // all — a Product/Account-scoped admin who happens to reach
-            // Settings gets no trace of it. See canManageAdmins().
-            const canManage = canManageAdmins();
-            if (card) card.style.display = canManage ? '' : 'none';
-            if (rolesCard) rolesCard.style.display = canManage ? '' : 'none';
-            if (!canManage) return;
-            renderRolesOverview();
             const container = document.getElementById('admin-accounts-list');
             const countEl = document.getElementById('admin-accounts-count');
             if (countEl) countEl.textContent = String(ADMIN_ACCOUNTS.length);
@@ -5652,19 +5083,10 @@
                 const isYou = a.username === currentAdminUsername;
                 const initial = escapeHtml((a.username || '?').trim().charAt(0).toUpperCase() || '?');
                 const avatarInner = a.avatarUrl ? `<img src="${a.avatarUrl}" alt="" loading="lazy" decoding="async" style="width:100%;height:100%;object-fit:cover;">` : initial;
-                const role = a.role || 'full';
                 const roleSafe = a.username.replace(/'/g, "\\'");
                 // Revoking someone (removing their login entirely) is never
-                // allowed on your own account, to avoid locking the store
-                // out — but changing your own Access level back and forth is
-                // fine: Full Access is the store owner, so they can manage
-                // their own row here same as anyone else's.
+                // allowed on your own account, to avoid locking the store out.
                 const canRevoke = !isYou;
-                const roleOpt = (value, label) => `
-                            <button type="button" class="role-toggle-opt ${role === value ? 'active' : ''}" data-value="${value}" onclick="setAdminRoleToggle(this,'${roleSafe}','${value}')">
-                                <span class="role-toggle-check"><svg class="ui-icon"><use href="#icon-check"></use></svg></span>
-                                <span class="role-toggle-title">${label}</span>
-                            </button>`;
                 // "Connected" — Telegram link status. Self-service: only
                 // this-is-you cards get a "Link Telegram" button, since only
                 // the account owner can prove control of a Telegram chat by
@@ -5679,7 +5101,7 @@
                     ? `<button type="button" onclick="unlinkAdminTelegram('${roleSafe}')" style="background:none;border:none;color:var(--danger);font-size:11px;font-weight:600;cursor:pointer;padding:0;">Unlink</button>`
                     : (isYou ? `<button type="button" onclick="openTelegramLinkModal('${roleSafe}')" style="background:none;border:none;color:var(--accent);font-size:11px;font-weight:600;cursor:pointer;padding:0;">Link Telegram</button>` : '');
                 return `
-                <div class="admin-card" style="padding:12px 14px;margin-bottom:8px;cursor:pointer;" onclick="openAdminPermissionsModal('${a.username.replace(/'/g, "\\'")}')" title="Tap to set Access Permission">
+                <div class="admin-card" style="padding:12px 14px;margin-bottom:8px;">
                     <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
                         <div style="display:flex;align-items:center;gap:10px;min-width:0;">
                             <label style="position:relative;cursor:pointer;flex-shrink:0;" title="Change ${escapeHtml(a.username)}'s avatar" onclick="event.stopPropagation()">
@@ -5700,11 +5122,7 @@
                             ${canRevoke ? `<button type="button" onclick="revokeAdmin('${a.username.replace(/'/g, "\\'")}')" style="background:none;border:none;color:var(--danger);font-size:11px;font-weight:600;cursor:pointer;padding:0;">Revoke</button>` : ''}
                         </div>
                     </div>
-                    <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border-glass);" onclick="event.stopPropagation()">
-                        <span style="font-size:11.5px;color:var(--text-secondary);display:block;margin-bottom:6px;">Access</span>
-                        <div class="role-toggle compact">${roleOpt('full', 'Full')}${roleOpt('product', 'Product')}</div>
-                    </div>
-                    <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border-glass);display:flex;justify-content:space-between;align-items:center;gap:8px;" onclick="event.stopPropagation()">
+                    <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border-glass);display:flex;justify-content:space-between;align-items:center;gap:8px;">
                         <div style="min-width:0;">
                             <span style="font-size:11.5px;color:var(--text-secondary);display:block;margin-bottom:3px;">Connected</span>
                             <span style="font-size:12.5px;font-weight:600;color:${telegramLinked ? 'var(--text-primary)' : 'var(--text-muted)'};display:flex;align-items:center;gap:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
@@ -5713,10 +5131,6 @@
                             </span>
                         </div>
                         ${telegramAction}
-                    </div>
-                    <div style="margin-top:8px;font-size:11px;color:var(--accent);font-weight:600;display:flex;align-items:center;gap:4px;">
-                        <svg class="ui-icon" style="width:12px;height:12px;"><use href="#icon-shield"></use></svg>
-                        Tap card to set Access Permission
                     </div>
                 </div>`;
             }).join('');
@@ -5732,133 +5146,6 @@
         }
         window.toggleAdminAccounts = toggleAdminAccounts;
 
-        // ---------- Admin Permissions modal (per-admin group toggles) ----------
-        // Opened by tapping an admin's card (see renderAdminAccountsList).
-        // Holds pending checkbox edits in memory until Save is tapped, same
-        // as Tab Access's own list does with saveTabAccessSettings().
-        let adminPermissionsTarget = null; // username currently open in the modal
-        let adminPermissionsPending = {};  // { 'group-dashboard': true/false, ... }
-
-        function openAdminPermissionsModal(username) {
-            // Role & Permission system removed — every admin has full access now.
-            window.showToast('Every admin now has full access — permissions are no longer used.', 'info');
-            return;
-            const admin = ADMIN_ACCOUNTS.find(a => a.username === username);
-            if (!admin) return;
-            adminPermissionsTarget = username;
-            const isFull = (admin.role || 'full') === 'full';
-            // Baseline = what this admin's Access level would show by default
-            // (before any per-admin override). A saved explicit true/false
-            // always wins over that baseline - true GRANTS a group even
-            // outside their Access level, false always revokes it, matching
-            // applyRoleRestrictions()'s own grant/revoke logic exactly, so the
-            // toggle states shown here always match what's actually enforced.
-            const roleVisible = NAV_GROUPS_BY_ROLE[admin.role || 'full'] || ALL_NAV_GROUPS;
-            const saved = admin.permissions || {};
-            adminPermissionsPending = {};
-            ALL_NAV_GROUPS.forEach(id => { adminPermissionsPending[id] = typeof saved[id] === 'boolean' ? saved[id] : roleVisible.includes(id); });
-            document.getElementById('admin-permissions-username').textContent = username;
-            document.getElementById('admin-permissions-note').textContent = isFull
-                ? 'Full Access admins always see every section — permissions here have no effect until their Access level is changed to Product or Account.'
-                : 'Choose exactly which sections this admin can open — including sections outside their Access level below. Off = hidden for them either way.';
-            renderAdminPermissionsList(isFull);
-            document.getElementById('save-admin-permissions-btn').style.display = isFull ? 'none' : '';
-            document.getElementById('admin-permissions-modal-overlay').classList.add('show');
-        }
-        window.openAdminPermissionsModal = openAdminPermissionsModal;
-
-        function renderAdminPermissionsList(isFull) {
-            const list = document.getElementById('admin-permissions-list');
-            if (!list) return;
-            list.innerHTML = ALL_NAV_GROUPS.map(id => {
-                const checked = !!adminPermissionsPending[id];
-                return `
-                <div class="switch-row" style="padding:8px 0;">
-                    <span class="switch-label">${NAV_GROUP_LABELS[id] || id}</span>
-                    <label class="toggle-switch">
-                        <input type="checkbox" ${checked ? 'checked' : ''} ${isFull ? 'disabled' : ''} onchange="toggleAdminPermissionPending('${id}', this.checked)">
-                        <span class="toggle-slider"></span>
-                    </label>
-                </div>`;
-            }).join('');
-        }
-
-        function toggleAdminPermissionPending(groupId, checked) {
-            adminPermissionsPending[groupId] = checked;
-        }
-        window.toggleAdminPermissionPending = toggleAdminPermissionPending;
-
-        function closeAdminPermissionsModal() {
-            document.getElementById('admin-permissions-modal-overlay').classList.remove('show');
-            adminPermissionsTarget = null;
-            adminPermissionsPending = {};
-        }
-        window.closeAdminPermissionsModal = closeAdminPermissionsModal;
-
-        async function saveAdminPermissions() {
-            if (!canManageAdmins()) { window.showToast('Only Full Access admins can change access permissions.', 'fail'); return; }
-            const username = adminPermissionsTarget;
-            if (!username) return;
-            const btn = document.getElementById('save-admin-permissions-btn');
-            const original = btn.innerText;
-            btn.disabled = true; btn.innerText = 'Saving...';
-            try {
-                // Stored as explicit true/false for every group (not just the
-                // false ones) so a later Access-level change doesn't silently
-                // reinterpret an old override against a different roleVisible
-                // baseline - see openAdminPermissionsModal()'s own read-back.
-                await setDoc(doc(db, "adminUsernames", username), { permissions: { ...adminPermissionsPending } }, { merge: true });
-                await logAdminActivity('Updated access permissions', username);
-                window.showToast('Access permissions saved ✓', 'success');
-                closeAdminPermissionsModal();
-            } catch (e) {
-                console.error('Save admin permissions error:', e);
-                window.showToast('Failed to save access permissions.', 'fail');
-            } finally {
-                btn.disabled = false; btn.innerText = original;
-            }
-        }
-        window.saveAdminPermissions = saveAdminPermissions;
-
-        // Only a Full Access admin may add, revoke, or reassign other
-        // admins' access — see the Admin Accounts card / applyRoleRestrictions.
-        function canManageAdmins() {
-            return currentAdminRole === 'full';
-        }
-        window.canManageAdmins = canManageAdmins;
-
-        // Changes what an admin is allowed to see (Product vs Account
-        // Selling vs Full Access — see currentAdminRole / applyRoleRestrictions).
-        // Purely a client-side UI gate, same trust model as the rest of this
-        // panel's admin system (no backend/custom-claims check).
-        async function updateAdminRole(username, role) {
-            if (!canManageAdmins()) { window.showToast('Only Full Access admins can change admin access.', 'fail'); renderAdminAccountsList(); return; }
-            try {
-                await setDoc(doc(db, "adminUsernames", username), { role }, { merge: true });
-                await logAdminActivity('Changed admin access', `${username} -> ${role}`);
-                if (username === currentAdminUsername) {
-                    currentAdminRole = role;
-                    applyRoleRestrictions();
-                }
-                // Re-sync Firebase Auth custom claims so the role change is
-                // actually enforced server-side (Firestore rules), not just
-                // in this browser's UI.
-                callAdminSyncClaims();
-                window.showToast('Access updated ✓', 'success');
-            } catch (e) {
-                console.error('Update admin role error:', e);
-                window.showToast('Failed to update access.', 'fail');
-            }
-        }
-        window.updateAdminRole = updateAdminRole;
-
-        // Keeps a per-admin-row role toggle's active state in sync, then
-        // saves the change the same way the old <select onchange> did.
-        function setAdminRoleToggle(btn, username, role) {
-            btn.closest('.role-toggle').querySelectorAll('.role-toggle-opt').forEach(b => b.classList.toggle('active', b.dataset.value === role));
-            updateAdminRole(username, role);
-        }
-        window.setAdminRoleToggle = setAdminRoleToggle;
 
         // Removes only the adminUsernames/{username} mapping doc, so that
         // username can no longer sign in. The underlying Firebase Auth
@@ -5866,7 +5153,6 @@
         // accounts — that needs the Admin SDK / a backend), but without the
         // mapping doc, login can never resolve to it again.
         function revokeAdmin(username) {
-            if (!canManageAdmins()) { window.showToast('Only Full Access admins can revoke admin access.', 'fail'); return; }
             if (username === currentAdminUsername) { window.showToast("You can't revoke your own access — ask another Full Access admin.", 'fail'); return; }
             window.showActionDialog({
                 type: 'delete',
@@ -5963,10 +5249,6 @@
         // support-chat forwards for them fall back to the shared Telegram
         // chat instead of a phone nobody checks anymore.
         function unlinkAdminTelegram(username) {
-            if (username !== currentAdminUsername && !canManageAdmins()) {
-                window.showToast('Only Full Access admins can unlink another admin\'s Telegram.', 'fail');
-                return;
-            }
             window.showActionDialog({
                 type: 'delete',
                 title: 'Unlink Telegram?',
@@ -6005,9 +5287,7 @@
                     ? `<img src="${me.avatarUrl}" alt="" loading="lazy" decoding="async" style="width:100%;height:100%;object-fit:cover;">`
                     : initial;
             }
-            const roleLabels = { full: 'Full Access', product: 'Product' };
             document.getElementById('my-account-username').innerText = currentAdminUsername || '—';
-            document.getElementById('my-account-role').innerText = roleLabels[me.role || 'full'] || 'Full Access';
 
 
             const telegramLinked = !!me.telegramChatId;
@@ -6031,24 +5311,9 @@
         }
         window.closeMyAccountModal = closeMyAccountModal;
 
-        // Keeps the visual role toggle in the Add Admin modal in sync with
-        // the hidden <select id="new-admin-role">, so createNewAdmin()'s
-        // existing roleSelect.value read still works unchanged.
-        function setNewAdminRole(btn, value) {
-            const toggle = document.getElementById('new-admin-role-toggle');
-            toggle.querySelectorAll('.role-toggle-opt').forEach(b => b.classList.toggle('active', b.dataset.value === value));
-            document.getElementById('new-admin-role').value = value;
-        }
-        window.setNewAdminRole = setNewAdminRole;
-
         function openAddAdminModal() {
-            if (!canManageAdmins()) { window.showToast('Only Full Access admins can add new admins.', 'fail'); return; }
             document.getElementById('new-admin-username').value = '';
             document.getElementById('new-admin-password').value = '';
-            const roleSelect = document.getElementById('new-admin-role');
-            if (roleSelect) roleSelect.value = 'product';
-            const roleToggle = document.getElementById('new-admin-role-toggle');
-            if (roleToggle) roleToggle.querySelectorAll('.role-toggle-opt').forEach(b => b.classList.toggle('active', b.dataset.value === 'product'));
             document.getElementById('add-admin-error').style.display = 'none';
             document.getElementById('add-admin-step-form').style.display = '';
             document.getElementById('add-admin-modal-overlay').classList.add('show');
@@ -6070,8 +5335,6 @@
             const btn = document.getElementById('create-admin-btn');
             const username = usernameInput.value.trim().toLowerCase();
             const password = passwordInput.value;
-            const roleSelect = document.getElementById('new-admin-role');
-            const role = roleSelect ? roleSelect.value : 'product';
             errEl.style.display = 'none';
             if (!username || !/^[a-z0-9_.]{3,}$/.test(username)) {
                 errEl.textContent = 'Username: at least 3 characters, letters/numbers/._ only.';
@@ -6096,14 +5359,13 @@
                 await createUserWithEmailAndPassword(adminCreationAuth, email, password);
                 await setDoc(doc(db, "adminUsernames", username), {
                     email,
-                    role,
+                    role: 'full',
                     createdBy: currentAdminUsername || 'unknown',
                     createdAt: serverTimestamp()
                 });
                 await logAdminActivity('Added admin', username);
-                // Give the new admin's Auth account its {admin:true, adminRole}
-                // claims right away, instead of waiting for the next
-                // scheduled sync.
+                // Give the new admin's Auth account its admin custom claim
+                // right away, instead of waiting for the next scheduled sync.
                 callAdminSyncClaims();
                 closeAddAdminModal();
                 window.showToast('Admin created ✓', 'success');
@@ -6371,8 +5633,6 @@
                 const usnap = await getDocs(uq);
                 if (!usnap.empty) {
                     currentAdminUsername = usnap.docs[0].id;
-                    currentAdminRole = 'full';
-                    window.currentAdminPermissions = null;
                 }
             } catch (e) { console.error('Admin username lookup error:', e); }
 
@@ -6404,8 +5664,6 @@
                 resetGateLocked();
                 currentAdminUsername = null;
                 currentAdminIP = null;
-                currentAdminRole = 'full';
-                window.currentAdminPermissions = null;
                 tryAutoAdminLogin().then((ok) => {
                     if (!ok) loginScreen.classList.remove('hidden');
                 });
@@ -8332,29 +7590,6 @@
         }
         window.switchTopupTab = switchTopupTab;
 
-        // ---------- Wallet Top Up Auto-Expire (settings/walletTopupSettings) ----------
-        // A Pending top up nobody actioned within N days gets flipped to
-        // Rejected with an explanatory auto-note. This is a client-side,
-        // best-effort check that runs whenever this panel's Wallet Top Ups
-        // page has a live listener open (see fetchWalletTopups below) - for
-        // guaranteed enforcement even while no admin has the panel open,
-        // move the same check into the pca-telegram-bot Cloudflare Worker's
-        // existing cron alongside its "orders" handling.
-        let WALLET_TOPUP_EXPIRY_ENABLED = false;
-        let WALLET_TOPUP_EXPIRY_DAYS = 3;
-        let walletExpireSettingsLoaded = false;
-        const walletExpireInFlight = new Set(); // topup ids currently being auto-expired, to avoid duplicate transactions
-
-        function toggleWalletExpireSettings() {
-            const body = document.getElementById('wallet-expire-body');
-            const chevron = document.getElementById('wallet-expire-chevron');
-            const isOpen = body.style.display === 'block';
-            body.style.display = isOpen ? 'none' : 'block';
-            chevron.style.transform = isOpen ? 'rotate(0deg)' : 'rotate(180deg)';
-            if (!isOpen && !walletExpireSettingsLoaded) loadWalletExpireSettings();
-        }
-        window.toggleWalletExpireSettings = toggleWalletExpireSettings;
-
         function togglePushNotificationSettings() {
             const body = document.getElementById('push-notif-body');
             const chevron = document.getElementById('push-notif-chevron');
@@ -8372,88 +7607,6 @@
             chevron.style.transform = isOpen ? 'rotate(0deg)' : 'rotate(180deg)';
         }
         window.toggleAutoPriceSettings = toggleAutoPriceSettings;
-
-        async function loadWalletExpireSettings() {
-            walletExpireSettingsLoaded = true;
-            try {
-                const snap = await getDoc(doc(db, "settings", "walletTopupSettings"));
-                const data = snap.exists() ? snap.data() : {};
-                WALLET_TOPUP_EXPIRY_ENABLED = data.expiryEnabled === true;
-                WALLET_TOPUP_EXPIRY_DAYS = Number(data.expiryDays) > 0 ? Number(data.expiryDays) : 3;
-            } catch (error) {
-                console.error("Wallet expire settings load error:", error);
-            }
-            const enabledEl = document.getElementById('wallet-expire-enabled');
-            const daysEl = document.getElementById('wallet-expire-days');
-            if (enabledEl) enabledEl.checked = WALLET_TOPUP_EXPIRY_ENABLED;
-            if (daysEl) daysEl.value = WALLET_TOPUP_EXPIRY_DAYS;
-        }
-
-        async function saveWalletExpireSettings() {
-            const enabledEl = document.getElementById('wallet-expire-enabled');
-            const daysEl = document.getElementById('wallet-expire-days');
-            const enabled = !!(enabledEl && enabledEl.checked);
-            const days = Math.max(1, Number(daysEl.value) || 3);
-            const btn = document.getElementById('save-wallet-expire-btn');
-            const originalText = btn.innerText;
-            btn.innerText = 'Saving...';
-            btn.disabled = true;
-            try {
-                await setDoc(doc(db, "settings", "walletTopupSettings"), { expiryEnabled: enabled, expiryDays: days }, { merge: true });
-                WALLET_TOPUP_EXPIRY_ENABLED = enabled;
-                WALLET_TOPUP_EXPIRY_DAYS = days;
-                daysEl.value = days;
-                window.showToast('Wallet auto-expire settings saved!', 'success');
-            } catch (error) {
-                console.error("Wallet expire settings save error:", error);
-                window.showToast(error.message || 'Failed to save.', 'fail');
-            } finally {
-                btn.innerText = originalText;
-                btn.disabled = false;
-            }
-        }
-        window.saveWalletExpireSettings = saveWalletExpireSettings;
-
-        // Transaction-guarded so two admin tabs open at once (or this check
-        // firing twice in quick succession off the same onSnapshot burst)
-        // can never double-process the same request - it re-reads the
-        // status and bails out unless it's still Pending.
-        async function expireWalletTopup(id) {
-            const topupRef = doc(db, "walletTopups", id);
-            try {
-                await runTransaction(db, async (tx) => {
-                    const snap = await tx.get(topupRef);
-                    if (!snap.exists() || snap.data().status !== 'Pending') return;
-                    tx.update(topupRef, {
-                        status: 'Rejected',
-                        statusNote: `Auto-expired — no admin action within ${WALLET_TOPUP_EXPIRY_DAYS} day(s).`,
-                        autoExpired: true,
-                        expiredAt: serverTimestamp()
-                    });
-                });
-                logAdminActivity('Auto-expired top-up', `id: ${id} (>${WALLET_TOPUP_EXPIRY_DAYS}d pending)`);
-                editTelegramWalletTopupMessage(id, 'Rejected');
-            } catch (error) {
-                console.error("expireWalletTopup error:", error);
-            }
-        }
-
-        // Scans the current in-memory WALLET_TOPUPS snapshot for stale
-        // Pending requests and expires them. Cheap no-op when the feature
-        // is off or nothing has aged out yet.
-        function checkWalletTopupAutoExpire(items) {
-            return; // Wallet Top Up Auto-Expire feature removed.
-            if (!walletExpireSettingsLoaded || !WALLET_TOPUP_EXPIRY_ENABLED) return;
-            const cutoffMs = Date.now() - WALLET_TOPUP_EXPIRY_DAYS * 24 * 60 * 60 * 1000;
-            Object.values(items).forEach(t => {
-                if (t.status !== 'Pending') return;
-                const ts = t.timestamp && t.timestamp.toMillis ? t.timestamp.toMillis() : null;
-                if (!ts || ts > cutoffMs) return;
-                if (walletExpireInFlight.has(t.id)) return;
-                walletExpireInFlight.add(t.id);
-                expireWalletTopup(t.id).finally(() => walletExpireInFlight.delete(t.id));
-            });
-        }
 
         // ---------- Wallet Top Ups: 7-day auto-delete (Completed/Rejected only) ----------
         // Mirrors the Orders 7-day auto-delete above: top-up requests that have
@@ -8488,7 +7641,6 @@
         function fetchWalletTopups() {
             if (topupsListenerAttached) return;
             topupsListenerAttached = true;
-            if (!walletExpireSettingsLoaded) loadWalletExpireSettings();
 
             const q = query(collection(db, "walletTopups"));
             onSnapshot(q, (querySnapshot) => {
@@ -8496,7 +7648,6 @@
                 querySnapshot.forEach(docSnap => { items[docSnap.id] = { id: docSnap.id, ...docSnap.data() }; });
                 WALLET_TOPUPS = items;
                 renderTopupsList();
-                checkWalletTopupAutoExpire(items);
                 checkWalletTopupsAutoDelete(items);
 
                 // New Pending requests that haven't been sent to Telegram yet get
@@ -10241,7 +9392,6 @@
                         renderAdminGamesList();
                         if (ordersLoadedAt) renderOrdersList();
                         if (lossFixSchedulerStarted) autoFixLossMakingPackages();
-                        populateFlashSaleGameSelect();
                         return Promise.resolve();
                     }
                 } catch (e) { /* corrupt/missing cache - fall through to a real fetch */ }
@@ -10257,7 +9407,6 @@
                     renderAdminGamesList();
                     if (ordersLoadedAt) renderOrdersList();
                     if (lossFixSchedulerStarted) autoFixLossMakingPackages();
-                    populateFlashSaleGameSelect();
                     if (silent !== true) window.showToast('Games refreshed ✓');
                 } catch (error) {
                     console.error("Games load error:", error);
@@ -10297,23 +9446,6 @@
         }
         window.refreshGames = () => loadGames(false, true); // explicit tap on ↻ Refresh always forces a real fetch, bypassing the cache
         function listenGames() { return loadGames(true); } // kept so the startup call site is unchanged
-
-        // Keeps the Flash Sale settings card's game dropdown in sync with the
-        // live games list, without losing whatever the admin currently has
-        // selected (including a selection not yet saved to Firestore).
-        function populateFlashSaleGameSelect() {
-            const select = document.getElementById('flashsale-game-select');
-            if (!select) return;
-            // Preserve an edit the admin is actively making (selected a game
-            // that differs from the saved value) over the saved value itself.
-            const desired = (select.value && select.value !== flashSaleSelectedGameId) ? select.value : flashSaleSelectedGameId;
-            const options = ['<option value="">None</option>'];
-            Object.keys(GAMES).forEach(id => {
-                options.push(`<option value="${id}">${GAMES[id].name || id}</option>`);
-            });
-            select.innerHTML = options.join('');
-            if (desired && GAMES[desired]) select.value = desired;
-        }
 
         function previewGameImage(e) {
             const file = e.target.files[0];
@@ -12270,246 +11402,6 @@
             });
         }
 
-        // ---------- Coupons (discount codes) ----------
-        // Firestore doc ID = the code itself (uppercased) so redemption at
-        // checkout is a single getDoc(doc(db,"coupons",CODE)) with no query
-        // needed — that lookup + the atomic usedCount/perUserLimit increment
-        // gets wired into Store.html/worker.js separately.
-        // Fields: code, discountType ('percent'|'fixed'), discountValue,
-        // maxDiscount (cap for percent type, null = no cap), startsAt (ms
-        // epoch, null = usable immediately), expiresAt (ms epoch, null =
-        // never), maxUses (null = unlimited), usedCount, perUserLimit
-        // (null = unlimited), note, isActive, createdAt.
-        // startsAt/expiresAt together define the coupon's "event window" —
-        // Store.html's coupon-availability listener uses the same two
-        // fields (+ isActive) to decide whether to show the Coupon Code
-        // box at all, so an admin toggling isActive off, or a window
-        // that hasn't opened / has already closed, makes it disappear
-        // from the storefront entirely rather than showing a code box
-        // that would just fail.
-        let COUPONS = {};
-        let couponListenerAttached = false;
-        let editingCouponOriginalCode = null;
-
-        function couponStatusInfo(c) {
-            if (!c.isActive) return { label: 'Inactive', cls: 'badge-danger' };
-            if (c.startsAt && c.startsAt > Date.now()) return { label: 'Scheduled', cls: 'badge-warning' };
-            if (c.expiresAt && c.expiresAt <= Date.now()) return { label: 'Expired', cls: 'badge-danger' };
-            if (c.maxUses && (c.usedCount || 0) >= c.maxUses) return { label: 'Exhausted', cls: 'badge-danger' };
-            return { label: 'Active', cls: 'badge-success' };
-        }
-        function formatCouponDiscount(c) {
-            if (c.discountType === 'fixed') return `${Number(c.discountValue || 0).toLocaleString()} MMK off`;
-            const cap = c.maxDiscount ? ` (max ${Number(c.maxDiscount).toLocaleString()} MMK)` : '';
-            return `${c.discountValue}% off${cap}`;
-        }
-
-        function renderCouponList() {
-            const container = document.getElementById('admin-coupon-container');
-            const codes = Object.keys(COUPONS).sort((a, b) => (COUPONS[b].createdAtMs || 0) - (COUPONS[a].createdAtMs || 0));
-            if (codes.length === 0) {
-                container.innerHTML = '<p class="empty-msg">No coupons yet. Tap + Add to create one.</p>';
-                return;
-            }
-            container.innerHTML = codes.map(code => {
-                const c = COUPONS[code];
-                const status = couponStatusInfo(c);
-                const usesText = c.maxUses ? `${c.usedCount || 0} / ${c.maxUses}` : `${c.usedCount || 0} / Unlimited`;
-                const perUserText = c.perUserLimit ? `${c.perUserLimit}x per user` : 'Unlimited per user';
-                const startsText = c.startsAt ? new Date(c.startsAt).toLocaleString() : 'Immediately';
-                const expiryText = c.expiresAt ? new Date(c.expiresAt).toLocaleString() : 'Never';
-                return `
-                    <div class="admin-card">
-                        <div class="ac-header">
-                            <span class="ac-id">${code}</span>
-                            <span class="badge ${status.cls}">${status.label}</span>
-                        </div>
-                        <div class="ac-body">
-                            <p><b>Discount:</b> ${formatCouponDiscount(c)}</p>
-                            <p><b>Uses:</b> ${usesText}</p>
-                            <p><b>Limit:</b> ${perUserText}</p>
-                            <p><b>Starts:</b> ${startsText}</p>
-                            <p><b>Expires:</b> ${expiryText}</p>
-                            ${c.note ? `<p><b>Note:</b> ${c.note}</p>` : ''}
-                        </div>
-                        <div class="ac-footer">
-                            <button class="btn btn-outline" onclick="openCouponEditor('${code}')">Edit</button>
-                            <button class="btn btn-danger" onclick="deleteCoupon('${code}')">Delete</button>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-        }
-
-        function listenCoupons() {
-            if (couponListenerAttached) return;
-            couponListenerAttached = true;
-            onSnapshot(collection(db, "coupons"), (snap) => {
-                const next = {};
-                snap.forEach(docSnap => {
-                    const data = docSnap.data();
-                    next[docSnap.id] = { ...data, createdAtMs: data.createdAt?.toMillis ? data.createdAt.toMillis() : 0 };
-                });
-                COUPONS = next;
-                renderCouponList();
-            }, (error) => {
-                console.error("Coupons listener error:", error);
-                document.getElementById('admin-coupon-container').innerHTML = '<p class="empty-msg" style="color:red;">Could not load coupons.</p>';
-            });
-        }
-
-        function generateCouponCode() {
-            const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // no O/0/I/1 (easy to misread)
-            let code = 'LINN';
-            for (let i = 0; i < 6; i++) code += chars[Math.floor(Math.random() * chars.length)];
-            document.getElementById('edit-coupon-code').value = code;
-        }
-        window.generateCouponCode = generateCouponCode;
-
-        function onCouponTypeChange() {
-            const isPercent = document.getElementById('edit-coupon-type').value === 'percent';
-            document.getElementById('coupon-max-discount-row').style.display = isPercent ? '' : 'none';
-        }
-        window.onCouponTypeChange = onCouponTypeChange;
-
-        function openCouponEditor(code = null) {
-            editingCouponOriginalCode = code;
-            const c = code ? COUPONS[code] : null;
-            document.getElementById('edit-coupon-original-code').value = code || '';
-            document.getElementById('coupon-editor-title').innerText = code ? 'Edit Coupon' : 'Add Coupon';
-            document.getElementById('edit-coupon-code').value = code || '';
-            document.getElementById('edit-coupon-code').disabled = !!code; // code is the doc ID — don't allow renaming an existing coupon
-            document.getElementById('edit-coupon-type').value = c?.discountType || 'percent';
-            document.getElementById('edit-coupon-value').value = c ? c.discountValue : '';
-            document.getElementById('edit-coupon-max-discount').value = c?.maxDiscount ?? '';
-            document.getElementById('edit-coupon-starts').value = c?.startsAt ? msToDatetimeLocalValue(c.startsAt) : '';
-            document.getElementById('edit-coupon-expiry').value = c?.expiresAt ? msToDatetimeLocalValue(c.expiresAt) : '';
-            document.getElementById('edit-coupon-maxuses').value = c?.maxUses ?? '';
-            document.getElementById('edit-coupon-perlimit').value = c ? (c.perUserLimit ?? '') : 1;
-            document.getElementById('edit-coupon-note').value = c?.note || '';
-            document.getElementById('edit-coupon-active').checked = c ? !!c.isActive : true;
-            document.getElementById('delete-coupon-btn').style.display = code ? '' : 'none';
-            const usedNote = document.getElementById('coupon-used-count-note');
-            if (c && c.usedCount) {
-                usedNote.style.display = '';
-                usedNote.innerText = `Already used ${c.usedCount} time(s). Lowering the total limit below that won't un-use it.`;
-            } else {
-                usedNote.style.display = 'none';
-            }
-            onCouponTypeChange();
-            document.getElementById('coupon-editor-modal-overlay').classList.add('show');
-        }
-        window.openCouponEditor = openCouponEditor;
-
-        function closeCouponEditor() {
-            document.getElementById('coupon-editor-modal-overlay').classList.remove('show');
-            document.getElementById('edit-coupon-code').disabled = false;
-        }
-        window.closeCouponEditor = closeCouponEditor;
-
-        async function saveCoupon() {
-            const originalCode = document.getElementById('edit-coupon-original-code').value;
-            const code = document.getElementById('edit-coupon-code').value.trim().toUpperCase().replace(/\s+/g, '');
-            const discountType = document.getElementById('edit-coupon-type').value;
-            const discountValue = parseFloat(document.getElementById('edit-coupon-value').value);
-            const maxDiscountRaw = document.getElementById('edit-coupon-max-discount').value;
-            const startsRaw = document.getElementById('edit-coupon-starts').value;
-            const expiryRaw = document.getElementById('edit-coupon-expiry').value;
-            const maxUsesRaw = document.getElementById('edit-coupon-maxuses').value;
-            const perLimitRaw = document.getElementById('edit-coupon-perlimit').value;
-            const note = document.getElementById('edit-coupon-note').value.trim();
-            const isActive = document.getElementById('edit-coupon-active').checked;
-
-            if (!code) { window.showToast('Please enter a code', 'fail'); return; }
-            if (!/^[A-Z0-9_-]+$/.test(code)) { window.showToast('Code can only have letters, numbers, - and _', 'fail'); return; }
-            if (!discountValue || discountValue <= 0) { window.showToast('Please enter a discount value', 'fail'); return; }
-            if (discountType === 'percent' && discountValue > 100) { window.showToast('Percent discount cannot exceed 100', 'fail'); return; }
-            if (!originalCode && COUPONS[code]) { window.showToast('This code already exists', 'fail'); return; }
-            const startsAtMs = startsRaw ? new Date(startsRaw).getTime() : null;
-            const expiresAtMs = expiryRaw ? new Date(expiryRaw).getTime() : null;
-            if (startsAtMs && expiresAtMs && startsAtMs >= expiresAtMs) { window.showToast('Starts At must be before the Expiry time', 'fail'); return; }
-
-            const saveBtn = document.getElementById('save-coupon-btn');
-            const originalText = saveBtn.innerText;
-            saveBtn.disabled = true;
-            saveBtn.innerText = 'Saving...';
-
-            try {
-                const data = {
-                    code,
-                    discountType,
-                    discountValue,
-                    maxDiscount: (discountType === 'percent' && maxDiscountRaw !== '') ? parseFloat(maxDiscountRaw) : null,
-                    startsAt: startsAtMs,
-                    expiresAt: expiresAtMs,
-                    maxUses: maxUsesRaw !== '' ? parseInt(maxUsesRaw, 10) : null,
-                    perUserLimit: perLimitRaw !== '' ? parseInt(perLimitRaw, 10) : null,
-                    note,
-                    isActive
-                };
-                if (originalCode) {
-                    await updateDoc(doc(db, "coupons", originalCode), data);
-                    logAdminActivity('Edited coupon', code);
-                } else {
-                    data.usedCount = 0;
-                    data.createdAt = serverTimestamp();
-                    await setDoc(doc(db, "coupons", code), data);
-                    logAdminActivity('Added coupon', code);
-                }
-                window.showToast('Coupon saved!', 'success');
-                closeCouponEditor();
-            } catch (error) {
-                console.error("Save coupon error:", error);
-                window.showToast(error.message || 'Failed to save coupon.', 'fail');
-            } finally {
-                saveBtn.disabled = false;
-                saveBtn.innerText = originalText;
-            }
-        }
-        window.saveCoupon = saveCoupon;
-
-        function deleteCoupon(code) {
-            window.showActionDialog({
-                type: 'delete',
-                title: 'Delete Coupon?',
-                message: `"${code}" cannot be recovered.`,
-                confirmText: 'Delete',
-                onConfirm: async () => {
-                    try {
-                        await deleteDoc(doc(db, "coupons", code));
-                        logAdminActivity('Deleted coupon', code);
-                        window.showToast('Coupon deleted', 'cancel');
-                    } catch (error) {
-                        console.error("Delete coupon error:", error);
-                        window.showToast('Failed to delete coupon.', 'fail');
-                    }
-                }
-            });
-        }
-        window.deleteCoupon = deleteCoupon;
-
-        function deleteCurrentCoupon() {
-            const code = document.getElementById('edit-coupon-original-code').value;
-            if (!code) return;
-            window.showActionDialog({
-                type: 'delete',
-                title: 'Delete Coupon?',
-                message: `"${code}" cannot be recovered.`,
-                confirmText: 'Delete',
-                onConfirm: async () => {
-                    try {
-                        await deleteDoc(doc(db, "coupons", code));
-                        logAdminActivity('Deleted coupon', code);
-                        window.showToast('Coupon deleted', 'cancel');
-                        closeCouponEditor();
-                    } catch (error) {
-                        console.error("Delete coupon error:", error);
-                        window.showToast('Failed to delete coupon.', 'fail');
-                    }
-                }
-            });
-        }
-        window.deleteCurrentCoupon = deleteCurrentCoupon;
 
         // ---------- Users (real customers, synced from the Store app's local profile) ----------
         let USERS = {};
@@ -13562,56 +12454,6 @@
             return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
         }
 
-        let flashSaleListenerAttached = false;
-        let flashSaleSelectedGameId = '';
-        function listenFlashSaleSettings() {
-            if (flashSaleListenerAttached) return;
-            flashSaleListenerAttached = true;
-            onSnapshot(doc(db, "settings", "flashsale"), (docSnap) => {
-                const data = docSnap.exists() ? docSnap.data() : {};
-                document.getElementById('flashsale-enabled').checked = !!data.enabled;
-                document.getElementById('flashsale-title').value = data.title || '';
-                document.getElementById('flashsale-desc').value = data.description || '';
-                document.getElementById('flashsale-endtime').value = data.endTime ? msToDatetimeLocalValue(data.endTime) : '';
-                flashSaleSelectedGameId = data.gameId || '';
-                populateFlashSaleGameSelect();
-            }, (error) => {
-                console.error("Flash sale settings listener error:", error);
-            });
-        }
-
-        async function saveFlashSaleSettings() {
-            const enabled = document.getElementById('flashsale-enabled').checked;
-            const title = document.getElementById('flashsale-title').value.trim();
-            const description = document.getElementById('flashsale-desc').value.trim();
-            const gameId = document.getElementById('flashsale-game-select').value;
-            const endtimeInput = document.getElementById('flashsale-endtime').value;
-            const endTime = endtimeInput ? new Date(endtimeInput).getTime() : null;
-
-            if (enabled && (!endTime || endTime <= Date.now())) {
-                window.showToast('Set an end time in the future before enabling the banner.', 'fail');
-                return;
-            }
-
-            const btn = document.getElementById('save-flashsale-btn');
-            const originalText = btn.innerText;
-            btn.disabled = true;
-            btn.innerText = 'Saving...';
-
-            try {
-                await setDoc(doc(db, "settings", "flashsale"), { enabled, title, description, gameId, endTime }, { merge: true });
-                logAdminActivity('Saved flash sale banner settings');
-                window.showToast('Flash sale banner saved!', 'success');
-            } catch (error) {
-                console.error("Save flash sale settings error:", error);
-                window.showToast(error.message || 'Failed to save flash sale settings.', 'fail');
-            } finally {
-                btn.disabled = false;
-                btn.innerText = originalText;
-            }
-        }
-        window.saveFlashSaleSettings = saveFlashSaleSettings;
-
         function listenSocialLinks() {
             if (socialListenerAttached) return;
             socialListenerAttached = true;
@@ -13738,23 +12580,6 @@
             }
         }
 
-        // ---------- Receipt Style (settings/receipt, style: 'minimal'|'premium'|'dark') ----------
-        // Same doc pattern as branding/tiers/social above. store.html reads this
-        // doc once at receipt-download time and switches the Canvas palette/layout
-        // used in downloadOrderReceipt() to match. Defaults to 'premium' (the
-        // original violet+gold look) when no doc exists yet.
-        let receiptStyleListenerAttached = false;
-        let selectedReceiptStyle = 'premium';
-
-        function toggleReceiptStyleSettings() {
-            const body = document.getElementById('receipt-style-body');
-            const chevron = document.getElementById('receipt-style-chevron');
-            const isOpen = body.style.display === 'block';
-            body.style.display = isOpen ? 'none' : 'block';
-            chevron.style.transform = isOpen ? 'rotate(0deg)' : 'rotate(180deg)';
-        }
-        window.toggleReceiptStyleSettings = toggleReceiptStyleSettings;
-
         function toggleAdminLoginSettings() {
             const body = document.getElementById('admin-login-body');
             const chevron = document.getElementById('admin-login-chevron');
@@ -13763,50 +12588,6 @@
             chevron.style.transform = isOpen ? 'rotate(0deg)' : 'rotate(180deg)';
         }
         window.toggleAdminLoginSettings = toggleAdminLoginSettings;
-
-        function renderReceiptStyleSelection(style) {
-            selectedReceiptStyle = style;
-            document.querySelectorAll('.receipt-style-option').forEach(el => {
-                const active = el.dataset.style === style;
-                el.style.borderColor = active ? 'var(--accent)' : 'var(--border)';
-                el.style.boxShadow = active ? '0 0 0 1px var(--accent)' : 'none';
-            });
-        }
-
-        function selectReceiptStyle(style) {
-            renderReceiptStyleSelection(style);
-        }
-        window.selectReceiptStyle = selectReceiptStyle;
-
-        function listenReceiptStyle() {
-            if (receiptStyleListenerAttached) return;
-            receiptStyleListenerAttached = true;
-            onSnapshot(doc(db, "settings", "receipt"), (docSnap) => {
-                const data = docSnap.exists() ? docSnap.data() : {};
-                renderReceiptStyleSelection(data.style || 'premium');
-            }, (error) => {
-                console.error("Receipt style listener error:", error);
-            });
-        }
-
-        async function saveReceiptStyle() {
-            const btn = document.getElementById('save-receipt-style-btn');
-            const originalText = btn.innerText;
-            btn.disabled = true;
-            btn.innerText = 'Saving...';
-            try {
-                await setDoc(doc(db, "settings", "receipt"), { style: selectedReceiptStyle }, { merge: true });
-                logAdminActivity('Changed receipt style', selectedReceiptStyle);
-                window.showToast('Receipt style updated!', 'success');
-            } catch (error) {
-                console.error("Save receipt style error:", error);
-                window.showToast('Failed to update receipt style.', 'fail');
-            } finally {
-                btn.disabled = false;
-                btn.innerText = originalText;
-            }
-        }
-        window.saveReceiptStyle = saveReceiptStyle;
 
         function toggleBrandingSettings() {
             const body = document.getElementById('branding-body');
@@ -17863,33 +16644,13 @@
         // gate above) — nothing here runs against Firestore before that.
         
 
-        // ---------- Admin Activity Log ----------
-        // Records a lightweight audit trail of admin actions ("who changed what")
-        // to Firestore so it can't be edited/cleared from the client the way a
-        // browser console log could be. Every write includes the signed-in
-        // admin's username (resolved once at login, see currentAdminUsername),
-        // their IP at the time (see currentAdminIP, also resolved at login),
-        // and the device's user agent string.
-        let activityLogListenerAttached = false;
-        let ACTIVITY_LOG = [];
-
-        // Activity Log feature disabled: no writes to Firestore, no listener
-        // attached, nothing rendered. Kept as no-ops so the many existing
-        // logAdminActivity(...) call sites throughout the app don't need to change.
+        // Admin Activity Log feature removed. logAdminActivity() is kept as a
+        // no-op because it's still called from many admin actions throughout
+        // this file; removing it there too would mean touching every one of
+        // those call sites for no behavior change.
         async function logAdminActivity(action, details = '') {
             return;
         }
-
-        function listenActivityLog() {
-            return;
-        }
-
-        function renderActivityLog() {
-            const container = document.getElementById('activity-log-container');
-            if (!container) return;
-            container.innerHTML = '<p class="empty-msg">Activity log is disabled.</p>';
-        }
-        window.renderActivityLog = renderActivityLog;
 
         // ---------- IP-based login alert ----------
         // Resolves the admin's current public IP via a free, keyless lookup and,
