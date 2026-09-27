@@ -1813,6 +1813,8 @@
         })();
     </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <!-- Renders the QR code shown when an admin sets up Authenticator (2FA) in My Account. -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
 <body>
 
@@ -1867,6 +1869,20 @@
                             <label for="login-remember-me">Remember me</label>
                         </div>
                         <button type="submit" id="login-btn">Sign In</button>
+                    </form>
+                </div>
+
+                <!-- Step 2 (only for admins who enabled it in My Account): authenticator
+                     code. Skipped automatically if this device passed it within the
+                     last TFA_TRUST_HOURS — see tfaIsTrusted()/showTwoFactorLoginStep(). -->
+                <div id="step-2fa" style="display:none;">
+                    <h2>Authenticator</h2>
+                    <p class="sub">Enter the 6-digit code from your authenticator app.</p>
+                    <p id="tfa-login-error" class="login-msg-error"></p>
+                    <form id="tfa-login-form" onsubmit="return false;">
+                        <input type="text" id="tfa-login-code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="000000" style="text-align:center;font-size:26px;letter-spacing:10px;font-weight:700;width:100%;" oninput="onTwoFactorCodeInput(this, 'login')">
+                        <button type="button" id="tfa-login-btn" style="margin-top:16px;" onclick="handleTwoFactorLoginVerify()">Verify</button>
+                        <button type="button" class="login-secondary-btn" style="width:100%;" onclick="cancelTwoFactorLogin()">Use a different account</button>
                     </form>
                 </div>
 
@@ -2081,6 +2097,64 @@
                     </div>
                     <span id="my-account-telegram-action"></span>
                 </div>
+                <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px 0;border-top:1px solid var(--border-glass);">
+                    <div style="min-width:0;">
+                        <span style="font-size:12.5px;font-weight:600;color:var(--text-primary);display:flex;align-items:center;gap:5px;">
+                            <svg class="ui-icon" style="width:13px;height:13px;flex-shrink:0;color:var(--accent);"><use href="#icon-shield"></use></svg>
+                            Authenticator (2FA)
+                        </span>
+                        <span id="my-account-tfa-status" style="font-size:11px;color:var(--text-muted);"></span>
+                    </div>
+                    <span id="my-account-tfa-action"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Authenticator (2FA) setup modal: Step 1 shows the QR/secret, then the
+         admin must enter a live code from their app before it's saved as
+         active — this prevents them locking themselves out with a
+         mis-scanned/mistyped secret. -->
+    <div class="modal-overlay" id="tfa-setup-modal-overlay" onclick="if(event.target===this) closeTwoFactorSetupModal()">
+        <div class="modal-box" style="max-width:360px;">
+            <div class="modal-header">
+                <h3>Set Up Authenticator</h3>
+                <div class="modal-close" onclick="closeTwoFactorSetupModal()">
+                    <svg class="ui-icon" style="width:18px;height:18px;"><use href="#icon-close"></use></svg>
+                </div>
+            </div>
+            <div class="modal-body">
+                <p style="font-size:12.5px;color:var(--text-secondary);margin-bottom:10px;">Scan this QR code with Google Authenticator, Authy, or any TOTP app:</p>
+                <div id="tfa-qr-container" style="display:flex;justify-content:center;align-items:center;min-height:176px;padding:12px;background:#fff;border-radius:12px;margin-bottom:12px;"></div>
+                <p style="font-size:11.5px;color:var(--text-muted);margin-bottom:6px;">Or enter this key manually:</p>
+                <div class="code-secret-box" id="tfa-secret-display" style="font-size:15px;font-weight:700;letter-spacing:1.5px;color:var(--text-primary);"></div>
+                <label style="margin-top:14px;">Enter the 6-digit code from your app</label>
+                <input type="text" id="tfa-setup-code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="000000" style="text-align:center;font-size:22px;letter-spacing:8px;font-weight:700;" oninput="onTwoFactorCodeInput(this, 'setup')">
+                <p id="tfa-setup-error" class="login-msg-error" style="display:none;"></p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" id="tfa-setup-confirm-btn" onclick="confirmTwoFactorSetup()">Verify &amp; Enable</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Authenticator (2FA) disable modal: requires one more live code so
+         turning it off needs the same proof of possession as turning it on. -->
+    <div class="modal-overlay" id="tfa-disable-modal-overlay" onclick="if(event.target===this) closeTwoFactorDisableModal()">
+        <div class="modal-box" style="max-width:340px;">
+            <div class="modal-header">
+                <h3>Disable Authenticator</h3>
+                <div class="modal-close" onclick="closeTwoFactorDisableModal()">
+                    <svg class="ui-icon" style="width:18px;height:18px;"><use href="#icon-close"></use></svg>
+                </div>
+            </div>
+            <div class="modal-body">
+                <p style="font-size:12.5px;color:var(--text-secondary);margin-bottom:14px;">Enter a current code from your authenticator app to turn 2FA off for your account.</p>
+                <input type="text" id="tfa-disable-code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="000000" style="text-align:center;font-size:22px;letter-spacing:8px;font-weight:700;" oninput="onTwoFactorCodeInput(this, 'disable')">
+                <p id="tfa-disable-error" class="login-msg-error" style="display:none;"></p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-danger" id="tfa-disable-confirm-btn" onclick="confirmTwoFactorDisable()">Disable</button>
             </div>
         </div>
     </div>
@@ -5154,6 +5228,305 @@
         }
         window.toggleAdminPushNotifications = toggleAdminPushNotifications;
 
+        // ---------- Authenticator (2FA) — TOTP, RFC 6238 ----------
+        // Entirely client-side: the shared secret lives on this admin's own
+        // adminUsernames/{username} doc (only readable once they're already
+        // signed in with their password) and codes are generated/verified
+        // locally with the Web Crypto API - no external TOTP service or
+        // library involved, and compatible with Google Authenticator, Authy,
+        // etc. This is an extra step on top of the password, not a
+        // hardened secret store - same caveat as everything else in this
+        // browser-side panel.
+        const TFA_ISSUER = 'LinnGameStore Admin';
+        const TFA_TRUST_HOURS = 5; // how long a passed check is remembered on this device
+        const TFA_TRUST_KEY_PREFIX = 'linn_2fa_trust_';
+        const TFA_PERIOD = 30;
+        const TFA_DIGITS = 6;
+        const TFA_BASE32_ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
+
+        function tfaBase32Encode(bytes) {
+            let bits = '', out = '';
+            for (const b of bytes) bits += b.toString(2).padStart(8, '0');
+            for (let i = 0; i + 5 <= bits.length; i += 5) out += TFA_BASE32_ALPHABET[parseInt(bits.substr(i, 5), 2)];
+            return out; // unpadded — authenticator apps accept this, and it's shorter to type manually
+        }
+        function tfaBase32Decode(str) {
+            str = String(str || '').toUpperCase().replace(/[^A-Z2-7]/g, '');
+            let bits = '';
+            for (const c of str) {
+                const val = TFA_BASE32_ALPHABET.indexOf(c);
+                if (val === -1) continue;
+                bits += val.toString(2).padStart(5, '0');
+            }
+            const bytes = [];
+            for (let i = 0; i + 8 <= bits.length; i += 8) bytes.push(parseInt(bits.substr(i, 8), 2));
+            return new Uint8Array(bytes);
+        }
+        function tfaGenerateSecret() {
+            const bytes = new Uint8Array(20); // 160-bit secret
+            crypto.getRandomValues(bytes);
+            return tfaBase32Encode(bytes);
+        }
+        function tfaOtpAuthUri(secret, username) {
+            const label = encodeURIComponent(`${TFA_ISSUER}:${username}`);
+            return `otpauth://totp/${label}?secret=${secret}&issuer=${encodeURIComponent(TFA_ISSUER)}&digits=${TFA_DIGITS}&period=${TFA_PERIOD}&algorithm=SHA1`;
+        }
+        async function tfaHmacSha1(keyBytes, msgBytes) {
+            const key = await crypto.subtle.importKey('raw', keyBytes, { name: 'HMAC', hash: 'SHA-1' }, false, ['sign']);
+            const sig = await crypto.subtle.sign('HMAC', key, msgBytes);
+            return new Uint8Array(sig);
+        }
+        function tfaCounterBytes(counter) {
+            const buf = new ArrayBuffer(8);
+            const view = new DataView(buf);
+            view.setUint32(0, 0, false); // high 32 bits: always 0 for any date in our lifetimes
+            view.setUint32(4, counter, false);
+            return new Uint8Array(buf);
+        }
+        async function tfaGenerateCode(secretBase32, forCounter) {
+            const keyBytes = tfaBase32Decode(secretBase32);
+            if (!keyBytes.length) return null;
+            const hash = await tfaHmacSha1(keyBytes, tfaCounterBytes(forCounter));
+            const offset = hash[hash.length - 1] & 0x0f;
+            const binary = ((hash[offset] & 0x7f) << 24) | ((hash[offset + 1] & 0xff) << 16) | ((hash[offset + 2] & 0xff) << 8) | (hash[offset + 3] & 0xff);
+            return (binary % (10 ** TFA_DIGITS)).toString().padStart(TFA_DIGITS, '0');
+        }
+        // Accepts a code from one 30s step early or late, to absorb clock
+        // drift between the admin's phone and this device.
+        async function tfaVerifyCode(secretBase32, token) {
+            token = String(token || '').trim();
+            if (!/^\d{6}$/.test(token) || !secretBase32) return false;
+            const counter = Math.floor(Date.now() / 1000 / TFA_PERIOD);
+            for (const drift of [0, -1, 1]) {
+                if ((await tfaGenerateCode(secretBase32, counter + drift)) === token) return true;
+            }
+            return false;
+        }
+
+        // ---------- 5-hour "trusted device" window ----------
+        // Purely time-based (not tied to the tab staying open) so an admin
+        // who closes the site and comes back within TFA_TRUST_HOURS isn't
+        // asked for a code again, but reopening after longer is.
+        function tfaTrustKey(username) { return TFA_TRUST_KEY_PREFIX + username; }
+        function tfaIsTrusted(username) {
+            try {
+                const verifiedAt = parseInt(localStorage.getItem(tfaTrustKey(username)), 10);
+                return !!verifiedAt && (Date.now() - verifiedAt) < TFA_TRUST_HOURS * 60 * 60 * 1000;
+            } catch (e) { return false; }
+        }
+        function tfaMarkTrusted(username) {
+            try { localStorage.setItem(tfaTrustKey(username), String(Date.now())); } catch (e) {}
+        }
+        function tfaClearTrust(username) {
+            try { localStorage.removeItem(tfaTrustKey(username)); } catch (e) {}
+        }
+
+        // Digit-only, 6-char cap on every 2FA code input, and auto-submits
+        // (no separate button press needed) the instant the 6th digit lands.
+        function onTwoFactorCodeInput(el, mode) {
+            el.value = el.value.replace(/\D/g, '').slice(0, 6);
+            if (el.value.length === 6) {
+                if (mode === 'login') handleTwoFactorLoginVerify();
+                else if (mode === 'setup') confirmTwoFactorSetup();
+                else if (mode === 'disable') confirmTwoFactorDisable();
+            }
+        }
+        window.onTwoFactorCodeInput = onTwoFactorCodeInput;
+
+        // ---------- Login-time verification step ----------
+        let pendingTfaSecret = null; // this admin's secret, held in memory only while step-2fa is shown
+        function showTwoFactorLoginStep(secret) {
+            pendingTfaSecret = secret;
+            document.getElementById('login-screen').classList.remove('hidden');
+            document.getElementById('login-box').style.display = '';
+            document.getElementById('step-login').style.display = 'none';
+            const step2fa = document.getElementById('step-2fa');
+            if (step2fa) step2fa.style.display = '';
+            const errEl = document.getElementById('tfa-login-error');
+            if (errEl) errEl.style.display = 'none';
+            const codeInput = document.getElementById('tfa-login-code');
+            if (codeInput) { codeInput.value = ''; setTimeout(() => codeInput.focus(), 50); }
+        }
+        async function handleTwoFactorLoginVerify() {
+            const codeInput = document.getElementById('tfa-login-code');
+            const errEl = document.getElementById('tfa-login-error');
+            const btn = document.getElementById('tfa-login-btn');
+            const code = (codeInput?.value || '').trim();
+            errEl.style.display = 'none';
+            if (applyLockoutUI('tfa-login', 'tfa-login-btn', 'tfa-login-error', 'Verify')) return;
+            if (!/^\d{6}$/.test(code)) {
+                errEl.textContent = 'Enter the 6-digit code.';
+                errEl.style.display = 'block';
+                return;
+            }
+            btn.disabled = true;
+            btn.innerText = 'Verifying...';
+            const ok = await tfaVerifyCode(pendingTfaSecret, code);
+            if (ok) {
+                clearLockout('tfa-login');
+                tfaMarkTrusted(currentAdminUsername);
+                pendingTfaSecret = null;
+                if (codeInput) codeInput.value = '';
+                document.getElementById('step-2fa').style.display = 'none';
+                document.getElementById('step-login').style.display = '';
+                btn.disabled = false;
+                btn.innerText = 'Verify';
+                unlockAdminApp();
+            } else {
+                registerFailedAttempt('tfa-login');
+                if (codeInput) { codeInput.value = ''; codeInput.focus(); } // cleared so retry never needs a manual delete
+                if (!applyLockoutUI('tfa-login', 'tfa-login-btn', 'tfa-login-error', 'Verify')) {
+                    errEl.textContent = 'Incorrect code. Try again.';
+                    errEl.style.display = 'block';
+                    btn.disabled = false;
+                    btn.innerText = 'Verify';
+                }
+            }
+        }
+        window.handleTwoFactorLoginVerify = handleTwoFactorLoginVerify;
+
+        function cancelTwoFactorLogin() {
+            pendingTfaSecret = null;
+            signOut(auth);
+        }
+        window.cancelTwoFactorLogin = cancelTwoFactorLogin;
+
+        // ---------- Setup (My Account -> Authenticator -> Set Up) ----------
+        let tfaPendingSetupSecret = null;
+        function openTwoFactorSetupModal() {
+            if (!currentAdminUsername) return;
+            tfaPendingSetupSecret = tfaGenerateSecret();
+            const uri = tfaOtpAuthUri(tfaPendingSetupSecret, currentAdminUsername);
+            const secretDisplay = document.getElementById('tfa-secret-display');
+            if (secretDisplay) secretDisplay.textContent = (tfaPendingSetupSecret.match(/.{1,4}/g) || []).join(' ');
+            const qrBox = document.getElementById('tfa-qr-container');
+            if (qrBox) {
+                qrBox.innerHTML = '';
+                try {
+                    new QRCode(qrBox, { text: uri, width: 176, height: 176, correctLevel: QRCode.CorrectLevel.M });
+                } catch (e) {
+                    console.error('QR render failed:', e);
+                    qrBox.innerHTML = '<p style="font-size:11px;color:#333;padding:0 10px;text-align:center;">QR unavailable — use the key below instead.</p>';
+                }
+            }
+            const codeInput = document.getElementById('tfa-setup-code');
+            const errEl = document.getElementById('tfa-setup-error');
+            if (codeInput) codeInput.value = '';
+            if (errEl) errEl.style.display = 'none';
+            document.getElementById('tfa-setup-modal-overlay').classList.add('show');
+        }
+        window.openTwoFactorSetupModal = openTwoFactorSetupModal;
+
+        function closeTwoFactorSetupModal() {
+            document.getElementById('tfa-setup-modal-overlay').classList.remove('show');
+            tfaPendingSetupSecret = null;
+        }
+        window.closeTwoFactorSetupModal = closeTwoFactorSetupModal;
+
+        // Requires one live code from the admin's app before the secret is
+        // saved as active, so a mis-scanned QR / mistyped key is caught here
+        // rather than locking them out on their next login.
+        async function confirmTwoFactorSetup() {
+            const codeInput = document.getElementById('tfa-setup-code');
+            const errEl = document.getElementById('tfa-setup-error');
+            const btn = document.getElementById('tfa-setup-confirm-btn');
+            const code = (codeInput?.value || '').trim();
+            errEl.style.display = 'none';
+            if (!tfaPendingSetupSecret) return;
+            if (!/^\d{6}$/.test(code)) {
+                errEl.textContent = 'Enter the 6-digit code from your app.';
+                errEl.style.display = 'block';
+                return;
+            }
+            btn.disabled = true;
+            btn.innerText = 'Verifying...';
+            const ok = await tfaVerifyCode(tfaPendingSetupSecret, code);
+            if (!ok) {
+                if (codeInput) { codeInput.value = ''; codeInput.focus(); }
+                errEl.textContent = 'Incorrect code — check the time on your phone and try again.';
+                errEl.style.display = 'block';
+                btn.disabled = false;
+                btn.innerText = 'Verify & Enable';
+                return;
+            }
+            try {
+                await setDoc(doc(db, "adminUsernames", currentAdminUsername), {
+                    totpEnabled: true,
+                    totpSecret: tfaPendingSetupSecret
+                }, { merge: true });
+                tfaMarkTrusted(currentAdminUsername); // this device just proved it — don't immediately re-prompt it
+                logAdminActivity('Enabled Authenticator (2FA)');
+                window.showToast('Authenticator enabled ✓', 'success');
+                closeTwoFactorSetupModal();
+                renderMyAccountModal();
+            } catch (e) {
+                console.error('Enable 2FA error:', e);
+                errEl.textContent = 'Failed to save — try again.';
+                errEl.style.display = 'block';
+            } finally {
+                btn.disabled = false;
+                btn.innerText = 'Verify & Enable';
+            }
+        }
+        window.confirmTwoFactorSetup = confirmTwoFactorSetup;
+
+        // ---------- Disable (My Account -> Authenticator -> Disable) ----------
+        function openTwoFactorDisableModal() {
+            const codeInput = document.getElementById('tfa-disable-code');
+            const errEl = document.getElementById('tfa-disable-error');
+            if (codeInput) codeInput.value = '';
+            if (errEl) errEl.style.display = 'none';
+            document.getElementById('tfa-disable-modal-overlay').classList.add('show');
+        }
+        window.openTwoFactorDisableModal = openTwoFactorDisableModal;
+
+        function closeTwoFactorDisableModal() {
+            document.getElementById('tfa-disable-modal-overlay').classList.remove('show');
+        }
+        window.closeTwoFactorDisableModal = closeTwoFactorDisableModal;
+
+        async function confirmTwoFactorDisable() {
+            const codeInput = document.getElementById('tfa-disable-code');
+            const errEl = document.getElementById('tfa-disable-error');
+            const btn = document.getElementById('tfa-disable-confirm-btn');
+            const code = (codeInput?.value || '').trim();
+            const me = ADMIN_ACCOUNTS.find(a => a.username === currentAdminUsername);
+            errEl.style.display = 'none';
+            if (!me || !me.totpSecret) { closeTwoFactorDisableModal(); return; }
+            if (!/^\d{6}$/.test(code)) {
+                errEl.textContent = 'Enter the 6-digit code.';
+                errEl.style.display = 'block';
+                return;
+            }
+            btn.disabled = true;
+            const ok = await tfaVerifyCode(me.totpSecret, code);
+            if (!ok) {
+                if (codeInput) { codeInput.value = ''; codeInput.focus(); }
+                errEl.textContent = 'Incorrect code.';
+                errEl.style.display = 'block';
+                btn.disabled = false;
+                return;
+            }
+            try {
+                await setDoc(doc(db, "adminUsernames", currentAdminUsername), {
+                    totpEnabled: false,
+                    totpSecret: deleteField()
+                }, { merge: true });
+                tfaClearTrust(currentAdminUsername);
+                logAdminActivity('Disabled Authenticator (2FA)');
+                window.showToast('Authenticator disabled', 'success');
+                closeTwoFactorDisableModal();
+                renderMyAccountModal();
+            } catch (e) {
+                console.error('Disable 2FA error:', e);
+                errEl.textContent = 'Failed to disable — try again.';
+                errEl.style.display = 'block';
+            } finally {
+                btn.disabled = false;
+            }
+        }
+        window.confirmTwoFactorDisable = confirmTwoFactorDisable;
+
         const ordersContainer = document.getElementById('orders-container');
 
         // ---------- Admin login gate ----------
@@ -5514,6 +5887,14 @@
             document.getElementById('my-account-telegram-action').innerHTML = telegramLinked
                 ? `<button type="button" onclick="unlinkAdminTelegram(currentAdminUsername)" style="background:none;border:none;color:var(--danger);font-size:12px;font-weight:600;cursor:pointer;padding:0;">Unlink</button>`
                 : `<button type="button" onclick="closeMyAccountModal(); openTelegramLinkModal(currentAdminUsername)" style="background:none;border:none;color:var(--accent);font-size:12px;font-weight:600;cursor:pointer;padding:0;">Link Telegram</button>`;
+
+            const tfaEnabled = !!me.totpEnabled;
+            const tfaStatusEl = document.getElementById('my-account-tfa-status');
+            const tfaActionEl = document.getElementById('my-account-tfa-action');
+            if (tfaStatusEl) tfaStatusEl.innerText = tfaEnabled ? 'Enabled on this account' : 'Not set up';
+            if (tfaActionEl) tfaActionEl.innerHTML = tfaEnabled
+                ? `<button type="button" onclick="openTwoFactorDisableModal()" style="background:none;border:none;color:var(--danger);font-size:12px;font-weight:600;cursor:pointer;padding:0;">Disable</button>`
+                : `<button type="button" onclick="openTwoFactorSetupModal()" style="background:none;border:none;color:var(--accent);font-size:12px;font-weight:600;cursor:pointer;padding:0;">Set Up</button>`;
         }
         window.renderMyAccountModal = renderMyAccountModal;
 
@@ -5600,6 +5981,9 @@
         function resetGateLocked() {
             document.getElementById('login-box').style.display = '';
             document.getElementById('step-login').style.display = '';
+            const step2fa = document.getElementById('step-2fa');
+            if (step2fa) step2fa.style.display = 'none';
+            pendingTfaSecret = null;
             document.getElementById('login-password').value = '';
             applyRememberedUsername();
             applyLockoutUI('login', 'login-btn', 'login-error', 'Sign In');
@@ -5845,13 +6229,30 @@
                 }
             }
 
+            let adminDocData = null;
             try {
                 const uq = query(collection(db, "adminUsernames"), where("email", "==", user.email));
                 const usnap = await getDocs(uq);
                 if (!usnap.empty) {
                     currentAdminUsername = usnap.docs[0].id;
+                    adminDocData = usnap.docs[0].data();
                 }
             } catch (e) { console.error('Admin username lookup error:', e); }
+
+            // ---------- Authenticator (2FA) gate ----------
+            // Runs after Firebase Auth already accepted the password. Skipped
+            // for admins who never set up 2FA (My Account -> Authenticator),
+            // and skipped for admins who already passed it on this device
+            // within the last TFA_TRUST_HOURS (see tfaIsTrusted) so reopening
+            // the panel soon after doesn't ask again.
+            if (adminDocData && adminDocData.totpEnabled && adminDocData.totpSecret) {
+                if (tfaIsTrusted(currentAdminUsername)) {
+                    unlockAdminApp();
+                } else {
+                    showTwoFactorLoginStep(adminDocData.totpSecret);
+                }
+                return;
+            }
 
             unlockAdminApp();
         }
