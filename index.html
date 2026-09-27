@@ -2584,42 +2584,46 @@
                     <svg class="ui-icon" id="branding-chevron" style="width:18px;height:18px;color:var(--text-secondary);transition:transform 0.2s;"><use href="#icon-chevron-down"></use></svg>
                 </div>
                 <div id="branding-body" style="display:none;margin-top:12px;">
-                    <label style="font-size:13px;font-weight:500;color:var(--text-secondary);">Logo (Light Mode)</label>
-                    <div style="margin:6px 0 4px;">
-                        <label class="img-update-box" id="logo-img-update-box" for="edit-logo-file">
-                            <div class="img-update-icon"><svg class="ui-icon"><use href="#icon-camera"></use></svg></div>
-                            <span class="img-update-label">Image Update</span>
-                            <img id="edit-logo-preview" src="" alt="Preview" loading="lazy" decoding="async" style="display:none;">
-                            <span class="img-update-change" id="logo-img-update-change" style="display:none;">
-                                <svg style="width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><use href="#icon-camera"></use></svg> Change
-                            </span>
-                        </label>
-                        <input type="file" id="edit-logo-file" class="img-update-input" accept="image/*" onchange="previewLogoImage(event)">
-                        <p id="logo-upload-status" style="font-size:12px;color:var(--text-secondary);display:none;"></p>
-                        <button class="btn btn-primary" id="save-logo-btn" style="margin-top:10px;" onclick="saveLogo()">Save Logo</button>
-                    </div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                        <div>
+                            <label style="font-size:13px;font-weight:500;color:var(--text-secondary);">Logo (Light Mode)</label>
+                            <div style="margin:6px 0 4px;">
+                                <label class="img-update-box" id="logo-img-update-box" for="edit-logo-file">
+                                    <div class="img-update-icon"><svg class="ui-icon"><use href="#icon-camera"></use></svg></div>
+                                    <span class="img-update-label">Image Update</span>
+                                    <img id="edit-logo-preview" src="" alt="Preview" loading="lazy" decoding="async" style="display:none;">
+                                    <span class="img-update-change" id="logo-img-update-change" style="display:none;">
+                                        <svg style="width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><use href="#icon-camera"></use></svg> Change
+                                    </span>
+                                </label>
+                                <input type="file" id="edit-logo-file" class="img-update-input" accept="image/*" onchange="previewLogoImage(event)">
+                                <p id="logo-upload-status" style="font-size:12px;color:var(--text-secondary);display:none;"></p>
+                                <button class="btn btn-primary" id="save-logo-btn" style="margin-top:10px;width:100%;" onclick="saveLogo()">Save Logo</button>
+                            </div>
+                        </div>
 
-                    <!-- Dark Mode logo (optional): shown instead of the Light
-                         Mode logo above whenever the app/store is displayed
-                         in a dark theme (resolved via --scheme, which covers
-                         every dark theme variant, not just data-theme="dark").
-                         Falls back to the Light Mode logo when not set. -->
-                    <div style="border-top:1px solid var(--fill-soft);margin:14px 0 0;padding-top:14px;">
-                        <label style="font-size:13px;font-weight:500;color:var(--text-secondary);">Logo (Dark Mode)</label>
-                        <p style="font-size:11.5px;color:var(--text-secondary);margin:4px 0 8px;">Optional — shown automatically in dark themes. Uses the Light Mode logo if left empty.</p>
-                        <label class="img-update-box" id="logo-dark-img-update-box" for="edit-logo-dark-file">
-                            <div class="img-update-icon"><svg class="ui-icon"><use href="#icon-camera"></use></svg></div>
-                            <span class="img-update-label">Image Update</span>
-                            <img id="edit-logo-dark-preview" src="" alt="Preview" loading="lazy" decoding="async" style="display:none;">
-                            <span class="img-update-change" id="logo-dark-img-update-change" style="display:none;">
-                                <svg style="width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><use href="#icon-camera"></use></svg> Change
-                            </span>
-                        </label>
-                        <input type="file" id="edit-logo-dark-file" class="img-update-input" accept="image/*" onchange="previewLogoDarkImage(event)">
-                        <p id="logo-dark-upload-status" style="font-size:12px;color:var(--text-secondary);display:none;"></p>
-                        <div style="display:flex;gap:8px;margin-top:10px;">
-                            <button class="btn btn-primary" id="save-logo-dark-btn" style="flex:1;" onclick="saveLogoDark()">Save Dark Logo</button>
-                            <button class="btn" id="remove-logo-dark-btn" style="flex:unset;padding:10px 14px;background:var(--fill-soft);color:var(--text-secondary);display:none;" onclick="removeLogoDark()">Remove</button>
+                        <!-- Dark Mode logo (optional): shown instead of the Light
+                             Mode logo above whenever the app/store is displayed
+                             in a dark theme (resolved via --scheme, which covers
+                             every dark theme variant, not just data-theme="dark").
+                             Falls back to the Light Mode logo when not set. -->
+                        <div>
+                            <label style="font-size:13px;font-weight:500;color:var(--text-secondary);">Logo (Dark Mode)</label>
+                            <p style="font-size:11.5px;color:var(--text-secondary);margin:4px 0 8px;">Optional — shown automatically in dark themes. Uses the Light Mode logo if left empty.</p>
+                            <label class="img-update-box" id="logo-dark-img-update-box" for="edit-logo-dark-file">
+                                <div class="img-update-icon"><svg class="ui-icon"><use href="#icon-camera"></use></svg></div>
+                                <span class="img-update-label">Image Update</span>
+                                <img id="edit-logo-dark-preview" src="" alt="Preview" loading="lazy" decoding="async" style="display:none;">
+                                <span class="img-update-change" id="logo-dark-img-update-change" style="display:none;">
+                                    <svg style="width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><use href="#icon-camera"></use></svg> Change
+                                </span>
+                            </label>
+                            <input type="file" id="edit-logo-dark-file" class="img-update-input" accept="image/*" onchange="previewLogoDarkImage(event)">
+                            <p id="logo-dark-upload-status" style="font-size:12px;color:var(--text-secondary);display:none;"></p>
+                            <div style="display:flex;gap:8px;margin-top:10px;">
+                                <button class="btn btn-primary" id="save-logo-dark-btn" style="flex:1;" onclick="saveLogoDark()">Save Dark Logo</button>
+                                <button class="btn" id="remove-logo-dark-btn" style="flex:unset;padding:10px 14px;background:var(--fill-soft);color:var(--text-secondary);display:none;" onclick="removeLogoDark()">Remove</button>
+                            </div>
                         </div>
                     </div>
 
@@ -3774,35 +3778,47 @@
                 <input type="text" id="edit-payment-availability" placeholder="Enter Availability">
                 <p style="font-size:12px;color:var(--text-secondary);margin-top:-6px;">Shown under this method at checkout so customers know when a receipt will be reviewed. Leave blank to hide.</p>
 
-                <label>Logo Image (optional)</label>
-                <label class="img-update-box logo-square" id="payment-img-update-box" for="edit-payment-file">
-                    <div class="img-update-icon"><svg class="ui-icon"><use href="#icon-camera"></use></svg></div>
-                    <span class="img-update-label">Image Update</span>
-                    <img id="edit-payment-preview" src="" alt="Preview" loading="lazy" decoding="async" style="display:none;">
-                    <span class="img-update-change" id="payment-img-update-change" style="display:none;">
-                        <svg style="width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><use href="#icon-camera"></use></svg> Change
-                    </span>
+                <label style="display:flex;align-items:center;gap:8px;margin-top:14px;cursor:pointer;" for="edit-payment-hot">
+                    <input type="checkbox" id="edit-payment-hot" style="width:auto;margin:0;">
+                    <span>🔥 Mark as Hot</span>
                 </label>
-                <input type="file" id="edit-payment-file" class="img-update-input" accept="image/*" onchange="previewPaymentImage(event)">
-                <p id="payment-upload-status" style="font-size:12px;color:var(--text-secondary);display:none;"></p>
+                <p style="font-size:12px;color:var(--text-secondary);margin-top:-6px;">Shows a "🔥 Hot" badge on this method here and on the Store checkout page.</p>
 
-                <!-- Separate from the small round Logo above: this is the
-                     scannable QR code shown to the customer next to the
-                     phone number/name once they pick this method at
-                     checkout, so they can scan-to-pay instead of typing the
-                     number into their banking app. Optional - stored as its
-                     own qrImage field so it never overwrites the logo. -->
-                <label style="margin-top:14px;">QR Code Image (optional)</label>
-                <label class="img-update-box logo-square" id="payment-qr-update-box" for="edit-payment-qr-file">
-                    <div class="img-update-icon"><svg class="ui-icon"><use href="#icon-camera"></use></svg></div>
-                    <span class="img-update-label">QR Update</span>
-                    <img id="edit-payment-qr-preview" src="" alt="Preview" loading="lazy" decoding="async" style="display:none;">
-                    <span class="img-update-change" id="payment-qr-update-change" style="display:none;">
-                        <svg style="width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><use href="#icon-camera"></use></svg> Change
-                    </span>
-                </label>
-                <input type="file" id="edit-payment-qr-file" class="img-update-input" accept="image/*" onchange="previewPaymentQrImage(event)">
-                <p id="payment-qr-upload-status" style="font-size:12px;color:var(--text-secondary);display:none;"></p>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:6px;">
+                    <div>
+                        <label>Logo Image (optional)</label>
+                        <label class="img-update-box logo-square" id="payment-img-update-box" for="edit-payment-file">
+                            <div class="img-update-icon"><svg class="ui-icon"><use href="#icon-camera"></use></svg></div>
+                            <span class="img-update-label">Image Update</span>
+                            <img id="edit-payment-preview" src="" alt="Preview" loading="lazy" decoding="async" style="display:none;">
+                            <span class="img-update-change" id="payment-img-update-change" style="display:none;">
+                                <svg style="width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><use href="#icon-camera"></use></svg> Change
+                            </span>
+                        </label>
+                        <input type="file" id="edit-payment-file" class="img-update-input" accept="image/*" onchange="previewPaymentImage(event)">
+                        <p id="payment-upload-status" style="font-size:12px;color:var(--text-secondary);display:none;"></p>
+                    </div>
+
+                    <!-- Separate from the small round Logo above: this is the
+                         scannable QR code shown to the customer next to the
+                         phone number/name once they pick this method at
+                         checkout, so they can scan-to-pay instead of typing the
+                         number into their banking app. Optional - stored as its
+                         own qrImage field so it never overwrites the logo. -->
+                    <div>
+                        <label>QR Code Image (optional)</label>
+                        <label class="img-update-box logo-square" id="payment-qr-update-box" for="edit-payment-qr-file">
+                            <div class="img-update-icon"><svg class="ui-icon"><use href="#icon-camera"></use></svg></div>
+                            <span class="img-update-label">QR Update</span>
+                            <img id="edit-payment-qr-preview" src="" alt="Preview" loading="lazy" decoding="async" style="display:none;">
+                            <span class="img-update-change" id="payment-qr-update-change" style="display:none;">
+                                <svg style="width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><use href="#icon-camera"></use></svg> Change
+                            </span>
+                        </label>
+                        <input type="file" id="edit-payment-qr-file" class="img-update-input" accept="image/*" onchange="previewPaymentQrImage(event)">
+                        <p id="payment-qr-upload-status" style="font-size:12px;color:var(--text-secondary);display:none;"></p>
+                    </div>
+                </div>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-danger" id="delete-payment-btn" style="display:none;" onclick="deleteCurrentPaymentMethod()">Delete</button>
@@ -6827,6 +6843,66 @@
 
         // Renders from the ORDERS cache rather than a live snapshot, so it can also be
         // called from listenGames() to fill in thumbnails once game images arrive.
+        // ---------- Fake-slip risk badge (Order list/detail + User history) ----------
+        // riskFlags / riskLevel / receiptHash / ocrAmountDetected are written by
+        // the Store app at order time from its own client-side OCR run (see
+        // submitOrder() in store.html). Duplicate-slip detection (the same
+        // receipt image reused across more than one order) can only happen
+        // here though — it needs to compare against every other order, which
+        // a guest client isn't (and shouldn't be) allowed to query. ORDERS is
+        // already a full, live-synced copy of the orders collection on this
+        // side, so this is just an in-memory count, no extra Firestore reads.
+        const RISK_FLAG_LABELS = {
+            duplicate_slip: 'Same receipt image used on another order',
+            amount_mismatch: "Amount on the receipt doesn't match the order total",
+            amount_not_detected: 'Could not read an amount off the receipt',
+            no_transaction_id: 'No transaction ID found on the receipt'
+        };
+
+        // { receiptHash: count } across ALL orders (not just the currently
+        // filtered/visible ones) so a duplicate is still caught even if its
+        // twin is sitting in a cleaned or filtered-out order.
+        function buildReceiptHashCounts() {
+            const counts = {};
+            Object.values(ORDERS).forEach(o => { if (o.receiptHash) counts[o.receiptHash] = (counts[o.receiptHash] || 0) + 1; });
+            return counts;
+        }
+
+        function computeOrderRiskInfo(data, receiptHashCounts) {
+            const flags = Array.isArray(data.riskFlags) ? data.riskFlags.slice() : [];
+            if (data.receiptHash && receiptHashCounts && (receiptHashCounts[data.receiptHash] || 0) > 1) flags.push('duplicate_slip');
+            const level = (flags.includes('duplicate_slip') || flags.includes('amount_mismatch')) ? 'high'
+                : flags.length ? 'low' : 'none';
+            return { level, flags };
+        }
+
+        function riskBadgeHtml(riskInfo) {
+            if (!riskInfo || riskInfo.level === 'none') return '';
+            const badgeClass = riskInfo.level === 'high' ? 'badge-danger' : 'badge-pending';
+            const icon = riskInfo.level === 'high' ? '🔴' : '🟡';
+            const label = riskInfo.level === 'high' ? 'High Risk' : 'Low Risk';
+            const title = riskInfo.flags.map(f => RISK_FLAG_LABELS[f] || f).join(' · ');
+            return `<span class="badge ${badgeClass}" title="${escapeHtml(title)}">${icon} ${label}</span>`;
+        }
+
+        // Expanded detail block shown inside an order card when it carries
+        // any risk flag — lists each reason in plain language plus the
+        // detected-vs-expected amount when that's the flag that fired.
+        function riskDetailHtml(data, riskInfo) {
+            if (!riskInfo || riskInfo.level === 'none') return '';
+            const rows = riskInfo.flags.map(f => `<li>${escapeHtml(RISK_FLAG_LABELS[f] || f)}</li>`).join('');
+            const amountLine = (data.ocrAmountDetected != null)
+                ? `<p style="font-size:12px;color:var(--text-secondary);margin-top:4px;">Detected on receipt: <b>${Number(data.ocrAmountDetected).toLocaleString()} MMK</b> &middot; Order total: <b>${Number(data.price).toLocaleString()} MMK</b></p>`
+                : '';
+            const bg = riskInfo.level === 'high' ? 'rgba(251,113,133,0.10)' : 'rgba(251,191,36,0.10)';
+            const border = riskInfo.level === 'high' ? 'rgba(251,113,133,0.35)' : 'rgba(251,191,36,0.35)';
+            return `<div style="margin-top:8px;padding:10px;background:${bg};border:1px solid ${border};border-radius:8px;">
+                <div style="font-size:11px;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.3px;margin-bottom:4px;">⚠️ Fake-slip risk — please double-check this receipt</div>
+                <ul style="margin:0;padding-left:18px;font-size:12.5px;color:var(--text-primary);">${rows}</ul>
+                ${amountLine}
+            </div>`;
+        }
+
         function renderOrdersListImpl() {
             const searchTerm = (document.getElementById('order-search')?.value || '').trim().toLowerCase();
             const dateFrom = document.getElementById('order-date-from')?.value || '';
@@ -6863,8 +6939,11 @@
                 return tb - ta;
             });
 
+            const receiptHashCounts = buildReceiptHashCounts();
+
             ordersContainer.innerHTML = sorted.map((data) => {
                 const orderId = data.id;
+                const riskInfo = computeOrderRiskInfo(data, receiptHashCounts);
                 const dateStr = data.timestamp ? data.timestamp.toDate().toLocaleString() : 'Just now';
                 const badgeClassByStatus = { Pending: 'badge-pending', Processing: 'badge-processing', Success: 'badge-success', Fail: 'badge-danger' };
                 const badgeClass = badgeClassByStatus[data.status] || 'badge-pending';
@@ -6954,6 +7033,7 @@
                                 <p class="oc-meta">ID: ${orderId.substring(0, 8)} &middot; ${data.itemAmount} &middot; <b>${Number(data.price).toLocaleString()} MMK</b>${data.userName ? ` &middot; ${escapeHtml(data.userName)}` : ''}</p>
                             </div>
                             <div class="oc-status">
+                                ${riskBadgeHtml(riskInfo)}
                                 <span class="badge ${badgeClass}">${statusBadgeHtml(badgeClass, orderStatusLabel(data.status))}</span>
                                 <svg class="ui-icon" id="chevron-${orderId}" style="width:16px;height:16px;color:var(--text-muted);transition:transform 0.2s;transform:rotate(${isOpen ? '180' : '0'}deg);"><use href="#icon-chevron-down"></use></svg>
                             </div>
@@ -6965,7 +7045,7 @@
                                         <div class="oc-thumb">${gameImg ? `<img src="${gameImg}" alt="" loading="lazy" decoding="async" onerror="this.style.display='none'">` : ''}</div>
                                         <div class="od-card-title-text">
                                             <span class="oc-game-name">${data.game}${data.serverRegion ? ` <span style="font-weight:400;color:var(--accent);">(${data.serverRegion})</span>` : ''}</span>
-                                            <p class="oc-meta">${Number(data.price).toLocaleString()} MMK &middot; <span class="badge ${badgeClass}">${statusBadgeHtml(badgeClass, orderStatusLabel(data.status))}</span></p>
+                                            <p class="oc-meta">${Number(data.price).toLocaleString()} MMK &middot; <span class="badge ${badgeClass}">${statusBadgeHtml(badgeClass, orderStatusLabel(data.status))}</span> ${riskBadgeHtml(riskInfo)}</p>
                                         </div>
                                     </div>
                                     <div class="od-card-close" onclick="toggleOrderCard('${orderId}')">
@@ -7037,6 +7117,7 @@
                                 ${data.serverRegion ? `<p><b>Server:</b> <span class="highlight-id">${data.serverRegion}</span></p>` : ''}
                                 ${data.location ? `<p><b>Order Location:</b> <a href="https://www.google.com/maps?q=${data.location.lat},${data.location.lng}" target="_blank" style="color:var(--accent);">View on Map</a></p>` : ''}
                                 ${data.receiptUrl ? `<p><b>Receipt:</b> <a href="${escapeHtml(data.receiptUrl)}" target="_blank" style="color:var(--accent);">View Screenshot</a></p><img src="${escapeHtml(data.receiptUrl)}" loading="lazy" decoding="async" style="width:100%;max-height:180px;object-fit:contain;border-radius:8px;background:var(--bg-subtle);margin-top:6px;">` : ''}
+                                ${riskDetailHtml(data, riskInfo)}
                                 ${Array.isArray(data.deliveredCodes) && data.deliveredCodes.length ? `<div style="margin-top:8px;padding:10px;background:var(--fill-soft);border-radius:8px;">
                                     <div style="font-size:11px;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.3px;margin-bottom:6px;">Delivered Voucher Code${data.deliveredCodes.length > 1 ? 's' : ''} — copy &amp; send to customer</div>
                                     ${data.deliveredCodes.map(c => `<div class="mono" style="font-size:13px;padding:4px 0;word-break:break-all;">${escapeHtml(String(c))}</div>`).join('')}
@@ -9380,9 +9461,11 @@
         function renderAdminGamesListImpl() {
             const container = document.getElementById('admin-games-container');
             const searchTerm = (document.getElementById('game-search')?.value || '').trim().toLowerCase();
-            // Sort by name (then server name) so games uploaded as multiple server
-            // variants (same Game Name, different Server name) sit next to each
-            // other in the list instead of being scattered.
+            // Sort by the order they were added (oldest/first-added on top,
+            // newest/last-added at the bottom) instead of alphabetically.
+            // An explicit `order` field (set via "Reorder") always wins;
+            // games without one yet fall back to their createdAt timestamp,
+            // and finally to name for the rare doc with neither.
             const ids = Object.keys(GAMES).filter(id => {
                 const g = GAMES[id];
                 const isVoucher = g.fulfillProvider === 'g2bulk_voucher' || g.fulfillProvider === 'fazercard_giftcard';
@@ -9391,7 +9474,13 @@
                 return (g.name || '').toLowerCase().includes(searchTerm) || (g.serverName || '').toLowerCase().includes(searchTerm);
             }).sort((a, b) => {
                 const ga = GAMES[a], gb = GAMES[b];
-                return ga.name.localeCompare(gb.name) || (ga.serverName || '').localeCompare(gb.serverName || '');
+                const oa = typeof ga.order === 'number' ? ga.order : Infinity;
+                const ob = typeof gb.order === 'number' ? gb.order : Infinity;
+                if (oa !== ob) return oa - ob;
+                const ta = ga.createdAt?.toMillis ? ga.createdAt.toMillis() : Infinity;
+                const tb = gb.createdAt?.toMillis ? gb.createdAt.toMillis() : Infinity;
+                if (ta !== tb) return ta - tb;
+                return (ga.name || '').localeCompare(gb.name || '') || (ga.serverName || '').localeCompare(gb.serverName || '');
             });
             if (ids.length === 0) {
                 container.innerHTML = searchTerm
@@ -10022,6 +10111,9 @@
             const oa = typeof ga.order === 'number' ? ga.order : Infinity;
             const ob = typeof gb.order === 'number' ? gb.order : Infinity;
             if (oa !== ob) return oa - ob;
+            const ta = ga.createdAt?.toMillis ? ga.createdAt.toMillis() : Infinity;
+            const tb = gb.createdAt?.toMillis ? gb.createdAt.toMillis() : Infinity;
+            if (ta !== tb) return ta - tb;
             return (ga.name || '').localeCompare(gb.name || '') || (ga.serverName || '').localeCompare(gb.serverName || '');
         }
 
@@ -11577,23 +11669,36 @@
         async function uploadImageToImgBB(file, statusElId = 'upload-status') {
             const statusEl = document.getElementById(statusElId);
             statusEl.style.display = 'block';
+            statusEl.style.color = 'var(--text-secondary)';
             statusEl.innerText = 'Compressing photo...';
 
-            const compressed = await compressImageFile(file);
-            statusEl.innerText = 'Uploading photo...';
+            try {
+                const compressed = await compressImageFile(file);
+                statusEl.innerText = 'Uploading photo...';
 
-            const form = new FormData();
-            form.append('image', compressed);
+                const form = new FormData();
+                form.append('image', compressed);
 
-            const res = await fetch(IMGBB_UPLOAD_URL, {
-                method: 'POST',
-                body: form
-            });
-            const data = await res.json();
-            if (!data.success) throw new Error(data.error?.message || 'Upload failed');
+                const res = await fetch(IMGBB_UPLOAD_URL, {
+                    method: 'POST',
+                    body: form
+                });
+                const data = await res.json();
+                if (!data.success) throw new Error(data.error?.message || 'Upload failed');
 
-            statusEl.innerText = 'Photo uploaded ✓';
-            return data.data.url;
+                statusEl.innerText = 'Photo uploaded ✓';
+                return data.data.url;
+            } catch (error) {
+                // Leaving the status line stuck on "Uploading photo..." after a
+                // failed upload (e.g. a dropped connection - "Failed to fetch")
+                // was misleading: the calling save function's own catch block
+                // shows a toast, but this line never updated, so it looked
+                // like the upload was still in progress forever. Show the
+                // real state here instead, right where the failure happened.
+                statusEl.innerText = 'Upload failed: ' + (error.message || 'network error') + ' — tap Save to retry.';
+                statusEl.style.color = 'var(--danger-strong)';
+                throw error;
+            }
         }
 
         function previewPaymentImage(e) {
@@ -12337,7 +12442,7 @@
                 const p = PAYMENT_METHODS[id];
                 return `
                     <div class="admin-card">
-                        <div class="ac-header"><span class="ac-id">${p.name}</span></div>
+                        <div class="ac-header"><span class="ac-id">${p.name}</span>${p.hot ? ' <span class="badge badge-danger">🔥 Hot</span>' : ''}</div>
                         <div class="ac-body" style="display:flex;gap:10px;align-items:center;">
                             ${p.image ? `<div style="width:56px;height:56px;flex-shrink:0;border-radius:8px;overflow:hidden;background:var(--bg-subtle);border:1px solid var(--fill-soft);"><img src="${p.image}" loading="lazy" decoding="async" style="width:100%;height:100%;object-fit:cover;display:block;"></div>` : ''}
                             <div>
@@ -12855,8 +12960,10 @@
             }
 
             const badgeClassByStatus = { Pending: 'badge-pending', Processing: 'badge-processing', Success: 'badge-success', Fail: 'badge-danger' };
+            const receiptHashCounts = buildReceiptHashCounts();
             container.innerHTML = userOrders.map(o => {
                 const orderId = o.id;
+                const riskInfo = computeOrderRiskInfo(o, receiptHashCounts);
                 const dateStr = o.timestamp ? o.timestamp.toDate().toLocaleString() : 'Just now';
                 const badgeClass = badgeClassByStatus[o.status] || 'badge-pending';
                 const isOpen = expandedUserOrders.has(orderId);
@@ -12865,6 +12972,7 @@
                         <div class="ac-header" style="margin-bottom:6px;padding-bottom:6px;cursor:pointer;" onclick="toggleUserOrderCard('${orderId}')">
                             <span class="ac-id">${o.game} (${o.itemAmount})</span>
                             <div style="display:flex;align-items:center;gap:8px;">
+                                ${riskBadgeHtml(riskInfo)}
                                 <span class="badge ${badgeClass}">${statusBadgeHtml(badgeClass, orderStatusLabel(o.status) + (o.adminCleared ? ' · cleaned' : ''))}</span>
                                 <svg class="ui-icon" id="ud-oc-chevron-${orderId}" style="width:15px;height:15px;color:var(--text-muted);transition:transform 0.2s;transform:rotate(${isOpen ? '180' : '0'}deg);"><use href="#icon-chevron-down"></use></svg>
                             </div>
@@ -12910,6 +13018,7 @@
                             </div>
                             ${o.serverRegion ? `<p><b>Server:</b> <span class="highlight-id">${o.serverRegion}</span></p>` : ''}
                             ${o.receiptUrl ? `<p><b>Receipt:</b> <a href="${escapeHtml(o.receiptUrl)}" target="_blank" style="color:var(--accent);">View Screenshot</a></p><img src="${escapeHtml(o.receiptUrl)}" loading="lazy" decoding="async" style="width:100%;max-height:180px;object-fit:contain;border-radius:8px;background:var(--bg-subtle);margin-top:6px;">` : ''}
+                            ${riskDetailHtml(o, riskInfo)}
                         </div>
                     </div>
                 `;
@@ -17607,6 +17716,7 @@
                 document.getElementById('edit-payment-number').value = p.number;
                 document.getElementById('edit-payment-accountname').value = p.accountName;
                 document.getElementById('edit-payment-availability').value = p.availabilityNote || '';
+                document.getElementById('edit-payment-hot').checked = !!p.hot;
                 if (p.image) {
                     preview.src = p.image; preview.style.display = 'block';
                     updateBox.classList.add('has-image'); changeBadge.style.display = 'flex';
@@ -17628,6 +17738,7 @@
                 document.getElementById('edit-payment-number').value = '';
                 document.getElementById('edit-payment-accountname').value = '';
                 document.getElementById('edit-payment-availability').value = '';
+                document.getElementById('edit-payment-hot').checked = false;
                 preview.src = '';
                 preview.style.display = 'none';
                 updateBox.classList.remove('has-image');
@@ -17651,6 +17762,7 @@
             const number = document.getElementById('edit-payment-number').value.trim();
             const accountName = document.getElementById('edit-payment-accountname').value.trim();
             const availabilityNote = document.getElementById('edit-payment-availability').value.trim();
+            const hot = document.getElementById('edit-payment-hot').checked;
 
             if (!name || !number || !accountName) { window.showToast('Please fill in all fields', 'fail'); return; }
 
@@ -17669,7 +17781,7 @@
                     qrImageUrl = await uploadImageToImgBB(editingPaymentQrImageFile, 'payment-qr-upload-status');
                 }
 
-                const data = { name, number, accountName, availabilityNote, image: imageUrl, qrImage: qrImageUrl };
+                const data = { name, number, accountName, availabilityNote, hot, image: imageUrl, qrImage: qrImageUrl };
                 if (paymentId) {
                     await updateDoc(doc(db, paymentMethodsCollectionName(), paymentId), data);
                     logAdminActivity('Edited payment method', name);
