@@ -948,6 +948,40 @@
         .obb-selectall span { font-size: 12.5px; font-weight: 600; color: var(--text-primary); white-space: nowrap; }
         .obb-actions { display: flex; gap: 6px; flex-shrink: 0; }
         .obb-actions .btn { flex: unset; padding: 8px 12px; font-size: 12.5px; }
+
+        /* Bulk price-image selection (Package rows) — long-press a row's summary
+           to enter selection mode, then tap more rows to add them; a bar
+           appears above the list with a single "Upload Price Image" action
+           that uploads once and stamps the same URL onto every selected row. */
+        .pkg-bulk-bar {
+            display: none; align-items: center; justify-content: space-between; gap: 10px;
+            margin-bottom: 10px; padding: 10px 12px;
+            background: var(--surface-strong); border: 1px solid var(--border-glass); border-radius: 14px;
+            box-shadow: var(--shadow-soft), inset 0 1px 0 var(--border-glass);
+        }
+        .pkg-bulk-bar.active { display: flex; }
+        .pkg-bulk-bar-count { font-size: 12.5px; font-weight: 600; color: var(--text-primary); white-space: nowrap; }
+        .pkg-bulk-bar-actions { display: flex; gap: 6px; flex-shrink: 0; }
+        .pkg-bulk-bar-actions .btn { flex: unset; padding: 8px 12px; font-size: 12.5px; white-space: nowrap; }
+        .package-row.pkg-row-selected { outline: 2px solid var(--accent); outline-offset: -1px; }
+        .package-row.pkg-row-selected .pkg-summary { background: var(--accent-soft); }
+        .pkg-select-check {
+            position: absolute; top: 4px; left: 4px; width: 18px; height: 18px; border-radius: 50%;
+            background: var(--accent); color: #fff; display: none; align-items: center; justify-content: center;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3); z-index: 2; pointer-events: none;
+        }
+        .pkg-select-check svg { width: 11px; height: 11px; }
+        .package-row.pkg-row-selected .pkg-select-check { display: flex; }
+        .pkg-summary-thumb { position: relative; }
+        /* Charging ring while a long-press is building up, so the admin gets
+           visible feedback that holding the row will do something. */
+        .pkg-summary { position: relative; }
+        .pkg-summary::after {
+            content: ''; position: absolute; inset: 0; border-radius: inherit;
+            box-shadow: inset 0 0 0 0 rgba(var(--accent-rgb), 0.85);
+            transition: box-shadow linear; pointer-events: none;
+        }
+        .pkg-summary.pkg-row-charging::after { box-shadow: inset 0 0 0 3px rgba(var(--accent-rgb), 0.85); transition-duration: 550ms; }
         
         /* Badges & Buttons */
         .badge { padding: 5px 11px 5px 8px; border-radius: 999px; font-size: 12px; font-weight: 600; display: inline-flex; align-items: center; gap: 5px; }
@@ -1472,14 +1506,29 @@
         /* Reorder-games grid: small 2-column cards matching the Store's game
            grid look, draggable by pointer (touch + mouse). */
         .game-reorder-grid { display: grid; grid-template-columns: repeat(var(--reorder-cols, 3), 1fr); gap: 10px; transition: grid-template-columns 0.1s ease; }
-        .game-reorder-card { position: relative; background: var(--surface); border: 1px solid var(--fill-soft); border-radius: 14px; overflow: hidden; touch-action: none; user-select: none; -webkit-user-select: none; cursor: grab; transition: box-shadow 0.15s ease; }
+        /* touch-action: pan-y (not "none") so a normal vertical swipe still
+           scrolls the modal - only a genuine long-press (handled in JS,
+           which then calls preventDefault itself once the hold is
+           confirmed) turns the gesture into a drag. */
+        .game-reorder-card { position: relative; background: var(--surface); border: 1px solid var(--fill-soft); border-radius: 14px; overflow: hidden; touch-action: pan-y; user-select: none; -webkit-user-select: none; cursor: grab; transition: box-shadow 0.15s ease, transform 0.15s ease; }
         .game-reorder-card:active { cursor: grabbing; }
-        .game-reorder-card.dragging { box-shadow: var(--shadow-soft); opacity: 0.92; }
+        .game-reorder-card.long-press-armed { transform: scale(0.96); }
+        .game-reorder-card.dragging { box-shadow: var(--shadow-soft); opacity: 0.92; transform: scale(1.04); }
         .game-reorder-card.drag-over { outline: 2px solid var(--accent); outline-offset: -2px; }
         .game-reorder-img-wrap { width: 100%; aspect-ratio: 1 / 1; background: var(--bg-subtle); pointer-events: none; }
         .game-reorder-img-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; }
         .game-reorder-name { padding: 7px 8px; font-size: 12px; font-weight: 500; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; pointer-events: none; }
-        .game-reorder-num { position: absolute; top: 6px; left: 6px; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px; background: rgba(0,0,0,0.6); color: #fff; font-size: 11px; font-weight: 600; display: flex; align-items: center; justify-content: center; pointer-events: none; z-index: 1; }
+        /* Was a plain pointer-events:none badge; now a real input so typing
+           a number jumps the card straight to that position. touch-action:
+           manipulation + stopping the card's own pointerdown (in JS) keeps
+           tapping it from ever starting a drag. */
+        .game-reorder-num-input {
+            position: absolute; top: 6px; left: 6px; width: 26px; height: 22px; padding: 0; border: none; border-radius: 9px;
+            background: rgba(0,0,0,0.65); color: #fff; font-size: 12px; font-weight: 600; text-align: center; z-index: 2;
+            touch-action: manipulation; -moz-appearance: textfield; font-family: inherit;
+        }
+        .game-reorder-num-input:focus { outline: 2px solid var(--accent); background: rgba(0,0,0,0.85); }
+        .game-reorder-num-input::-webkit-outer-spin-button, .game-reorder-num-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
         /* Reorder-grid card size slider — 100% (fewest, biggest cards) down to 10% (most, smallest cards) */
         .reorder-size-row { display: flex; align-items: center; gap: 10px; margin: -4px 0 12px; }
         .reorder-size-row span:first-child { font-size: 10px; color: var(--text-muted); flex-shrink: 0; }
@@ -3445,6 +3494,16 @@
 
                 <label>Top-up Packages</label>
                 <div class="pkg-tab-bar" id="pkg-tab-bar"></div>
+                <!-- Bulk price-image bar — appears once one or more package rows are
+                     selected (long-press a row's summary to start, tap more to add) -->
+                <div class="pkg-bulk-bar" id="pkg-bulk-bar">
+                    <span class="pkg-bulk-bar-count" id="pkg-bulk-bar-count">0 selected</span>
+                    <div class="pkg-bulk-bar-actions">
+                        <button type="button" class="btn btn-primary" onclick="document.getElementById('pkg-bulk-image-file').click()">Upload Price Image</button>
+                        <button type="button" class="btn btn-outline" onclick="clearPkgSelection()">Cancel</button>
+                    </div>
+                </div>
+                <input type="file" accept="image/*" id="pkg-bulk-image-file" style="display:none;" onchange="handleBulkPkgImageSelect(this)">
                 <div id="edit-packages-list"></div>
                 <p class="pkg-tab-empty-msg" id="pkg-tab-empty-msg" style="display:none;">No packages in this tab yet — tap "+ Add Package" to add one.</p>
                 <div class="pkg-actions-row">
@@ -4101,6 +4160,7 @@
             if (prevPageId === 'payment-list' && nextPageId !== 'payment-list') {
                 if (paymentUnsub) { paymentUnsub(); paymentUnsub = null; }
                 paymentListenerAttached = false;
+                clearTimeout(paymentLoadWatchdog);
             }
             if (prevPageId === 'settings' && nextPageId !== 'settings') {
                 if (socialUnsub) { socialUnsub(); socialUnsub = null; }
@@ -9879,12 +9939,13 @@
                     </button>
                 </div>
                 <div class="pkg-row-fields">
-                    <div class="pkg-summary" onclick="expandPackageRow(this)">
+                    <div class="pkg-summary">
                         <div class="pkg-summary-head">
                             <div class="pkg-summary-label">
                                 <div class="pkg-summary-thumb">
                                     <img class="pkg-summary-thumb-img" src="${image}" loading="lazy" decoding="async" style="${image ? '' : 'display:none;'}">
                                     <span class="pkg-summary-thumb-placeholder" style="${image ? 'display:none;' : ''}">+</span>
+                                    <div class="pkg-select-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></div>
                                 </div>
                                 <span class="pkg-summary-name">${amount || 'Unnamed package'}</span>
                                 <span class="pkg-summary-badge-tag" style="${badge === 'top' || badge === 'hot' ? '' : 'display:none;'}padding:1px 6px;border-radius:8px;font-size:9px;font-weight:700;color:#fff;background:${badge === 'top' ? 'linear-gradient(135deg,#FFC93C,#FF9800)' : 'linear-gradient(135deg,#FF8A65,#FF3D57)'};">⭐${badge === 'top' ? 'TOP' : 'HOT'}</span>
@@ -9984,6 +10045,7 @@
             `;
             list.appendChild(row);
             makePackageRowDraggable(row);
+            attachPkgLongPress(row);
             renderPkgTabBar();
             applyPackageTabFilter();
             updatePackageProfit(row.querySelector('.pkg-price'));
@@ -10384,6 +10446,147 @@
                 window.addEventListener('pointercancel', onUp);
             });
         }
+
+        // ---------- Bulk price-image selection ----------
+        // Long-press a package row's summary to enter selection mode (and
+        // select that row); while active, a plain tap on any other row's
+        // summary adds/removes it instead of opening its edit card. The
+        // "Upload Price Image" bar that appears then uploads one picture
+        // and stamps that same hosted URL onto every selected row's image
+        // field — a normal tap never selects on its own, only the initial
+        // long-press does, exactly like Favorites long-press-to-pin on the
+        // storefront.
+        let pkgSelectMode = false;
+        const selectedPkgRows = new Set();
+
+        function attachPkgLongPress(row) {
+            const summary = row.querySelector('.pkg-summary');
+            if (!summary) return;
+            const LONG_PRESS_MS = 550;
+            let pressTimer = null;
+            let startX = 0, startY = 0;
+            let justLongPressed = false;
+
+            function stopTimer() {
+                if (pressTimer) { clearTimeout(pressTimer); pressTimer = null; }
+                summary.classList.remove('pkg-row-charging');
+            }
+
+            summary.addEventListener('pointerdown', (e) => {
+                if (e.target.closest('.pkg-summary-remove')) return; // don't hijack the delete (×) icon
+                if (e.button !== undefined && e.button !== 0) return;
+                startX = e.clientX; startY = e.clientY;
+                summary.classList.add('pkg-row-charging');
+                pressTimer = setTimeout(() => {
+                    pressTimer = null;
+                    justLongPressed = true;
+                    pkgSelectMode = true;
+                    togglePkgRowSelection(row);
+                    summary.classList.remove('pkg-row-charging');
+                    if (navigator.vibrate) navigator.vibrate(15);
+                }, LONG_PRESS_MS);
+            });
+            summary.addEventListener('pointermove', (e) => {
+                if (!pressTimer) return;
+                if (Math.abs(e.clientX - startX) > 8 || Math.abs(e.clientY - startY) > 8) stopTimer();
+            });
+            ['pointerup', 'pointercancel', 'pointerleave'].forEach(evt => summary.addEventListener(evt, stopTimer));
+
+            summary.addEventListener('click', (e) => {
+                if (e.target.closest('.pkg-summary-remove')) return; // its own onclick already handled this
+                if (justLongPressed) { justLongPressed = false; return; } // tail-end click of the long press — swallow it
+                if (pkgSelectMode) {
+                    togglePkgRowSelection(row);
+                } else {
+                    expandPackageRow(summary);
+                }
+            });
+        }
+
+        function togglePkgRowSelection(row) {
+            if (selectedPkgRows.has(row)) {
+                selectedPkgRows.delete(row);
+                row.classList.remove('pkg-row-selected');
+            } else {
+                selectedPkgRows.add(row);
+                row.classList.add('pkg-row-selected');
+            }
+            if (selectedPkgRows.size === 0) pkgSelectMode = false;
+            updatePkgBulkBar();
+        }
+        window.togglePkgRowSelection = togglePkgRowSelection;
+
+        function updatePkgBulkBar() {
+            const bar = document.getElementById('pkg-bulk-bar');
+            const count = document.getElementById('pkg-bulk-bar-count');
+            if (!bar || !count) return;
+            const n = selectedPkgRows.size;
+            bar.classList.toggle('active', n > 0);
+            count.textContent = `${n} selected`;
+        }
+
+        function clearPkgSelection() {
+            selectedPkgRows.forEach(row => row.classList.remove('pkg-row-selected'));
+            selectedPkgRows.clear();
+            pkgSelectMode = false;
+            updatePkgBulkBar();
+        }
+        window.clearPkgSelection = clearPkgSelection;
+
+        // Uploads the picked image ONCE, then writes that same hosted URL
+        // into every selected row's image field (data-url + preview + the
+        // collapsed summary thumbnail), rather than re-uploading per row.
+        async function handleBulkPkgImageSelect(inputEl) {
+            const file = inputEl.files[0];
+            if (!file) return;
+            const rows = Array.from(selectedPkgRows);
+            if (rows.length === 0) { inputEl.value = ''; return; }
+
+            const bar = document.getElementById('pkg-bulk-bar');
+            const count = document.getElementById('pkg-bulk-bar-count');
+            const prevText = count ? count.textContent : '';
+            if (count) count.textContent = 'Uploading…';
+            if (bar) bar.style.pointerEvents = 'none';
+
+            // Instant local preview on every selected row while the real upload runs.
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                rows.forEach(row => {
+                    const wrap = row.querySelector('.pkg-img-preview');
+                    const imgTag = wrap && wrap.querySelector('.pkg-img-tag');
+                    const placeholder = wrap && wrap.querySelector('.pkg-img-placeholder');
+                    if (imgTag) { imgTag.src = ev.target.result; imgTag.style.display = 'block'; }
+                    if (placeholder) placeholder.style.display = 'none';
+                });
+            };
+            reader.readAsDataURL(file);
+
+            try {
+                const url = await uploadPackageImageToImgBB(file);
+                rows.forEach(row => {
+                    const wrap = row.querySelector('.pkg-img-preview');
+                    if (!wrap) return;
+                    wrap.dataset.url = url;
+                    const imgTag = wrap.querySelector('.pkg-img-tag');
+                    const placeholder = wrap.querySelector('.pkg-img-placeholder');
+                    const removeLink = row.querySelector('.pkg-img-remove');
+                    if (imgTag) { imgTag.src = url; imgTag.style.display = 'block'; }
+                    if (placeholder) placeholder.style.display = 'none';
+                    if (removeLink) removeLink.style.display = 'block';
+                    syncPkgSummary(row);
+                });
+                if (window.showToast) window.showToast(`${rows.length} package(s) updated with the same image ✓`, 'success');
+                clearPkgSelection();
+            } catch (error) {
+                console.error('Bulk package image upload failed:', error);
+                if (window.showToast) window.showToast(error.message || 'Image upload failed', 'fail');
+                if (count) count.textContent = prevText;
+            } finally {
+                if (bar) bar.style.pointerEvents = '';
+                inputEl.value = '';
+            }
+        }
+        window.handleBulkPkgImageSelect = handleBulkPkgImageSelect;
 
         // Shared leading-number detector: "100 Diamonds" → 100, "50 UC" → 50,
         // "Weekly Pass" → null. Used both to auto-sort package rows and to
@@ -11082,7 +11285,9 @@
                     logAdminActivity('Edited game', name);
                     invalidateGameCostScan(gameId);
                 } else {
-                    await addDoc(collection(db, "games"), data);
+                    // createdAt lets store.html put newly added games first
+                    // in the grid instead of sorting them in alphabetically.
+                    await addDoc(collection(db, "games"), { ...data, createdAt: serverTimestamp() });
                     logAdminActivity('Added game', name);
                 }
 
@@ -11174,7 +11379,13 @@
                 const label = g.serverName ? `${g.name} · ${g.serverName}` : g.name;
                 return `
                     <div class="game-reorder-card" data-id="${id}">
-                        <span class="game-reorder-num">${i + 1}</span>
+                        <input class="game-reorder-num-input" type="text" inputmode="numeric" pattern="[0-9]*"
+                               value="${i + 1}"
+                               onfocus="this.select()"
+                               onpointerdown="event.stopPropagation()"
+                               onclick="event.stopPropagation()"
+                               onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur();}"
+                               onchange="moveReorderCardToPosition('${id}', this.value)">
                         <div class="game-reorder-img-wrap">
                             <img src="${g.image}" loading="lazy" decoding="async">
                         </div>
@@ -11185,77 +11396,176 @@
             Array.from(grid.querySelectorAll('.game-reorder-card')).forEach(makeGameCardDraggable);
         }
 
+        // Typing a number into a card's position badge and confirming
+        // (Enter / tapping away) moves that game straight to that spot in
+        // the list - an alternative to dragging for a precise, one-tap
+        // reorder. Values are clamped into range and the grid re-renders
+        // with the new order.
+        function moveReorderCardToPosition(id, rawValue) {
+            const total = reorderGameIds.length;
+            let target = parseInt(rawValue, 10);
+            if (!Number.isFinite(target)) target = reorderGameIds.indexOf(id) + 1;
+            target = Math.min(Math.max(target, 1), total);
+            const fromIdx = reorderGameIds.indexOf(id);
+            if (fromIdx === -1) return;
+            reorderGameIds.splice(fromIdx, 1);
+            reorderGameIds.splice(target - 1, 0, id);
+            renderGameReorderGrid();
+        }
+        window.moveReorderCardToPosition = moveReorderCardToPosition;
+
         // Pointer-based drag (touch + mouse), same technique as the package
         // row drag handle - except the whole card is the handle, and since
         // cards sit in a 2-column grid (not a single vertical list) the drop
         // target is found with elementFromPoint instead of simple before/after.
+        // Long-press-to-drag: a plain touch/swipe on a card starts out as a
+        // normal scroll (touch-action: pan-y above lets the browser handle
+        // it). Only if the finger stays down and roughly still for
+        // LONG_PRESS_MS do we treat it as "pick this card up" - at which
+        // point we take over completely (pointer capture + preventDefault)
+        // so page scroll can't fight with the drag anymore.
+        const REORDER_LONG_PRESS_MS = 220;
+        const REORDER_MOVE_TOLERANCE = 10; // px of wiggle allowed before the hold is cancelled
+
         function makeGameCardDraggable(card) {
             card.addEventListener('pointerdown', (downEvent) => {
-                downEvent.preventDefault();
+                if (downEvent.target.closest('.game-reorder-num-input')) return; // typing a number, not dragging
                 const grid = document.getElementById('game-reorder-grid');
-                const startRect = card.getBoundingClientRect();
+                const pointerId = downEvent.pointerId;
                 const startX = downEvent.clientX, startY = downEvent.clientY;
+                let dragging = false; // true once we've actually taken over the gesture
 
-                card.classList.add('dragging');
-                card.style.position = 'fixed';
-                card.style.top = startRect.top + 'px';
-                card.style.left = startRect.left + 'px';
-                card.style.width = startRect.width + 'px';
-                card.style.zIndex = '999';
-                card.style.pointerEvents = 'none';
-                card.style.willChange = 'transform';
+                // While waiting to see if this is a hold or a scroll/tap, we
+                // don't preventDefault anything - a real scroll gesture is
+                // free to take over the touch, exactly like before the card
+                // was ever touched.
+                function cancelHold() {
+                    clearTimeout(holdTimer);
+                    card.classList.remove('long-press-armed');
+                    window.removeEventListener('pointermove', preDragMove);
+                    window.removeEventListener('pointerup', preDragUp);
+                    window.removeEventListener('pointercancel', preDragUp);
+                }
+                function preDragMove(moveEvent) {
+                    if (moveEvent.pointerId !== pointerId || dragging) return;
+                    const dx = moveEvent.clientX - startX, dy = moveEvent.clientY - startY;
+                    if (Math.hypot(dx, dy) > REORDER_MOVE_TOLERANCE) cancelHold();
+                }
+                function preDragUp(upEvent) {
+                    if (upEvent.pointerId !== pointerId || dragging) return;
+                    cancelHold();
+                }
+                const holdTimer = setTimeout(() => {
+                    dragging = true;
+                    card.classList.add('long-press-armed');
+                    window.removeEventListener('pointermove', preDragMove);
+                    window.removeEventListener('pointerup', preDragUp);
+                    window.removeEventListener('pointercancel', preDragUp);
+                    startDrag(startX, startY);
+                }, REORDER_LONG_PRESS_MS);
+                window.addEventListener('pointermove', preDragMove);
+                window.addEventListener('pointerup', preDragUp);
+                window.addEventListener('pointercancel', preDragUp);
 
-                let currentOverCard = null;
-                let latestX = startX, latestY = startY;
-                let rafId = null;
+                function startDrag(atX, atY) {
+                    try { card.setPointerCapture(pointerId); } catch (e) {}
+                    const startRect = card.getBoundingClientRect();
+                    // Offset between where the finger actually touched and
+                    // the card's own top-left corner, so the card keeps
+                    // exactly the same spot under the finger for the whole
+                    // drag instead of snapping to some other alignment.
+                    const offsetX = atX - startRect.left, offsetY = atY - startRect.top;
 
-                function processFrame() {
-                    rafId = null;
-                    card.style.transform = `translate3d(${latestX - startX}px, ${latestY - startY}px, 0)`;
-                    const under = document.elementFromPoint(latestX, latestY);
-                    const target = under ? under.closest('.game-reorder-card') : null;
-                    if (currentOverCard && currentOverCard !== target) {
-                        currentOverCard.classList.remove('drag-over');
-                        currentOverCard = null;
-                    }
-                    if (target && target !== card) {
-                        target.classList.add('drag-over');
-                        currentOverCard = target;
+                    card.classList.remove('long-press-armed');
+                    card.classList.add('dragging');
+                    card.style.position = 'fixed';
+                    card.style.top = startRect.top + 'px';
+                    card.style.left = startRect.left + 'px';
+                    card.style.width = startRect.width + 'px';
+                    card.style.height = startRect.height + 'px';
+                    card.style.zIndex = '999';
+                    card.style.pointerEvents = 'none';
+                    card.style.willChange = 'top, left';
+
+                    let currentOverCard = null;
+                    let latestX = atX, latestY = atY;
+                    let rafId = null;
+
+                    // Picks the nearest OTHER card by center-to-pointer
+                    // distance rather than document.elementFromPoint, which
+                    // used to return whatever was under the finger in the
+                    // gap *between* cards (often the wrong neighbor) instead
+                    // of the card the admin actually meant to drop onto.
+                    function findNearestCard(x, y) {
                         const cards = Array.from(grid.querySelectorAll('.game-reorder-card'));
-                        const fromIdx = cards.indexOf(card);
-                        const toIdx = cards.indexOf(target);
-                        if (fromIdx !== toIdx) {
-                            if (fromIdx < toIdx) grid.insertBefore(card, target.nextSibling);
-                            else grid.insertBefore(card, target);
+                        let nearest = null, nearestDist = Infinity;
+                        cards.forEach(c => {
+                            if (c === card) return;
+                            const r = c.getBoundingClientRect();
+                            const cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+                            const dist = (x - cx) ** 2 + (y - cy) ** 2;
+                            if (dist < nearestDist) { nearestDist = dist; nearest = c; }
+                        });
+                        return nearest;
+                    }
+
+                    function processFrame() {
+                        rafId = null;
+                        card.style.top = (latestY - offsetY) + 'px';
+                        card.style.left = (latestX - offsetX) + 'px';
+                        // Use the pointer's own position (not the hidden
+                        // card's) so the target is whichever card is
+                        // actually nearest the finger right now.
+                        const target = findNearestCard(latestX, latestY);
+                        if (currentOverCard && currentOverCard !== target) {
+                            currentOverCard.classList.remove('drag-over');
+                            currentOverCard = null;
+                        }
+                        if (target && target !== card) {
+                            target.classList.add('drag-over');
+                            currentOverCard = target;
+                            const cards = Array.from(grid.querySelectorAll('.game-reorder-card'));
+                            const fromIdx = cards.indexOf(card);
+                            const toIdx = cards.indexOf(target);
+                            if (fromIdx !== toIdx) {
+                                if (fromIdx < toIdx) grid.insertBefore(card, target.nextSibling);
+                                else grid.insertBefore(card, target);
+                            }
                         }
                     }
-                }
 
-                function onMove(moveEvent) {
-                    latestX = moveEvent.clientX;
-                    latestY = moveEvent.clientY;
-                    if (rafId === null) rafId = requestAnimationFrame(processFrame);
-                }
+                    function onMove(moveEvent) {
+                        if (moveEvent.pointerId !== pointerId) return;
+                        moveEvent.preventDefault();
+                        latestX = moveEvent.clientX;
+                        latestY = moveEvent.clientY;
+                        if (rafId === null) rafId = requestAnimationFrame(processFrame);
+                    }
 
-                function onUp() {
-                    if (rafId !== null) { cancelAnimationFrame(rafId); rafId = null; }
-                    if (currentOverCard) currentOverCard.classList.remove('drag-over');
-                    card.classList.remove('dragging');
-                    card.style.position = '';
-                    card.style.top = '';
-                    card.style.left = '';
-                    card.style.width = '';
-                    card.style.zIndex = '';
-                    card.style.pointerEvents = '';
-                    card.style.transform = '';
-                    card.style.willChange = '';
-                    renumberGameReorderCards();
-                    window.removeEventListener('pointermove', onMove);
-                    window.removeEventListener('pointerup', onUp);
-                }
+                    function onUp(upEvent) {
+                        if (upEvent.pointerId !== pointerId) return;
+                        if (rafId !== null) { cancelAnimationFrame(rafId); rafId = null; }
+                        if (currentOverCard) currentOverCard.classList.remove('drag-over');
+                        try { card.releasePointerCapture(pointerId); } catch (e) {}
+                        card.classList.remove('dragging');
+                        card.style.position = '';
+                        card.style.top = '';
+                        card.style.left = '';
+                        card.style.width = '';
+                        card.style.height = '';
+                        card.style.zIndex = '';
+                        card.style.pointerEvents = '';
+                        card.style.willChange = '';
+                        renumberGameReorderCards();
+                        window.removeEventListener('pointermove', onMove);
+                        window.removeEventListener('pointerup', onUp);
+                        window.removeEventListener('pointercancel', onUp);
+                    }
 
-                window.addEventListener('pointermove', onMove);
-                window.addEventListener('pointerup', onUp);
+                    window.addEventListener('pointermove', onMove);
+                    window.addEventListener('pointerup', onUp);
+                    window.addEventListener('pointercancel', onUp);
+                }
             });
         }
 
@@ -11264,8 +11574,8 @@
             const cards = Array.from(grid.querySelectorAll('.game-reorder-card'));
             reorderGameIds = cards.map(c => c.dataset.id);
             cards.forEach((c, i) => {
-                const num = c.querySelector('.game-reorder-num');
-                if (num) num.innerText = i + 1;
+                const input = c.querySelector('.game-reorder-num-input');
+                if (input) input.value = i + 1;
             });
         }
 
@@ -11524,6 +11834,38 @@
         }
         let PAYMENT_METHODS = {};
         let paymentListenerAttached = false;
+        let paymentUnsub = null;
+        let paymentLoadWatchdog = null;
+
+        function paymentLoadingHTML() {
+            return '<p class="empty-msg">Loading payment methods...</p>';
+        }
+
+        // Anything that stops the listener from ever calling back (bad
+        // network, blocked request, a permission-denied rule, or a bug) used
+        // to leave "Loading payment methods..." on screen forever with no
+        // way out except a full page reload. This always lands on either
+        // the real list or a visible, actionable error with a Try Again
+        // button - never a silent hang.
+        function showPaymentLoadError(message) {
+            const container = document.getElementById('admin-payment-container');
+            if (!container) return;
+            container.innerHTML = `
+                <p class="empty-msg" style="color:#E11D2E;">${escapeHtml(message || 'Could not load payment methods.')}</p>
+                <button type="button" class="btn btn-outline" style="margin-top:8px;" onclick="retryLoadPaymentMethods()">Try Again</button>
+            `;
+        }
+        window.showPaymentLoadError = showPaymentLoadError;
+
+        function retryLoadPaymentMethods() {
+            if (paymentUnsub) { try { paymentUnsub(); } catch (e) {} paymentUnsub = null; }
+            clearTimeout(paymentLoadWatchdog);
+            paymentListenerAttached = false;
+            const container = document.getElementById('admin-payment-container');
+            if (container) container.innerHTML = paymentLoadingHTML();
+            listenPaymentMethods();
+        }
+        window.retryLoadPaymentMethods = retryLoadPaymentMethods;
 
         function renderAdminPaymentList() {
             const container = document.getElementById('admin-payment-container');
@@ -11596,19 +11938,41 @@
         }
         window.movePaymentMethod = movePaymentMethod;
 
-        let paymentUnsub = null;
         function listenPaymentMethods() {
             if (paymentListenerAttached) return;
             paymentListenerAttached = true;
-            paymentUnsub = onSnapshot(collection(db, paymentMethodsCollectionName()), (snap) => {
-                const newMethods = {};
-                snap.forEach(docSnap => { newMethods[docSnap.id] = docSnap.data(); });
-                PAYMENT_METHODS = newMethods;
-                renderAdminPaymentList();
-            }, (error) => {
-                console.error("Payment methods listener error:", error);
-                document.getElementById('admin-payment-container').innerHTML = '<p class="empty-msg" style="color:red;">Could not load payment methods.</p>';
-            });
+
+            // If Firestore never calls back at all - bad network, a blocked
+            // request, or a rule/config problem that hangs instead of
+            // erroring - this is what used to leave "Loading..." up forever
+            // with no way out. Now it surfaces a real message instead.
+            clearTimeout(paymentLoadWatchdog);
+            paymentLoadWatchdog = setTimeout(() => {
+                console.warn('Payment methods: no response from Firestore after 8s.');
+                paymentListenerAttached = false;
+                if (paymentUnsub) { try { paymentUnsub(); } catch (e) {} paymentUnsub = null; }
+                showPaymentLoadError('Still waiting on the server. Check your connection and try again.');
+            }, 8000);
+
+            try {
+                paymentUnsub = onSnapshot(collection(db, paymentMethodsCollectionName()), (snap) => {
+                    clearTimeout(paymentLoadWatchdog);
+                    const newMethods = {};
+                    snap.forEach(docSnap => { newMethods[docSnap.id] = docSnap.data(); });
+                    PAYMENT_METHODS = newMethods;
+                    renderAdminPaymentList();
+                }, (error) => {
+                    clearTimeout(paymentLoadWatchdog);
+                    console.error("Payment methods listener error:", error);
+                    paymentListenerAttached = false; // so Try Again actually retries instead of no-op'ing
+                    showPaymentLoadError('Could not load payment methods (' + (error.code || error.message || 'unknown error') + ').');
+                });
+            } catch (error) {
+                clearTimeout(paymentLoadWatchdog);
+                console.error("Payment methods listener setup error:", error);
+                paymentListenerAttached = false;
+                showPaymentLoadError('Could not load payment methods (' + (error.message || 'setup failed') + ').');
+            }
         }
 
 
@@ -14552,15 +14916,11 @@
 
         function renderGameCategorySelect() {
             const current = document.getElementById('edit-game-category').value;
-            const noneChip = `<div class="cat-chip${current === '' ? ' active' : ''}" data-cat="" style="--cat-color:var(--text-secondary);">
-                <svg class="ui-icon"><use href="#icon-grid"></use></svg>None
-            </div>`;
-            const addChip = `<div class="cat-chip" data-add-cat="1" style="--cat-color:var(--text-muted);border-style:dashed;">
-                <svg class="ui-icon"><use href="#icon-tag"></use></svg>+ Add Role
-            </div>`;
+            const noneChip = `<div class="cat-chip${current === '' ? ' active' : ''}" data-cat="" style="--cat-color:var(--text-secondary);">None</div>`;
+            const addChip = `<div class="cat-chip" data-add-cat="1" style="--cat-color:var(--text-muted);border-style:dashed;">+ Add Role</div>`;
             document.getElementById('game-category-select').innerHTML = noneChip + allGameCategories().map(c => `
                 <div class="cat-chip${current === c.id ? ' active' : ''}" data-cat="${c.id}" style="--cat-color:${c.color};">
-                    <svg class="ui-icon"><use href="#${c.icon}"></use></svg>${escapeHtml(c.label)}
+                    ${escapeHtml(c.label)}
                     ${CUSTOM_GAME_CATEGORIES.some(x => x.id === c.id) ? `<span class="cat-chip-del" data-del-cat="${c.id}" title="Remove this Game Role">&times;</span>` : ''}
                 </div>`).join('') + addChip;
         }
@@ -14638,7 +14998,7 @@
         function categoryBadgeHtml(categoryId) {
             const c = findCategory(categoryId);
             if (!c) return '';
-            return `<span class="cat-badge" style="background:${c.color};"><svg><use href="#${c.icon}"></use></svg>${escapeHtml(c.label)}</span>`;
+            return `<span class="cat-badge" style="background:${c.color};">${escapeHtml(c.label)}</span>`;
         }
 
         // Escapes a string for safe insertion into HTML (used for provider game
@@ -15711,7 +16071,7 @@
                         };
                     }
 
-                    await addDoc(collection(db, "games"), gameData);
+                    await addDoc(collection(db, "games"), { ...gameData, createdAt: serverTimestamp() });
                     logAdminActivity('Added game', gameData.name + (gameData.serverName ? ` (${gameData.serverName})` : ''));
                     added++;
                 } catch (error) {
