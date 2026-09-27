@@ -2720,6 +2720,25 @@
                 </div>
             </div>
 
+            <!-- Authenticator (2FA) for THIS signed-in admin's own login. Also
+                 mirrored inside the My Account modal's row further up -
+                 renderTwoFactorSettingsCard() keeps both in sync. -->
+            <div class="admin-card" id="settings-card-2fa" style="margin-top:14px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;cursor:pointer;" onclick="toggleTwoFactorSettings()">
+                    <div style="display:flex;align-items:center;gap:8px;">
+                        <svg class="ui-icon" style="width:18px;height:18px;color:var(--text-secondary);"><use href="#icon-shield"></use></svg>
+                        <span style="font-size:15px;font-weight: 600;">Authenticator (2FA)</span>
+                        <span id="tfa-status-badge" style="font-size:11.5px;font-weight:700;padding:2px 9px;border-radius:20px;background:var(--fill-soft);color:var(--text-secondary);">Off</span>
+                    </div>
+                    <svg class="ui-icon" id="tfa-settings-chevron" style="width:18px;height:18px;color:var(--text-secondary);transition:transform 0.2s;"><use href="#icon-chevron-down"></use></svg>
+                </div>
+                <div id="tfa-settings-body" style="display:none;margin-top:12px;">
+                    <p style="font-size:12px;color:var(--text-secondary);line-height:1.5;margin-bottom:12px;">Adds a 6-digit code from an authenticator app (Google Authenticator, Authy, etc.) to your own login. Once enabled, this device won't ask again for 5 hours after your last successful check.</p>
+                    <button class="btn btn-primary" id="tfa-settings-enable-btn" style="width:100%;justify-content:center;" onclick="openTwoFactorSetupModal()">Set Up Authenticator</button>
+                    <button class="btn btn-danger" id="tfa-settings-disable-btn" style="width:100%;justify-content:center;display:none;" onclick="openTwoFactorDisableModal()">Disable Authenticator</button>
+                </div>
+            </div>
+
             <div class="admin-card" style="margin-top:14px;" id="admin-accounts-card">
                 <div style="display:flex;justify-content:space-between;align-items:center;cursor:pointer;" onclick="toggleAdminAccounts()">
                     <div style="display:flex;align-items:center;gap:8px;">
@@ -5459,6 +5478,7 @@
                 window.showToast('Authenticator enabled ✓', 'success');
                 closeTwoFactorSetupModal();
                 renderMyAccountModal();
+                renderTwoFactorSettingsCard();
             } catch (e) {
                 console.error('Enable 2FA error:', e);
                 errEl.textContent = 'Failed to save — try again.';
@@ -5517,6 +5537,7 @@
                 window.showToast('Authenticator disabled', 'success');
                 closeTwoFactorDisableModal();
                 renderMyAccountModal();
+                renderTwoFactorSettingsCard();
             } catch (e) {
                 console.error('Disable 2FA error:', e);
                 errEl.textContent = 'Failed to disable — try again.';
@@ -5611,6 +5632,7 @@
             onSnapshot(q, (snap) => {
                 ADMIN_ACCOUNTS = snap.docs.map(d => ({ username: d.id, ...d.data() }));
                 renderAdminAccountsList();
+                renderTwoFactorSettingsCard();
                 // if it happens to be open (e.g. right after a link/reset
                 // completes) — same live-update pattern as the Admin
                 // Accounts card above, just for whichever admin is signed in.
@@ -5735,6 +5757,34 @@
             chevron.style.transform = isOpen ? 'rotate(0deg)' : 'rotate(180deg)';
         }
         window.toggleAdminAccounts = toggleAdminAccounts;
+
+        function toggleTwoFactorSettings() {
+            const body = document.getElementById('tfa-settings-body');
+            const chevron = document.getElementById('tfa-settings-chevron');
+            const isOpen = body.style.display !== 'none';
+            body.style.display = isOpen ? 'none' : 'block';
+            chevron.style.transform = isOpen ? 'rotate(0deg)' : 'rotate(180deg)';
+        }
+        window.toggleTwoFactorSettings = toggleTwoFactorSettings;
+
+        // Keeps the Settings-page 2FA card in sync with this admin's own
+        // adminUsernames doc. Called whenever ADMIN_ACCOUNTS refreshes (live
+        // listener) and right after enabling/disabling.
+        function renderTwoFactorSettingsCard() {
+            const me = ADMIN_ACCOUNTS.find(a => a.username === currentAdminUsername) || {};
+            const enabled = !!me.totpEnabled;
+            const badge = document.getElementById('tfa-status-badge');
+            const enableBtn = document.getElementById('tfa-settings-enable-btn');
+            const disableBtn = document.getElementById('tfa-settings-disable-btn');
+            if (badge) {
+                badge.textContent = enabled ? 'On' : 'Off';
+                badge.style.background = enabled ? 'var(--accent-soft)' : 'var(--fill-soft)';
+                badge.style.color = enabled ? 'var(--accent)' : 'var(--text-secondary)';
+            }
+            if (enableBtn) enableBtn.style.display = enabled ? 'none' : '';
+            if (disableBtn) disableBtn.style.display = enabled ? '' : 'none';
+        }
+        window.renderTwoFactorSettingsCard = renderTwoFactorSettingsCard;
 
 
         // Removes only the adminUsernames/{username} mapping doc, so that
