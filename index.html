@@ -583,9 +583,21 @@
            makes the browser recomposite it properly every frame. */
         .header { background-color: var(--surface); padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; box-shadow: 0 1px 0 var(--border-glass), 0 8px 24px -12px rgba(0,0,0,0.25); border-bottom: 1px solid var(--fill-soft); transform: translateZ(0); will-change: transform; }
         .logo { color: var(--text-primary); font-size: 20px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
-        .logo-icon { background: var(--accent); color: white; padding: 4px; border-radius: 6px; display: flex; width: 32px; height: 32px; }
+        .logo-icon { position: relative; background: var(--accent); color: white; padding: 4px; border-radius: 6px; display: flex; width: 32px; height: 32px; overflow: hidden; }
         .logo-icon.has-custom-logo { padding: 0; background: transparent; overflow: hidden; }
         .logo-icon img { transform-origin: center; transition: transform 0.15s ease; }
+        /* Shown only until the branding doc's first Firestore snapshot
+           arrives - replaces the flash of the blue default-icon "sample"
+           box with a neutral shimmering placeholder while it's unknown
+           whether a custom logo is even set. */
+        .logo-icon.is-loading { background: var(--fill-soft); }
+        .logo-icon.is-loading svg { visibility: hidden; }
+        .logo-icon.is-loading::after {
+            content: ''; position: absolute; inset: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.45), transparent);
+            background-size: 200% 100%; animation: logo-skeleton-sweep 1.3s ease-in-out infinite;
+        }
+        @keyframes logo-skeleton-sweep { 0% { background-position: 150% 0; } 100% { background-position: -50% 0; } }
         .header-icon { background: var(--fill-soft); width: 36px; height: 36px; border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; }
 
         /* Blue flame indicator (next to logout) */
@@ -1983,7 +1995,7 @@
 
     <header class="header">
         <div class="logo" id="store-switcher-btn">
-            <div class="logo-icon" id="header-logo-icon">
+            <div class="logo-icon is-loading" id="header-logo-icon">
                 <svg class="ui-icon" id="header-logo-default-icon" style="width:18px;height:18px;"><use href="#icon-shield"></use></svg>
                 <img id="header-logo-img" src="" alt="LINN GAME STORE" loading="lazy" decoding="async" style="display:none;width:100%;height:100%;object-fit:cover;border-radius:6px;">
             </div>
@@ -13727,6 +13739,7 @@
             const img = document.getElementById('header-logo-img');
             const defaultIcon = document.getElementById('header-logo-default-icon');
             const box = document.getElementById('header-logo-icon');
+            box.classList.remove('is-loading');
             const url = activeLogoUrl(data);
             if (url) {
                 img.src = url;
