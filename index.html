@@ -1284,6 +1284,8 @@
         .category-chip-select .cat-chip:active { transform: scale(0.95); }
         .category-chip-select .cat-chip.active { color: #fff; border-color: transparent; background: var(--cat-color, var(--accent)); box-shadow: 0 4px 12px -2px var(--cat-color, var(--accent)); }
         .category-chip-select .cat-chip.active svg { opacity: 1; }
+        .category-chip-select .cat-chip-del { margin-left: 2px; opacity: 0.7; font-size: 13px; line-height: 1; }
+        .category-chip-select .cat-chip-del:hover { opacity: 1; }
         /* Small category badge shown on admin game cards / store game cards */
         .cat-badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 9px; border-radius: 10px; font-size: 10.5px; font-weight: 600; color: #fff; }
         .cat-badge svg { width: 11px; height: 11px; }
@@ -3535,15 +3537,42 @@
                 </div>
                 <span id="game-picker-count" style="font-size:12.5px;font-weight:600;color:var(--text-muted);background:var(--fill-soft);padding:9px 10px;border-radius:100px;white-space:nowrap;flex-shrink:0;"></span>
                 <button type="button" class="btn btn-outline" id="game-picker-update-btn" onclick="refreshGamePickerList()" style="flex:unset;padding:10px 14px;font-size:13px;white-space:nowrap;">Update</button>
-                <button type="button" class="btn btn-outline" id="game-picker-bulk-toggle-btn" onclick="toggleFazerCardBulkMode()" style="display:none;flex:unset;padding:10px 14px;font-size:13px;white-space:nowrap;">Select Multiple</button>
+                <button type="button" class="btn btn-outline" id="game-picker-bulk-toggle-btn" onclick="togglePickerBulkMode()" style="display:none;flex:unset;padding:10px 14px;font-size:13px;white-space:nowrap;">Select Multiple</button>
             </div>
             <div class="game-picker-grid" id="game-picker-grid"></div>
+            <!-- ids kept as "fazercard-*" for historical reasons (this bar
+                 was first built for FazerCards) but it's shared by the bulk
+                 import flow for every provider/kind the picker supports -
+                 see importSelectedPickerGames/runPickerBulkImport. -->
             <div id="fazercard-bulk-bar" style="display:none;flex-shrink:0;margin-top:10px;padding-top:10px;border-top:1px solid var(--fill-soft);align-items:center;justify-content:space-between;gap:10px;">
                 <span id="fazercard-bulk-count" style="font-size:12.5px;color:var(--text-muted);">0 selected</span>
                 <div style="display:flex;gap:8px;">
-                    <button type="button" class="btn btn-outline" onclick="toggleFazerCardBulkMode()" style="padding:9px 12px;font-size:13px;">Cancel</button>
-                    <button type="button" class="btn btn-primary" id="fazercard-bulk-import-btn" onclick="importSelectedFazerCardGames()" disabled style="padding:9px 14px;font-size:13px;">Import Selected</button>
+                    <button type="button" class="btn btn-outline" onclick="togglePickerBulkMode()" style="padding:9px 12px;font-size:13px;">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="fazercard-bulk-import-btn" onclick="importSelectedPickerGames()" disabled style="padding:9px 14px;font-size:13px;">Import Selected</button>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Game Role Modal: lets the admin add a brand-new category chip
+         (beyond the built-in MOBA/Battle Royale/Survival/Fun/Creative/
+         Sport/Shooter/RPG/Racing/Strategy set) with its own name and a
+         freely-chosen color, from the game editor's category chip row. -->
+    <div class="modal-overlay" id="add-category-modal-overlay" onclick="if(event.target===this) closeAddCategoryModal()">
+        <div class="modal-box" style="max-width:360px;">
+            <div class="modal-header">
+                <h3>Add Game Role</h3>
+                <div class="modal-close" onclick="closeAddCategoryModal()">
+                    <svg class="ui-icon" style="width:18px;height:18px;"><use href="#icon-close"></use></svg>
+                </div>
+            </div>
+            <label>Role Name</label>
+            <input type="text" id="add-category-label" placeholder="e.g. Card, Puzzle, Idle" autocomplete="off" style="width:100%;padding:10px 12px;border:1px solid var(--border-glass);border-radius:10px;font-size:14px;background:var(--bg-subtle-2);color:var(--text-primary);box-sizing:border-box;margin-top:6px;">
+            <label style="margin-top:12px;">Tab Color</label>
+            <input type="color" id="add-category-color" value="#7C5CFC" style="width:100%;height:42px;padding:2px;border:1px solid var(--border-glass);border-radius:10px;background:var(--bg-subtle-2);box-sizing:border-box;margin-top:6px;cursor:pointer;">
+            <div style="display:flex;gap:8px;margin-top:16px;">
+                <button type="button" class="btn btn-outline" onclick="closeAddCategoryModal()" style="padding:10px 14px;font-size:13px;">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="saveNewGameCategory()" style="padding:10px 14px;font-size:13px;">Add Role</button>
             </div>
         </div>
     </div>
@@ -4003,6 +4032,7 @@
         function showPage(pageId) {
             // Admin Broadcast (Notify) removed — send anyone still routed here to Settings.
             if (pageId === 'notify-list') pageId = 'settings';
+            const previousPageId = document.querySelector('.page-section.active')?.id || null;
             document.querySelectorAll('.page-section').forEach(p => p.classList.remove('active'));
             document.querySelectorAll('.nav-item').forEach(m => m.classList.remove('active'));
             document.getElementById(pageId).classList.add('active');
@@ -4017,6 +4047,7 @@
             if (pageId === 'g2bulk' && window.refreshG2BulkBalance) window.refreshG2BulkBalance();
             if (['order-list', 'analytics', 'user-list'].includes(pageId) && window.ensureOrdersLoaded) window.ensureOrdersLoaded();
             if (pageId === 'dashboard' && window.ordersAreLoaded && !window.ordersAreLoaded() && window.showToast) window.showToast('Order stats load when you open Orders');
+            unsubscribeTabListeners(previousPageId, pageId);
             subscribeTabListeners(pageId);
         }
 
@@ -4052,6 +4083,34 @@
             if (pageId === 'tier-list' || pageId === 'user-list') listenTierSettings();
         }
         window.subscribeTabListeners = subscribeTabListeners;
+
+        // Tears down the onSnapshot listener(s) tied to the tab being left,
+        // so a tab that isn't open right now doesn't keep billing reads on
+        // every doc change in the background. Runs BEFORE subscribeTabListeners()
+        // so a listener shared by two tabs (tier settings: 'tier-list' +
+        // 'user-list') isn't closed and immediately reopened when moving
+        // between those two. Resets the matching *ListenerAttached flag so
+        // reopening the tab re-subscribes cleanly.
+        function unsubscribeTabListeners(prevPageId, nextPageId) {
+            if (!prevPageId || prevPageId === nextPageId) return;
+            if (prevPageId === 'notify-list') prevPageId = 'settings';
+            if (prevPageId === 'ticker-list' && nextPageId !== 'ticker-list') {
+                if (tickerUnsub) { tickerUnsub(); tickerUnsub = null; }
+                tickerListenerAttached = false;
+            }
+            if (prevPageId === 'payment-list' && nextPageId !== 'payment-list') {
+                if (paymentUnsub) { paymentUnsub(); paymentUnsub = null; }
+                paymentListenerAttached = false;
+            }
+            if (prevPageId === 'settings' && nextPageId !== 'settings') {
+                if (socialUnsub) { socialUnsub(); socialUnsub = null; }
+                socialListenerAttached = false;
+            }
+            if ((prevPageId === 'tier-list' || prevPageId === 'user-list') && nextPageId !== 'tier-list' && nextPageId !== 'user-list') {
+                if (tierUnsub) { tierUnsub(); tierUnsub = null; }
+                tierListenerAttached = false;
+            }
+        }
 
         // ---------- Grouped Side-Nav Picker Sheet ----------
         // Each group icon in .top-nav bundles several pages that used to be
@@ -5066,6 +5125,7 @@
             listenAdminBroadcastSecret();
             listenAdminAccounts();
             listenAutoUpdatePricesSetting();
+            loadCustomGameCategories();
             listenGames();
             showPage('dashboard');
             runLoginSecurityCheck();
@@ -11407,13 +11467,14 @@
             }
         }
 
+        let tickerUnsub = null;
         function listenAnnouncementsAdmin() {
             if (tickerListenerAttached) return;
             tickerListenerAttached = true;
             const container = document.getElementById('ticker-list-container');
 
             const q = query(collection(db, "announcements"), orderBy("createdAt", "asc"));
-            onSnapshot(q, (snap) => {
+            tickerUnsub = onSnapshot(q, (snap) => {
                 if (snap.empty) {
                     container.innerHTML = '<p class="empty-msg">No ticker messages yet.</p>';
                     return;
@@ -11535,10 +11596,11 @@
         }
         window.movePaymentMethod = movePaymentMethod;
 
+        let paymentUnsub = null;
         function listenPaymentMethods() {
             if (paymentListenerAttached) return;
             paymentListenerAttached = true;
-            onSnapshot(collection(db, paymentMethodsCollectionName()), (snap) => {
+            paymentUnsub = onSnapshot(collection(db, paymentMethodsCollectionName()), (snap) => {
                 const newMethods = {};
                 snap.forEach(docSnap => { newMethods[docSnap.id] = docSnap.data(); });
                 PAYMENT_METHODS = newMethods;
@@ -12519,10 +12581,11 @@
             }).join('');
         }
 
+        let tierUnsub = null;
         function listenTierSettings() {
             if (tierListenerAttached) return;
             tierListenerAttached = true;
-            onSnapshot(doc(db, "settings", "tiers"), (docSnap) => {
+            tierUnsub = onSnapshot(doc(db, "settings", "tiers"), (docSnap) => {
                 const data = docSnap.exists() ? (docSnap.data().mins || {}) : {};
                 const mins = { ...DEFAULT_TIER_MINS, ...data };
                 currentTierMins = mins;
@@ -12601,10 +12664,11 @@
             return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
         }
 
+        let socialUnsub = null;
         function listenSocialLinks() {
             if (socialListenerAttached) return;
             socialListenerAttached = true;
-            onSnapshot(doc(db, "settings", "social"), (docSnap) => {
+            socialUnsub = onSnapshot(doc(db, "settings", "social"), (docSnap) => {
                 const data = docSnap.exists() ? docSnap.data() : {};
                 document.getElementById('social-facebook').value = data.facebook || '';
                 document.getElementById('social-telegram').value = data.telegram || '';
@@ -14458,34 +14522,123 @@
             { id: 'battle_royale', label: 'Battle Royale', icon: 'icon-zap', color: '#E53935' },
             { id: 'survival', label: 'Survival', icon: 'icon-compass', color: '#16A34A' },
             { id: 'fun', label: 'Fun', icon: 'icon-smile', color: '#EC4899' },
-            { id: 'creative', label: 'Creative', icon: 'icon-feather', color: '#0891B2' }
+            { id: 'creative', label: 'Creative', icon: 'icon-feather', color: '#0891B2' },
+            { id: 'sport', label: 'Sport', icon: 'icon-trophy', color: '#F59E0B' },
+            { id: 'shooter', label: 'Shooter', icon: 'icon-target', color: '#DC2626' },
+            { id: 'rpg', label: 'RPG', icon: 'icon-shield', color: '#6D28D9' },
+            { id: 'racing', label: 'Racing', icon: 'icon-trending-up', color: '#0EA5E9' },
+            { id: 'strategy', label: 'Strategy', icon: 'icon-gear', color: '#334155' }
         ];
-        function findCategory(id) { return GAME_CATEGORIES.find(c => c.id === id); }
+
+        // Admin-added categories (label + freely-chosen color) on top of the
+        // built-in list above - persisted to settings/gameCategories so any
+        // new "Game Role" tab the admin adds (and its color) survives a
+        // reload and shows up for every admin session. Loaded once at
+        // startup by loadCustomGameCategories() (see init/auth flow below).
+        let CUSTOM_GAME_CATEGORIES = [];
+        function allGameCategories() { return GAME_CATEGORIES.concat(CUSTOM_GAME_CATEGORIES); }
+        function findCategory(id) { return allGameCategories().find(c => c.id === id); }
+
+        async function loadCustomGameCategories() {
+            try {
+                const snap = await getDoc(doc(db, "settings", "gameCategories"));
+                CUSTOM_GAME_CATEGORIES = (snap.exists() && Array.isArray(snap.data().custom)) ? snap.data().custom : [];
+            } catch (error) {
+                console.error('Load custom game categories error:', error);
+                CUSTOM_GAME_CATEGORIES = [];
+            }
+        }
+        window.loadCustomGameCategories = loadCustomGameCategories;
 
         function renderGameCategorySelect() {
             const current = document.getElementById('edit-game-category').value;
             const noneChip = `<div class="cat-chip${current === '' ? ' active' : ''}" data-cat="" style="--cat-color:var(--text-secondary);">
                 <svg class="ui-icon"><use href="#icon-grid"></use></svg>None
             </div>`;
-            document.getElementById('game-category-select').innerHTML = noneChip + GAME_CATEGORIES.map(c => `
+            const addChip = `<div class="cat-chip" data-add-cat="1" style="--cat-color:var(--text-muted);border-style:dashed;">
+                <svg class="ui-icon"><use href="#icon-tag"></use></svg>+ Add Role
+            </div>`;
+            document.getElementById('game-category-select').innerHTML = noneChip + allGameCategories().map(c => `
                 <div class="cat-chip${current === c.id ? ' active' : ''}" data-cat="${c.id}" style="--cat-color:${c.color};">
-                    <svg class="ui-icon"><use href="#${c.icon}"></use></svg>${c.label}
-                </div>`).join('');
+                    <svg class="ui-icon"><use href="#${c.icon}"></use></svg>${escapeHtml(c.label)}
+                    ${CUSTOM_GAME_CATEGORIES.some(x => x.id === c.id) ? `<span class="cat-chip-del" data-del-cat="${c.id}" title="Remove this Game Role">&times;</span>` : ''}
+                </div>`).join('') + addChip;
         }
 
         document.getElementById('game-category-select').addEventListener('click', (e) => {
+            const delBtn = e.target.closest('[data-del-cat]');
+            if (delBtn) { removeCustomGameCategory(delBtn.dataset.delCat); return; }
+            if (e.target.closest('[data-add-cat]')) { openAddCategoryModal(); return; }
             const chip = e.target.closest('.cat-chip');
             if (!chip) return;
             document.getElementById('edit-game-category').value = chip.dataset.cat;
             renderGameCategorySelect();
         });
 
+        // "+ Add Role" modal - lets the admin add a brand-new Game Role tab
+        // (e.g. Sport already covers most needs, but anything else - Card,
+        // Idle, Puzzle...) with its own freely-chosen color, instead of only
+        // ever having the fixed built-in set above.
+        function openAddCategoryModal() {
+            document.getElementById('add-category-label').value = '';
+            document.getElementById('add-category-color').value = '#7C5CFC';
+            document.getElementById('add-category-modal-overlay').classList.add('show');
+            setTimeout(() => document.getElementById('add-category-label').focus(), 50);
+        }
+        window.openAddCategoryModal = openAddCategoryModal;
+
+        function closeAddCategoryModal() {
+            document.getElementById('add-category-modal-overlay').classList.remove('show');
+        }
+        window.closeAddCategoryModal = closeAddCategoryModal;
+
+        async function saveNewGameCategory() {
+            const label = document.getElementById('add-category-label').value.trim();
+            const color = document.getElementById('add-category-color').value || '#7C5CFC';
+            if (!label) { window.showToast('Enter a name for the Game Role', 'fail'); return; }
+            let id = label.toLowerCase().trim().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '');
+            if (!id) id = 'role_' + Date.now();
+            if (allGameCategories().some(c => c.id === id)) { window.showToast('A Game Role with that name already exists', 'fail'); return; }
+
+            CUSTOM_GAME_CATEGORIES.push({ id, label, icon: 'icon-tag', color });
+            try {
+                await setDoc(doc(db, "settings", "gameCategories"), { custom: CUSTOM_GAME_CATEGORIES });
+                document.getElementById('edit-game-category').value = id;
+                renderGameCategorySelect();
+                closeAddCategoryModal();
+                window.showToast('Game Role added ✓', 'success');
+            } catch (error) {
+                console.error('Save custom game category error:', error);
+                CUSTOM_GAME_CATEGORIES.pop();
+                window.showToast('Could not save: ' + error.message, 'fail');
+            }
+        }
+        window.saveNewGameCategory = saveNewGameCategory;
+
+        async function removeCustomGameCategory(id) {
+            const idx = CUSTOM_GAME_CATEGORIES.findIndex(c => c.id === id);
+            if (idx === -1) return; // only ever-admin-added roles can be removed, not the built-in set
+            const removed = CUSTOM_GAME_CATEGORIES[idx];
+            CUSTOM_GAME_CATEGORIES.splice(idx, 1);
+            if (document.getElementById('edit-game-category').value === id) document.getElementById('edit-game-category').value = '';
+            renderGameCategorySelect();
+            try {
+                await setDoc(doc(db, "settings", "gameCategories"), { custom: CUSTOM_GAME_CATEGORIES });
+            } catch (error) {
+                console.error('Remove custom game category error:', error);
+                CUSTOM_GAME_CATEGORIES.splice(idx, 0, removed);
+                renderGameCategorySelect();
+                window.showToast('Could not remove: ' + error.message, 'fail');
+            }
+        }
+        window.removeCustomGameCategory = removeCustomGameCategory;
+
         // Small colored "MOBA" / "Fun" / etc. badge, reused on the admin Game
         // List cards. Returns '' when the game has no category set.
         function categoryBadgeHtml(categoryId) {
             const c = findCategory(categoryId);
             if (!c) return '';
-            return `<span class="cat-badge" style="background:${c.color};"><svg><use href="#${c.icon}"></use></svg>${c.label}</span>`;
+            return `<span class="cat-badge" style="background:${c.color};"><svg><use href="#${c.icon}"></use></svg>${escapeHtml(c.label)}</span>`;
         }
 
         // Escapes a string for safe insertion into HTML (used for provider game
@@ -14695,15 +14848,17 @@
             { code: 'smilecoinph', name: 'SmileCoin (Philippines)' }
         ];
 
-        // Bulk-add state for the FazerCards picker only - lets the admin tick
-        // several catalogue entries (e.g. every "Free Fire (XX)" region) and
-        // import them as separate new games in one go, each with its own
-        // imported packages (see importSelectedFazerCardGames below), instead
-        // of repeating Add New Game -> pick -> import -> save per region.
-        // Only offered when the picker is opened for a brand-new game (no
-        // edit-game-id yet) - see loadGamePickerList.
-        let fazerCardBulkMode = false;
-        let fazerCardBulkSelected = new Set();
+        // Bulk-add state for the game picker - lets the admin tick several
+        // catalogue entries at once (e.g. 4-5 games from G2Bulk/JCPlays/
+        // FazerCards) and import them as separate new games in one
+        // sequential pass, each with its own imported packages (see
+        // importSelectedPickerGames below), instead of repeating Add New
+        // Game -> pick -> import -> save per game. Works the same for every
+        // provider/kind the picker can be opened with. Only offered when the
+        // picker is opened for a brand-new game (no edit-game-id yet) - see
+        // loadGamePickerList.
+        let pickerBulkMode = false;
+        let pickerBulkSelected = new Set();
 
         let gamePickerProvider = null;     // 'g2bulk' | 'jcplays'
         let gamePickerSubtab = 'direct';   // 'direct' | 'voucher' — only meaningful when provider === 'g2bulk'
@@ -14817,6 +14972,16 @@
             if (showSubtabs) {
                 document.querySelectorAll('#game-picker-subtabs .pkg-type-tab').forEach(el => el.classList.toggle('active', el.dataset.subtab === subtab));
             }
+            // Reset any bulk-select state left over from a previous open,
+            // and only offer "Select Multiple" when adding a brand-new game
+            // (bulk-add always creates fresh games, so it makes no sense
+            // while relinking an existing game's provider code).
+            pickerBulkMode = false;
+            pickerBulkSelected = new Set();
+            document.getElementById('fazercard-bulk-bar').style.display = 'none';
+            const isNewGame = !document.getElementById('edit-game-id').value;
+            document.getElementById('game-picker-bulk-toggle-btn').style.display = isNewGame ? 'inline-flex' : 'none';
+            document.getElementById('game-picker-bulk-toggle-btn').innerText = 'Select Multiple';
             loadGamePickerList();
         }
         window.openGamePicker = openGamePicker;
@@ -14828,6 +14993,10 @@
             if (gamePickerProvider !== 'g2bulk' || gamePickerSubtab === subtab) return;
             gamePickerSubtab = subtab;
             document.querySelectorAll('#game-picker-subtabs .pkg-type-tab').forEach(el => el.classList.toggle('active', el.dataset.subtab === subtab));
+            pickerBulkMode = false;
+            pickerBulkSelected = new Set();
+            document.getElementById('fazercard-bulk-bar').style.display = 'none';
+            document.getElementById('game-picker-bulk-toggle-btn').innerText = 'Select Multiple';
             loadGamePickerList();
         }
         window.switchGamePickerSubtab = switchGamePickerSubtab;
@@ -14858,7 +15027,7 @@
             const q = (term || '').trim().toLowerCase();
             const filtered = q ? gamePickerItems.filter(g => g.name.toLowerCase().includes(q)) : gamePickerItems;
             const currentCode = document.getElementById(gamePickerFieldId(gamePickerKind())).value;
-            const bulk = fazerCardBulkMode && gamePickerKind() === 'fazercard';
+            const bulk = pickerBulkMode;
 
             // In bulk mode there's no single "current" link to highlight and
             // no "Not linked" option (bulk add only ever creates new games),
@@ -14873,7 +15042,7 @@
                 html += `<div class="game-picker-empty-msg">No games match "${escapeHtml(term)}"</div>`;
             } else {
                 html += filtered.map(g => `
-                    <div class="game-picker-card${bulk ? ' bulk-pickable' + (fazerCardBulkSelected.has(g.code) ? ' bulk-selected' : '') : (currentCode === g.code ? ' selected' : '')}" data-code="${escapeHtml(g.code)}" data-name="${escapeHtml(g.name)}">
+                    <div class="game-picker-card${bulk ? ' bulk-pickable' + (pickerBulkSelected.has(g.code) ? ' bulk-selected' : '') : (currentCode === g.code ? ' selected' : '')}" data-code="${escapeHtml(g.code)}" data-name="${escapeHtml(g.name)}">
                         <div class="game-picker-thumb" style="${g.image ? '' : `background:${pickerColorFor(g.name)}`}">${pickerThumbHtml(g) || escapeHtml(pickerInitials(g.name))}</div>
                         ${bulk ? `<div class="game-picker-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg></div>` : ''}
                         <span>${escapeHtml(g.name)}${typeof g.count === 'number' ? ` <span style="opacity:.6;">(${g.count})</span>` : ''}</span>
@@ -14888,8 +15057,8 @@
         document.getElementById('game-picker-grid').addEventListener('click', (e) => {
             const card = e.target.closest('.game-picker-card');
             if (!card) return;
-            if (fazerCardBulkMode && gamePickerKind() === 'fazercard') {
-                toggleFazerCardBulkSelection(card);
+            if (pickerBulkMode) {
+                togglePickerBulkSelection(card);
                 return;
             }
             selectGamePickerItem(card.dataset.code || '', card.dataset.name || '');
@@ -14897,34 +15066,36 @@
 
         // Flips one card's checkbox state in place (no full grid re-render,
         // so the scroll position holds on a long catalogue like FazerCards'
-        // 300+ regions) and keeps the footer's count/button in sync.
-        function toggleFazerCardBulkSelection(card) {
+        // 300+ regions or G2Bulk's 200+ games) and keeps the footer's
+        // count/button in sync.
+        function togglePickerBulkSelection(card) {
             const code = card.dataset.code || '';
             if (!code) return;
-            if (fazerCardBulkSelected.has(code)) {
-                fazerCardBulkSelected.delete(code);
+            if (pickerBulkSelected.has(code)) {
+                pickerBulkSelected.delete(code);
                 card.classList.remove('bulk-selected');
             } else {
-                fazerCardBulkSelected.add(code);
+                pickerBulkSelected.add(code);
                 card.classList.add('bulk-selected');
             }
-            const n = fazerCardBulkSelected.size;
+            const n = pickerBulkSelected.size;
             document.getElementById('fazercard-bulk-count').innerText = n === 1 ? '1 selected' : `${n} selected`;
             document.getElementById('fazercard-bulk-import-btn').disabled = n === 0;
         }
 
-        // Toggles the FazerCards picker between its normal single-pick mode
-        // and bulk-select mode (checkboxes + an "Import Selected" footer).
-        function toggleFazerCardBulkMode() {
-            fazerCardBulkMode = !fazerCardBulkMode;
-            fazerCardBulkSelected = new Set();
-            document.getElementById('game-picker-bulk-toggle-btn').innerText = fazerCardBulkMode ? 'Cancel Multiple' : 'Select Multiple';
-            document.getElementById('fazercard-bulk-bar').style.display = fazerCardBulkMode ? 'flex' : 'none';
+        // Toggles the picker between its normal single-pick mode and
+        // bulk-select mode (checkboxes + an "Import Selected" footer) -
+        // works for whichever provider/kind the picker is currently open on.
+        function togglePickerBulkMode() {
+            pickerBulkMode = !pickerBulkMode;
+            pickerBulkSelected = new Set();
+            document.getElementById('game-picker-bulk-toggle-btn').innerText = pickerBulkMode ? 'Cancel Multiple' : 'Select Multiple';
+            document.getElementById('fazercard-bulk-bar').style.display = pickerBulkMode ? 'flex' : 'none';
             document.getElementById('fazercard-bulk-count').innerText = '0 selected';
             document.getElementById('fazercard-bulk-import-btn').disabled = true;
             renderGamePickerGrid(document.getElementById('game-picker-search').value);
         }
-        window.toggleFazerCardBulkMode = toggleFazerCardBulkMode;
+        window.togglePickerBulkMode = togglePickerBulkMode;
 
         function selectGamePickerItem(code, name) {
             const kind = gamePickerKind();
@@ -15278,7 +15449,7 @@
                 // manually - on when FazerCards actually asks for a
                 // server/zone value for this game, off when it doesn't. Same
                 // regex + same bidirectional set as the bulk importer
-                // (runFazerCardBulkImport) below, so single-game and bulk
+                // (runPickerBulkImport) below, so single-game and bulk
                 // imports behave identically.
                 const fazerNeedsServerIdField = pendingFazerCardFields.some(k => /server|zone/i.test(k));
                 // Same fix as G2Bulk's import above - Requires Player ID was
@@ -15336,15 +15507,39 @@
             return m ? { gameName: m[1].trim(), serverName: m[2].trim() } : null;
         }
 
-        // Confirms and kicks off a bulk import for every FazerCards
-        // catalogue entry currently ticked in the picker (see
-        // toggleFazerCardBulkMode / toggleFazerCardBulkSelection). Skips any
-        // selection already linked to an existing game so re-running this
-        // after a partial manual add never creates a duplicate.
-        function importSelectedFazerCardGames() {
-            if (fazerCardBulkSelected.size === 0) return;
-            const items = gamePickerItems.filter(g => fazerCardBulkSelected.has(g.code));
-            const alreadyLinked = new Set(Object.values(GAMES).map(g => g.fazercardCategoryId).filter(Boolean));
+        // Which game-doc field marks an item as "already linked" for each
+        // picker kind - used to skip already-imported catalogue entries on a
+        // re-run instead of creating duplicates.
+        function bulkLinkedFieldForKind(kind) {
+            return kind === 'jcplays' ? 'jcplaysProduct'
+                : kind === 'fazercard_giftcard' ? 'fazercardGiftCategoryId'
+                : kind === 'fazercard' ? 'fazercardCategoryId'
+                : kind === 'g2bulk_voucher' ? 'g2bulkVoucherCategory'
+                : 'g2bulkCode';
+        }
+
+        // Short label for each kind, used in the confirm dialog and toasts.
+        function bulkProviderLabel(kind) {
+            return kind === 'jcplays' ? 'JCPlays'
+                : kind === 'fazercard_giftcard' ? 'FazerCards Gift Cards'
+                : kind === 'fazercard' ? 'FazerCards'
+                : kind === 'g2bulk_voucher' ? 'G2Bulk Vouchers'
+                : 'G2Bulk';
+        }
+
+        // Confirms and kicks off a bulk import for every catalogue entry
+        // currently ticked in the picker (see togglePickerBulkMode /
+        // togglePickerBulkSelection) - works the same regardless of which
+        // provider/kind the picker is open on (G2Bulk direct, G2Bulk
+        // Vouchers, JCPlays, FazerCards, or FazerCards Gift Cards). Skips
+        // any selection already linked to an existing game so re-running
+        // this after a partial manual add never creates a duplicate.
+        function importSelectedPickerGames() {
+            if (pickerBulkSelected.size === 0) return;
+            const kind = gamePickerKind();
+            const items = gamePickerItems.filter(g => pickerBulkSelected.has(g.code));
+            const linkedField = bulkLinkedFieldForKind(kind);
+            const alreadyLinked = new Set(Object.values(GAMES).map(g => g[linkedField]).filter(Boolean));
             const toImport = items.filter(g => !alreadyLinked.has(g.code));
             const skippedLinked = items.length - toImport.length;
 
@@ -15356,85 +15551,187 @@
             window.showActionDialog({
                 type: 'warning',
                 title: `Import ${toImport.length} Game${toImport.length === 1 ? '' : 's'}?`,
-                message: `Each becomes its own new game with packages imported from FazerCards at cost (no markup yet, no price cards shared between them) — set Price and check each game's image before it goes live.${skippedLinked ? ` ${skippedLinked} already-linked selection${skippedLinked === 1 ? '' : 's'} will be skipped.` : ''}`,
+                message: `Each becomes its own new game with packages imported from ${bulkProviderLabel(kind)} at cost (no markup yet, no price cards shared between them) — set Price and check each game's image before it goes live.${skippedLinked ? ` ${skippedLinked} already-linked selection${skippedLinked === 1 ? '' : 's'} will be skipped.` : ''}`,
                 confirmText: 'Import',
-                onConfirm: () => runFazerCardBulkImport(toImport)
+                onConfirm: () => runPickerBulkImport(kind, toImport)
             });
         }
-        window.importSelectedFazerCardGames = importSelectedFazerCardGames;
+        window.importSelectedPickerGames = importSelectedPickerGames;
 
-        // Creates one new "games" doc per selected FazerCards catalogue
-        // entry, each with its own freshly-imported packages (Price defaults
-        // to Cost, same as the single-game importFazerCardCatalogue above) -
-        // sequential with a short stagger so it doesn't hammer FazerCards'
-        // API, and each game's packages stay in that game's own doc so nothing
-        // gets mixed between games.
-        async function runFazerCardBulkImport(items) {
+        // Creates one new "games" doc per selected catalogue entry, each
+        // with its own freshly-imported packages (Price defaults to Cost,
+        // same as the single-game import buttons) - sequential with a short
+        // stagger so it doesn't hammer the provider's API, and each game's
+        // packages stay in that game's own doc so nothing gets mixed between
+        // games. Handles all five picker kinds; the per-item fetch/package
+        // shape mirrors that kind's single-game import function exactly
+        // (importG2BulkCatalogue / importG2BulkVoucherCatalogue /
+        // importJCPlaysCatalogue / importFazerCardCatalogue /
+        // importFazerCardGiftCardCatalogue).
+        async function runPickerBulkImport(kind, items) {
             const btn = document.getElementById('fazercard-bulk-import-btn');
             const countEl = document.getElementById('fazercard-bulk-count');
             btn.disabled = true;
-            const rate = FAZERCARD_SETTINGS.usdRate || 4500;
+            const g2bulkRate = G2BULK_SETTINGS.usdRate || 4500;
+            const fazercardRate = FAZERCARD_SETTINGS.usdRate || 4500;
             let added = 0, failed = 0;
             const failedNames = [];
+
+            if (kind === 'jcplays' && (!JCPLAYS_SETTINGS.uid || !JCPLAYS_SETTINGS.email || !JCPLAYS_SETTINGS.mKey)) {
+                window.showToast('Add your JCPlays credentials first (Dashboard → JCPlays → Settings).', 'fail');
+                btn.disabled = false;
+                return;
+            }
 
             for (let i = 0; i < items.length; i++) {
                 const item = items[i];
                 countEl.innerText = `Importing ${i + 1}/${items.length}: ${item.name}`;
                 try {
-                    const data = await fazercardRequest('/topups/offers', { params: { category_id: item.code } });
-                    const offers = data.offers || [];
-                    if (offers.length === 0) { failed++; failedNames.push(item.name + ' (no offers)'); continue; }
-                    if (!item.image) { failed++; failedNames.push(item.name + ' (no image)'); continue; }
+                    let gameData = null;
 
-                    const packages = offers.map(o => {
-                        const cost = Math.round(Number(o.price_usd) * rate);
-                        return { amount: o.name, cost, price: cost, g2bulk: '', jcplays: '', voucherId: '', fazercardOfferId: o.offer_id, image: '', type: 'currency', tab: 'currency' };
-                    });
-                    const fieldKeys = (data.fields || []).map(f => f.key);
-                    const fazerDropdown = detectFazerCardServerDropdown(data.fields || []);
-                    const split = splitFazerCardRegionName(item.name);
-
-                    const gameData = {
-                        name: split ? split.gameName : item.name,
-                        serverName: split ? split.serverName : '',
-                        image: item.image,
-                        banner: item.image,
-                        packages,
-                        packageTabs: [],
-                        packageTabLabels: { package: 'Package', currency: 'Currency' },
-                        g2bulkCode: '', jcplaysProduct: '', g2bulkVoucherCategory: '',
-                        fazercardCategoryId: item.code,
-                        fazercardFields: fieldKeys,
-                        fazercardServerMode: fazerDropdown.mode || '',
-                        fazercardServerOptions: fazerDropdown.options || [],
-                        g2bulkIdCheckCode: '',
-                        fulfillProvider: 'fazercard',
-                        category: '', description: '', popular: false,
-                        playerIdRequired: true,
-                        serverIdRequired: fieldKeys.some(k => /server|zone/i.test(k))
-                    };
+                    if (kind === 'fazercard') {
+                        const data = await fazercardRequest('/topups/offers', { params: { category_id: item.code } });
+                        const offers = data.offers || [];
+                        if (offers.length === 0) { failed++; failedNames.push(item.name + ' (no offers)'); continue; }
+                        if (!item.image) { failed++; failedNames.push(item.name + ' (no image)'); continue; }
+                        const packages = offers.map(o => {
+                            const cost = Math.round(Number(o.price_usd) * fazercardRate);
+                            return { amount: o.name, cost, price: cost, g2bulk: '', jcplays: '', voucherId: '', fazercardOfferId: o.offer_id, fazercardGiftCardId: '', image: '', type: 'currency', tab: 'currency', badge: '' };
+                        });
+                        const fieldKeys = (data.fields || []).map(f => f.key);
+                        const fazerDropdown = detectFazerCardServerDropdown(data.fields || []);
+                        const split = splitFazerCardRegionName(item.name);
+                        gameData = {
+                            name: split ? split.gameName : item.name,
+                            serverName: split ? split.serverName : '',
+                            image: item.image, banner: item.image, packages,
+                            packageTabs: [], packageTabLabels: { package: 'Package', currency: 'Currency' },
+                            g2bulkCode: '', jcplaysProduct: '', g2bulkVoucherCategory: '',
+                            fazercardCategoryId: item.code, fazercardGiftCategoryId: '',
+                            fazercardFields: fieldKeys,
+                            fazercardServerMode: fazerDropdown.mode || '', fazercardServerOptions: fazerDropdown.options || [],
+                            g2bulkIdCheckCode: '', fulfillProvider: 'fazercard',
+                            category: '', description: '', popular: false,
+                            playerIdRequired: true, serverIdRequired: fieldKeys.some(k => /server|zone/i.test(k))
+                        };
+                    } else if (kind === 'fazercard_giftcard') {
+                        const data = await fazercardRequest('/giftcards/cards', { params: { category_id: item.code } });
+                        const offers = data.offers || [];
+                        if (offers.length === 0) { failed++; failedNames.push(item.name + ' (no cards)'); continue; }
+                        const packages = offers.map(o => {
+                            const cost = Math.round(Number(o.price_usd) * fazercardRate);
+                            return { amount: o.name, cost, price: cost, g2bulk: '', jcplays: '', voucherId: '', fazercardOfferId: '', fazercardGiftCardId: o.card_id, image: '', type: 'currency', tab: 'currency', badge: '' };
+                        });
+                        gameData = {
+                            name: item.name, serverName: '',
+                            image: item.image || '', banner: item.image || '', packages,
+                            packageTabs: [], packageTabLabels: { package: 'Package', currency: 'Currency' },
+                            g2bulkCode: '', jcplaysProduct: '', g2bulkVoucherCategory: '',
+                            fazercardCategoryId: '', fazercardGiftCategoryId: item.code,
+                            fazercardFields: [], fazercardServerMode: '', fazercardServerOptions: [],
+                            g2bulkIdCheckCode: '', fulfillProvider: 'fazercard_giftcard',
+                            category: '', description: '', popular: false,
+                            playerIdRequired: false, serverIdRequired: false
+                        };
+                    } else if (kind === 'g2bulk_voucher') {
+                        const res = await fetch(`https://api.g2bulk.com/v1/category/${encodeURIComponent(item.code)}`);
+                        const data = await res.json();
+                        if (!data.success) { failed++; failedNames.push(item.name + ' (' + (data.message || 'load failed') + ')'); continue; }
+                        const products = data.products || (data.category ? data.category.products : []) || [];
+                        if (products.length === 0) { failed++; failedNames.push(item.name + ' (no products)'); continue; }
+                        const packages = products.map(p => {
+                            const cost = Math.round(p.unit_price * g2bulkRate);
+                            const label = p.face_value ? `${p.title} ($${p.face_value})` : p.title;
+                            return { amount: label, cost, price: cost, g2bulk: '', jcplays: '', voucherId: String(p.id), fazercardOfferId: '', fazercardGiftCardId: '', image: p.image_url || '', type: 'currency', tab: 'currency', badge: '' };
+                        });
+                        gameData = {
+                            name: item.name, serverName: '',
+                            image: item.image || '', banner: item.image || '', packages,
+                            packageTabs: [], packageTabLabels: { package: 'Package', currency: 'Currency' },
+                            g2bulkCode: '', jcplaysProduct: '', g2bulkVoucherCategory: item.code,
+                            fazercardCategoryId: '', fazercardGiftCategoryId: '',
+                            fazercardFields: [], fazercardServerMode: '', fazercardServerOptions: [],
+                            g2bulkIdCheckCode: '', fulfillProvider: 'g2bulk_voucher',
+                            category: '', description: '', popular: false,
+                            playerIdRequired: false, serverIdRequired: false
+                        };
+                    } else if (kind === 'jcplays') {
+                        const data = await jcplaysRequest('productlist', { product: item.code });
+                        if (data.status !== 200) { failed++; failedNames.push(item.name + ' (' + (data.message || `status ${data.status}`) + ')'); continue; }
+                        const rows = (data.data && data.data.product) || [];
+                        if (rows.length === 0) { failed++; failedNames.push(item.name + ' (no denominations)'); continue; }
+                        const packages = rows.map(r => {
+                            const cost = Math.round(Number(r.price) * g2bulkRate);
+                            return { amount: r.spu, cost, price: cost, g2bulk: '', jcplays: String(r.id), voucherId: '', fazercardOfferId: '', fazercardGiftCardId: '', image: '', type: 'currency', tab: 'currency', badge: '' };
+                        });
+                        gameData = {
+                            name: item.name, serverName: '',
+                            image: item.image || '', banner: item.image || '', packages,
+                            packageTabs: [], packageTabLabels: { package: 'Package', currency: 'Currency' },
+                            g2bulkCode: '', jcplaysProduct: item.code, g2bulkVoucherCategory: '',
+                            fazercardCategoryId: '', fazercardGiftCategoryId: '',
+                            fazercardFields: [], fazercardServerMode: '', fazercardServerOptions: [],
+                            g2bulkIdCheckCode: '', fulfillProvider: 'jcplays',
+                            category: '', description: '', popular: false,
+                            playerIdRequired: false, serverIdRequired: false
+                        };
+                    } else {
+                        // g2bulk direct
+                        const res = await fetch(`https://api.g2bulk.com/v1/games/${encodeURIComponent(item.code)}/catalogue`);
+                        const data = await res.json();
+                        if (!data.success) { failed++; failedNames.push(item.name + ' (' + (data.message || 'load failed') + ')'); continue; }
+                        const catalogues = data.catalogues || [];
+                        if (catalogues.length === 0) { failed++; failedNames.push(item.name + ' (no packages)'); continue; }
+                        const packages = catalogues.map(c => {
+                            const cost = Math.round(c.amount * g2bulkRate);
+                            return { amount: c.name, cost, price: cost, g2bulk: c.name, jcplays: '', voucherId: '', fazercardOfferId: '', fazercardGiftCardId: '', image: '', type: 'currency', tab: 'currency', badge: '' };
+                        });
+                        let serverIdRequired = false;
+                        try {
+                            const fieldsRes = await fetch('https://api.g2bulk.com/v1/games/fields', {
+                                method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ game: item.code })
+                            });
+                            const fieldsData = await fieldsRes.json();
+                            const g2bulkFields = Array.isArray(fieldsData.fields) ? fieldsData.fields
+                                : (fieldsData.info && Array.isArray(fieldsData.info.fields)) ? fieldsData.info.fields : [];
+                            serverIdRequired = g2bulkFields.some(k => /server/i.test(k));
+                        } catch (fieldsError) {
+                            console.warn('G2Bulk /games/fields check failed during bulk import for', item.name, fieldsError);
+                        }
+                        gameData = {
+                            name: item.name, serverName: '',
+                            image: item.image || '', banner: item.image || '', packages,
+                            packageTabs: [], packageTabLabels: { package: 'Package', currency: 'Currency' },
+                            g2bulkCode: item.code, jcplaysProduct: '', g2bulkVoucherCategory: '',
+                            fazercardCategoryId: '', fazercardGiftCategoryId: '',
+                            fazercardFields: [], fazercardServerMode: '', fazercardServerOptions: [],
+                            g2bulkIdCheckCode: '', fulfillProvider: 'g2bulk',
+                            category: '', description: '', popular: false,
+                            playerIdRequired: true, serverIdRequired
+                        };
+                    }
 
                     await addDoc(collection(db, "games"), gameData);
                     logAdminActivity('Added game', gameData.name + (gameData.serverName ? ` (${gameData.serverName})` : ''));
                     added++;
                 } catch (error) {
-                    console.error('Bulk FazerCards import error for', item.name, error);
+                    console.error('Bulk import error for', item.name, error);
                     failed++;
                     failedNames.push(item.name);
                 }
-                await new Promise(r => setTimeout(r, 400)); // stagger calls, don't hammer FazerCards' API
+                await new Promise(r => setTimeout(r, 400)); // stagger calls, don't hammer the provider's API
             }
 
             countEl.innerText = `${added} imported${failed ? `, ${failed} failed` : ''}`;
             window.showToast(`Imported ${added} game${added === 1 ? '' : 's'}${failed ? `, ${failed} failed` : ''} ✓`, (failed && !added) ? 'fail' : 'success');
-            if (failedNames.length) console.warn('FazerCards bulk import failures:', failedNames);
+            if (failedNames.length) console.warn(`${bulkProviderLabel(kind)} bulk import failures:`, failedNames);
 
-            fazerCardBulkSelected = new Set();
-            toggleFazerCardBulkMode();
+            pickerBulkSelected = new Set();
+            togglePickerBulkMode();
             closeGamePicker();
             if (added > 0) closeGameEditor();
         }
-        window.runFazerCardBulkImport = runFazerCardBulkImport;
+        window.runPickerBulkImport = runPickerBulkImport;
 
         // ---------- G2Bulk Giftcards & Vouchers import ----------
         // Separate part of G2Bulk's catalog from the Games list above:
