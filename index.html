@@ -12179,6 +12179,7 @@
                 container.innerHTML = '<p class="empty-msg" style="color:red;">Could not load notifications.</p>';
             });
         }
+        window.listenNotifications = listenNotifications;
 
         function deleteNotification(notifId) {
             window.showActionDialog({
@@ -12258,6 +12259,7 @@
                 container.innerHTML = '<p class="empty-msg" style="color:red;">Could not load ticker messages.</p>';
             });
         }
+        window.listenAnnouncementsAdmin = listenAnnouncementsAdmin;
 
         function deleteAnnouncement(id) {
             window.showActionDialog({
@@ -12425,6 +12427,7 @@
                 showPaymentLoadError('Could not load payment methods (' + (error.message || 'setup failed') + ').');
             }
         }
+        window.listenPaymentMethods = listenPaymentMethods;
 
 
         // ---------- Users (real customers, synced from the Store app's local profile) ----------
@@ -13410,6 +13413,7 @@
                 console.error("Tier settings listener error:", error);
             });
         }
+        window.listenTierSettings = listenTierSettings;
 
         async function saveTierSettings() {
             const mins = {};
