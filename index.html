@@ -2936,6 +2936,7 @@
             <div class="game-list-tabs" id="game-list-tabs">
                 <button type="button" class="game-list-tab-btn active" id="game-list-tab-direct" onclick="showGameListTab('direct')">Direct Games</button>
                 <button type="button" class="game-list-tab-btn" id="game-list-tab-voucher" onclick="showGameListTab('voucher')">Gift Card & Vouchers</button>
+                <button type="button" class="game-list-tab-btn" id="game-list-tab-software" onclick="showGameListTab('software')">Software</button>
             </div>
             <div class="pkg-actions-row" style="margin:-8px 0 14px;">
                 <button class="btn btn-outline" onclick="window.refreshGames && window.refreshGames()">↻ Refresh</button>
@@ -9373,6 +9374,17 @@
         // kinds are never mixed in one list.
         let gameListTab = 'direct';
 
+        // Single source of truth for which of the 3 game-list tabs a game
+        // belongs to, based on its fulfillProvider — used by the list
+        // filter, the search-scoped "Copy Names" action, and the "Add
+        // Server" picker, so all three always agree with each other.
+        function gameListTabFor(g) {
+            if (['g2bulk_voucher', 'fazercard_giftcard', 'jcplays'].includes(g.fulfillProvider)) return 'voucher';
+            if (g.fulfillProvider === 'software') return 'software';
+            return 'direct';
+        }
+        window.gameListTabFor = gameListTabFor;
+
         // When off (default), the games list collapses every server/region
         // variant of the same game name down to a single representative
         // card, so the list reads as one card per game instead of one card
@@ -9399,8 +9411,9 @@
             document.querySelectorAll('.nav-item').forEach(m => m.classList.remove('active'));
             document.getElementById('game-list').classList.add('active');
             document.getElementById('group-game')?.classList.add('active');
-            document.getElementById('game-list-tab-direct')?.classList.toggle('active', tab !== 'voucher');
+            document.getElementById('game-list-tab-direct')?.classList.toggle('active', tab === 'direct');
             document.getElementById('game-list-tab-voucher')?.classList.toggle('active', tab === 'voucher');
+            document.getElementById('game-list-tab-software')?.classList.toggle('active', tab === 'software');
             window.scrollTo(0, 0);
             renderAdminGamesList();
         }
@@ -9425,19 +9438,27 @@
         // the same game (e.g. "Free Fire" as both Global and Malaysia) each
         // keep their own line since they're separate entries in the list.
         function copyAllGameNames() {
-            const ids = Object.keys(GAMES).filter(id => {
-                const g = GAMES[id];
-                const isVoucher = g.fulfillProvider === 'g2bulk_voucher' || g.fulfillProvider === 'fazercard_giftcard';
-                return gameListTab === 'voucher' ? isVoucher : !isVoucher;
-            }).sort((a, b) => {
+            const ids = Object.keys(GAMES).filter(id => gameListTabFor(GAMES[id]) === gameListTab).sort((a, b) => {
                 const ga = GAMES[a], gb = GAMES[b];
                 return ga.name.localeCompare(gb.name) || (ga.serverName || '').localeCompare(gb.serverName || '');
             });
 
             if (ids.length === 0) { window.showToast('No games to copy', 'fail'); return; }
-            const text = ids.map(id => GAMES[id].name || '').join('\n');
+            // One line per game NAME, not per server/region variant — a game
+            // with 3 server entries (e.g. Global/Malaysia/Myanmar) should
+            // still only produce a single line here, matching the collapsed
+            // (Edit Mode off) view of the list rather than every row in it.
+            const seenNames = new Set();
+            const names = [];
+            ids.forEach(id => {
+                const n = GAMES[id].name || '';
+                if (seenNames.has(n)) return;
+                seenNames.add(n);
+                names.push(n);
+            });
+            const text = names.join('\n');
 
-            const doCopy = () => window.showToast(`Copied ${ids.length} game name${ids.length === 1 ? '' : 's'} ✓`, 'success');
+            const doCopy = () => window.showToast(`Copied ${names.length} game name${names.length === 1 ? '' : 's'} ✓`, 'success');
             if (navigator.clipboard && navigator.clipboard.writeText) {
                 navigator.clipboard.writeText(text).then(doCopy).catch(() => fallbackCopyText(text, doCopy));
             } else {
@@ -9480,8 +9501,7 @@
             // and finally to name for the rare doc with neither.
             const ids = Object.keys(GAMES).filter(id => {
                 const g = GAMES[id];
-                const isVoucher = g.fulfillProvider === 'g2bulk_voucher' || g.fulfillProvider === 'fazercard_giftcard';
-                if (gameListTab === 'voucher' ? !isVoucher : isVoucher) return false;
+                if (gameListTabFor(g) !== gameListTab) return false;
                 if (!searchTerm) return true;
                 return (g.name || '').toLowerCase().includes(searchTerm) || (g.serverName || '').toLowerCase().includes(searchTerm);
             }).sort((a, b) => {
@@ -9497,7 +9517,7 @@
             if (ids.length === 0) {
                 container.innerHTML = searchTerm
                     ? '<p class="empty-msg">No games match your search.</p>'
-                    : `<p class="empty-msg">No ${gameListTab === 'voucher' ? 'Gift Card & Voucher' : 'Direct'} games yet. Tap + Add to create one.</p>`;
+                    : `<p class="empty-msg">No ${gameListTab === 'voucher' ? 'Gift Card & Voucher' : gameListTab === 'software' ? 'Software' : 'Direct'} games yet. Tap + Add to create one.</p>`;
                 return;
             }
             // Count how many entries share each game name, so multi-server/
@@ -10249,7 +10269,13 @@
         }
         window.removeGameBannerImage = removeGameBannerImage;
         function previewGameBanners(e) {
-            const files = Array.from(e.target.files || []).filter(f => f.type.startsWith('image/'));
+            // Was filtering on f.type.startsWith('image/') - some phone camera
+            // rolls/browsers report a blank or non-standard MIME type for a
+            // picked photo, so that filter silently dropped the file with no
+            // error shown, making it look like the banner picker did nothing.
+            // Accept whatever the file picker returned (accept="image/*"
+            // already limits what shows up in the picker itself).
+            const files = Array.from(e.target.files || []);
             if (!files.length) return;
             editingBannerImageFiles = files;
             editingBannerImageUrls = [];
@@ -10258,6 +10284,15 @@
                 reader.onload = ev => { editingBannerImageUrls.push(ev.target.result); renderGameBannerGallery(); };
                 reader.readAsDataURL(file);
             });
+            // Also show the first picked banner in the update box itself
+            // (matches how editing an existing game's banner already looks)
+            // instead of leaving the box blank until Save.
+            const bannerPreview = document.getElementById('edit-game-banner-preview');
+            const firstReader = new FileReader();
+            firstReader.onload = ev => {
+                if (bannerPreview) { bannerPreview.src = ev.target.result; bannerPreview.style.display = 'block'; }
+            };
+            firstReader.readAsDataURL(files[0]);
             document.getElementById('game-banner-update-box')?.classList.add('has-image');
             document.getElementById('game-banner-update-change').style.display = 'flex';
         }
@@ -11579,7 +11614,7 @@
                 pendingG2BulkServerMode = null;
                 pendingG2BulkServerOptions = null;
                 onFazerCardGiftCardCategoryChange();
-                setFulfillProvider(gameListTab === 'voucher' ? 'g2bulk_voucher' : 'manual');
+                setFulfillProvider(gameListTab === 'voucher' ? 'g2bulk_voucher' : gameListTab === 'software' ? 'software' : 'manual');
                 preview.src = '';
                 preview.style.display = 'none';
                 updateBox.classList.remove('has-image');
@@ -17897,11 +17932,9 @@
         let addServerPickerGroups = [];
 
         function addServerGameGroupsForCurrentTab() {
-            const wantVoucher = gameListTab === 'voucher';
             const seen = new Map(); // game name -> one representative doc for its basics
             Object.values(GAMES || {}).forEach(g => {
-                const isVoucher = g.fulfillProvider === 'g2bulk_voucher' || g.fulfillProvider === 'fazercard_giftcard';
-                if (isVoucher !== wantVoucher) return;
+                if (gameListTabFor(g) !== gameListTab) return;
                 if (!seen.has(g.name)) seen.set(g.name, g);
             });
             return Array.from(seen.values()).sort((a, b) => (a.name || '').localeCompare(b.name || ''));
@@ -17910,9 +17943,11 @@
         function openAddServerPicker() {
             addServerPickerGroups = addServerGameGroupsForCurrentTab();
             document.getElementById('add-server-picker-search').value = '';
-            document.getElementById('add-server-picker-title').innerText = gameListTab === 'voucher' ? 'Add Server — Choose Voucher' : 'Add Server — Choose Game';
+            document.getElementById('add-server-picker-title').innerText = gameListTab === 'voucher' ? 'Add Server — Choose Voucher' : gameListTab === 'software' ? 'Add Server — Choose Software' : 'Add Server — Choose Game';
             document.getElementById('add-server-picker-hint').innerText = gameListTab === 'voucher'
                 ? 'Pick the Voucher/Gift Card to add another server for. It opens a fresh entry with the same Name/Image/Category — name the server, then import its packages from a G2Bulk voucher category.'
+                : gameListTab === 'software'
+                ? 'Pick the Software item to add another server/variant for. It opens a fresh entry with the same Name/Image/Category — name the server, then add its packages.'
                 : 'Pick the Direct game to add another server for. It opens a fresh entry with the same Name/Image/Category — name the server, then Import its packages from G2Bulk.';
             renderAddServerPickerGrid('');
             document.getElementById('add-server-picker-overlay').classList.add('show');
@@ -17931,7 +17966,7 @@
 
         function renderAddServerPickerGrid(term) {
             const gridEl = document.getElementById('add-server-picker-grid');
-            const kindLabel = gameListTab === 'voucher' ? 'Voucher' : 'Direct';
+            const kindLabel = gameListTab === 'voucher' ? 'Voucher' : gameListTab === 'software' ? 'Software' : 'Direct';
             if (!addServerPickerGroups.length) {
                 gridEl.innerHTML = `<p class="game-picker-empty-msg">No ${kindLabel} games yet — add one with "+ Add" first.</p>`;
                 return;
@@ -17969,12 +18004,11 @@
         function startAddServerForGame(name) {
             const base = addServerPickerGroups.find(g => g.name === name);
             if (!base) return;
-            const wantVoucher = gameListTab === 'voucher';
             openGameEditor();
             // openGameEditor() already defaults the provider from gameListTab,
             // but set it explicitly here too so this stays correct even if
             // that default logic changes later.
-            setFulfillProvider(wantVoucher ? 'g2bulk_voucher' : 'manual');
+            setFulfillProvider(gameListTab === 'voucher' ? 'g2bulk_voucher' : gameListTab === 'software' ? 'software' : 'manual');
             document.getElementById('edit-game-name').value = base.name || '';
             // Same soft-lock as the FazerCards region split: this flow only
             // works if Game Name matches the base game exactly, so lock it
