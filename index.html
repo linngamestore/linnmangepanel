@@ -674,6 +674,15 @@
             width: 7px; height: 7px; border-radius: 50%; background: #FF3B30; display: none;
             box-shadow: 0 0 0 2px rgba(255,59,48,0.16); flex-shrink: 0;
         }
+        /* Numeric badge (e.g. "New orders" count on the Orders nav icon) —
+           same red pill used elsewhere for counts, sized to sit on a nav
+           icon. Hidden by default; JS sets its text and toggles display. */
+        .nav-item-count-badge {
+            min-width: 16px; height: 16px; padding: 0 4px; border-radius: 999px;
+            background: #FF3B30; color: #fff; font-size: 10px; font-weight: 700;
+            line-height: 16px; text-align: center; display: none; flex-shrink: 0;
+            box-shadow: 0 0 0 2px var(--surface);
+        }
 
         /* App Layout (sidebar + content) */
         .app-layout { display: flex; align-items: flex-start; }
@@ -1045,6 +1054,9 @@
         .nav-item.active .ui-icon { stroke: var(--accent); }
         .nav-item .nav-item-low-balance-dot {
             position: absolute; top: 9px; right: 14px; margin-left: 0;
+        }
+        .nav-item .nav-item-count-badge {
+            position: absolute; top: 6px; right: 10px; margin-left: 0;
         }
 
         /* Collapsible sidebar: hides labels and narrows the rail. State is
@@ -1796,6 +1808,7 @@
         }
         .top-nav .nav-item.active { border-right-color: transparent; border-bottom-color: var(--accent); }
         .top-nav .nav-item .nav-item-low-balance-dot { top: 7px; right: 7px; }
+        .top-nav .nav-item .nav-item-count-badge { top: 4px; right: 3px; }
         .content-area { padding-top: 20px; }
     
         .game-banner-gallery { display:flex; flex-wrap:wrap; gap:6px; margin-top:8px; }
@@ -2020,21 +2033,26 @@
     </header>
 
 <nav class="top-nav" id="admin-top-nav">
-        <!-- Grouped top-nav: each icon now bundles several related pages.
-             Tapping one opens a picker sheet (#nav-group-sheet-overlay) instead
-             of jumping straight to a page - see openNavGroupSheet() / NAV_GROUPS. -->
+        <!-- Grouped top-nav: most icons bundle several related pages and open
+             a picker sheet (#nav-group-sheet-overlay) instead of jumping
+             straight to a page - see openNavGroupSheet() / NAV_GROUPS below.
+             Orders is the one exception: it's checked far more often than
+             anything else here, so it's a direct-navigation icon (straight to
+             Order List, no sheet) with its own "new orders" count badge - see
+             updateOrdersNavBadge(). API (G2Bulk/JCPlays/API Keys) now lives
+             nested one level inside Setting instead of its own top icon. -->
         <div class="nav-item active" id="group-dashboard" onclick="openNavGroupSheet('dashboard')">
             <svg class="ui-icon"><use href="#icon-trending-up"></use></svg> <span class="nav-label">Dashboard</span>
+        </div>
+        <div class="nav-item" id="group-order" onclick="showPage('order-list')">
+            <svg class="ui-icon"><use href="#icon-cart"></use></svg> <span class="nav-label">Orders</span>
+            <span class="nav-item-count-badge" id="orders-nav-count-badge" title="New orders"></span>
         </div>
         <div class="nav-item" id="group-game" onclick="openNavGroupSheet('game')">
             <svg class="ui-icon"><use href="#icon-gamepad"></use></svg> <span class="nav-label">Game</span>
         </div>
         <div class="nav-item" id="group-wallet" onclick="openNavGroupSheet('wallet')">
             <svg class="ui-icon"><use href="#icon-wallet"></use></svg> <span class="nav-label">Wallet</span>
-        </div>
-        <div class="nav-item" id="group-api" onclick="openNavGroupSheet('api')">
-            <svg class="ui-icon"><use href="#icon-plug"></use></svg> <span class="nav-label">API</span>
-            <span class="nav-item-low-balance-dot" id="api-nav-low-dot" title="Low balance"></span>
         </div>
         <div class="nav-item" id="group-userlist" onclick="openNavGroupSheet('userlist')">
             <svg class="ui-icon"><use href="#icon-users"></use></svg> <span class="nav-label">Userlist</span>
@@ -2714,6 +2732,17 @@
                         </label>
                     </div>
                     <p id="autoupdate-prices-status" style="font-size:12px;color:var(--text-secondary);margin-top:8px;"></p>
+
+                    <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border-glass);">
+                        <span class="switch-label">Target Margin %</span>
+                        <p style="font-size:11px;color:var(--text-secondary);margin-top:2px;">Auto price update run တိုင်း Cost ပေါ်မှာ ဒီ % margin ကို ပေါင်းပြီး Price ကို auto ချပေးမှာဖြစ်ပါတယ်။ မသတ်မှတ်ရသေးရင် default 5% ကိုပဲ သုံးပါမယ်။</p>
+                        <div style="display:flex;gap:8px;margin-top:8px;align-items:center;">
+                            <input type="number" id="autoprice-margin-input" min="0" max="100" step="0.1" placeholder="5" style="flex:1;padding:10px;border:1px solid var(--border-glass);background:var(--bg-subtle-2);color:var(--text-primary);border-radius:12px;font-size:14px;box-sizing:border-box;">
+                            <span style="font-size:14px;color:var(--text-secondary);">%</span>
+                            <button class="btn btn-primary" id="save-autoprice-margin-btn" onclick="saveAutoPriceMarginPct()">Save</button>
+                        </div>
+                        <p id="autoprice-margin-status" style="font-size:12px;color:var(--text-secondary);margin-top:8px;"></p>
+                    </div>
                 </div>
             </div>
 
@@ -4204,8 +4233,9 @@
         // under, so showPage() can highlight the right icon (see NAV_GROUPS /
         // openNavGroupSheet() below for the picker sheet itself).
         const PAGE_TO_NAV_GROUP = {
-            'dashboard': 'group-dashboard', 'analytics': 'group-dashboard', 'order-list': 'group-dashboard',
-            'g2bulk': 'group-api', 'jcplays': 'group-api', 'api-docs': 'group-api',
+            'dashboard': 'group-dashboard', 'analytics': 'group-dashboard',
+            'order-list': 'group-order',
+            'g2bulk': 'group-setting', 'jcplays': 'group-setting', 'api-docs': 'group-setting',
             'payment-list': 'group-wallet', 'topup-list': 'group-wallet',
             'user-list': 'group-userlist', 'tier-list': 'group-userlist',
             'settings': 'group-setting', 'notify-list': 'group-setting', 'ticker-list': 'group-setting'
@@ -4302,7 +4332,6 @@
         const NAV_GROUPS = {
             dashboard: { title: 'Dashboard', items: [
                 { label: 'Dashboard', icon: '#icon-trending-up', run: () => showPage('dashboard') },
-                { label: 'Orders', icon: '#icon-cart', run: () => showPage('order-list') },
                 { label: 'Analytics', icon: '#icon-bar-chart', run: () => showPage('analytics') }
             ]},
             game: { title: 'Game', items: [
@@ -4322,24 +4351,48 @@
                 { label: 'Userlist', icon: '#icon-users', run: () => showPage('user-list') },
                 { label: 'Tiers', icon: '#icon-trophy', run: () => showPage('tier-list') }
             ]},
+            // API now lives nested one level inside Setting (tap "API" here to
+            // drill into the same G2Bulk/JCPlays/API Keys list the old
+            // top-level API icon used to open) — so Setting reads as
+            // API, General, Ticker. See the `group` handling in
+            // renderNavGroupSheet() below for the drill-in/Back behavior.
             setting: { title: 'Setting', items: [
+                { label: 'API', icon: '#icon-plug', group: 'api', dotId: 'api-nav-low-dot' },
                 { label: 'General', icon: '#icon-gear', run: () => showPage('settings') },
                 { label: 'Ticker', icon: '#icon-megaphone', run: () => showPage('ticker-list') }
             ]}
         };
-        function renderNavGroupSheet(groupKey) {
+        function renderNavGroupSheet(groupKey, parentKey) {
             const group = NAV_GROUPS[groupKey];
             if (!group) return;
             document.getElementById('nav-group-sheet-title').innerText = group.title;
             const list = document.getElementById('nav-group-sheet-list');
             list.innerHTML = '';
+            // Sub-sheet (currently just Setting -> API): a Back row returns to
+            // the parent list without closing the sheet.
+            if (parentKey) {
+                const backBtn = document.createElement('button');
+                backBtn.type = 'button';
+                backBtn.style.cssText = 'display:flex;align-items:center;gap:12px;width:100%;padding:13px 14px;border:1px solid var(--fill-soft);border-radius:12px;background:var(--surface);cursor:pointer;font-size:14px;font-weight:600;color:var(--text-secondary);text-align:left;';
+                backBtn.innerHTML = `<svg class="ui-icon" style="width:19px;height:19px;flex-shrink:0;transform:rotate(180deg);"><use href="#icon-chevron-right"></use></svg><span>Back</span>`;
+                backBtn.onclick = () => renderNavGroupSheet(parentKey);
+                list.appendChild(backBtn);
+            }
             group.items.forEach(it => {
                 const btn = document.createElement('button');
                 btn.type = 'button';
                 btn.style.cssText = 'display:flex;align-items:center;gap:12px;width:100%;padding:13px 14px;border:1px solid var(--fill-soft);border-radius:12px;background:var(--surface);cursor:pointer;font-size:14px;font-weight:600;color:var(--text-primary);text-align:left;';
+                const trailing = [];
+                if (it.dotId) trailing.push(`<span class="nav-item-low-balance-dot" id="${it.dotId}" style="position:static;"></span>`);
+                if (it.group) trailing.push(`<svg class="ui-icon" style="width:16px;height:16px;flex-shrink:0;color:var(--text-secondary);"><use href="#icon-chevron-right"></use></svg>`);
                 btn.innerHTML = `<svg class="ui-icon" style="width:19px;height:19px;flex-shrink:0;"><use href="${it.icon}"></use></svg><span>${it.label}</span>` +
-                    (it.dotId ? `<span class="nav-item-low-balance-dot" id="${it.dotId}" style="position:static;margin-left:auto;"></span>` : '');
-                btn.onclick = () => { closeNavGroupSheet(); it.run(); };
+                    (trailing.length ? `<span style="display:flex;align-items:center;gap:8px;margin-left:auto;">${trailing.join('')}</span>` : '');
+                btn.onclick = () => {
+                    // Drill-in item (e.g. "API") re-renders this same sheet
+                    // with its own sub-list instead of closing + running a page.
+                    if (it.group) { renderNavGroupSheet(it.group, groupKey); return; }
+                    closeNavGroupSheet(); it.run();
+                };
                 list.appendChild(btn);
             });
             // Re-sync the low-balance dots now that they exist again inside this
@@ -6599,10 +6652,35 @@
         // ONE-SHOT getDocs(): loaded the first time the Orders page (or another page that
         // needs the cache) is opened, and re-read only when the Refresh button is tapped.
         // Local order writes are mirrored into the cache by the updateDoc wrapper.
+        // Numeric badge on the Orders nav icon — count of Pending ("New")
+        // orders for the current store, same definition as the "New orders"
+        // stat card on the Order List page itself. Reads straight from the
+        // in-memory ORDERS cache (no extra Firestore read), so it's only as
+        // fresh as that cache: it fills in once Orders/Analytics/User List has
+        // been opened at least once this session (ORDERS lazy-loads on first
+        // open of one of those, same as loadDashboardStats() above), then
+        // stays live via every scheduleOrdersRender() call after that.
+        function updateOrdersNavBadge() {
+            const badge = document.getElementById('orders-nav-count-badge');
+            if (!badge) return;
+            let pending = 0;
+            Object.values(ORDERS).forEach(o => {
+                try { if (o.status === 'Pending' && matchesCurrentStore(o)) pending++; } catch (e) { /* skip malformed order */ }
+            });
+            if (pending > 0) {
+                badge.innerText = pending > 99 ? '99+' : String(pending);
+                badge.style.display = 'block';
+            } else {
+                badge.style.display = 'none';
+            }
+        }
+        window.updateOrdersNavBadge = updateOrdersNavBadge;
+
         function renderOrdersDependents() {
             if (window.renderUserDetailsIfOpen) window.renderUserDetailsIfOpen();
             if (Object.keys(USERS).length) renderAdminUsersList();
             renderOrdersList();
+            updateOrdersNavBadge();
             const activePageNow = document.querySelector('.page-section.active')?.id;
             if ((activePageNow === 'dashboard' || activePageNow === 'order-list') && window.loadDashboardStats) window.loadDashboardStats();
         }
@@ -10112,9 +10190,50 @@
                 AUTO_UPDATE_PRICES_ENABLED = !!data.autoApplyOnLoad;
                 const toggle = document.getElementById('autoupdate-prices-toggle');
                 if (toggle) toggle.checked = AUTO_UPDATE_PRICES_ENABLED;
+                // Only fill the box from Firestore while the admin isn't actively
+                // typing in it, so a live update elsewhere doesn't clobber a
+                // number they're mid-edit on.
+                const marginInput = document.getElementById('autoprice-margin-input');
+                if (marginInput && document.activeElement !== marginInput) {
+                    const marginPct = (data.marginPct === undefined || data.marginPct === null) ? 5 : data.marginPct;
+                    marginInput.value = marginPct;
+                }
             }, (error) => console.error('Auto Price Update setting listener error:', error));
         }
         window.listenAutoUpdatePricesSetting = listenAutoUpdatePricesSetting;
+
+        // Saves settings/pricing.marginPct — read by the telegram-worker's auto
+        // price update sweep to decide how much margin to hold above Cost when
+        // it sets Price (falls back to 5% there if this is never set).
+        async function saveAutoPriceMarginPct() {
+            const input = document.getElementById('autoprice-margin-input');
+            const statusEl = document.getElementById('autoprice-margin-status');
+            const val = parseFloat(input.value);
+            if (isNaN(val) || val < 0 || val > 100) {
+                statusEl.style.color = 'var(--danger-strong)';
+                statusEl.innerText = 'Enter a valid % between 0 and 100.';
+                return;
+            }
+            const btn = document.getElementById('save-autoprice-margin-btn');
+            const originalText = btn.innerText;
+            btn.disabled = true;
+            btn.innerText = 'Saving...';
+            try {
+                await setDoc(doc(db, "settings", "pricing"), { marginPct: val }, { merge: true });
+                statusEl.style.color = 'var(--text-secondary)';
+                statusEl.innerText = `Saved — auto price update ${val}% margin ကို ဆက်ကိုင်သွားမှာဖြစ်ပါတယ်။`;
+                logAdminActivity('Auto Price Update margin changed', val + '%');
+            } catch (error) {
+                console.error('Margin % save error:', error);
+                statusEl.style.color = 'var(--danger-strong)';
+                statusEl.innerText = 'Save failed: ' + error.message;
+                window.showToast('Failed to save margin %.', 'fail');
+            } finally {
+                btn.disabled = false;
+                btn.innerText = originalText;
+            }
+        }
+        window.saveAutoPriceMarginPct = saveAutoPriceMarginPct;
 
 
         async function onAutoUpdatePricesToggle(checked) {
