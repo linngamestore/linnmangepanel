@@ -1042,6 +1042,12 @@
         #resync-pct-value { min-width: 34px; text-align: center; font-size: 12px; font-weight: 700; color: var(--text-primary); }
         .resync-pct-go { display: flex; align-items: center; gap: 4px; border: none; background: transparent; color: var(--accent); font-size: 12.5px; font-weight: 600; cursor: pointer; padding: 4px 6px 4px 2px; white-space: nowrap; }
         .resync-pct-go:active { filter: brightness(0.85); }
+        /* Game editor price-card toolbar: grouped rows with tiny labels instead of one long wrapped row. */
+        .pkg-actions-stack { display: flex; flex-direction: column; gap: 6px; margin-top: 4px; }
+        .pkg-actions-label { font-size: 10.5px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-muted); margin: 6px 0 0; }
+        .pkg-import-row { margin-top: 2px; }
+        .pkg-autoprice-box { margin: 12px 0 8px; padding: 12px; border: 1px solid var(--border-glass); border-radius: 12px; background: var(--bg-subtle-2); }
+        .pkg-recommend-chip { display: inline-block; margin-left: 6px; padding: 1px 7px; border-radius: 999px; font-size: 10px; font-weight: 700; color: var(--accent); background: var(--accent-soft); vertical-align: middle; }
         .btn:active { transform: scale(0.97); }
         .btn-primary { background-color: var(--accent); background-image: linear-gradient(180deg, rgba(255,255,255,0.25), rgba(255,255,255,0)); color: white; box-shadow: 0 6px 16px -6px rgba(var(--accent-rgb),0.65), inset 0 1px 0 rgba(255,255,255,0.35); }
         .btn-primary:active { filter: brightness(0.94); }
@@ -3606,25 +3612,45 @@
                 <input type="file" accept="image/*" id="pkg-bulk-image-file" style="display:none;" onchange="handleBulkPkgImageSelect(this)">
                 <div id="edit-packages-list"></div>
                 <p class="pkg-tab-empty-msg" id="pkg-tab-empty-msg" style="display:none;">No packages in this tab yet — tap "+ Add Package" to add one.</p>
-                <div class="pkg-actions-row">
-                    <button class="btn btn-outline" onclick="addPackageRow()">+ Add Package</button>
-                    <button class="btn btn-outline" onclick="sortPackageRows()" title="Currency name ထဲက ဂဏန်း (100, 200...) ကို အငယ်ကနေအကြီးသို့ စီပေးမယ်, ဂဏန်းမပါတဲ့ Weekly Pass စတာတွေကို အက္ခရာစဉ်လိုက် အောက်ခြေမှာ ထားပေးမယ်"><svg class="ui-icon" style="width:13px;height:13px;"><use href="#icon-sort"></use></svg> Sort</button>
-                    <button class="btn btn-outline" onclick="copyAllPackagesText()" title="Copy every row in the current tab only"><svg class="ui-icon" style="width:13px;height:13px;"><use href="#icon-copy"></use></svg> Copy Tab</button>
-                    <!-- Pricing tools grouped together: Bulk % / Resync ±% / Check Prices all touch Cost-and-Price, so they read as one group instead of being scattered between row tools and provider imports. -->
-                    <button class="btn btn-outline" onclick="openBulkPkgModal()" title="Cost/Price အားလုံးကို % တစ်ခုတည်းနဲ့ တစ်ခါတည်းချိန်ညှိပေးမယ်"><svg class="ui-icon" style="width:13px;height:13px;"><use href="#icon-dollar"></use></svg> Bulk %</button>
-                    <div class="resync-pct-control" title="Package အားလုံးရဲ့ Price ကို လက်ရှိ Cost အပေါ်မူတည်ပြီး ရွေးထားတဲ့ % margin ပြန်ရောက်အောင် ချိန်ညှိပေးမယ် (Cost မရှိသေးတဲ့ row တွေကိုတော့ ကျော်သွားမယ်) — −/+ ကို နှိပ်ပြီး % ကို ချိန်ပါ">
+                <div class="pkg-actions-stack">
+                    <div class="pkg-actions-label">Edit</div>
+                    <div class="pkg-actions-row">
+                        <button class="btn btn-outline" onclick="addPackageRow()">+ Add Package</button>
+                        <button class="btn btn-outline" onclick="sortPackageRows()" title="Currency name ထဲက ဂဏန်း (100, 200...) ကို အငယ်ကနေအကြီးသို့ စီပေးမယ်, ဂဏန်းမပါတဲ့ Weekly Pass စတာတွေကို အက္ခရာစဉ်လိုက် အောက်ခြေမှာ ထားပေးမယ်"><svg class="ui-icon" style="width:13px;height:13px;"><use href="#icon-sort"></use></svg> Sort</button>
+                        <button class="btn btn-outline" onclick="copyAllPackagesText()" title="Copy every row in the current tab only"><svg class="ui-icon" style="width:13px;height:13px;"><use href="#icon-copy"></use></svg> Copy Tab</button>
+                    </div>
+                    <div class="pkg-actions-label">Pricing</div>
+                    <div class="pkg-actions-row">
+                        <button class="btn btn-outline" onclick="openBulkPkgModal()" title="Cost/Price အားလုံးကို % တစ်ခုတည်းနဲ့ တစ်ခါတည်းချိန်ညှိပေးမယ်"><svg class="ui-icon" style="width:13px;height:13px;"><use href="#icon-dollar"></use></svg> Bulk %</button>
+                        <div class="resync-pct-control" title="Package အားလုံးရဲ့ Price ကို လက်ရှိ Cost အပေါ်မူတည်ပြီး ရွေးထားတဲ့ % margin ပြန်ရောက်အောင် ချိန်ညှိပေးမယ် (Cost မရှိသေးတဲ့ row တွေကိုတော့ ကျော်သွားမယ်) — −/+ ကို နှိပ်ပြီး % ကို ချိန်ပါ">
                         <button type="button" class="resync-pct-btn" onclick="adjustResyncPct(-1)" aria-label="Decrease resync percent">−</button>
                         <span id="resync-pct-value">+1%</span>
                         <button type="button" class="resync-pct-btn" onclick="adjustResyncPct(1)" aria-label="Increase resync percent">+</button>
                         <button type="button" class="resync-pct-go" onclick="resyncAllPricesToMargin()"><svg class="ui-icon" style="width:13px;height:13px;"><use href="#icon-refresh"></use></svg> Resync</button>
                     </div>
-                    <button class="btn btn-outline" id="pkg-check-prices-btn" onclick="checkLivePriceChanges()" style="display:none;"><svg class="ui-icon" style="width:13px;height:13px;"><use href="#icon-refresh"></use></svg> Check Prices</button>
-                    <!-- Provider import + its own Debug button kept as adjacent pairs, instead of both Debug buttons being separated from the imports they check. -->
-                    <button class="btn btn-outline" id="g2bulk-import-btn" onclick="importG2BulkCatalogue()" style="display:none;">Import from G2Bulk</button>
-                    <button class="btn btn-outline" id="g2bulk-debug-btn" onclick="debugG2BulkServerCheck()" style="display:none;" title="Import မလုပ်ဘဲ G2Bulk ရဲ့ fields/servers raw response ကို စစ်ကြည့်မယ်"><svg class="ui-icon" style="width:13px;height:13px;"><use href="#icon-code"></use></svg> Debug</button>
-                    <button class="btn btn-outline" id="fazercard-import-btn" onclick="importFazerCardCatalogue()" style="display:none;">Import from FazerCards</button>
-                    <button class="btn btn-outline" id="fazercard-debug-btn" onclick="debugFazerCardServerCheck()" style="display:none;" title="Import မလုပ်ဘဲ FazerCards ရဲ့ fields raw response ကို စစ်ကြည့်မယ်"><svg class="ui-icon" style="width:13px;height:13px;"><use href="#icon-code"></use></svg> Debug</button>
-                    
+                        <button class="btn btn-outline" id="pkg-check-prices-btn" onclick="checkLivePriceChanges()" style="display:none;"><svg class="ui-icon" style="width:13px;height:13px;"><use href="#icon-refresh"></use></svg> Check Prices</button>
+                    </div>
+                    <div class="pkg-actions-row pkg-import-row">
+                        <button class="btn btn-outline" id="g2bulk-import-btn" onclick="importG2BulkCatalogue()" style="display:none;">Import from G2Bulk</button>
+                        <button class="btn btn-outline" id="g2bulk-debug-btn" onclick="debugG2BulkServerCheck()" style="display:none;" title="Import မလုပ်ဘဲ G2Bulk ရဲ့ fields/servers raw response ကို စစ်ကြည့်မယ်"><svg class="ui-icon" style="width:13px;height:13px;"><use href="#icon-code"></use></svg> Debug</button>
+                        <button class="btn btn-outline" id="fazercard-import-btn" onclick="importFazerCardCatalogue()" style="display:none;">Import from FazerCards</button>
+                        <button class="btn btn-outline" id="fazercard-debug-btn" onclick="debugFazerCardServerCheck()" style="display:none;" title="Import မလုပ်ဘဲ FazerCards ရဲ့ fields raw response ကို စစ်ကြည့်မယ်"><svg class="ui-icon" style="width:13px;height:13px;"><use href="#icon-code"></use></svg> Debug</button>
+                    </div>
+                </div>
+                <!-- Per-game Auto Update Price switch. ON = the daily 07:00 Worker sweep (and the admin's manual
+                     "run all") keeps THIS game's Price following its Cost at the % set in Settings. OFF = this game is
+                     skipped. Games saved before this switch existed read as ON (same as before). -->
+                <div class="pkg-autoprice-box">
+                    <div class="switch-row" style="padding:0;">
+                        <div>
+                            <span class="switch-label">Auto Update Price <span class="pkg-recommend-chip">Recommend</span></span>
+                            <p class="switch-hint" id="edit-game-autoprice-hint">Cost ပြောင်းတိုင်း Price ကို Settings မှာချိန်ထားတဲ့ % အတိုင်း အလိုအလျောက် လိုက်ညှိပေးမယ်။</p>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="edit-game-autoprice" checked onchange="onGameAutoPriceToggle()">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
                 </div>
                 <button class="btn btn-primary" id="pkg-apply-all-cost-btn" onclick="applyAllCostUpdates()" style="display:none;width:100%;justify-content:center;gap:6px;background:#FF9500;"><svg class="ui-icon" style="width:14px;height:14px;stroke:#fff;"><use href="#icon-refresh"></use></svg> <span id="pkg-apply-all-cost-label">Update All Costs</span></button>
                 <p id="pkg-price-check-status" style="font-size:11px;color:var(--text-muted);margin:-4px 0 0;"></p>
@@ -9996,6 +10022,8 @@
         // rather than refactoring applyGameCostUpdatesFromList to share code, so
         // the existing manual "Pass" badge flow stays exactly as it was.
         async function applyLiveCostUpdatesForGame(gameId, g) {
+            if (g.autoPriceUpdate === false) return 0;        // this game's Auto Update Price switch is OFF
+            if (!(AUTO_PRICE_MARGIN_LIVE > 0)) return 0;      // Settings margin 0% = feature fully inactive
             const rate = G2BULK_SETTINGS.usdRate || 4500;
             const packages = (g.packages || []).map(p => ({ ...p }));
             const sources = [];
@@ -10032,7 +10060,7 @@
                     if (liveCost === (Number(p.cost) || 0)) return;
                     changed++;
                     p.cost = liveCost;
-                    p.price = autoPriceForCost(liveCost);
+                    p.price = autoPriceForMargin(liveCost, AUTO_PRICE_MARGIN_LIVE);
                 });
             });
             if (changed > 0) {
@@ -10076,11 +10104,22 @@
         // whatever else reads it), just no longer used to trigger a run here -
         // the toggle's real effect now lives entirely in the Worker's sweep.
         let AUTO_UPDATE_PRICES_ENABLED = false;
+        // Margin % from Settings (settings/pricing.marginPct); unset = 5 (same default the Settings box shows). 0 = auto update fully off.
+        let AUTO_PRICE_MARGIN_LIVE = 5;
+        function autoPriceForMargin(cost, marginPct) {
+            if (!cost || cost <= 0 || !(marginPct > 0)) return 0;
+            const rawTarget = cost * (1 + marginPct / 100);
+            const hardCeiling = cost * (1 + (marginPct + 2) / 100);
+            let price = Math.ceil(rawTarget / 50) * 50;
+            if (price > hardCeiling) price = Math.ceil(rawTarget);
+            return price;
+        }
 
         function listenAutoUpdatePricesSetting() {
             onSnapshot(doc(db, "settings", "pricing"), (docSnap) => {
                 const data = docSnap.exists() ? docSnap.data() : {};
                 AUTO_UPDATE_PRICES_ENABLED = !!data.autoApplyOnLoad;
+                AUTO_PRICE_MARGIN_LIVE = (data.marginPct === undefined || data.marginPct === null || data.marginPct === '') ? 5 : Number(data.marginPct) || 0;
                 const toggle = document.getElementById('autoupdate-prices-toggle');
                 if (toggle) toggle.checked = AUTO_UPDATE_PRICES_ENABLED;
                 // Only fill the box from Firestore while the admin isn't actively
@@ -11549,6 +11588,8 @@
                 document.getElementById('edit-game-app-ios-scheme').value = g.appIosScheme || '';
                 document.getElementById('edit-game-app-ios-store-url').value = g.appIosStoreUrl || '';
                 document.getElementById('edit-game-popular').checked = !!g.popular;
+                document.getElementById('edit-game-autoprice').checked = g.autoPriceUpdate !== false; // missing on older games = ON
+                onGameAutoPriceToggle();
                 // Missing field on older games defaults to "required" so nothing changes for them.
                 document.getElementById('edit-game-playerid').checked = g.playerIdRequired !== false;
                 document.getElementById('edit-game-serverid').checked = g.serverIdRequired !== false;
@@ -11620,6 +11661,8 @@
                 document.getElementById('edit-game-app-ios-scheme').value = '';
                 document.getElementById('edit-game-app-ios-store-url').value = '';
                 document.getElementById('edit-game-popular').checked = false;
+                document.getElementById('edit-game-autoprice').checked = true;
+                onGameAutoPriceToggle();
                 document.getElementById('edit-game-playerid').checked = false;
                 document.getElementById('edit-game-serverid').checked = false;
                 document.getElementById('edit-game-charname').checked = false;
@@ -11809,6 +11852,16 @@
 
         
 
+        // Per-game Auto Update Price switch (game editor). Only changes the hint text here; the value is saved with Save Game.
+        function onGameAutoPriceToggle() {
+            const on = document.getElementById('edit-game-autoprice').checked;
+            const hint = document.getElementById('edit-game-autoprice-hint');
+            if (hint) hint.textContent = on
+                ? 'Cost ပြောင်းတိုင်း Price ကို Settings မှာချိန်ထားတဲ့ % အတိုင်း အလိုအလျောက် လိုက်ညှိပေးမယ်။'
+                : 'ပိတ်ထားတယ် — ဒီဂိမ်းရဲ့ Cost/Price ကို auto update မလုပ်ပါ။ ဖွင့်ထားဖို့ အကြံပြုပါတယ်။';
+        }
+        window.onGameAutoPriceToggle = onGameAutoPriceToggle;
+
         async function saveGame() {
             const gameId = document.getElementById('edit-game-id').value;
             const name = document.getElementById('edit-game-name').value.trim();
@@ -11842,6 +11895,7 @@
             const appIosScheme = document.getElementById('edit-game-app-ios-scheme').value.trim();
             const appIosStoreUrl = document.getElementById('edit-game-app-ios-store-url').value.trim();
             const popular = document.getElementById('edit-game-popular').checked;
+            const autoPriceUpdate = document.getElementById('edit-game-autoprice').checked;
             const playerIdRequired = document.getElementById('edit-game-playerid').checked;
             const serverIdRequired = playerIdRequired && document.getElementById('edit-game-serverid').checked;
             const charNameRequired = document.getElementById('edit-game-charname').checked;
@@ -11910,7 +11964,7 @@
                 // currently sit in them - without this, a tab created but left empty (or
                 // emptied out later) would vanish on reload since nothing else in the
                 // saved data would reference it.
-                const data = { name, serverName: serverName || '', image: imageUrl, banner: bannerUrl || imageUrl, bannerImages: existingBanners.length ? existingBanners : [imageUrl], packages, packageTabs: customPkgTabs.slice(), packageTabLabels: { package: builtinPkgTabLabels.package, currency: builtinPkgTabLabels.currency }, g2bulkCode: g2bulkCode || '', jcplaysProduct: jcplaysProduct || '', g2bulkVoucherCategory: g2bulkVoucherCategory || '', fazercardCategoryId: fazercardCategoryId || '', fazercardFields: fazercardCategoryId ? pendingFazerCardFields.slice() : [], fazercardServerMode: pendingFazerCardServerMode || '', fazercardServerOptions: pendingFazerCardServerOptions || [], g2bulkIdCheckCode: fazercardCategoryId ? (g2bulkIdCheckCode || '') : '', fazercardGiftCategoryId: fazercardGiftCategoryId || '', g2bulkServerMode: pendingG2BulkServerMode || '', g2bulkServerOptions: pendingG2BulkServerOptions || [], fulfillProvider: currentFulfillProvider, category: category || '', description: description || '', appAndroidPackage: appAndroidPackage || '', appAndroidScheme: appAndroidScheme || '', appAndroidStoreUrl: appAndroidStoreUrl || '', appIosScheme: appIosScheme || '', appIosStoreUrl: appIosStoreUrl || '', popular, playerIdRequired, serverIdRequired, charNameRequired };
+                const data = { name, serverName: serverName || '', image: imageUrl, banner: bannerUrl || imageUrl, bannerImages: existingBanners.length ? existingBanners : [imageUrl], packages, packageTabs: customPkgTabs.slice(), packageTabLabels: { package: builtinPkgTabLabels.package, currency: builtinPkgTabLabels.currency }, g2bulkCode: g2bulkCode || '', jcplaysProduct: jcplaysProduct || '', g2bulkVoucherCategory: g2bulkVoucherCategory || '', fazercardCategoryId: fazercardCategoryId || '', fazercardFields: fazercardCategoryId ? pendingFazerCardFields.slice() : [], fazercardServerMode: pendingFazerCardServerMode || '', fazercardServerOptions: pendingFazerCardServerOptions || [], g2bulkIdCheckCode: fazercardCategoryId ? (g2bulkIdCheckCode || '') : '', fazercardGiftCategoryId: fazercardGiftCategoryId || '', g2bulkServerMode: pendingG2BulkServerMode || '', g2bulkServerOptions: pendingG2BulkServerOptions || [], fulfillProvider: currentFulfillProvider, category: category || '', description: description || '', appAndroidPackage: appAndroidPackage || '', appAndroidScheme: appAndroidScheme || '', appAndroidStoreUrl: appAndroidStoreUrl || '', appIosScheme: appIosScheme || '', appIosStoreUrl: appIosStoreUrl || '', popular, autoPriceUpdate, playerIdRequired, serverIdRequired, charNameRequired };
 
                 if (gameId) {
                     await updateDoc(doc(db, "games", gameId), data);
@@ -18053,6 +18107,8 @@
             document.getElementById('edit-game-app-ios-scheme').value = base.appIosScheme || '';
             document.getElementById('edit-game-app-ios-store-url').value = base.appIosStoreUrl || '';
             document.getElementById('edit-game-popular').checked = !!base.popular;
+            document.getElementById('edit-game-autoprice').checked = base.autoPriceUpdate !== false;
+            onGameAutoPriceToggle();
             document.getElementById('edit-game-playerid').checked = base.playerIdRequired !== false;
             document.getElementById('edit-game-serverid').checked = base.serverIdRequired !== false;
             document.getElementById('edit-game-charname').checked = !!base.charNameRequired;
