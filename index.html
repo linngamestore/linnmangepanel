@@ -7300,6 +7300,39 @@
         // a retry (the admin clicking Start Processing again after an error)
         // resumes from the first not-yet-placed unit instead of re-placing -
         // and re-paying G2Bulk's balance for - units that already went through.
+        // The g2bulk-function webhook Worker can record a unit's COMPLETED/FAILED result
+        // into orders/{id}.g2bulkSubOrders while this function is still placing later
+        // units (instant top-ups finish in seconds). Writing our older local subOrders
+        // array back as-is would erase those results and strand the order in
+        // "Processing". So the read-merge-write happens inside ONE Firestore transaction:
+        // if the webhook writes in between, Firestore re-runs the callback with the fresh
+        // doc, so no recorded result can be lost. buildUpdate({done, terminal}) returns
+        // the fields to write; `terminal` = the webhook already finished the whole order.
+        async function writeSubOrdersMerged(orderId, subOrders, buildUpdate) {
+            const ref = doc(db, "orders", orderId);
+            const { merged, update } = await runTransaction(db, async (tx) => {
+                const snap = await tx.get(ref);
+                const fresh = snap.exists() ? snap.data() : null;
+                const freshSubs = fresh && Array.isArray(fresh.g2bulkSubOrders) ? fresh.g2bulkSubOrders : [];
+                // rebuilt from scratch on every run - the callback may execute more than once
+                const mergedSubs = subOrders.map(sub => {
+                    const f = freshSubs.find(x => x && x.index === sub.index);
+                    return (f && f.result && !sub.result) ? { ...sub, result: f.result } : { ...sub };
+                });
+                const info = {
+                    done: mergedSubs.filter(x => x.result).length,
+                    terminal: !!fresh && (fresh.status === 'Success' || fresh.status === 'Fail')
+                };
+                const upd = buildUpdate(info, mergedSubs);
+                tx.update(ref, upd);
+                return { merged: mergedSubs, update: upd };
+            });
+            // keep the caller's local array in step with what was actually saved
+            merged.forEach((m, i) => { if (m.result) subOrders[i].result = m.result; });
+            // transaction writes skip the wrapped updateDoc(), so refresh the local orders cache by hand
+            try { _mirrorOrderWrite(ref, [update]); } catch (e) { /* cache only */ }
+        }
+
         async function placeG2BulkOrder(orderId, order, btnElement) {
             if (!G2BULK_SETTINGS.enabled) {
                 window.showToast('G2Bulk is turned off (Dashboard → G2Bulk API Key → Settings). Fulfill this order manually or re-enable it.', 'fail');
@@ -7333,7 +7366,12 @@
 
                 // Reuse the same idempotency key on a retry of THIS unit (kept
                 // once generated) so G2Bulk can't charge twice for it.
-                if (!sub.idempotencyKey) sub.idempotencyKey = `${orderId}-u${sub.index}-${crypto.randomUUID().slice(0, 8)}`;
+                // G2Bulk docs: X-Idempotency-Key must be a 36-character UUID. The old
+                // "<orderId>-u<n>-<8 chars>" format isn't one, so replace any such
+                // leftover key from an earlier failed attempt (nothing was placed with it).
+                if (!sub.idempotencyKey || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(sub.idempotencyKey)) {
+                    sub.idempotencyKey = crypto.randomUUID();
+                }
 
                 let data;
                 try {
@@ -7351,7 +7389,7 @@
                     });
                     data = await res.json();
                     if (!res.ok || data.success === false) {
-                        throw new Error(data.message || 'G2Bulk rejected the order');
+                        throw new Error(data.message || data.error || (data.detail && data.detail.message) || (typeof data.detail === 'string' ? data.detail : '') || data.msg || ('G2Bulk rejected the order (HTTP ' + res.status + ')'));
                     }
                 } catch (error) {
                     // Failed before G2Bulk confirmed/accepted this unit (network
@@ -7359,7 +7397,7 @@
                     // DID get placed before this one so a retry resumes here.
                     console.error("G2Bulk place order error:", error);
                     try {
-                        await updateDoc(doc(db, "orders", orderId), { quantity, g2bulkSubOrders: subOrders });
+                        await writeSubOrdersMerged(orderId, subOrders, (info, subs) => ({ quantity, g2bulkSubOrders: subs }));
                     } catch (saveError) {
                         console.error("Save partial g2bulkSubOrders progress error:", saveError);
                     }
@@ -7378,16 +7416,20 @@
             // failure mode); surface it clearly instead so the admin can
             // reconcile manually via G2Bulk's dashboard/order_ids.
             try {
-                await updateDoc(doc(db, "orders", orderId), {
-                    status: "Processing",
-                    quantity,
-                    g2bulkSubOrders: subOrders,
-                    g2bulkSubOrdersTotal: quantity,
-                    g2bulkSubOrdersDone: 0,
-                    // Kept for back-compat with anything still reading a single
-                    // id/status (e.g. older order-detail views) - reflects unit #1.
-                    g2bulkOrderId: subOrders[0].g2bulkOrderId || null,
-                    g2bulkStatus: subOrders[0].status || 'PENDING'
+                await writeSubOrdersMerged(orderId, subOrders, (info, subs) => {
+                    const finalUpdate = {
+                        quantity,
+                        g2bulkSubOrders: subs,
+                        g2bulkSubOrdersTotal: quantity,
+                        g2bulkSubOrdersDone: info.done,
+                        // Kept for back-compat with anything still reading a single
+                        // id/status (e.g. older order-detail views) - reflects unit #1.
+                        g2bulkOrderId: subs[0].g2bulkOrderId || null
+                    };
+                    // If the webhook already finished the whole order, don't drag it back
+                    // to "Processing" or overwrite its g2bulkStatus.
+                    if (!info.terminal) { finalUpdate.status = "Processing"; finalUpdate.g2bulkStatus = subs[0].status || 'PENDING'; }
+                    return finalUpdate;
                 });
                 window.showToast(
                     quantity > 1 ? `${quantity} units placed with G2Bulk — checking for completion...` : 'Order placed with G2Bulk — checking for completion...',
@@ -7455,11 +7497,21 @@
         // (a plain single-quantity order has just one) and applies the result.
         // silent=true is used by the background auto-poller below, so it doesn't
         // pop a toast every ~25s for orders that are still just "processing".
+        // Docs: repeated failed authentication can get the IP permanently banned, and
+        // a 401 must not be retried in a loop. After a 401 the background pollers
+        // pause for 10 minutes (a manual "Check Status" tap still goes through).
+        let G2BULK_AUTH_FAIL_UNTIL = 0;
+        function g2bulkAuthFailed(silent) {
+            G2BULK_AUTH_FAIL_UNTIL = Date.now() + 10 * 60 * 1000;
+            if (!silent) window.showToast('G2Bulk rejected the API key (401). Check the key before retrying - repeated failures can get the IP banned.', 'fail');
+        }
+
         async function checkG2BulkOrderStatus(orderId, silent = false) {
             if (!G2BULK_SETTINGS.apiKey) {
                 if (!silent) window.showToast('Add your G2Bulk API key first.', 'fail');
                 return;
             }
+            if (silent && Date.now() < G2BULK_AUTH_FAIL_UNTIL) return;
             try {
                 // The background auto-poll (silent=true) runs every 25s for EVERY Processing
                 // order, and used to do a fresh getDoc() each time = 1 billed read per order
@@ -7485,10 +7537,14 @@
                         headers: { 'X-API-Key': G2BULK_SETTINGS.apiKey, 'Content-Type': 'application/json' },
                         body: JSON.stringify({ order_id: sub.g2bulkOrderId })
                     });
-                    const data = await res.json();
+                    if (res.status === 401) { g2bulkAuthFailed(silent); return; }
+                    if (res.status === 429 || res.status >= 500) continue; // back off: try again on the next poll
+                    const data = await res.json().catch(() => ({}));
                     const unitStatus = (data.order?.status || data.status || '').toUpperCase();
-                    if (unitStatus === 'COMPLETED') sub.result = 'COMPLETED';
-                    else if (unitStatus === 'FAILED' || unitStatus === 'REFUNDED') sub.result = 'FAILED';
+                    // Docs: game order status carries is_refunded - a refunded unit was not delivered.
+                    const unitRefunded = data.order?.is_refunded === true || data.is_refunded === true;
+                    if (unitRefunded || unitStatus === 'FAILED' || unitStatus === 'REFUNDED') sub.result = 'FAILED';
+                    else if (unitStatus === 'COMPLETED') sub.result = 'COMPLETED';
                     if (total > 1) await new Promise(r => setTimeout(r, 300)); // stagger multi-unit calls a touch
                 }
 
@@ -7990,7 +8046,7 @@
                         body: JSON.stringify({ game: linkedGame.g2bulkIdCheckCode, user_id: order.playerId, server_id: order.serverId || undefined })
                     });
                     const data = await res.json();
-                    if (res.ok && data.valid === 'valid' && data.name) playerName = data.name;
+                    if (res.ok && (data.valid === 'valid' || data.valid === true) && data.name) playerName = data.name;
                 } catch (error) {
                     console.error("G2Bulk fallback checkPlayerId error:", error);
                 }
@@ -8098,7 +8154,7 @@
                 });
                 data = await res.json();
                 if (!res.ok || data.success === false) {
-                    throw new Error(data.message || 'G2Bulk rejected the order');
+                    throw new Error(data.message || data.error || (data.detail && data.detail.message) || (typeof data.detail === 'string' ? data.detail : '') || data.msg || ('G2Bulk rejected the order (HTTP ' + res.status + ')'));
                 }
             } catch (error) {
                 console.error("G2Bulk voucher purchase error:", error);
@@ -8153,6 +8209,7 @@
                 if (!silent) window.showToast('Add your G2Bulk API key first.', 'fail');
                 return;
             }
+            if (silent && Date.now() < G2BULK_AUTH_FAIL_UNTIL) return 'AUTH_FAILED';
             try {
                 const url = pollUrl.startsWith('http') ? pollUrl : `https://api.g2bulk.com${pollUrl}`;
                 const res = await fetch(url, { headers: { 'X-API-Key': G2BULK_SETTINGS.apiKey } });
@@ -8168,6 +8225,9 @@
                     if (!silent) window.showToast('G2Bulk order failed/refunded.', 'fail');
                     editTelegramOrderMessage(orderId, 'Fail');
                     return 'REFUNDED';
+                } else if (res.status === 401) {
+                    g2bulkAuthFailed(silent);
+                    return 'AUTH_FAILED';
                 } else if (res.status === 404) {
                     if (!silent) window.showToast('Order not found on G2Bulk.', 'fail');
                     return 'NOT_FOUND';
@@ -8186,7 +8246,7 @@
             if (triesLeft <= 0) return;
             await new Promise(r => setTimeout(r, 4000));
             const status = await checkG2BulkVoucherDeliveryStatus(orderId, pollUrl, true);
-            if (status === 'COMPLETED' || status === 'REFUNDED' || status === 'NOT_FOUND') return;
+            if (status === 'COMPLETED' || status === 'REFUNDED' || status === 'NOT_FOUND' || status === 'AUTH_FAILED') return;
             pollG2BulkVoucherDelivery(orderId, pollUrl, triesLeft - 1);
         }
 
@@ -17009,8 +17069,13 @@
                     return sharedData;
                 }
                 return fetch(`https://api.g2bulk.com/v1/category/${encodeURIComponent(categoryId)}`)
-                    .then(res => res.json())
-                    .then(data => {
+                    .then(async res => {
+                        // 429 / 5xx must never be cached (or written to the shared Firestore
+                        // cache the store front also reads) - docs say to back off on those.
+                        const data = await res.json().catch(() => null);
+                        if (!res.ok || !data || data.success === false) {
+                            throw new Error('G2Bulk category ' + categoryId + ' failed: HTTP ' + res.status);
+                        }
                         g2bulkCategoryCache.set(categoryId, { data, ts: Date.now() });
                         writeSharedG2BulkCache(categoryId, data);
                         return data;
