@@ -171,7 +171,7 @@
                 }).join('') : '<span class="stat-card-sub-text">' + emptyText + '</span>';
             }
             function render() {
-                var dash = document.getElementById('dashboard');
+                var dash = document.getElementById('usage-page');
                 if (!dash || !dash.classList.contains('active') || !document.getElementById('usage-grid')) return;
                 var v = merge(load(), pending);
                 var writes = v.fs.w + v.fs.d;
@@ -2319,7 +2319,46 @@
                 </div>
                 
             </div>
+        </div>
 
+        <!-- API BALANCE PAGE — live provider balances (G2Bulk / JCPlays / FazerCards). -->
+        <div id="analytics" class="page-section">
+            <h2 class="title-header">
+                <span>API Balance</span>
+                <button class="btn btn-outline" style="flex:unset; padding: 4px 10px; font-size:12px;" onclick="renderAnalytics()">Refresh</button>
+            </h2>
+
+            <div class="stat-grid" style="margin-top:0;">
+                <div class="stat-card">
+                    <div class="stat-card-top">
+                        <span class="stat-card-label">G2Bulk</span>
+                        <div class="stat-card-icon" style="background:#7C3AED;"><svg class="ui-icon" style="color:#fff;"><use href="#icon-g2bulk"></use></svg></div>
+                    </div>
+                    <div class="stat-card-value" id="an-g2bulk-balance-display" style="color:var(--accent);font-size:17px;">—</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-card-top">
+                        <span class="stat-card-label">JCPlays</span>
+                        <div class="stat-card-icon" style="background:#16A34A;"><svg class="ui-icon"><use href="#icon-key"></use></svg></div>
+                    </div>
+                    <div class="stat-card-value" id="an-jcplays-balance-display" style="color:var(--accent);font-size:17px;">—</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-card-top">
+                        <span class="stat-card-label">FazerCards</span>
+                        <div class="stat-card-icon" style="background:#2563EB;"><svg class="ui-icon"><use href="#icon-key"></use></svg></div>
+                    </div>
+                    <div class="stat-card-value" id="an-fazercard-balance-display" style="color:var(--accent);font-size:17px;">—</div>
+                </div>
+                
+            </div>
+        </div>
+
+        <!-- USAGE PAGE (own tab under Setting) -->
+        <div id="usage-page" class="page-section">
+            <h2 class="title-header">
+                <span>Usage</span>
+            </h2>
             <!-- REQUEST USAGE — how many Firestore operations and Cloudflare Worker
                  requests this admin panel is making (today, this device). Fed by
                  window.LinnUsage (head script + Firestore wrappers in the module script). -->
@@ -2423,39 +2462,6 @@
                 <div class="usage-bar"><i id="fs-real-deletes-bar"></i></div>
             </div>
             <p class="stat-card-sub-text" style="line-height:1.5;">The cards and lists above count only what this admin panel sends from this device today (local time), and Firestore reads are estimated from what the SDK delivers. The "Cloudflare · all traffic" card is the real account-wide total from Cloudflare Analytics (UTC day, storefront included; bar = 100K free-plan limit). For exact Firestore totals see Firebase Console → Usage.</p>
-        </div>
-
-        <!-- API BALANCE PAGE — live provider balances (G2Bulk / JCPlays / FazerCards). -->
-        <div id="analytics" class="page-section">
-            <h2 class="title-header">
-                <span>API Balance</span>
-                <button class="btn btn-outline" style="flex:unset; padding: 4px 10px; font-size:12px;" onclick="renderAnalytics()">Refresh</button>
-            </h2>
-
-            <div class="stat-grid" style="margin-top:0;">
-                <div class="stat-card">
-                    <div class="stat-card-top">
-                        <span class="stat-card-label">G2Bulk</span>
-                        <div class="stat-card-icon" style="background:#7C3AED;"><svg class="ui-icon" style="color:#fff;"><use href="#icon-g2bulk"></use></svg></div>
-                    </div>
-                    <div class="stat-card-value" id="an-g2bulk-balance-display" style="color:var(--accent);font-size:17px;">—</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-card-top">
-                        <span class="stat-card-label">JCPlays</span>
-                        <div class="stat-card-icon" style="background:#16A34A;"><svg class="ui-icon"><use href="#icon-key"></use></svg></div>
-                    </div>
-                    <div class="stat-card-value" id="an-jcplays-balance-display" style="color:var(--accent);font-size:17px;">—</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-card-top">
-                        <span class="stat-card-label">FazerCards</span>
-                        <div class="stat-card-icon" style="background:#2563EB;"><svg class="ui-icon"><use href="#icon-key"></use></svg></div>
-                    </div>
-                    <div class="stat-card-value" id="an-fazercard-balance-display" style="color:var(--accent);font-size:17px;">—</div>
-                </div>
-                
-            </div>
         </div>
 
         <!-- SETTINGS PAGE (own sidebar tab, moved out of Dashboard) -->
@@ -4193,7 +4199,7 @@
             'g2bulk': 'group-setting', 'jcplays': 'group-setting', 'api-docs': 'group-setting',
             'payment-list': 'group-wallet', 'topup-list': 'group-wallet',
             'user-list': 'group-userlist', 'tier-list': 'group-userlist',
-            'settings': 'group-setting', 'notify-list': 'group-setting', 'ticker-list': 'group-setting'
+            'usage-page': 'group-setting', 'settings': 'group-setting', 'notify-list': 'group-setting', 'ticker-list': 'group-setting'
         };
         function showPage(pageId) {
             // Admin Broadcast (Notify) removed — send anyone still routed here to Settings.
@@ -4208,7 +4214,7 @@
             window.scrollTo(0,0);
             if ((pageId === 'dashboard' || pageId === 'order-list') && window.loadDashboardStats) window.loadDashboardStats();
             if (pageId === 'analytics' && window.renderAnalytics) window.renderAnalytics();
-            if (pageId === 'dashboard' && window.LinnUsage) window.LinnUsage.render();
+            if (pageId === 'usage-page' && window.LinnUsage) window.LinnUsage.render();
             // Cloudflare/Firestore usage no longer auto-loads (saves Worker requests); use the Refresh buttons.
             if (pageId === 'g2bulk' && window.refreshG2BulkBalance) window.refreshG2BulkBalance();
             if (['order-list', 'analytics', 'user-list'].includes(pageId) && window.ensureOrdersLoaded) window.ensureOrdersLoaded();
@@ -4314,6 +4320,7 @@
             setting: { title: 'Setting', items: [
                 { label: 'API', icon: '#icon-plug', group: 'api', dotId: 'api-nav-low-dot' },
                 { label: 'General', icon: '#icon-gear', run: () => showPage('settings') },
+                { label: 'Usage', icon: '#icon-trending-up', run: () => showPage('usage-page') },
                 { label: 'Ticker', icon: '#icon-megaphone', run: () => showPage('ticker-list') }
             ]}
         };
