@@ -1822,6 +1822,8 @@
         .game-banner-thumb { position:relative; width:74px; aspect-ratio:16/9; border-radius:7px; overflow:hidden; background:var(--bg-subtle); border:1px solid var(--border-glass); }
         .game-banner-thumb img { width:100%; height:100%; object-fit:cover; display:block; }
         .game-banner-thumb button { position:absolute; top:2px; right:2px; width:17px; height:17px; border:0; border-radius:50%; background:rgba(0,0,0,.7); color:#fff; cursor:pointer; font-size:12px; line-height:15px; }
+        /* Games page: Refresh / Reorder / Add Server / Copy Names / + Add only show while Edit Mode is On */
+        #game-list:not(.game-edit-on) .game-edit-only { display: none !important; }
     </style>
     <script>
         // Applied synchronously (before first paint) to avoid a flash of the
@@ -2935,12 +2937,12 @@
                 <button type="button" class="game-list-tab-btn" id="game-list-tab-software" onclick="showGameListTab('software')">Software</button>
             </div>
             <div class="pkg-actions-row" style="margin:-8px 0 14px;">
-                <button class="btn btn-outline" onclick="window.refreshGames && window.refreshGames()">↻ Refresh</button>
-                <button class="btn btn-outline" onclick="openGameReorder()">↕ Reorder</button>
-                <button class="btn btn-outline" onclick="openAddServerPicker()">+ Add Server</button>
-                <button class="btn btn-outline" onclick="copyAllGameNames()">📋 Copy Names</button>
+                <button class="btn btn-outline game-edit-only" onclick="window.refreshGames && window.refreshGames()">↻ Refresh</button>
+                <button class="btn btn-outline game-edit-only" onclick="openGameReorder()">↕ Reorder</button>
+                <button class="btn btn-outline game-edit-only" onclick="openAddServerPicker()">+ Add Server</button>
+                <button class="btn btn-outline game-edit-only" onclick="copyAllGameNames()">📋 Copy Names</button>
                 <button type="button" class="btn btn-outline" id="game-edit-mode-btn" onclick="toggleGameListEditMode()">✏️ Edit Mode: Off</button>
-                <button class="btn btn-primary" onclick="openGameEditor()">+ Add</button>
+                <button class="btn btn-primary game-edit-only" onclick="openGameEditor()">+ Add</button>
             </div>
             <div style="display:flex; align-items:center; gap:8px; margin-bottom:14px;">
                 <div class="admin-search-wrap" style="flex:1; margin-bottom:0;">
@@ -3013,8 +3015,6 @@
                 <span>Active Orders</span>
                 <span style="display:flex;gap:6px;flex-wrap:wrap;">
                     <button class="btn btn-outline" style="flex:unset; padding: 4px 10px; font-size:12px;" onclick="exportOrdersCSV()"><svg class="ui-icon" style="width:13px;height:13px;"><use href="#icon-download"></use></svg> Export CSV</button>
-                    <button class="btn btn-outline" style="flex:unset; padding: 4px 10px; font-size:12px;" onclick="cleanAllCompletedOrders()" title="Hide all Success/Fail orders from this list">Clean Completed</button>
-                    <button class="btn btn-outline" id="toggle-cleaned-btn" style="flex:unset; padding: 4px 10px; font-size:12px;" onclick="toggleShowCleanedOrders(); this.innerText = showCleanedOrders ? 'Show Active' : 'Show Cleaned';">Show Cleaned</button>
                     <button class="btn btn-primary" style="flex:unset; padding: 4px 10px; font-size:12px;" onclick="fetchOrders()">Refresh</button>
                 </span>
             </h2>
@@ -3621,14 +3621,13 @@
                     </div>
                     <div class="pkg-actions-label">Pricing</div>
                     <div class="pkg-actions-row">
-                        <button class="btn btn-outline" onclick="openBulkPkgModal()" title="Cost/Price အားလုံးကို % တစ်ခုတည်းနဲ့ တစ်ခါတည်းချိန်ညှိပေးမယ်"><svg class="ui-icon" style="width:13px;height:13px;"><use href="#icon-dollar"></use></svg> Bulk %</button>
                         <div class="resync-pct-control" title="Package အားလုံးရဲ့ Price ကို လက်ရှိ Cost အပေါ်မူတည်ပြီး ရွေးထားတဲ့ % margin ပြန်ရောက်အောင် ချိန်ညှိပေးမယ် (Cost မရှိသေးတဲ့ row တွေကိုတော့ ကျော်သွားမယ်) — −/+ ကို နှိပ်ပြီး % ကို ချိန်ပါ">
                         <button type="button" class="resync-pct-btn" onclick="adjustResyncPct(-1)" aria-label="Decrease resync percent">−</button>
                         <span id="resync-pct-value">+1%</span>
                         <button type="button" class="resync-pct-btn" onclick="adjustResyncPct(1)" aria-label="Increase resync percent">+</button>
                         <button type="button" class="resync-pct-go" onclick="resyncAllPricesToMargin()"><svg class="ui-icon" style="width:13px;height:13px;"><use href="#icon-refresh"></use></svg> Resync</button>
                     </div>
-                        <button class="btn btn-outline" id="pkg-check-prices-btn" onclick="checkLivePriceChanges()" style="display:none;"><svg class="ui-icon" style="width:13px;height:13px;"><use href="#icon-refresh"></use></svg> Check Prices</button>
+                        <button class="btn btn-outline" id="pkg-check-prices-btn" onclick="checkLivePriceChanges()" style="display:none !important;"><svg class="ui-icon" style="width:13px;height:13px;"><use href="#icon-refresh"></use></svg> Check Prices</button>
                     </div>
                     <div class="pkg-actions-row pkg-import-row">
                         <button class="btn btn-outline" id="g2bulk-import-btn" onclick="importG2BulkCatalogue()" style="display:none;">Import from G2Bulk</button>
@@ -9392,6 +9391,8 @@
         let gameListEditMode = false;
         function toggleGameListEditMode() {
             gameListEditMode = !gameListEditMode;
+            const glPage = document.getElementById('game-list');
+            if (glPage) glPage.classList.toggle('game-edit-on', gameListEditMode);
             const btn = document.getElementById('game-edit-mode-btn');
             if (btn) {
                 btn.innerText = `✏️ Edit Mode: ${gameListEditMode ? 'On' : 'Off'}`;
@@ -18487,5 +18488,98 @@
         // immediately on returning instead of waiting for the next tick.
         
     </script>
+
+<!-- Laptop keyboard shortcuts (desktop only) -->
+<script>
+(function(){
+  var pages={'1':'dashboard','2':'order-list','3':'game-list','4':'topup-list','5':'user-list','6':'settings','7':'payment-list','8':'tier-list','9':'ticker-list'};
+  var rows=[
+    ['Go to','',''],
+    ['1 - 9','Dashboard, Orders, Games, Top Ups, Users, Settings, Payments, VIP Tiers, Ticker','Ctrl+Alt+1-9 works too'],
+    ['Search','',''],
+    ['/  or  Ctrl+K','Focus the search bar of this page',''],
+    ['Orders','',''],
+    ['R  or  Ctrl+Alt+R','Refresh orders / users',''],
+    ['Ctrl+Alt+E','Export CSV',''],
+    ['Ctrl+Alt+A','Select all pending orders',''],
+    ['Games','',''],
+    ['Ctrl+Alt+N','New game / payment method / package (in editor)',''],
+    ['Ctrl+Alt+M','Games Edit Mode on/off',''],
+    ['Game Editor','',''],
+    ['Ctrl+S  or  Ctrl+Enter','Save game',''],
+    ['Ctrl+Alt+O','Sort packages',''],
+    ['Ctrl+Alt+C','Copy Tab',''],
+    ['Esc','Close popup / leave editor',''],
+    ['General','',''],
+    ['Ctrl+Alt+T','Theme picker',''],
+    ['?  or  Ctrl+/','This help','']
+  ];
+  var help=null;
+  function typing(t){return t&&(/^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName)||t.isContentEditable);}
+  function openModals(){return document.querySelectorAll('.modal-overlay.show');}
+  function active(id){return !!document.querySelector('#'+id+'.active');}
+  function call(n){if(typeof window[n]==='function'){window[n].apply(null,[].slice.call(arguments,1));return true;}return false;}
+  function click(sel){var el=document.querySelector(sel);if(el){el.click();return true;}return false;}
+  function toggleHelp(){
+    if(help){help.remove();help=null;return;}
+    help=document.createElement('div');
+    help.style.cssText='position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;padding:16px';
+    help.onclick=toggleHelp;
+    var h='<div style="background:#fff;color:#111;border-radius:14px;padding:16px 20px;font:13.5px/1.7 system-ui,sans-serif;max-width:560px;width:100%;max-height:86vh;overflow:auto"><b style="font-size:15px">Keyboard shortcuts</b>';
+    rows.forEach(function(r){
+      if(!r[1]){h+='<div style="margin-top:10px;font-weight:700;color:#2563eb">'+r[0]+'</div>';return;}
+      h+='<div style="display:flex;gap:12px;border-bottom:1px solid #eee;padding:2px 0"><span style="flex:0 0 190px;font-family:ui-monospace,monospace;font-size:12.5px">'+r[0]+'</span><span>'+r[1]+(r[2]?' <span style="color:#888">('+r[2]+')</span>':'')+'</span></div>';
+    });
+    help.innerHTML=h+'</div>';
+    document.body.appendChild(help);
+  }
+  function focusSearch(){
+    var i=document.querySelector('.page-section.active input[id$="-search"]');
+    if(i){i.focus();i.select();return true;}return false;
+  }
+  function go(k){if(pages[k]&&typeof showPage==='function'){showPage(pages[k]);return true;}return false;}
+
+  document.addEventListener('keydown',function(e){
+    var k=e.key, low=(k||'').toLowerCase(), ctrl=e.ctrlKey||e.metaKey, alt=e.altKey;
+    if(k==='Escape'){
+      if(help){toggleHelp();return;}
+      var m=openModals();
+      if(m.length){var c=m[m.length-1].querySelector('.modal-close');if(c){e.preventDefault();c.click();}return;}
+      if(active('game-editor-page')&&!typing(e.target)){e.preventDefault();call('closeGameEditor');}
+      return;
+    }
+    if(ctrl&&!alt){
+      if(low==='k'){e.preventDefault();focusSearch();return;}
+      if(k==='/'){e.preventDefault();toggleHelp();return;}
+      if((low==='s'||k==='Enter')&&active('game-editor-page')&&!openModals().length){e.preventDefault();call('saveGame');return;}
+      return;
+    }
+    if(ctrl&&alt){
+      if(openModals().length)return;
+      var done=false;
+      if(pages[k]){done=go(k);}
+      else if(low==='t'){done=call('openThemeSheet');}
+      else if(low==='r'){done=active('order-list')?call('fetchOrders'):active('user-list')?call('fetchUsers'):false;}
+      else if(low==='e'){done=active('order-list')&&call('exportOrdersCSV');}
+      else if(low==='a'){done=active('order-list')&&click('#order-select-all');}
+      else if(low==='m'){done=active('game-list')&&call('toggleGameListEditMode');}
+      else if(low==='n'){
+        if(active('game-editor-page'))done=call('addPackageRow');
+        else if(active('game-list'))done=call('openGameEditor');
+        else if(active('payment-list'))done=call('openPaymentEditor');
+      }
+      else if(low==='o'){done=active('game-editor-page')&&call('sortPackageRows');}
+      else if(low==='c'){done=active('game-editor-page')&&call('copyAllPackagesText');}
+      if(done)e.preventDefault();
+      return;
+    }
+    if(ctrl||alt||typing(e.target)||openModals().length)return;
+    if(pages[k]){e.preventDefault();go(k);return;}
+    if(k==='/'){if(focusSearch())e.preventDefault();return;}
+    if(low==='r'&&active('order-list')){e.preventDefault();call('fetchOrders');return;}
+    if(k==='?'){e.preventDefault();toggleHelp();}
+  });
+})();
+</script>
 </body>
 </html>
