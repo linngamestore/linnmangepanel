@@ -8,14 +8,11 @@
          debugging. Loaded as a plain script (not type="module") so it still
          runs even if the main Firebase module script below fails entirely. -->
     <script>
-        // Debug console (eruda) — turned ON by default for now so errors are
-        // visible right on the phone (tap the floating button in the corner →
-        // Console tab). Note: this loads a third-party inspector script from
-        // a CDN on every visit, which isn't something you'd normally want
-        // permanently on an admin panel holding provider API keys — once
-        // debugging is done, consider setting ERUDA_DEFAULT_ON back to false
-        // below (it can still be turned on per-device with #debug in the URL).
-        var ERUDA_DEFAULT_ON = true;
+        // Debug console (eruda) — OFF by default so its floating gear button
+        // no longer sits on top of the UI. Open ...admin.html#debug (or run
+        // localStorage.setItem('linn_debug','1') once in Eruda/devtools) on a
+        // phone to turn it back on for that device when actually debugging.
+        var ERUDA_DEFAULT_ON = false;
         (function () {
             try {
                 if (ERUDA_DEFAULT_ON || location.hash === '#debug' || localStorage.getItem('linn_debug') === '1') {
@@ -793,17 +790,21 @@
         .donut-legend-row b { color: var(--text-primary); font-weight: 600; flex-shrink: 0; }
         .donut-legend-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 7px; flex-shrink: 0; }
 
-        .order-stat-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 14px; }
-        .order-stat-card { border-radius: 16px; padding: 13px 14px; color: #fff; position: relative; overflow: hidden; box-shadow: var(--shadow-soft); min-width: 0; }
-        .order-stat-card h5 { font-size: 12px; font-weight: 500; opacity: 0.85; margin-bottom: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .order-stat-card .val { font-size: 23px; font-weight: 600; letter-spacing: -0.3px; }
-        .order-stat-card .sub { display: flex; align-items: center; gap: 6px; margin-top: 8px; }
-        .order-stat-card .sub-label { font-size: 10px; opacity: 0.7; }
+        .order-stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 14px; }
+        .order-stat-card { border-radius: 14px; padding: 10px 8px; color: #fff; position: relative; overflow: hidden; box-shadow: var(--shadow-soft); min-width: 0; }
+        .order-stat-card h5 { font-size: 10.5px; font-weight: 500; opacity: 0.85; margin-bottom: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .order-stat-card .val { font-size: 18px; font-weight: 600; letter-spacing: -0.3px; }
+        .order-stat-card .sub { display: flex; align-items: center; gap: 4px; margin-top: 5px; }
+        .order-stat-card .sub-label { font-size: 8.5px; opacity: 0.7; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .order-stat-card .stat-delta { background: rgba(255,255,255,0.22); color: #fff; }
 
         @media (min-width: 640px) {
             .stat-grid { grid-template-columns: repeat(4, 1fr); }
-            .order-stat-grid { grid-template-columns: repeat(3, 1fr); }
+            .order-stat-card { padding: 13px 14px; border-radius: 16px; }
+            .order-stat-card h5 { font-size: 12px; margin-bottom: 10px; }
+            .order-stat-card .val { font-size: 23px; }
+            .order-stat-card .sub { gap: 6px; margin-top: 8px; }
+            .order-stat-card .sub-label { font-size: 10px; }
             .dashboard-charts-row { display: grid; grid-template-columns: 1.3fr 1fr; gap: 12px; align-items: start; }
         }
 
@@ -2424,54 +2425,13 @@
             <p class="stat-card-sub-text" style="line-height:1.5;">The cards and lists above count only what this admin panel sends from this device today (local time), and Firestore reads are estimated from what the SDK delivers. The "Cloudflare · all traffic" card is the real account-wide total from Cloudflare Analytics (UTC day, storefront included; bar = 100K free-plan limit). For exact Firestore totals see Firebase Console → Usage.</p>
         </div>
 
-        <!-- ANALYTICS PAGE — repeat-purchase rate, retention, churn, top spenders.
-             Computed client-side from the ORDERS/USERS caches already kept in sync
-             for the Orders/Users pages, so it needs no extra Firestore reads. -->
+        <!-- API BALANCE PAGE — live provider balances (G2Bulk / JCPlays / FazerCards). -->
         <div id="analytics" class="page-section">
             <h2 class="title-header">
-                <span>Analytics</span>
+                <span>API Balance</span>
                 <button class="btn btn-outline" style="flex:unset; padding: 4px 10px; font-size:12px;" onclick="renderAnalytics()">Refresh</button>
             </h2>
 
-            <div class="stat-grid">
-                <div class="stat-card">
-                    <div class="stat-card-top">
-                        <span class="stat-card-label">Repeat Purchase Rate</span>
-                        <div class="stat-card-icon" style="background:#8B5CF6;"><svg class="ui-icon"><use href="#icon-refresh"></use></svg></div>
-                    </div>
-                    <div class="stat-card-value" id="an-repeat-rate">...</div>
-                    <div class="stat-card-sub"><span class="stat-card-sub-text" id="an-repeat-rate-sub">Customers with 2+ orders</span></div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-card-top">
-                        <span class="stat-card-label">30-Day Retention</span>
-                        <div class="stat-card-icon" style="background:#34D399;"><svg class="ui-icon"><use href="#icon-users"></use></svg></div>
-                    </div>
-                    <div class="stat-card-value" id="an-retention-rate">...</div>
-                    <div class="stat-card-sub"><span class="stat-card-sub-text">Bought again within 30 days</span></div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-card-top">
-                        <span class="stat-card-label">Churned Customers</span>
-                        <div class="stat-card-icon" style="background:#FB7185;"><svg class="ui-icon"><use href="#icon-x-circle"></use></svg></div>
-                    </div>
-                    <div class="stat-card-value" id="an-churn-count">...</div>
-                    <div class="stat-card-sub"><span class="stat-card-sub-text">No order in 60+ days</span></div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-card-top">
-                        <span class="stat-card-label">Avg. Order Value</span>
-                        <div class="stat-card-icon" style="background:#3B82F6;"><svg class="ui-icon"><use href="#icon-dollar"></use></svg></div>
-                    </div>
-                    <div class="stat-card-value" id="an-aov">...</div>
-                    <div class="stat-card-sub"><span class="stat-card-sub-text">Successful orders only</span></div>
-                </div>
-            </div>
-
-            <div class="dash-section-label" style="display:flex;align-items:center;justify-content:space-between;">
-                <span>API Balances</span>
-                <button class="btn btn-outline" style="flex:unset; padding: 3px 10px; font-size:11px;" onclick="refreshAllApiBalances()">Refresh</button>
-            </div>
             <div class="stat-grid" style="margin-top:0;">
                 <div class="stat-card">
                     <div class="stat-card-top">
@@ -2495,11 +2455,6 @@
                     <div class="stat-card-value" id="an-fazercard-balance-display" style="color:var(--accent);font-size:17px;">—</div>
                 </div>
                 
-            </div>
-
-            <div class="dash-section-label">Top Spenders</div>
-            <div id="an-top-spenders-container" class="admin-card" style="margin-top:0;">
-                <p class="empty-msg">Loading analytics...</p>
             </div>
         </div>
 
@@ -4085,8 +4040,8 @@
                 <p id="tg-status" style="font-size:12px;color:var(--text-secondary);display:none;margin-top:8px;"></p>
             </div>
             <div class="modal-footer" style="flex-wrap:wrap;">
-                <button class="btn btn-outline" id="test-tg-btn" style="flex:1 1 45%;" onclick="sendTestTelegramMessage()">Send Test Message</button>
-                <button class="btn btn-outline" id="test-daily-summary-btn" style="flex:1 1 45%;" onclick="sendDailySummaryNow()">Send Today's Summary Now</button>
+                <button class="btn btn-outline" id="test-tg-btn" style="flex:1 1 45%;padding:7px 8px;font-size:12px;" onclick="sendTestTelegramMessage()">Test Message</button>
+                <button class="btn btn-outline" id="test-daily-summary-btn" style="flex:1 1 45%;padding:7px 8px;font-size:12px;" onclick="sendDailySummaryNow()">Today's Summary</button>
                 <button class="btn btn-primary" id="save-tg-btn" style="flex:1 1 100%;" onclick="saveTelegramBotSettings()">Save</button>
             </div>
         </div>
@@ -4332,7 +4287,7 @@
         const NAV_GROUPS = {
             dashboard: { title: 'Dashboard', items: [
                 { label: 'Dashboard', icon: '#icon-trending-up', run: () => showPage('dashboard') },
-                { label: 'Analytics', icon: '#icon-bar-chart', run: () => showPage('analytics') }
+                { label: 'API Balance', icon: '#icon-bar-chart', run: () => showPage('analytics') }
             ]},
             game: { title: 'Game', items: [
                 { label: 'Direct', icon: '#icon-gamepad', run: () => showGameListTab('direct') },
@@ -9265,78 +9220,9 @@
         }
         window.refreshTotalUsersStat = refreshTotalUsersStat;
 
-        // ---------- Analytics page ----------
-        // Everything here is computed client-side from the ORDERS/USERS caches
-        // (both one-shot getDocs() caches, loaded lazily when their own tab is
-        // first opened) — no extra Firestore reads needed here.
+        // ---------- API Balance page ----------
         function renderAnalytics() {
             if (window.refreshAllApiBalances) window.refreshAllApiBalances();
-            const successOrders = Object.values(ORDERS).filter(o => o.status === 'Success' && o.userId && matchesCurrentStore(o));
-            const now = Date.now();
-            const DAY = 24 * 60 * 60 * 1000;
-
-            // Per-customer: order count, total spend, and last purchase time.
-            const perCustomer = {};
-            successOrders.forEach(o => {
-                const t = o.timestamp ? o.timestamp.toMillis() : 0;
-                const rec = perCustomer[o.userId] || (perCustomer[o.userId] = { count: 0, spend: 0, last: 0 });
-                rec.count++;
-                rec.spend += Number(o.price) || 0;
-                if (t > rec.last) rec.last = t;
-            });
-            const customerIds = Object.keys(perCustomer);
-
-            // Repeat purchase rate: share of paying customers with 2+ successful orders.
-            const repeatCount = customerIds.filter(id => perCustomer[id].count >= 2).length;
-            const repeatRate = customerIds.length ? (repeatCount / customerIds.length * 100) : 0;
-            document.getElementById('an-repeat-rate').innerText = customerIds.length ? repeatRate.toFixed(1) + '%' : 'N/A';
-            document.getElementById('an-repeat-rate-sub').innerText = `${repeatCount} of ${customerIds.length} customers`;
-
-            // 30-day retention: of customers who last bought in the 30-60 day window,
-            // what share also bought again in the most recent 30 days.
-            const prevWindowIds = customerIds.filter(id => {
-                const last = perCustomer[id].last;
-                return last >= now - 60 * DAY && last < now - 30 * DAY;
-            });
-            const alsoRecentIds = prevWindowIds.filter(id => successOrders.some(o =>
-                o.userId === id && o.timestamp && (now - o.timestamp.toMillis()) <= 30 * DAY
-            ));
-            const retentionRate = prevWindowIds.length ? (alsoRecentIds.length / prevWindowIds.length * 100) : null;
-            document.getElementById('an-retention-rate').innerText = retentionRate === null ? 'N/A' : retentionRate.toFixed(1) + '%';
-
-            // Churn: customers with a purchase history whose most recent order is 60+ days old.
-            const churnCount = customerIds.filter(id => (now - perCustomer[id].last) >= 60 * DAY).length;
-            document.getElementById('an-churn-count').innerText = churnCount.toLocaleString();
-
-            // Average order value across all successful orders.
-            const totalRevenue = successOrders.reduce((sum, o) => sum + (Number(o.price) || 0), 0);
-            const aov = successOrders.length ? (totalRevenue / successOrders.length) : 0;
-            document.getElementById('an-aov').innerText = Math.round(aov).toLocaleString() + ' MMK';
-
-            // Top 10 spenders leaderboard.
-            const topSpenders = customerIds
-                .map(id => ({ id, ...perCustomer[id] }))
-                .sort((a, b) => b.spend - a.spend)
-                .slice(0, 10);
-            const container = document.getElementById('an-top-spenders-container');
-            if (!container) return;
-            if (topSpenders.length === 0) {
-                container.innerHTML = '<p class="empty-msg">No successful orders yet.</p>';
-                return;
-            }
-            container.innerHTML = topSpenders.map((c, i) => {
-                const u = USERS[c.id];
-                const displayName = (u && u.name && u.name.trim()) ? u.name.trim() : (u && u.guestId) || c.id;
-                return `
-                <div class="tx-row">
-                    <div class="tx-row-icon" style="background:var(--accent-soft);color:var(--accent);font-size:12px;font-weight:600;">#${i + 1}</div>
-                    <div class="tx-row-info">
-                        <div class="tx-row-title">${escapeHtml(displayName)}</div>
-                        <div class="tx-row-sub">${c.count} order${c.count === 1 ? '' : 's'}</div>
-                    </div>
-                    <div class="tx-row-amount" style="color:var(--accent);">${c.spend.toLocaleString()} MMK</div>
-                </div>`;
-            }).join('');
         }
         window.renderAnalytics = renderAnalytics;
 
@@ -11621,6 +11507,23 @@
 
             if (gameId && GAMES[gameId]) {
                 const g = GAMES[gameId];
+                // Rebuild each saved package as its own row — edit-packages-list
+                // was just cleared above and otherwise stays empty forever for
+                // an existing game, since nothing else ever refills it from
+                // g.packages. Provider isn't stored as its own field (see
+                // saveGame): addPackageRow infers it from which of the
+                // g2bulk/jcplays/fazercardOfferId args is non-empty, exactly
+                // matching how saveGame only wrote the field matching the
+                // row's own provider in the first place.
+                (Array.isArray(g.packages) ? g.packages : []).forEach(p => {
+                    addPackageRow(
+                        p.amount || '', p.cost || 0, p.price || 0,
+                        p.g2bulk || '', p.jcplays || '', p.image || '',
+                        p.type || 'currency', p.tab || p.type || 'currency', false,
+                        p.voucherId || '', p.fazercardOfferId || '', p.fazercardGiftCardId || '',
+                        null, p.badge || ''
+                    );
+                });
                 // If this game name has more than one server variant, show
                 // which one is currently open right in the title — makes it
                 // obvious you're editing Malaysia's prices and not Global's
@@ -15082,6 +14985,7 @@
                 await setDoc(doc(db, "settings", "telegramBot"), { botToken, chatId, webhookUrl, webhookSecret, botUsername, enabled }, { merge: true });
                 logAdminActivity('Saved Telegram Bot settings', enabled ? 'Enabled' : 'Disabled');
                 window.showToast('Telegram Bot settings saved!', 'success');
+                closeTelegramBotModal();
                 if (enabled && botToken) startTelegramPollingOnce();
             } catch (error) {
                 console.error('Save Telegram settings error:', error);
