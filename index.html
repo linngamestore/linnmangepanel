@@ -1824,6 +1824,7 @@
         .game-banner-thumb button { position:absolute; top:2px; right:2px; width:17px; height:17px; border:0; border-radius:50%; background:rgba(0,0,0,.7); color:#fff; cursor:pointer; font-size:12px; line-height:15px; }
         /* Games page: Refresh / Reorder / Add Server / Copy Names / + Add only show while Edit Mode is On */
         #game-list:not(.game-edit-on) .game-edit-only { display: none !important; }
+            .fulfill-hide { display: none !important; }
     </style>
     <script>
         // Applied synchronously (before first paint) to avoid a flash of the
@@ -3499,7 +3500,7 @@
                                 <button type="button" class="pkg-type-tab" data-provider="g2bulk_voucher" onclick="setFulfillProvider('g2bulk_voucher')">Vouchers</button>
                                 <button type="button" class="pkg-type-tab" data-provider="jcplays" onclick="setFulfillProvider('jcplays')">JCPlays (Code)</button>
                                 <button type="button" class="pkg-type-tab" data-provider="fazercard_giftcard" onclick="setFulfillProvider('fazercard_giftcard')">Gift Cards (FazerCards)</button>
-                                <button type="button" class="pkg-type-tab" data-provider="manual" onclick="setFulfillProvider('manual')">Manual</button>
+                                <button type="button" class="pkg-type-tab" data-provider="voucher_manual" onclick="setFulfillProvider('voucher_manual')">Manual</button>
                             </div>
                         </div>
                     </div>
@@ -4322,7 +4323,8 @@
             ]},
             game: { title: 'Game', items: [
                 { label: 'Direct', icon: '#icon-gamepad', run: () => showGameListTab('direct') },
-                { label: 'Voucher', icon: '#icon-gift', run: () => showGameListTab('voucher') }
+                { label: 'Voucher', icon: '#icon-gift', run: () => showGameListTab('voucher') },
+                { label: 'Software', icon: '#icon-grid', run: () => showGameListTab('software') }
             ]},
             wallet: { title: 'Wallet', items: [
                 { label: 'Payment', icon: '#icon-wallet', run: () => showPage('payment-list') },
@@ -9435,7 +9437,7 @@
         // filter, the search-scoped "Copy Names" action, and the "Add
         // Server" picker, so all three always agree with each other.
         function gameListTabFor(g) {
-            if (['g2bulk_voucher', 'fazercard_giftcard', 'jcplays'].includes(g.fulfillProvider)) return 'voucher';
+            if (['g2bulk_voucher', 'fazercard_giftcard', 'jcplays', 'voucher_manual'].includes(g.fulfillProvider)) return 'voucher';
             if (g.fulfillProvider === 'software') return 'software';
             return 'direct';
         }
@@ -11809,7 +11811,7 @@
                 pendingFazerCardServerOptions = Array.isArray(g.fazercardServerOptions) ? g.fazercardServerOptions.slice() : null;
                 document.getElementById('edit-game-fazercard-giftcard-category').value = g.fazercardGiftCategoryId || '';
                 document.getElementById('fazercard-giftcard-import-status').innerText = '';
-                setFulfillProvider(g.fulfillProvider || (gameListTab === 'voucher' ? 'g2bulk_voucher' : 'manual'));
+                setFulfillProvider(g.fulfillProvider || (gameListTab === 'voucher' ? 'voucher_manual' : gameListTab === 'software' ? 'software' : 'manual'));
                 onG2BulkGameChange();
                 onFazerCardGameChange();
                 onFazerCardGiftCardCategoryChange();
@@ -15963,8 +15965,16 @@
         // are only blanked for the non-selected provider at Save time, so
         // just clicking between tabs to look around never loses anything.
         function setFulfillProvider(provider) {
-            const allowed = ['manual', 'g2bulk', 'fazercard', 'g2bulk_voucher', 'jcplays', 'fazercard_giftcard', 'software'];
-            currentFulfillProvider = allowed.includes(provider) ? provider : 'manual';
+            const allowed = ['manual', 'g2bulk', 'fazercard', 'g2bulk_voucher', 'jcplays', 'fazercard_giftcard', 'software', 'voucher_manual'];
+            provider = allowed.includes(provider) ? provider : 'manual';
+            // Keep the game in the tab it is being added from: a game added
+            // under Software / Voucher must never be saved with a Direct
+            // provider (manual / g2bulk / fazercard), or the list and the
+            // store would file it under Direct.
+            const voucherKinds = ['g2bulk_voucher', 'jcplays', 'fazercard_giftcard', 'voucher_manual'];
+            if (gameListTab === 'software') provider = 'software';
+            else if (gameListTab === 'voucher' && !voucherKinds.includes(provider)) provider = 'voucher_manual';
+            currentFulfillProvider = provider;
             document.querySelectorAll('#fulfill-provider-tabs .pkg-type-tab').forEach(btn => {
                 btn.classList.toggle('active', btn.dataset.provider === currentFulfillProvider);
             });
@@ -15975,7 +15985,7 @@
             // fulfillProvider === 'software'). Untick "Player ID Required"
             // below for a software item since it doesn't need one.
             const direct = ['manual', 'g2bulk', 'fazercard', 'software'].includes(currentFulfillProvider);
-            const voucher = ['g2bulk_voucher', 'jcplays', 'fazercard_giftcard'].includes(currentFulfillProvider);
+            const voucher = ['g2bulk_voucher', 'jcplays', 'fazercard_giftcard', 'voucher_manual'].includes(currentFulfillProvider);
             document.querySelectorAll('#fulfill-group-direct').forEach(el => { el.style.display = direct ? 'block' : 'none'; });
             document.querySelectorAll('#fulfill-group-voucher').forEach(el => { el.style.display = voucher ? 'block' : 'none'; });
             // Show only the provider-specific section (picker button + its
@@ -16015,6 +16025,9 @@
         function refreshFulfillGroupVisibility() {
             const isVoucherSide = gameListTab === 'voucher';
             document.getElementById('fulfill-group-direct').style.display = isVoucherSide ? 'none' : 'block';
+            document.querySelectorAll('#fulfill-group-direct .pkg-type-tab').forEach(btn => {
+                btn.classList.toggle('fulfill-hide', gameListTab === 'software' && btn.dataset.provider !== 'software');
+            });
             document.getElementById('fulfill-group-voucher').style.display = isVoucherSide ? 'block' : 'none';
         }
         window.refreshFulfillGroupVisibility = refreshFulfillGroupVisibility;
