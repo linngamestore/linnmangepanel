@@ -1039,7 +1039,7 @@
         .resync-pct-control { display: flex; align-items: center; gap: 2px; background: var(--bg-subtle-2); border: 1px solid var(--border-glass); border-radius: 10px; padding: 3px; flex: 0 1 auto; }
         .resync-pct-btn { width: 22px; height: 22px; flex-shrink: 0; border: none; border-radius: 6px; background: var(--fill-soft); color: var(--text-primary); font-size: 14px; line-height: 1; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; }
         .resync-pct-btn:active { filter: brightness(0.9); }
-        #resync-pct-value { min-width: 34px; text-align: center; font-size: 12px; font-weight: 700; color: var(--text-primary); }
+        #resync-pct-value { min-width: 52px; white-space: nowrap; cursor: pointer; text-align: center; font-size: 12px; font-weight: 700; color: var(--text-primary); }
         .resync-pct-go { display: flex; align-items: center; gap: 4px; border: none; background: transparent; color: var(--accent); font-size: 12.5px; font-weight: 600; cursor: pointer; padding: 4px 6px 4px 2px; white-space: nowrap; }
         .resync-pct-go:active { filter: brightness(0.85); }
         /* Game editor price-card toolbar: grouped rows with tiny labels instead of one long wrapped row. */
@@ -2686,14 +2686,14 @@
 
             <div class="admin-card" id="settings-card-autoprice" style="margin-top:14px;">
                 <div style="display:flex;justify-content:space-between;align-items:center;cursor:pointer;" onclick="toggleAutoPriceSettings()">
-                    <span style="font-size:15px;font-weight: 600;">Auto Price Update</span>
+                    <span style="font-size:15px;font-weight: 600;">Auto Cost Update</span>
                     <svg class="ui-icon" id="autoprice-chevron" style="width:18px;height:18px;color:var(--text-secondary);transition:transform 0.2s;"><use href="#icon-chevron-down"></use></svg>
                 </div>
                 <div id="autoprice-body" style="display:none;margin-top:12px;">
                     <div class="switch-row">
                         <div>
                             <span class="switch-label">Auto-apply price updates</span>
-                            <p style="font-size:11px;color:var(--text-secondary);margin-top:2px;">ဖွင့်ထားရင် admin panel ဝင်တိုင်း G2Bulk/JCPlays/Voucher ရဲ့ ဈေးနှုန်း update ရှိနေတဲ့ package တွေရဲ့ Cost ကို auto update လုပ်ပေးမှာဖြစ်ပါတယ် (Price ကိုတော့ မထိပါ)။ ပိတ်ထားရင် Games list ထဲက "Pass" ခလုတ်ကို manual နှိပ်ပြီးမှ update လုပ်ရပါမယ်။</p>
+                            <p style="font-size:11px;color:var(--text-secondary);margin-top:2px;">ဖွင့်ထားရင် အောက်က Schedule အချိန်တွေမှာ G2Bulk/JCPlays/Voucher ဈေးပြောင်းထားတဲ့ package တွေရဲ့ Cost ကိုပဲ auto update လုပ်ပေးမယ် (Price ကို မထိပါ — Price ကို Resync နဲ့ ကိုယ်တိုင်ချိန်ပါ)။ ပိတ်ထားရင် Telegram အသိပေးရုံပဲ၊ Games list ထဲက badge/ခလုတ်နဲ့ manual update လုပ်ရပါမယ်။</p>
                         </div>
                         <label class="toggle-switch">
                             <input type="checkbox" id="autoupdate-prices-toggle" onchange="onAutoUpdatePricesToggle(this.checked)">
@@ -2703,14 +2703,14 @@
                     <p id="autoupdate-prices-status" style="font-size:12px;color:var(--text-secondary);margin-top:8px;"></p>
 
                     <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border-glass);">
-                        <span class="switch-label">Target Margin %</span>
-                        <p style="font-size:11px;color:var(--text-secondary);margin-top:2px;">Auto price update run တိုင်း Cost ပေါ်မှာ ဒီ % margin ကို ပေါင်းပြီး Price ကို auto ချပေးမှာဖြစ်ပါတယ်။ မသတ်မှတ်ရသေးရင် default 5% ကိုပဲ သုံးပါမယ်။</p>
-                        <div style="display:flex;gap:8px;margin-top:8px;align-items:center;">
-                            <input type="number" id="autoprice-margin-input" min="0" max="100" step="0.1" placeholder="5" style="flex:1;padding:10px;border:1px solid var(--border-glass);background:var(--bg-subtle-2);color:var(--text-primary);border-radius:12px;font-size:14px;box-sizing:border-box;">
-                            <span style="font-size:14px;color:var(--text-secondary);">%</span>
-                            <button class="btn btn-primary" id="save-autoprice-margin-btn" onclick="saveAutoPriceMarginPct()">Save</button>
+                        <span class="switch-label">Cost Update Schedule</span>
+                        <p style="font-size:11px;color:var(--text-secondary);margin-top:2px;">တစ်ရက်မှာ Cost ကို စစ်ပြီး update လုပ်မယ့် အချိန်တွေကို ရွေးပါ (ရန်ကုန်အချိန်)။ ကြိုက်သလောက် ထည့်လို့ရပါတယ်၊ Cost ကိုပဲ ပြင်ပြီး Price ကို မထိပါ။ အချိန်တစ်ခုမှ မထားရင် auto update ပိတ်ပါတယ်။</p>
+                        <div id="cost-schedule-list" style="display:flex;flex-direction:column;gap:8px;margin-top:8px;"></div>
+                        <div style="display:flex;gap:8px;margin-top:10px;">
+                            <button class="btn btn-outline" onclick="addCostScheduleTime()">+ Add time</button>
+                            <button class="btn btn-primary" id="save-cost-schedule-btn" onclick="saveCostSchedule()">Save</button>
                         </div>
-                        <p id="autoprice-margin-status" style="font-size:12px;color:var(--text-secondary);margin-top:8px;"></p>
+                        <p id="cost-schedule-status" style="font-size:12px;color:var(--text-secondary);margin-top:8px;"></p>
                     </div>
                 </div>
             </div>
@@ -3621,9 +3621,9 @@
                     </div>
                     <div class="pkg-actions-label">Pricing</div>
                     <div class="pkg-actions-row">
-                        <div class="resync-pct-control" title="Package အားလုံးရဲ့ Price ကို လက်ရှိ Cost အပေါ်မူတည်ပြီး ရွေးထားတဲ့ % margin ပြန်ရောက်အောင် ချိန်ညှိပေးမယ် (Cost မရှိသေးတဲ့ row တွေကိုတော့ ကျော်သွားမယ်) — −/+ ကို နှိပ်ပြီး % ကို ချိန်ပါ">
+                        <div class="resync-pct-control" title="Package အားလုံးရဲ့ Price ကို လက်ရှိ Cost အပေါ်မူတည်ပြီး ရွေးထားတဲ့ % margin ပြန်ရောက်အောင် ချိန်ညှိပေးမယ် (Cost မရှိသေးတဲ့ row တွေကိုတော့ ကျော်သွားမယ်) — −/+ ကို နှိပ်ရင် 0.25% ချင်းစီ ရွှေ့မယ်၊ နံပါတ်ကို နှိပ်ရင် ကိုယ်တိုင်ရိုက်လို့ရ">
                         <button type="button" class="resync-pct-btn" onclick="adjustResyncPct(-1)" aria-label="Decrease resync percent">−</button>
-                        <span id="resync-pct-value">+1%</span>
+                        <span id="resync-pct-value" onclick="promptResyncPct()" title="နှိပ်ပြီး % ကို ကိုယ်တိုင်ရိုက်ထည့်လို့ရ">0.00%</span>
                         <button type="button" class="resync-pct-btn" onclick="adjustResyncPct(1)" aria-label="Increase resync percent">+</button>
                         <button type="button" class="resync-pct-go" onclick="resyncAllPricesToMargin()"><svg class="ui-icon" style="width:13px;height:13px;"><use href="#icon-refresh"></use></svg> Resync</button>
                     </div>
@@ -3642,8 +3642,8 @@
                 <div class="pkg-autoprice-box">
                     <div class="switch-row" style="padding:0;">
                         <div>
-                            <span class="switch-label">Auto Update Price <span class="pkg-recommend-chip">Recommend</span></span>
-                            <p class="switch-hint" id="edit-game-autoprice-hint">Cost ပြောင်းတိုင်း Price ကို Settings မှာချိန်ထားတဲ့ % အတိုင်း အလိုအလျောက် လိုက်ညှိပေးမယ်။</p>
+                            <span class="switch-label">Auto Update Cost <span class="pkg-recommend-chip">Recommend</span></span>
+                            <p class="switch-hint" id="edit-game-autoprice-hint">Settings ထဲက Schedule အချိန်တွေမှာ ဒီဂိမ်းရဲ့ Cost ကို supplier ဈေးအတိုင်း auto update လုပ်ပေးမယ် (Price မထိပါ — Resync နဲ့ ကိုယ်တိုင်ချိန်ပါ)။</p>
                         </div>
                         <label class="toggle-switch">
                             <input type="checkbox" id="edit-game-autoprice" checked onchange="onGameAutoPriceToggle()">
@@ -9852,6 +9852,18 @@
             } catch (error) {
                 console.error('Game cost scan error:', error);
             }
+            // FazerCards (its own try, so a failure here can't hide G2Bulk/JCPlays changes counted above)
+            if (g.fazercardCategoryId && FAZERCARD_SETTINGS.apiKey && FAZERCARD_SETTINGS.enabled !== false) {
+                try {
+                    const data = await fazercardRequest('/topups/offers', { params: { category_id: g.fazercardCategoryId } });
+                    const liveByOffer = new Map((data.offers || []).map(o => [String(o.offer_id), Math.round(Number(o.price_usd) * (FAZERCARD_SETTINGS.usdRate || 4500))]));
+                    packages.forEach(p => {
+                        const key = (p.fazercardOfferId || '').trim();
+                        if (!key || !liveByOffer.has(key)) return;
+                        if (liveByOffer.get(key) !== (Number(p.cost) || 0)) changed++;
+                    });
+                } catch (error) { console.error('Game cost scan (FazerCards) error:', error); }
+            }
             return changed;
         }
         window.computeGameCostUpdateCount = computeGameCostUpdateCount;
@@ -10034,6 +10046,13 @@
                         sources.push({ keyField: 'voucherId', liveByKey: new Map(products.map(p => [String(p.id), Math.round(p.unit_price * rate)])) });
                     } catch (err) { sourceErrors.push(`Voucher: ${err.message}`); }
                 }
+                if (g.fazercardCategoryId) {
+                    try {
+                        if (!FAZERCARD_SETTINGS.apiKey) throw new Error('Add your FazerCards API key first.');
+                        const data = await fazercardRequest('/topups/offers', { params: { category_id: g.fazercardCategoryId } });
+                        sources.push({ keyField: 'fazercardOfferId', liveByKey: new Map((data.offers || []).map(o => [String(o.offer_id), Math.round(Number(o.price_usd) * (FAZERCARD_SETTINGS.usdRate || 4500))])) });
+                    } catch (err) { sourceErrors.push(`FazerCards: ${err.message}`); }
+                }
 
                 if (sources.length === 0) {
                     throw new Error(sourceErrors[0] || 'No live source linked.');
@@ -10083,8 +10102,7 @@
         // rather than refactoring applyGameCostUpdatesFromList to share code, so
         // the existing manual "Pass" badge flow stays exactly as it was.
         async function applyLiveCostUpdatesForGame(gameId, g) {
-            if (g.autoPriceUpdate === false) return 0;        // this game's Auto Update Price switch is OFF
-            if (!(AUTO_PRICE_MARGIN_LIVE > 0)) return 0;      // Settings margin 0% = feature fully inactive
+            if (g.autoPriceUpdate === false) return 0;        // this game's Auto Update Cost switch is OFF (Cost only - Price is never touched)
             const rate = G2BULK_SETTINGS.usdRate || 4500;
             const packages = (g.packages || []).map(p => ({ ...p }));
             const sources = [];
@@ -10110,6 +10128,12 @@
                     }
                 } catch (error) { console.error('Auto price update — Voucher fetch error:', gameId, error); }
             }
+            if (g.fazercardCategoryId && FAZERCARD_SETTINGS.apiKey && FAZERCARD_SETTINGS.enabled !== false) {
+                try {
+                    const data = await fazercardRequest('/topups/offers', { params: { category_id: g.fazercardCategoryId } });
+                    sources.push({ keyField: 'fazercardOfferId', liveByKey: new Map((data.offers || []).map(o => [String(o.offer_id), Math.round(Number(o.price_usd) * (FAZERCARD_SETTINGS.usdRate || 4500))])) });
+                } catch (error) { console.error('Auto cost update — FazerCards fetch error:', gameId, error); }
+            }
             if (!sources.length) return 0;
 
             let changed = 0;
@@ -10121,7 +10145,6 @@
                     if (liveCost === (Number(p.cost) || 0)) return;
                     changed++;
                     p.cost = liveCost;
-                    p.price = autoPriceForMargin(liveCost, AUTO_PRICE_MARGIN_LIVE);
                 });
             });
             if (changed > 0) {
@@ -10137,18 +10160,18 @@
         // run itself automatically once per admin session (via
         // maybeRunAutoPriceUpdateOnLoad, right after games finished loading) -
         // removed because telegram-worker.js's runAutoPriceUpdateSweep() already
-        // does this exact sweep server-side, once a day at 07:00 Yangon time,
+        // does this exact sweep server-side, on the Cost Update Schedule set in Settings,
         // independent of whether the admin panel is even open. Running it again
         // here on every admin page load was pure duplicate work: an extra full
         // pass over every linked game (cost-provider fetches + games/* writes)
         // each time someone opened or refreshed the panel. Kept here only as a
         // function you can call by hand (window.runAutoPriceUpdateForAllGames)
-        // if you ever want to force a check outside the 7am window; the manual
+        // if you ever want to force a check outside the schedule; the manual
         // "Pass" badge in the games list is unaffected either way.
         async function runAutoPriceUpdateForAllGames() {
             let updatedGames = 0, updatedPackages = 0;
             for (const [gameId, g] of Object.entries(GAMES || {})) {
-                const linked = g.g2bulkCode || g.jcplaysProduct || (g.fulfillProvider === 'g2bulk_voucher' && g.g2bulkVoucherCategory);
+                const linked = g.g2bulkCode || g.jcplaysProduct || g.fazercardCategoryId || (g.fulfillProvider === 'g2bulk_voucher' && g.g2bulkVoucherCategory);
                 if (!linked) continue;
                 try {
                     const changed = await applyLiveCostUpdatesForGame(gameId, g);
@@ -10165,68 +10188,20 @@
         // whatever else reads it), just no longer used to trigger a run here -
         // the toggle's real effect now lives entirely in the Worker's sweep.
         let AUTO_UPDATE_PRICES_ENABLED = false;
-        // Margin % from Settings (settings/pricing.marginPct); unset = 5 (same default the Settings box shows). 0 = auto update fully off.
-        let AUTO_PRICE_MARGIN_LIVE = 5;
-        function autoPriceForMargin(cost, marginPct) {
-            if (!cost || cost <= 0 || !(marginPct > 0)) return 0;
-            const rawTarget = cost * (1 + marginPct / 100);
-            const hardCeiling = cost * (1 + (marginPct + 2) / 100);
-            let price = Math.ceil(rawTarget / 50) * 50;
-            if (price > hardCeiling) price = Math.ceil(rawTarget);
-            return price;
-        }
-
         function listenAutoUpdatePricesSetting() {
             onSnapshot(doc(db, "settings", "pricing"), (docSnap) => {
                 const data = docSnap.exists() ? docSnap.data() : {};
                 AUTO_UPDATE_PRICES_ENABLED = !!data.autoApplyOnLoad;
-                AUTO_PRICE_MARGIN_LIVE = (data.marginPct === undefined || data.marginPct === null || data.marginPct === '') ? 5 : Number(data.marginPct) || 0;
                 const toggle = document.getElementById('autoupdate-prices-toggle');
                 if (toggle) toggle.checked = AUTO_UPDATE_PRICES_ENABLED;
-                // Only fill the box from Firestore while the admin isn't actively
-                // typing in it, so a live update elsewhere doesn't clobber a
-                // number they're mid-edit on.
-                const marginInput = document.getElementById('autoprice-margin-input');
-                if (marginInput && document.activeElement !== marginInput) {
-                    const marginPct = (data.marginPct === undefined || data.marginPct === null) ? 5 : data.marginPct;
-                    marginInput.value = marginPct;
+                if (!costScheduleDirty) {
+                    COST_SCHEDULE_DRAFT = Array.isArray(data.costSchedule) ? normalizeCostSchedule(data.costSchedule) : DEFAULT_COST_SCHEDULE.slice();
+                    renderCostSchedule();
                 }
             }, (error) => console.error('Auto Price Update setting listener error:', error));
         }
         window.listenAutoUpdatePricesSetting = listenAutoUpdatePricesSetting;
 
-        // Saves settings/pricing.marginPct — read by the telegram-worker's auto
-        // price update sweep to decide how much margin to hold above Cost when
-        // it sets Price (falls back to 5% there if this is never set).
-        async function saveAutoPriceMarginPct() {
-            const input = document.getElementById('autoprice-margin-input');
-            const statusEl = document.getElementById('autoprice-margin-status');
-            const val = parseFloat(input.value);
-            if (isNaN(val) || val < 0 || val > 100) {
-                statusEl.style.color = 'var(--danger-strong)';
-                statusEl.innerText = 'Enter a valid % between 0 and 100.';
-                return;
-            }
-            const btn = document.getElementById('save-autoprice-margin-btn');
-            const originalText = btn.innerText;
-            btn.disabled = true;
-            btn.innerText = 'Saving...';
-            try {
-                await setDoc(doc(db, "settings", "pricing"), { marginPct: val }, { merge: true });
-                statusEl.style.color = 'var(--text-secondary)';
-                statusEl.innerText = `Saved — auto price update ${val}% margin ကို ဆက်ကိုင်သွားမှာဖြစ်ပါတယ်။`;
-                logAdminActivity('Auto Price Update margin changed', val + '%');
-            } catch (error) {
-                console.error('Margin % save error:', error);
-                statusEl.style.color = 'var(--danger-strong)';
-                statusEl.innerText = 'Save failed: ' + error.message;
-                window.showToast('Failed to save margin %.', 'fail');
-            } finally {
-                btn.disabled = false;
-                btn.innerText = originalText;
-            }
-        }
-        window.saveAutoPriceMarginPct = saveAutoPriceMarginPct;
 
 
         async function onAutoUpdatePricesToggle(checked) {
@@ -10235,8 +10210,8 @@
                 await setDoc(doc(db, "settings", "pricing"), { autoApplyOnLoad: checked }, { merge: true });
                 statusEl.style.color = 'var(--text-secondary)';
                 statusEl.innerText = checked
-                    ? 'Admin panel ဖွင့်တိုင်း ဈေးနှုန်း update ကို auto ဆွဲပြီး Cost update လုပ်ပေးပါမယ်။'
-                    : 'Auto update ပိတ်ထားပါပြီ — Games list ထဲက "Pass" ခလုတ်ကို manual နှိပ်ပြီးမှ update လုပ်ရပါမယ်။';
+                    ? 'Schedule အချိန်တွေမှာ Cost ကို auto update လုပ်ပေးပါမယ် (Price မထိပါ)။'
+                    : 'Auto update ပိတ်ထားပါပြီ — Schedule အချိန်တွေမှာ Telegram အသိပေးရုံပဲ၊ Cost ကို manual update လုပ်ရပါမယ်။';
                 logAdminActivity('Auto Price Update setting changed', checked ? 'Enabled' : 'Disabled');
             } catch (error) {
                 console.error('Auto Price Update toggle save error:', error);
@@ -10246,6 +10221,92 @@
             }
         }
         window.onAutoUpdatePricesToggle = onAutoUpdatePricesToggle;
+
+        // ---------- Cost Update Schedule (settings/pricing.costSchedule) ----------
+        // Yangon-time "HH:MM" slots the Worker runs the COST-ONLY update at, several per day.
+        // Field missing = one run at 07:00 (old daily behaviour); empty list = schedule off.
+        const DEFAULT_COST_SCHEDULE = ['07:00'];
+        const COST_TIME_RE = /^([01]\d|2[0-3]):[0-5]\d$/;
+        let COST_SCHEDULE_DRAFT = DEFAULT_COST_SCHEDULE.slice();
+        let costScheduleDirty = false; // true while there are unsaved edits, so a live snapshot doesn't overwrite them
+
+        function normalizeCostSchedule(list) {
+            return Array.from(new Set((list || []).filter(t => typeof t === 'string' && COST_TIME_RE.test(t)))).sort();
+        }
+
+        function renderCostSchedule() {
+            const box = document.getElementById('cost-schedule-list');
+            if (!box) return;
+            if (!COST_SCHEDULE_DRAFT.length) {
+                box.innerHTML = '<p style="font-size:12px;color:var(--text-muted);margin:0;">အချိန်မရှိပါ — Cost auto update ပိတ်ထားပါတယ်။</p>';
+                return;
+            }
+            box.innerHTML = COST_SCHEDULE_DRAFT.map((t, i) => `
+                <div style="display:flex;gap:8px;align-items:center;">
+                    <input type="time" value="${t}" onchange="onCostScheduleTimeChange(${i}, this.value)" style="flex:1;padding:10px;border:1px solid var(--border-glass);background:var(--bg-subtle-2);color:var(--text-primary);border-radius:12px;font-size:14px;box-sizing:border-box;">
+                    <button type="button" class="btn btn-outline" onclick="removeCostScheduleTime(${i})" aria-label="Remove time">✕</button>
+                </div>`).join('');
+        }
+
+        function onCostScheduleTimeChange(i, value) {
+            COST_SCHEDULE_DRAFT[i] = value;
+            costScheduleDirty = true;
+        }
+        window.onCostScheduleTimeChange = onCostScheduleTimeChange;
+
+        function addCostScheduleTime() {
+            const last = COST_SCHEDULE_DRAFT.filter(t => COST_TIME_RE.test(t)).sort().pop();
+            let next = '07:00';
+            if (last) {
+                const h = (parseInt(last.slice(0, 2), 10) + 3) % 24;
+                next = String(h).padStart(2, '0') + last.slice(2);
+            }
+            COST_SCHEDULE_DRAFT.push(next);
+            costScheduleDirty = true;
+            renderCostSchedule();
+        }
+        window.addCostScheduleTime = addCostScheduleTime;
+
+        function removeCostScheduleTime(i) {
+            COST_SCHEDULE_DRAFT.splice(i, 1);
+            costScheduleDirty = true;
+            renderCostSchedule();
+        }
+        window.removeCostScheduleTime = removeCostScheduleTime;
+
+        async function saveCostSchedule() {
+            const statusEl = document.getElementById('cost-schedule-status');
+            if (COST_SCHEDULE_DRAFT.some(t => !COST_TIME_RE.test(t))) {
+                statusEl.style.color = 'var(--danger-strong)';
+                statusEl.innerText = 'အချိန်တစ်ခု ကွက်လပ်ဖြစ်နေပါတယ် — ဖြည့်ပါ ဒါမှမဟုတ် ✕ နဲ့ ဖျက်ပါ။';
+                return;
+            }
+            const list = normalizeCostSchedule(COST_SCHEDULE_DRAFT);
+            const btn = document.getElementById('save-cost-schedule-btn');
+            const originalText = btn.innerText;
+            btn.disabled = true;
+            btn.innerText = 'Saving...';
+            try {
+                await setDoc(doc(db, "settings", "pricing"), { costSchedule: list }, { merge: true });
+                COST_SCHEDULE_DRAFT = list;
+                costScheduleDirty = false;
+                renderCostSchedule();
+                statusEl.style.color = 'var(--text-secondary)';
+                statusEl.innerText = list.length
+                    ? `Saved — ရန်ကုန်အချိန် ${list.join(', ')} မှာ Cost ကို စစ်ပြီး update လုပ်ပါမယ်။`
+                    : 'Saved — အချိန်မရှိတော့လို့ Cost auto update ပိတ်ထားပါတယ်။';
+                logAdminActivity('Cost Update schedule changed', list.join(', ') || 'off');
+            } catch (error) {
+                console.error('Cost schedule save error:', error);
+                statusEl.style.color = 'var(--danger-strong)';
+                statusEl.innerText = 'Save failed: ' + error.message;
+                window.showToast('Failed to save schedule.', 'fail');
+            } finally {
+                btn.disabled = false;
+                btn.innerText = originalText;
+            }
+        }
+        window.saveCostSchedule = saveCostSchedule;
 
         // Sort key mirrors store.html: explicit `order` field wins (ascending),
         // games without one yet fall to the end, alphabetically - so nothing
@@ -10378,6 +10439,17 @@
             editingBannerImageUrls.splice(index, 1);
             editingBannerImageFiles.splice(index, 1);
             renderGameBannerGallery();
+            // Keep the big preview box in step with the gallery (it kept showing the removed photo).
+            const bannerPreview = document.getElementById('edit-game-banner-preview');
+            const box = document.getElementById('game-banner-update-box');
+            const badge = document.getElementById('game-banner-update-change');
+            if (editingBannerImageUrls.length) {
+                if (bannerPreview) { bannerPreview.src = editingBannerImageUrls[0]; bannerPreview.style.display = 'block'; }
+            } else {
+                if (bannerPreview) { bannerPreview.src = ''; bannerPreview.style.display = 'none'; }
+                box?.classList.remove('has-image');
+                if (badge) badge.style.display = 'none';
+            }
         }
         window.removeGameBannerImage = removeGameBannerImage;
         function previewGameBanners(e) {
@@ -10387,26 +10459,28 @@
             // error shown, making it look like the banner picker did nothing.
             // Accept whatever the file picker returned (accept="image/*"
             // already limits what shows up in the picker itself).
-            const files = Array.from(e.target.files || []);
+            const input = e.target;
+            const files = Array.from(input.files || []);
+            input.value = ''; // lets the same photo be picked again after removing it
             if (!files.length) return;
             editingBannerImageFiles = files;
             editingBannerImageUrls = [];
-            files.forEach(file => {
-                const reader = new FileReader();
-                reader.onload = ev => { editingBannerImageUrls.push(ev.target.result); renderGameBannerGallery(); };
-                reader.readAsDataURL(file);
+            // Promise.all keeps each preview in the same order as its File, so removing thumbnail N
+            // drops the matching file (per-file onload used to finish out of order).
+            Promise.all(files.map(readFileAsDataURL)).then(urls => {
+                editingBannerImageUrls = urls;
+                renderGameBannerGallery();
+                // Also show the first picked banner in the update box itself
+                // instead of leaving the box blank until Save.
+                const bannerPreview = document.getElementById('edit-game-banner-preview');
+                if (bannerPreview) { bannerPreview.src = urls[0]; bannerPreview.style.display = 'block'; }
+                document.getElementById('game-banner-update-box')?.classList.add('has-image');
+                document.getElementById('game-banner-update-change').style.display = 'flex';
+            }).catch(err => {
+                console.error('Banner preview error:', err);
+                editingBannerImageFiles = [];
+                window.showToast('Could not read that photo — try another one.', 'fail');
             });
-            // Also show the first picked banner in the update box itself
-            // (matches how editing an existing game's banner already looks)
-            // instead of leaving the box blank until Save.
-            const bannerPreview = document.getElementById('edit-game-banner-preview');
-            const firstReader = new FileReader();
-            firstReader.onload = ev => {
-                if (bannerPreview) { bannerPreview.src = ev.target.result; bannerPreview.style.display = 'block'; }
-            };
-            firstReader.readAsDataURL(files[0]);
-            document.getElementById('game-banner-update-box')?.classList.add('has-image');
-            document.getElementById('game-banner-update-change').style.display = 'flex';
         }
         function previewGameBanner(e) { previewGameBanners(e); }
 
@@ -11387,18 +11461,13 @@
         }
         window.roundBulkPrice = roundBulkPrice;
 
-        // ---------- Auto Price-to-Cost margin sync (Cost update -> Price follows) ----------
-        // Whenever a package's Cost is refreshed from a live sync — the
-        // single "Update Cost" tap, "Update All Costs", the Games list
-        // "Pass" badge, or the "Auto Price Update" toggle's background
-        // sweep — Price is recomputed to track a steady 1% margin above
-        // the new Cost, whether Cost went up OR down. Rounds UP to a clean
-        // 50-MMK grid (…00 / …50 endings — matches how prices already look
-        // in this store, no odd …90-style numbers) so the margin never
-        // dips below 1%, while a hard ceiling (target + 2 points) keeps it
-        // from ever drifting too far past that for very small Cost values.
-        // Manually typing into Price or Cost by hand is never touched by
-        // this — it only fires on a live cost sync.
+        // ---------- Starting-price helper (~1% above Cost) ----------
+        // Only used for a NEW package row from a catalogue import and for the
+        // bulk Cost adjust. Live Cost updates (Update Cost buttons, the Pass
+        // badge, the scheduled sweep) never change Price any more - re-sync it
+        // with the Resync button. Rounds UP to a clean 50-MMK grid so the
+        // margin never dips below the target; a hard ceiling (target + 2
+        // points) keeps it from drifting too far for very small Cost values.
         const AUTO_PRICE_MARGIN_PCT = 1;
 
         function autoPriceForCost(cost) {
@@ -11414,22 +11483,54 @@
 
         // Resync ±% stepper state — the percent the "Resync" button will
         // apply next, adjustable with the −/+ buttons (can go negative for
-        // a deliberate discount-style resync). Starts matching the current
-        // auto-margin target, but is independent of it once touched.
-        let resyncPct = AUTO_PRICE_MARGIN_PCT;
+        // a deliberate discount-style resync). Always starts at 0.00% and
+        // moves in fine 0.25% steps (tap the number to type any value).
+        let resyncPct = 0;
+        const RESYNC_PCT_STEP = 0.25;
+        function fmtResyncPct(p) { return (p > 0 ? '+' : '') + p.toFixed(2) + '%'; }
+        window.fmtResyncPct = fmtResyncPct;
+
+        // Resync only lands on prices whose last two digits are 60/70/80/90/00 (never 10/20/30/40 endings).
+        // Picks the allowed price NEAREST to x (a tie goes up). minPrice, when given, is a floor: the
+        // result is never below it (used so a 0% / positive resync can't drop Price under Cost).
+        const RESYNC_ENDINGS = [0, 60, 70, 80, 90];
+        function roundToResyncEnding(x, minPrice) {
+            const base = Math.floor(x / 100) * 100;
+            let best = null;
+            for (const b of [base - 100, base, base + 100, base + 200]) {
+                for (const e of RESYNC_ENDINGS) {
+                    const c = b + e;
+                    if (c <= 0 || (minPrice && c < minPrice)) continue;
+                    if (best === null) { best = c; continue; }
+                    const d = Math.abs(c - x), bd = Math.abs(best - x);
+                    if (d < bd || (d === bd && c > best)) best = c;
+                }
+            }
+            return best;
+        }
         function updateResyncPctDisplay() {
             const el = document.getElementById('resync-pct-value');
-            if (el) el.textContent = (resyncPct > 0 ? '+' : '') + resyncPct + '%';
+            if (el) el.textContent = fmtResyncPct(resyncPct);
         }
-        function adjustResyncPct(delta) {
-            resyncPct += delta;
+        // direction is -1 / +1 from the buttons; each tap moves RESYNC_PCT_STEP.
+        function adjustResyncPct(direction) {
+            resyncPct = Math.round((resyncPct + direction * RESYNC_PCT_STEP) * 100) / 100;
             updateResyncPctDisplay();
         }
         window.adjustResyncPct = adjustResyncPct;
+        function promptResyncPct() {
+            const raw = window.prompt('Resync % ကို ရိုက်ထည့်ပါ (ဥပမာ 0.5 သို့မဟုတ် -1.25)', String(resyncPct));
+            if (raw === null) return;
+            const v = parseFloat(raw);
+            if (isNaN(v) || v < -100 || v > 100) { window.showToast('Enter a valid % (e.g. 0.5)', 'fail'); return; }
+            resyncPct = Math.round(v * 100) / 100;
+            updateResyncPctDisplay();
+        }
+        window.promptResyncPct = promptResyncPct;
         updateResyncPctDisplay();
 
         // Shifts every matched row's Price or Cost by the given percentage —
-        // rounds to a clean price via roundBulkPrice() (see above) and skips
+        // rounds Price to the 60/70/80/90/00 endings (roundToResyncEnding, same rule as Resync) and Cost via roundBulkPrice() (see above), and skips
         // rows where the field is blank or zero, so an unset package never
         // gets a value invented for it. Reuses updatePackageProfit() per row
         // so the profit badge AND the collapsed summary line (via
@@ -11453,7 +11554,12 @@
                 const input = row.querySelector(fieldClass);
                 const current = Number(input.value);
                 if (!current || current <= 0) return;
-                const newValue = Math.max(0, roundBulkPrice(current * (1 + pct / 100)));
+                const raw = current * (1 + pct / 100);
+                // Price snaps to the store's price endings (never 10/20/30/40); a positive % on Price never lowers it.
+                // Cost keeps the old clean-hundred rounding (it's a supplier number, not a shelf price).
+                const newValue = Math.max(0, bulkPkgField === 'price'
+                    ? (raw <= 0 ? 0 : roundToResyncEnding(raw, pct > 0 ? current : 0))
+                    : roundBulkPrice(raw));
                 input.value = newValue;
                 // Adjusting Cost by bulk % shifts the sell Price too, so the
                 // margin stays pinned at the auto-margin target (autoPriceForCost)
@@ -11494,7 +11600,7 @@
             window.showActionDialog({
                 type: 'warning',
                 title: 'Resync all prices?',
-                message: `This overwrites Price on every package (all tabs) to hold a ${pct > 0 ? '+' : ''}${pct}% margin above its current Cost. Continue?`,
+                message: `This overwrites Price on every package (all tabs) to hold a ${fmtResyncPct(pct)} margin above its current Cost. Continue?`,
                 confirmText: 'Resync',
                 onConfirm: () => {
                     let changed = 0, skipped = 0;
@@ -11503,7 +11609,9 @@
                         const priceInput = row.querySelector('.pkg-price');
                         const cost = Number(costInput.value);
                         if (!cost || cost <= 0) { skipped++; return; }
-                        const newPrice = roundBulkPrice(cost * (1 + pct / 100));
+                        // Chosen % above Cost, snapped to the nearest allowed ending (60/70/80/90/00 - see
+                        // roundToResyncEnding). At 0% or a positive margin Price is also kept at or above Cost.
+                        const newPrice = roundToResyncEnding(cost * (1 + pct / 100), pct >= 0 ? cost : 0);
                         if (Number(priceInput.value) === newPrice) return;
                         priceInput.value = newPrice;
                         updatePackageProfit(priceInput);
@@ -11512,7 +11620,7 @@
                     if (changed === 0) {
                         window.showToast(skipped ? `Already synced — ${skipped} row(s) skipped (no Cost set)` : 'Every price already matches the target margin', 'success');
                     } else {
-                        window.showToast(`${changed} price(s) re-synced to ${pct > 0 ? '+' : ''}${pct}% margin ✓${skipped ? ` (${skipped} skipped — no Cost)` : ''}`, 'success');
+                        window.showToast(`${changed} price(s) re-synced to ${fmtResyncPct(pct)} margin ✓${skipped ? ` (${skipped} skipped — no Cost)` : ''}`, 'success');
                     }
                 }
             });
@@ -11804,8 +11912,12 @@
         // untouched if the browser can't do canvas/toBlob for any reason
         // (very old browsers, non-image files, decode errors, etc.) so an
         // upload never hard-fails just because compression didn't work.
+        // Banners are shown full-width, so they keep up to 1600px (icons/logos stay at 800px).
+        const BANNER_COMPRESS = { maxDim: 1600, quality: 0.85 };
         async function compressImageFile(file, { maxDim = 800, quality = 0.82 } = {}) {
-            if (!file || !file.type || !file.type.startsWith('image/')) return file;
+            // A blank MIME type is common for phone-picked photos: still try to decode + re-encode
+            // it (so it uploads as a proper JPEG). Only skip files that are clearly not images.
+            if (!file || (file.type && !file.type.startsWith('image/'))) return file;
             // Animated GIFs would lose their animation if re-encoded via canvas
             // (canvas only ever captures a single frame) - upload those as-is.
             if (file.type === 'image/gif') return file;
@@ -11846,14 +11958,14 @@
 
         // Uploads a phone photo to a free image host (ImgBB) and resolves with its direct URL.
         // No Firebase Storage / Blaze plan involved.
-        async function uploadImageToImgBB(file, statusElId = 'upload-status') {
+        async function uploadImageToImgBB(file, statusElId = 'upload-status', compressOptions = undefined) {
             const statusEl = document.getElementById(statusElId);
             statusEl.style.display = 'block';
             statusEl.style.color = 'var(--text-secondary)';
             statusEl.innerText = 'Compressing photo...';
 
             try {
-                const compressed = await compressImageFile(file);
+                const compressed = await compressImageFile(file, compressOptions);
                 statusEl.innerText = 'Uploading photo...';
 
                 const form = new FormData();
@@ -11863,7 +11975,9 @@
                     method: 'POST',
                     body: form
                 });
-                const data = await res.json();
+                let data;
+                try { data = await res.json(); }
+                catch (_) { throw new Error('Upload server error (HTTP ' + res.status + ')'); }
                 if (!data.success) throw new Error(data.error?.message || 'Upload failed');
 
                 statusEl.innerText = 'Photo uploaded ✓';
@@ -11918,8 +12032,8 @@
             const on = document.getElementById('edit-game-autoprice').checked;
             const hint = document.getElementById('edit-game-autoprice-hint');
             if (hint) hint.textContent = on
-                ? 'Cost ပြောင်းတိုင်း Price ကို Settings မှာချိန်ထားတဲ့ % အတိုင်း အလိုအလျောက် လိုက်ညှိပေးမယ်။'
-                : 'ပိတ်ထားတယ် — ဒီဂိမ်းရဲ့ Cost/Price ကို auto update မလုပ်ပါ။ ဖွင့်ထားဖို့ အကြံပြုပါတယ်။';
+                ? 'Settings ထဲက Schedule အချိန်တွေမှာ ဒီဂိမ်းရဲ့ Cost ကို supplier ဈေးအတိုင်း auto update လုပ်ပေးမယ် (Price မထိပါ — Resync နဲ့ ကိုယ်တိုင်ချိန်ပါ)။'
+                : 'ပိတ်ထားတယ် — ဒီဂိမ်းရဲ့ Cost ကို auto update မလုပ်ပါ။ ဖွင့်ထားဖို့ အကြံပြုပါတယ်။';
         }
         window.onGameAutoPriceToggle = onGameAutoPriceToggle;
 
@@ -12012,10 +12126,13 @@
                 if (editingBannerImageFiles.length) {
                     existingBanners = [];
                     for (let i = 0; i < editingBannerImageFiles.length; i++) {
-                        const uploaded = await uploadImageToImgBB(editingBannerImageFiles[i], 'banner-upload-status');
+                        const uploaded = await uploadImageToImgBB(editingBannerImageFiles[i], 'banner-upload-status', BANNER_COMPRESS);
                         existingBanners.push(uploaded);
                     }
-                } else if (editingBannerImageUrls.length) {
+                } else {
+                    // The editor's own list is the intended state (openGameEditor preloads the saved banners
+                    // into it). Before, removing every banner left this empty and the OLD banners were
+                    // silently kept on save; an empty list now falls back to the game image below.
                     existingBanners = editingBannerImageUrls.slice();
                 }
                 const bannerUrl = existingBanners[0] || imageUrl;
@@ -14179,16 +14296,38 @@
         }
         window.removeHomeBannerImage = removeHomeBannerImage;
 
-        function previewHomeBanners(e) {
-            const files = Array.from(e.target.files || []).filter(f => f.type.startsWith('image/'));
-            if (!files.length) return;
-            files.forEach(file => {
-                editingHomeBannerFiles.push(file);
+        // Reads a picked file into a data: URL for the thumbnail preview.
+        function readFileAsDataURL(file) {
+            return new Promise((resolve, reject) => {
                 const reader = new FileReader();
-                reader.onload = ev => { editingHomeBannerUrls.push(ev.target.result); renderHomeBannerGallery(); };
+                reader.onload = ev => resolve(ev.target.result);
+                reader.onerror = () => reject(reader.error || new Error('Could not read the picked photo'));
                 reader.readAsDataURL(file);
             });
-            e.target.value = '';
+        }
+
+        async function previewHomeBanners(e) {
+            // No f.type.startsWith('image/') filter here: some phone browsers report a blank or
+            // odd MIME type for a picked photo, and that filter silently dropped the file so the
+            // picker looked like it did nothing (same fix the game banner picker already has).
+            // accept="image/*" already limits what the picker shows.
+            const input = e.target;
+            const files = Array.from(input.files || []);
+            input.value = '';
+            if (!files.length) return;
+            try {
+                // Promise.all keeps previews in the same order as the files (per-file onload can
+                // finish out of order, which mixed up which thumbnail belonged to which File).
+                const urls = await Promise.all(files.map(readFileAsDataURL));
+                files.forEach((file, i) => {
+                    editingHomeBannerFiles.push(file);
+                    editingHomeBannerUrls.push(urls[i]);
+                });
+                renderHomeBannerGallery();
+            } catch (err) {
+                console.error('Home banner preview error:', err);
+                window.showToast('Could not read that photo — try another one.', 'fail');
+            }
         }
         window.previewHomeBanners = previewHomeBanners;
 
@@ -14216,7 +14355,7 @@
                     const file = editingHomeBannerFiles[i];
                     if (file) {
                         // Pending local file (data: URL preview) — upload it now.
-                        const uploaded = await uploadImageToImgBB(file, 'homebanner-upload-status');
+                        const uploaded = await uploadImageToImgBB(file, 'homebanner-upload-status', BANNER_COMPRESS);
                         finalUrls.push(uploaded);
                     } else {
                         // Already a hosted URL from a previous save — keep as-is.
@@ -17217,7 +17356,22 @@
                             if (markRowChanged(row, liveById.get(key))) changed++;
                         });
                     }
-                    if (!anyChecked) throw new Error('No G2Bulk or JCPlays game linked.');
+                    const fazerCategoryVal = (document.getElementById('edit-game-fazercard-category').value || '').trim();
+                    if (fazerCategoryVal) {
+                        const data = await fazercardRequest('/topups/offers', { params: { category_id: fazerCategoryVal } });
+                        const liveByOffer = new Map((data.offers || []).map(o => [String(o.offer_id), Math.round(Number(o.price_usd) * (FAZERCARD_SETTINGS.usdRate || 4500))]));
+                        anyChecked = true;
+                        rows.forEach(row => {
+                            // Only rows whose own Auto-Fulfill is FazerCards (a stale offer id on another row is ignored).
+                            const prov = row.querySelector('.pkg-provider');
+                            if (prov && prov.value !== 'fazercard') return;
+                            const el = row.querySelector('.pkg-fazercard');
+                            const key = el ? el.value.trim() : '';
+                            if (!key || !liveByOffer.has(key)) return;
+                            if (markRowChanged(row, liveByOffer.get(key))) changed++;
+                        });
+                    }
+                    if (!anyChecked) throw new Error('No G2Bulk, JCPlays or FazerCards game linked.');
                 }
 
                 if (statusEl) {
@@ -17284,37 +17438,27 @@
         window.enforceMinPriceMargin = enforceMinPriceMargin;
 
         // Applies one row's pending live-price update (set by checkLivePriceChanges)
-        // to its Cost field, then recomputes Price to hold a steady auto-margin
-        // margin via autoPriceForCost() (see above) — so a supplier cost
-        // change flows through to the sell Price automatically instead of
-        // silently shrinking or ballooning the margin over time. Admin can
-        // still type a different Price by hand afterward if they want.
+        // to its Cost field ONLY. Price is never touched - re-sync it yourself
+        // with the Resync button (0.00% stepper) when you want Price to follow.
         function applyCostUpdate(btn, silent = false) {
             const newCost = btn.dataset.newCost;
             if (newCost === undefined) return;
             const row = btn.closest('.package-row');
             const costInput = row.querySelector('.pkg-cost');
-            const priceInput = row.querySelector('.pkg-price');
             costInput.value = newCost;
-            // Price follows Cost to keep a steady auto-margin (see
-            // autoPriceForCost above) instead of drifting whenever a live
-            // cost sync lands — admin can still overwrite Price by hand
-            // afterward if they want a different number.
-            priceInput.value = autoPriceForCost(Number(newCost));
             btn.style.display = 'none';
             delete btn.dataset.newCost;
 
             updatePackageProfit(costInput);
-            if (!silent) window.showToast('Cost & Price updated', 'success');
+            if (!silent) window.showToast('Cost updated', 'success');
         }
         window.applyCostUpdate = applyCostUpdate;
 
         // Applies every row's pending live-price update in one tap, instead
         // of tapping "Update Cost" on each row one by one. Reuses
-        // applyCostUpdate per row so the profit badge, Price (via
-        // autoPriceForCost) and collapsed-row warning dot all stay in sync.
-        // Each row is applied silently so only the single summary toast
-        // below shows, instead of queuing up one toast per row.
+        // applyCostUpdate per row (Cost only, Price untouched) so the profit
+        // badge and collapsed-row warning dot stay in sync. Each row is applied
+        // silently so only the single summary toast below shows.
         function applyAllCostUpdates() {
             const buttons = Array.from(document.querySelectorAll('.pkg-cost-update-btn'))
                 .filter(u => u.dataset.newCost !== undefined && u.style.display !== 'none');
@@ -17325,7 +17469,7 @@
             if (allBtn) allBtn.style.display = 'none';
             const statusEl = document.getElementById('pkg-price-check-status');
             if (statusEl) { statusEl.style.color = 'var(--text-muted)'; statusEl.innerText = 'All costs updated.'; }
-            window.showToast(`${buttons.length} cost & price update(s) applied`, 'success');
+            window.showToast(`${buttons.length} cost update(s) applied`, 'success');
         }
         window.applyAllCostUpdates = applyAllCostUpdates;
 
@@ -18063,6 +18207,9 @@
         window.closeGameEditor = closeGameEditor;
         window.previewGameImage = previewGameImage;
         window.previewGameBanner = previewGameBanner;
+        // The banner <input> calls the plural name from its inline onchange, so it must be on window too
+        // (only the singular was exposed, which threw a ReferenceError and made the picker do nothing).
+        window.previewGameBanners = previewGameBanners;
         window.addPackageRow = addPackageRow;
         // The old "+ New Server" duplicate button/flow inside the Edit Game
         // modal was removed — adding a server now only happens via the
