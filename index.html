@@ -1292,6 +1292,10 @@
         .img-update-box.logo-square { aspect-ratio: 1 / 1; max-width: 140px; margin: 0 auto; padding: 10px; }
         .img-update-box.logo-square.has-image { padding: 0; }
         .img-update-box.logo-square img { width: 100%; height: 100%; max-height: none; object-fit: contain; background: var(--bg-subtle); }
+        /* Store Logo boxes (Light/Dark): fixed 1:1 box so the box never grows with the image - the image adjusts (contain) to fit inside. No border. */
+        #logo-img-update-box, #logo-dark-img-update-box { aspect-ratio: 1 / 1; width: 100%; padding: 10px; }
+        #logo-img-update-box.has-image, #logo-dark-img-update-box.has-image { padding: 0; border: none; background: var(--bg-subtle); }
+        #logo-img-update-box img, #logo-dark-img-update-box img { position: absolute; inset: 0; width: 100%; height: 100%; max-height: none; object-fit: contain; background: transparent; }
         .img-update-change { position: absolute; bottom: 8px; right: 8px; background: rgba(0,0,0,0.65); color: #fff; font-size: 12px; font-weight: 500; padding: 6px 12px; border-radius: 20px; display: flex; align-items: center; gap: 5px; }
         .img-update-change svg { width: 13px; height: 13px; }
         #server-variant-thumbs { display: flex; flex-wrap: wrap; gap: 8px; margin: -4px 0 14px; }
@@ -2909,27 +2913,44 @@
                     <svg class="ui-icon" id="autoprice-chevron" style="width:18px;height:18px;color:var(--text-secondary);transition:transform 0.2s;"><use href="#icon-chevron-down"></use></svg>
                 </div>
                 <div id="autoprice-body" style="display:none;margin-top:12px;">
-                    <div class="switch-row">
-                        <div>
-                            <span class="switch-label">Auto-apply price updates</span>
-                            <p style="font-size:11px;color:var(--text-secondary);margin-top:2px;">ဖွင့်ထားရင် အောက်က Schedule အချိန်တွေမှာ G2Bulk/JCPlays/Voucher ဈေးပြောင်းထားတဲ့ package တွေရဲ့ Cost ကိုပဲ auto update လုပ်ပေးမယ် (Price ကို မထိပါ — Price ကို Resync နဲ့ ကိုယ်တိုင်ချိန်ပါ)။ ပိတ်ထားရင် Telegram အသိပေးရုံပဲ၊ Games list ထဲက badge/ခလုတ်နဲ့ manual update လုပ်ရပါမယ်။</p>
-                        </div>
-                        <label class="toggle-switch">
-                            <input type="checkbox" id="autoupdate-prices-toggle" onchange="onAutoUpdatePricesToggle(this.checked)">
-                            <span class="toggle-slider"></span>
-                        </label>
-                    </div>
-                    <p id="autoupdate-prices-status" style="font-size:12px;color:var(--text-secondary);margin-top:8px;"></p>
+                    <p style="font-size:11px;color:var(--text-secondary);line-height:1.5;">Cost update က အမြဲဖွင့်ထားပါတယ် (ပိတ်လို့မရ) — အောက်က Schedule အချိန်တွေမှာပဲ G2Bulk/JCPlays/Voucher/FazerCards ဈေးပြောင်းထားတဲ့ package တွေရဲ့ Cost ကို update လုပ်ပါမယ်။ Price ကိုတော့ မထိပါ — Price က အောက်က <b>Auto Price Update</b> ကတ်မှာ သီးသန့်ပါ။</p>
 
                     <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border-glass);">
                         <span class="switch-label">Cost Update Schedule</span>
-                        <p style="font-size:11px;color:var(--text-secondary);margin-top:2px;">တစ်ရက်မှာ Cost ကို စစ်ပြီး update လုပ်မယ့် အချိန်တွေကို ရွေးပါ (ရန်ကုန်အချိန်)။ ကြိုက်သလောက် ထည့်လို့ရပါတယ်၊ Cost ကိုပဲ ပြင်ပြီး Price ကို မထိပါ။ အချိန်တစ်ခုမှ မထားရင် auto update ပိတ်ပါတယ်။</p>
+                        <p style="font-size:11px;color:var(--text-secondary);margin-top:2px;">တစ်ရက်မှာ Cost ကို စစ်ပြီး update လုပ်မယ့် အချိန်တွေကို ရွေးပါ (ရန်ကုန်အချိန်)။ ကြိုက်သလောက် ထည့်လို့ရပါတယ်၊ Cost ကိုပဲ ပြင်ပြီး Price ကို မထိပါ။ အချိန်တစ်ခုမှ မထားရင် Cost auto update မလုပ်ပါ။</p>
                         <div id="cost-schedule-list" style="display:flex;flex-direction:column;gap:8px;margin-top:8px;"></div>
                         <div style="display:flex;gap:8px;margin-top:10px;">
                             <button class="btn btn-outline" onclick="addCostScheduleTime()">+ Add time</button>
                             <button class="btn btn-primary" id="save-cost-schedule-btn" onclick="saveCostSchedule()">Save</button>
                         </div>
                         <p id="cost-schedule-status" style="font-size:12px;color:var(--text-secondary);margin-top:8px;"></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="admin-card" id="settings-card-autoprice-sell" style="margin-top:14px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;cursor:pointer;" onclick="togglePriceUpdateSettings()">
+                    <span style="font-size:15px;font-weight: 600;">Auto Price Update</span>
+                    <svg class="ui-icon" id="priceupdate-chevron" style="width:18px;height:18px;color:var(--text-secondary);transition:transform 0.2s;"><use href="#icon-chevron-down"></use></svg>
+                </div>
+                <div id="priceupdate-body" style="display:none;margin-top:12px;">
+                    <p style="font-size:11px;color:var(--text-secondary);line-height:1.5;">Cost update နဲ့ သီးသန့်ပါ။ Game editor ထဲမှာ <b>Auto Update Price</b> ကို ဖွင့်ထားတဲ့ ဂိမ်းတွေရဲ့ Price ကိုပဲ အောက်က Schedule အချိန်တွေမှာ Cost အပေါ် Margin % ပေါင်းပြီး auto ချိန်ပေးပါမယ်။ မဖွင့်ထားတဲ့ ဂိမ်းတွေက Cost ပဲ update ဖြစ်ပါမယ်။</p>
+                    <div style="margin-top:12px;">
+                        <span class="switch-label">Price Margin %</span>
+                        <div style="display:flex;gap:8px;margin-top:6px;align-items:center;">
+                            <input type="number" id="price-margin-pct-input" min="0" max="100" step="0.25" value="1" style="width:110px;padding:10px;border:1px solid var(--border-glass);background:var(--bg-subtle-2);color:var(--text-primary);border-radius:12px;font-size:14px;box-sizing:border-box;">
+                            <span style="font-size:12px;color:var(--text-secondary);">Cost အပေါ် ပေါင်းမယ့် %</span>
+                        </div>
+                    </div>
+                    <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border-glass);">
+                        <span class="switch-label">Price Update Schedule</span>
+                        <p style="font-size:11px;color:var(--text-secondary);margin-top:2px;">Price ကို ချိန်မယ့် အချိန်တွေ (ရန်ကုန်အချိန်)။ Cost Schedule နဲ့ မတူလည်း ရပါတယ်။ အချိန်တစ်ခုမှ မထားရင် Price auto update မလုပ်ပါ။</p>
+                        <div id="price-schedule-list" style="display:flex;flex-direction:column;gap:8px;margin-top:8px;"></div>
+                        <div style="display:flex;gap:8px;margin-top:10px;">
+                            <button class="btn btn-outline" onclick="addPriceScheduleTime()">+ Add time</button>
+                            <button class="btn btn-primary" id="save-price-schedule-btn" onclick="savePriceSchedule()">Save</button>
+                        </div>
+                        <p id="price-schedule-status" style="font-size:12px;color:var(--text-secondary);margin-top:8px;"></p>
                     </div>
                 </div>
             </div>
@@ -3855,17 +3876,17 @@
                         <button class="btn btn-outline" id="fazercard-debug-btn" onclick="debugFazerCardServerCheck()" style="display:none;" title="Import မလုပ်ဘဲ FazerCards ရဲ့ fields raw response ကို စစ်ကြည့်မယ်"><svg class="ui-icon" style="width:13px;height:13px;"><use href="#icon-code"></use></svg> Debug</button>
                     </div>
                 </div>
-                <!-- Per-game Auto Update Price switch. ON = the daily 07:00 Worker sweep (and the admin's manual
-                     "run all") keeps THIS game's Price following its Cost at the % set in Settings. OFF = this game is
-                     skipped. Games saved before this switch existed read as ON (same as before). -->
+                <!-- Per-game Auto Update Price switch (separate from Cost). Cost is ALWAYS auto-updated on the Cost Update
+                     Schedule. ON = on the Price Update Schedule (Settings) this game's Price is also re-set to Cost + Margin %.
+                     OFF (default) = Price is never touched automatically. -->
                 <div class="pkg-autoprice-box">
                     <div class="switch-row" style="padding:0;">
                         <div>
-                            <span class="switch-label">Auto Update Cost <span class="pkg-recommend-chip">Recommend</span></span>
-                            <p class="switch-hint" id="edit-game-autoprice-hint">Settings ထဲက Schedule အချိန်တွေမှာ ဒီဂိမ်းရဲ့ Cost ကို supplier ဈေးအတိုင်း auto update လုပ်ပေးမယ် (Price မထိပါ — Resync နဲ့ ကိုယ်တိုင်ချိန်ပါ)။</p>
+                            <span class="switch-label">Auto Update Price</span>
+                            <p class="switch-hint" id="edit-game-autoprice-hint">ပိတ်ထားတယ် — ဒီဂိမ်းရဲ့ Cost ပဲ auto update ဖြစ်မယ်၊ Price ကို မထိပါ။</p>
                         </div>
                         <label class="toggle-switch">
-                            <input type="checkbox" id="edit-game-autoprice" checked onchange="onGameAutoPriceToggle()">
+                            <input type="checkbox" id="edit-game-autoprice" onchange="onGameAutoPriceToggle()">
                             <span class="toggle-slider"></span>
                         </label>
                     </div>
@@ -10165,6 +10186,8 @@
         // listenGames) and again on a fixed interval as a safety net, guarded
         // by lossFixInFlight so overlapping runs never double-write the same
         // game while an earlier write is still in flight.
+        // Only games whose "Auto Update Price" switch (games/{id}.autoPriceSync) is ON are
+        // touched; with the switch OFF, Price stays exactly as the admin set it.
         const LOSS_MARGIN_MARKUP_PCT = 1;
         const LOSS_FIX_INTERVAL_MS = 5 * 60 * 1000; // safety-net re-check every 5 minutes
         let lossFixSchedulerStarted = false;
@@ -10175,6 +10198,7 @@
             lossFixInFlight = true;
             try {
                 for (const [gameId, g] of Object.entries(GAMES || {})) {
+                    if (g.autoPriceSync !== true) continue; // Auto Update Price OFF = Price is never changed automatically
                     const packages = g.packages || [];
                     let changed = false;
                     const updated = packages.map(p => {
@@ -10287,8 +10311,7 @@
                         const currentCost = Number(p.cost) || 0;
                         if (liveCost === currentCost) return;
                         changed++;
-                        p.cost = liveCost;
-                        p.price = autoPriceForCost(liveCost);
+                        p.cost = liveCost; // COST ONLY - Price changes only via the Price schedule or Resync
                     });
                 });
 
@@ -10321,9 +10344,9 @@
         // the admin panel doesn't spam a toast per game. Kept as its own function
         // rather than refactoring applyGameCostUpdatesFromList to share code, so
         // the existing manual "Pass" badge flow stays exactly as it was.
-        async function applyLiveCostUpdatesForGame(gameId, g) {
-            if (g.autoPriceUpdate === false) return 0;        // this game's Auto Update Cost switch is OFF (Cost only - Price is never touched)
-            const rate = G2BULK_SETTINGS.usdRate || 4500;
+        async function applyLiveCostUpdatesForGame(gameId, g, opts = {}) {
+            const withPrice = opts.withPrice === true && g.autoPriceSync === true; // Price only when the run is a Price run AND this game's switch is ON
+                        const rate = G2BULK_SETTINGS.usdRate || 4500;
             const packages = (g.packages || []).map(p => ({ ...p }));
             const sources = [];
             if (g.g2bulkCode) {
@@ -10366,6 +10389,10 @@
                     changed++;
                     p.cost = liveCost;
                 });
+                if (withPrice && Number(p.cost) > 0) {
+                    const np = autoPriceForCost(Number(p.cost));
+                    if (np && np !== Number(p.price)) { p.price = np; changed++; }
+                }
             });
             if (changed > 0) {
                 await updateDoc(doc(db, "games", gameId), { packages });
@@ -10388,13 +10415,13 @@
         // function you can call by hand (window.runAutoPriceUpdateForAllGames)
         // if you ever want to force a check outside the schedule; the manual
         // "Pass" badge in the games list is unaffected either way.
-        async function runAutoPriceUpdateForAllGames() {
+        async function runAutoPriceUpdateForAllGames(opts = {}) {
             let updatedGames = 0, updatedPackages = 0;
             for (const [gameId, g] of Object.entries(GAMES || {})) {
                 const linked = g.g2bulkCode || g.jcplaysProduct || g.fazercardCategoryId || (g.fulfillProvider === 'g2bulk_voucher' && g.g2bulkVoucherCategory);
                 if (!linked) continue;
                 try {
-                    const changed = await applyLiveCostUpdatesForGame(gameId, g);
+                    const changed = await applyLiveCostUpdatesForGame(gameId, g, opts);
                     if (changed > 0) { updatedGames++; updatedPackages += changed; }
                 } catch (error) {
                     console.error('Auto price update error for', gameId, error);
@@ -10411,9 +10438,15 @@
         function listenAutoUpdatePricesSetting() {
             onSnapshot(doc(db, "settings", "pricing"), (docSnap) => {
                 const data = docSnap.exists() ? docSnap.data() : {};
-                AUTO_UPDATE_PRICES_ENABLED = !!data.autoApplyOnLoad;
-                const toggle = document.getElementById('autoupdate-prices-toggle');
-                if (toggle) toggle.checked = AUTO_UPDATE_PRICES_ENABLED;
+                if (typeof data.priceMarginPct === 'number' && data.priceMarginPct >= 0) {
+                    AUTO_PRICE_MARGIN_PCT = data.priceMarginPct;
+                    const mi = document.getElementById('price-margin-pct-input');
+                    if (mi && document.activeElement !== mi) mi.value = data.priceMarginPct;
+                }
+                if (!priceScheduleDirty) {
+                    PRICE_SCHEDULE_DRAFT = Array.isArray(data.priceSchedule) ? normalizeCostSchedule(data.priceSchedule) : [];
+                    renderPriceSchedule();
+                }
                 if (!costScheduleDirty) {
                     COST_SCHEDULE_DRAFT = Array.isArray(data.costSchedule) ? normalizeCostSchedule(data.costSchedule) : DEFAULT_COST_SCHEDULE.slice();
                     renderCostSchedule();
@@ -10424,23 +10457,6 @@
 
 
 
-        async function onAutoUpdatePricesToggle(checked) {
-            const statusEl = document.getElementById('autoupdate-prices-status');
-            try {
-                await setDoc(doc(db, "settings", "pricing"), { autoApplyOnLoad: checked }, { merge: true });
-                statusEl.style.color = 'var(--text-secondary)';
-                statusEl.innerText = checked
-                    ? 'Schedule အချိန်တွေမှာ Cost ကို auto update လုပ်ပေးပါမယ် (Price မထိပါ)။'
-                    : 'Auto update ပိတ်ထားပါပြီ — Schedule အချိန်တွေမှာ Telegram အသိပေးရုံပဲ၊ Cost ကို manual update လုပ်ရပါမယ်။';
-                logAdminActivity('Auto Price Update setting changed', checked ? 'Enabled' : 'Disabled');
-            } catch (error) {
-                console.error('Auto Price Update toggle save error:', error);
-                statusEl.style.color = 'var(--danger-strong)';
-                statusEl.innerText = 'Save failed: ' + error.message;
-                window.showToast('Failed to save setting.', 'fail');
-            }
-        }
-        window.onAutoUpdatePricesToggle = onAutoUpdatePricesToggle;
 
         // ---------- Cost Update Schedule (settings/pricing.costSchedule) ----------
         // Yangon-time "HH:MM" slots the Worker runs the COST-ONLY update at, several per day.
@@ -10527,6 +10543,89 @@
             }
         }
         window.saveCostSchedule = saveCostSchedule;
+
+        // ---------- Price Update Schedule (settings/pricing.priceSchedule + priceMarginPct) ----------
+        // Separate from the Cost schedule. On these Yangon-time "HH:MM" slots the Worker re-sets Price = Cost + margin %
+        // for ONLY the games whose Auto Update Price switch (games/{id}.autoPriceSync) is ON. Missing/empty = never.
+        let PRICE_SCHEDULE_DRAFT = [];
+        let priceScheduleDirty = false;
+
+        function togglePriceUpdateSettings() {
+            const body = document.getElementById('priceupdate-body');
+            const chevron = document.getElementById('priceupdate-chevron');
+            const open = body.style.display === 'none';
+            body.style.display = open ? 'block' : 'none';
+            chevron.style.transform = open ? 'rotate(180deg)' : '';
+        }
+        window.togglePriceUpdateSettings = togglePriceUpdateSettings;
+
+        function renderPriceSchedule() {
+            const box = document.getElementById('price-schedule-list');
+            if (!box) return;
+            if (!PRICE_SCHEDULE_DRAFT.length) {
+                box.innerHTML = '<p style="font-size:12px;color:var(--text-muted);margin:0;">အချိန်မရှိပါ — Price auto update ပိတ်ထားပါတယ်။</p>';
+                return;
+            }
+            box.innerHTML = PRICE_SCHEDULE_DRAFT.map((t, i) => `
+                <div style="display:flex;gap:8px;align-items:center;">
+                    <input type="time" value="${t}" onchange="onPriceScheduleTimeChange(${i}, this.value)" style="flex:1;padding:10px;border:1px solid var(--border-glass);background:var(--bg-subtle-2);color:var(--text-primary);border-radius:12px;font-size:14px;box-sizing:border-box;">
+                    <button type="button" class="btn btn-outline" onclick="removePriceScheduleTime(${i})" aria-label="Remove time">✕</button>
+                </div>`).join('');
+        }
+        function onPriceScheduleTimeChange(i, value) { PRICE_SCHEDULE_DRAFT[i] = value; priceScheduleDirty = true; }
+        window.onPriceScheduleTimeChange = onPriceScheduleTimeChange;
+        function addPriceScheduleTime() {
+            const last = PRICE_SCHEDULE_DRAFT.filter(t => COST_TIME_RE.test(t)).sort().pop();
+            let next = '08:00';
+            if (last) next = String((parseInt(last.slice(0, 2), 10) + 3) % 24).padStart(2, '0') + last.slice(2);
+            PRICE_SCHEDULE_DRAFT.push(next);
+            priceScheduleDirty = true;
+            renderPriceSchedule();
+        }
+        window.addPriceScheduleTime = addPriceScheduleTime;
+        function removePriceScheduleTime(i) { PRICE_SCHEDULE_DRAFT.splice(i, 1); priceScheduleDirty = true; renderPriceSchedule(); }
+        window.removePriceScheduleTime = removePriceScheduleTime;
+
+        async function savePriceSchedule() {
+            const statusEl = document.getElementById('price-schedule-status');
+            if (PRICE_SCHEDULE_DRAFT.some(t => !COST_TIME_RE.test(t))) {
+                statusEl.style.color = 'var(--danger-strong)';
+                statusEl.innerText = 'အချိန်တစ်ခု ကွက်လပ်ဖြစ်နေပါတယ် — ဖြည့်ပါ ဒါမှမဟုတ် ✕ နဲ့ ဖျက်ပါ။';
+                return;
+            }
+            const margin = Number(document.getElementById('price-margin-pct-input').value);
+            if (isNaN(margin) || margin < 0 || margin > 100) {
+                statusEl.style.color = 'var(--danger-strong)';
+                statusEl.innerText = 'Margin % ကို 0 မှ 100 ကြားထည့်ပါ။';
+                return;
+            }
+            const list = normalizeCostSchedule(PRICE_SCHEDULE_DRAFT);
+            const btn = document.getElementById('save-price-schedule-btn');
+            const originalText = btn.innerText;
+            btn.disabled = true;
+            btn.innerText = 'Saving...';
+            try {
+                await setDoc(doc(db, "settings", "pricing"), { priceSchedule: list, priceMarginPct: margin }, { merge: true });
+                PRICE_SCHEDULE_DRAFT = list;
+                priceScheduleDirty = false;
+                AUTO_PRICE_MARGIN_PCT = margin;
+                renderPriceSchedule();
+                statusEl.style.color = 'var(--text-secondary)';
+                statusEl.innerText = list.length
+                    ? `Saved — ရန်ကုန်အချိန် ${list.join(', ')} မှာ Auto Update Price ဖွင့်ထားတဲ့ ဂိမ်းတွေရဲ့ Price ကို Cost + ${margin}% အတိုင်း ချိန်ပါမယ်။`
+                    : 'Saved — အချိန်မရှိတော့လို့ Price auto update ပိတ်ထားပါတယ်။';
+                logAdminActivity('Price Update schedule changed', (list.join(', ') || 'off') + ` / margin ${margin}%`);
+            } catch (error) {
+                console.error('Price schedule save error:', error);
+                statusEl.style.color = 'var(--danger-strong)';
+                statusEl.innerText = 'Save failed: ' + error.message;
+                window.showToast('Failed to save price schedule.', 'fail');
+            } finally {
+                btn.disabled = false;
+                btn.innerText = originalText;
+            }
+        }
+        window.savePriceSchedule = savePriceSchedule;
 
         // Sort key mirrors store.html: explicit `order` field wins (ascending),
         // games without one yet fall to the end, alphabetically - so nothing
@@ -11688,7 +11787,7 @@
         // with the Resync button. Rounds UP to a clean 50-MMK grid so the
         // margin never dips below the target; a hard ceiling (target + 2
         // points) keeps it from drifting too far for very small Cost values.
-        const AUTO_PRICE_MARGIN_PCT = 1;
+        let AUTO_PRICE_MARGIN_PCT = 1; // overwritten by settings/pricing.priceMarginPct (Settings → Auto Price Update)
 
         function autoPriceForCost(cost) {
             if (!cost || cost <= 0) return 0;
@@ -11786,7 +11885,7 @@
                 // instead of drifting further from it every time a bulk cost change
                 // lands. Adjusting Price directly is left as a pure % shift
                 // with no Cost side-effect, same as before.
-                if (bulkPkgField === 'cost') {
+                if (bulkPkgField === 'cost' && document.getElementById('edit-game-autoprice').checked) {
                     row.querySelector('.pkg-price').value = autoPriceForCost(newValue);
                 }
                 updatePackageProfit(input);
@@ -11977,7 +12076,7 @@
                 document.getElementById('edit-game-app-ios-scheme').value = g.appIosScheme || '';
                 document.getElementById('edit-game-app-ios-store-url').value = g.appIosStoreUrl || '';
                 document.getElementById('edit-game-popular').checked = !!g.popular;
-                document.getElementById('edit-game-autoprice').checked = g.autoPriceUpdate !== false; // missing on older games = ON
+                document.getElementById('edit-game-autoprice').checked = g.autoPriceSync === true; // missing on older games = OFF (Cost only)
                 onGameAutoPriceToggle();
                 // Missing field on older games defaults to "required" so nothing changes for them.
                 document.getElementById('edit-game-playerid').checked = g.playerIdRequired !== false;
@@ -12050,7 +12149,7 @@
                 document.getElementById('edit-game-app-ios-scheme').value = '';
                 document.getElementById('edit-game-app-ios-store-url').value = '';
                 document.getElementById('edit-game-popular').checked = false;
-                document.getElementById('edit-game-autoprice').checked = true;
+                document.getElementById('edit-game-autoprice').checked = false;
                 onGameAutoPriceToggle();
                 document.getElementById('edit-game-playerid').checked = false;
                 document.getElementById('edit-game-serverid').checked = false;
@@ -12252,8 +12351,8 @@
             const on = document.getElementById('edit-game-autoprice').checked;
             const hint = document.getElementById('edit-game-autoprice-hint');
             if (hint) hint.textContent = on
-                ? 'Settings ထဲက Schedule အချိန်တွေမှာ ဒီဂိမ်းရဲ့ Cost ကို supplier ဈေးအတိုင်း auto update လုပ်ပေးမယ် (Price မထိပါ — Resync နဲ့ ကိုယ်တိုင်ချိန်ပါ)။'
-                : 'ပိတ်ထားတယ် — ဒီဂိမ်းရဲ့ Cost ကို auto update မလုပ်ပါ။ ဖွင့်ထားဖို့ အကြံပြုပါတယ်။';
+                ? 'ဖွင့်ထားတယ် — Settings ထဲက Price Update Schedule အချိန်တွေမှာ ဒီဂိမ်းရဲ့ Price ကို Cost + Margin % အတိုင်း auto ချိန်ပေးမယ်။ (Cost က သူ့ Schedule နဲ့ သီးသန့် update ဖြစ်နေမယ်)'
+                : 'ပိတ်ထားတယ် — ဒီဂိမ်းရဲ့ Cost ပဲ auto update ဖြစ်မယ်၊ Price ကို မထိပါ။';
         }
         window.onGameAutoPriceToggle = onGameAutoPriceToggle;
 
@@ -12290,7 +12389,8 @@
             const appIosScheme = document.getElementById('edit-game-app-ios-scheme').value.trim();
             const appIosStoreUrl = document.getElementById('edit-game-app-ios-store-url').value.trim();
             const popular = document.getElementById('edit-game-popular').checked;
-            const autoPriceUpdate = document.getElementById('edit-game-autoprice').checked;
+            const autoPriceSync = document.getElementById('edit-game-autoprice').checked;
+            const autoPriceUpdate = true; // Cost auto update is always on (no switch) — kept true so the Worker's cost sweep never skips this game
             const playerIdRequired = document.getElementById('edit-game-playerid').checked;
             const serverIdRequired = playerIdRequired && document.getElementById('edit-game-serverid').checked;
             const charNameRequired = document.getElementById('edit-game-charname').checked;
@@ -12362,7 +12462,7 @@
                 // currently sit in them - without this, a tab created but left empty (or
                 // emptied out later) would vanish on reload since nothing else in the
                 // saved data would reference it.
-                const data = { name, serverName: serverName || '', image: imageUrl, banner: bannerUrl || imageUrl, bannerImages: existingBanners.length ? existingBanners : [imageUrl], packages, packageTabs: customPkgTabs.slice(), packageTabLabels: { package: builtinPkgTabLabels.package, currency: builtinPkgTabLabels.currency }, g2bulkCode: g2bulkCode || '', jcplaysProduct: jcplaysProduct || '', g2bulkVoucherCategory: g2bulkVoucherCategory || '', fazercardCategoryId: fazercardCategoryId || '', fazercardFields: fazercardCategoryId ? pendingFazerCardFields.slice() : [], fazercardServerMode: pendingFazerCardServerMode || '', fazercardServerOptions: pendingFazerCardServerOptions || [], g2bulkIdCheckCode: fazercardCategoryId ? (g2bulkIdCheckCode || '') : '', fazercardGiftCategoryId: fazercardGiftCategoryId || '', g2bulkServerMode: pendingG2BulkServerMode || '', g2bulkServerOptions: pendingG2BulkServerOptions || [], fulfillProvider: currentFulfillProvider, category: category || '', description: description || '', appAndroidPackage: appAndroidPackage || '', appAndroidScheme: appAndroidScheme || '', appAndroidStoreUrl: appAndroidStoreUrl || '', appIosScheme: appIosScheme || '', appIosStoreUrl: appIosStoreUrl || '', popular, autoPriceUpdate, playerIdRequired, serverIdRequired, charNameRequired };
+                const data = { name, serverName: serverName || '', image: imageUrl, banner: bannerUrl || imageUrl, bannerImages: existingBanners.length ? existingBanners : [imageUrl], packages, packageTabs: customPkgTabs.slice(), packageTabLabels: { package: builtinPkgTabLabels.package, currency: builtinPkgTabLabels.currency }, g2bulkCode: g2bulkCode || '', jcplaysProduct: jcplaysProduct || '', g2bulkVoucherCategory: g2bulkVoucherCategory || '', fazercardCategoryId: fazercardCategoryId || '', fazercardFields: fazercardCategoryId ? pendingFazerCardFields.slice() : [], fazercardServerMode: pendingFazerCardServerMode || '', fazercardServerOptions: pendingFazerCardServerOptions || [], g2bulkIdCheckCode: fazercardCategoryId ? (g2bulkIdCheckCode || '') : '', fazercardGiftCategoryId: fazercardGiftCategoryId || '', g2bulkServerMode: pendingG2BulkServerMode || '', g2bulkServerOptions: pendingG2BulkServerOptions || [], fulfillProvider: currentFulfillProvider, category: category || '', description: description || '', appAndroidPackage: appAndroidPackage || '', appAndroidScheme: appAndroidScheme || '', appAndroidStoreUrl: appAndroidStoreUrl || '', appIosScheme: appIosScheme || '', appIosStoreUrl: appIosStoreUrl || '', popular, autoPriceUpdate, autoPriceSync, playerIdRequired, serverIdRequired, charNameRequired };
 
                 if (gameId) {
                     await updateDoc(doc(db, "games", gameId), data);
@@ -14257,6 +14357,11 @@
             const box = document.getElementById('header-logo-icon');
             box.classList.remove('is-loading');
             const url = activeLogoUrl(data);
+            img.onerror = () => {
+                img.style.display = 'none';
+                defaultIcon.style.display = '';
+                box.classList.remove('has-custom-logo', 'is-loading');
+            };
             if (url) {
                 img.src = url;
                 img.style.display = 'block';
@@ -14411,7 +14516,16 @@
                 }
             }, (error) => {
                 console.error("Branding listener error:", error);
+                // Never leave the header logo stuck on the loading skeleton.
+                const b = document.getElementById('header-logo-icon');
+                if (b) b.classList.remove('is-loading');
             });
+            // Safety net: if no snapshot arrives (offline / slow / blocked),
+            // drop the skeleton after 4s and fall back to the default icon.
+            setTimeout(() => {
+                const b = document.getElementById('header-logo-icon');
+                if (b) b.classList.remove('is-loading');
+            }, 4000);
         }
 
         async function saveLogo() {
