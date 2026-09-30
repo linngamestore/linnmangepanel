@@ -18690,7 +18690,9 @@
         // the tab is focused/unfocused repeatedly.
         let _lastHeartbeatMs = 0;
         async function sendAdminHeartbeat() {
-            if (document.hidden) return;
+            // NOTE: no document.hidden guard any more - on a phone the panel tab is usually in the
+            // background (admin is in Telegram/another app), and skipping those beats made the
+            // storefront show "Admin Offline" while the admin was actually signed in.
             if (Date.now() - _lastHeartbeatMs < 120000) return;
             _lastHeartbeatMs = Date.now();
             try {
@@ -18702,7 +18704,7 @@
         function startAdminHeartbeat() {
             if (adminHeartbeatInterval) return;
             sendAdminHeartbeat();
-            adminHeartbeatInterval = setInterval(sendAdminHeartbeat, 600000);
+            adminHeartbeatInterval = setInterval(sendAdminHeartbeat, 300000); // 5 min (storefront treats <12 min as Online)
             document.addEventListener('visibilitychange', () => {
                 if (!document.hidden) sendAdminHeartbeat();
             });
