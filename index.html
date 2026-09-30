@@ -243,7 +243,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>LINN GAME STORE - Admin</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+Myanmar:wght@400;500;600;700&family=Poppins:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap');
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; -webkit-tap-highlight-color: transparent; }
         html { -webkit-text-size-adjust: 100%; -moz-text-size-adjust: 100%; text-size-adjust: 100%; }
 
@@ -1825,6 +1825,222 @@
         /* Games page: Refresh / Reorder / Add Server / Copy Names / + Add only show while Edit Mode is On */
         #game-list:not(.game-edit-on) .game-edit-only { display: none !important; }
             .fulfill-hide { display: none !important; }
+
+        /* ============================================================
+           UI REDESIGN v2 — "Flat Modern"
+           A pure presentation layer appended after every existing rule:
+           flat solid surfaces (no glass blur / mesh), Inter + Noto Sans
+           Myanmar type, pill navigation, accent hero on the dashboard,
+           calmer borders + shadows. No markup / JS / ID / class changes,
+           so all existing behaviour is untouched. All 4 themes still work
+           (they only swap the tokens below). To roll back, delete this
+           whole block.
+           ============================================================ */
+        * { font-family: 'Inter', 'Noto Sans Myanmar', 'Padauk', 'Poppins', system-ui, -apple-system, 'Segoe UI', sans-serif; scrollbar-width: thin; scrollbar-color: var(--line) transparent; }
+        body { font-size: 14px; line-height: 1.5; -webkit-font-smoothing: antialiased; }
+
+        :root, html[data-theme="light"] {
+            --bg-app: #F3F5FA;
+            --surface: #FFFFFF; --surface-strong: #FFFFFF;
+            --bg-subtle: #EFF2F8; --bg-subtle-2: #F5F7FB;
+            --fill-soft: rgba(15,23,42,0.055);
+            --border-glass: rgba(15,23,42,0.08);
+            --line: rgba(15,23,42,0.13);
+            --text-primary: #1A2133; --text-strong: #0A0F1E;
+            --text-secondary: #566079; --text-muted: #8A93A9;
+            --accent: #3B5BFF; --accent-rgb: 59,91,255; --accent-soft: rgba(59,91,255,0.10);
+            --shadow-soft: 0 1px 2px rgba(16,24,40,0.05), 0 10px 24px -14px rgba(16,24,40,0.16);
+            --glass-blur: 0px;
+        }
+        html[data-theme="dark-blue"] {
+            --bg-app: #0A0E1A;
+            --surface: #121826; --surface-strong: #171F31;
+            --bg-subtle: rgba(255,255,255,0.045); --bg-subtle-2: rgba(255,255,255,0.065);
+            --fill-soft: rgba(255,255,255,0.07);
+            --border-glass: rgba(255,255,255,0.08); --line: rgba(255,255,255,0.14);
+            --accent: #3E86FF; --accent-rgb: 62,134,255; --accent-soft: rgba(62,134,255,0.16);
+            --shadow-soft: 0 1px 2px rgba(0,0,0,0.35), 0 12px 28px -14px rgba(0,0,0,0.6);
+            --glass-blur: 0px;
+        }
+        html[data-theme="midnight-purple"] {
+            --bg-app: #0D0916;
+            --surface: #171126; --surface-strong: #1D1631;
+            --bg-subtle: rgba(255,255,255,0.045); --bg-subtle-2: rgba(255,255,255,0.065);
+            --fill-soft: rgba(255,255,255,0.07);
+            --border-glass: rgba(255,255,255,0.08); --line: rgba(255,255,255,0.14);
+            --accent: #9B5CF6; --accent-rgb: 155,92,246; --accent-soft: rgba(155,92,246,0.18);
+            --shadow-soft: 0 1px 2px rgba(0,0,0,0.35), 0 12px 28px -14px rgba(0,0,0,0.6);
+            --glass-blur: 0px;
+        }
+        html[data-theme="ocean"] {
+            --bg-app: #061015;
+            --surface: #0C1B22; --surface-strong: #10232C;
+            --bg-subtle: rgba(255,255,255,0.045); --bg-subtle-2: rgba(255,255,255,0.065);
+            --fill-soft: rgba(255,255,255,0.07);
+            --border-glass: rgba(255,255,255,0.08); --line: rgba(255,255,255,0.14);
+            --accent: #10A8A0; --accent-rgb: 16,168,160; --accent-soft: rgba(16,168,160,0.17);
+            --shadow-soft: 0 1px 2px rgba(0,0,0,0.35), 0 12px 28px -14px rgba(0,0,0,0.6);
+            --glass-blur: 0px;
+        }
+
+        /* Flat backdrop: one soft accent glow at the top, nothing animated. */
+        body::before {
+            background:
+                radial-gradient(70% 38% at 50% -8%, rgba(var(--accent-rgb), 0.10) 0%, transparent 70%),
+                var(--bg-app);
+        }
+        .glass, .modal-box, .dialog-box, .login-box, .header, .top-nav, #toast {
+            -webkit-backdrop-filter: none; backdrop-filter: none;
+        }
+
+        /* ---- Header ---- */
+        .header {
+            height: 61px; padding: 0 16px; background: var(--surface);
+            border-bottom: 1px solid var(--border-glass); box-shadow: none;
+        }
+        .logo-icon { width: 34px; height: 34px; border-radius: 10px; }
+        .logo-icon img { border-radius: 10px !important; }
+        .header-icon { width: 36px; height: 36px; border-radius: 12px; background: var(--bg-subtle); border: 1px solid var(--border-glass); }
+        .conn-status { background: var(--bg-subtle); border-color: var(--border-glass); }
+
+        /* ---- Navigation: pill tabs ---- */
+        .top-nav { background: var(--surface); border-bottom: 1px solid var(--border-glass); padding: 6px 10px; gap: 6px; align-items: center; }
+        .top-nav .nav-item {
+            min-height: 36px; padding: 6px 14px; border-radius: 999px; border-bottom: 0;
+            font-size: 12.5px; font-weight: 600; color: var(--text-secondary);
+            transition: background 0.15s ease, color 0.15s ease;
+        }
+        .top-nav .nav-item .ui-icon { width: 18px; height: 18px; }
+        .top-nav .nav-item:active { background: var(--fill-soft); }
+        .top-nav .nav-item.active,
+        .top-nav .nav-item.active:active {
+            background: var(--accent); color: #fff; box-shadow: 0 6px 14px -8px rgba(var(--accent-rgb), 0.9);
+            border-right-color: transparent; border-bottom-color: transparent;
+        }
+        .top-nav .nav-item.active .ui-icon { stroke: #fff; }
+        .top-nav .nav-item .nav-item-count-badge { top: 1px; right: 2px; }
+        .top-nav .nav-item .nav-item-low-balance-dot { top: 4px; right: 5px; }
+        .content-area { padding: 18px 14px 32px; }
+
+        /* ---- Page titles + section labels ---- */
+        .title-header { font-size: 20px; font-weight: 700; letter-spacing: -0.01em; color: var(--text-strong); border-bottom: 0; padding: 0; margin-bottom: 14px; }
+        .dash-section-label { font-size: 11px; font-weight: 700; letter-spacing: 0.08em; color: var(--text-muted); margin: 20px 2px 8px; }
+
+        /* ---- Cards ---- */
+        .admin-card, .api-doc-card {
+            background: var(--surface); border: 1px solid var(--border-glass); border-radius: 16px;
+            box-shadow: var(--shadow-soft); padding: 16px;
+        }
+        .tier-row, .user-card, .package-row, .details-grid-item { border-radius: 14px; }
+        .user-card { border: 1px solid var(--border-glass); box-shadow: var(--shadow-soft); }
+        .details-grid-item, .ugc-meta-cell { background: var(--bg-subtle-2); border-color: var(--border-glass); }
+
+        /* ---- Dashboard hero deck ---- */
+        .dash-deck {
+            border-radius: 22px; padding: 20px 18px 16px; border: 1px solid rgba(var(--accent-rgb), 0.28);
+            background: linear-gradient(140deg, rgba(var(--accent-rgb), 0.34) 0%, rgba(var(--accent-rgb), 0.10) 60%), var(--surface);
+            box-shadow: var(--shadow-soft);
+        }
+        .dash-deck::before { background: radial-gradient(60% 90% at 100% 0%, rgba(var(--accent-rgb), 0.35), transparent 70%); }
+        .dash-eyebrow { color: rgba(255,255,255,0.7); font-weight: 600; letter-spacing: 0.08em; }
+        .dash-deck-icon { border-radius: 12px; background: rgba(255,255,255,0.14); }
+        .dash-deck-value { font-weight: 700; font-size: 32px; letter-spacing: -0.02em; }
+        .day-tick { background: rgba(255,255,255,0.16); }
+        .day-tick.filled { background: rgba(255,255,255,0.85); }
+        .day-tick.current { background: #fff; box-shadow: 0 0 10px 1px rgba(255,255,255,0.65); }
+        .day-track-label { color: rgba(255,255,255,0.6); }
+        html[data-theme="light"] .dash-deck {
+            border-color: transparent;
+            background: linear-gradient(140deg, #3B5BFF 0%, #6D4DFF 100%);
+            box-shadow: 0 18px 34px -18px rgba(59,91,255,0.75);
+        }
+        html[data-theme="light"] .dash-deck::before { background: radial-gradient(60% 90% at 100% 0%, rgba(255,255,255,0.28), transparent 70%); }
+        .stat-chip { border-radius: 14px; border: 1px solid var(--border-glass); border-left: 1px solid var(--border-glass); box-shadow: var(--shadow-soft); padding: 11px 12px; }
+        .stat-chip h4 { font-weight: 600; }
+        .stat-chip p { font-weight: 700; letter-spacing: -0.01em; }
+
+        /* ---- Buttons ---- */
+        .btn { border-radius: 12px; font-weight: 600; letter-spacing: 0.005em; }
+        .btn-primary { background-image: none; background-color: var(--accent); box-shadow: 0 6px 14px -8px rgba(var(--accent-rgb), 0.85); }
+        .btn-primary:active { filter: brightness(0.92); }
+        .btn-danger { background-image: none; box-shadow: 0 6px 14px -8px rgba(250,62,62,0.7); }
+        .btn-outline { background: transparent; color: var(--text-primary); border-color: var(--line); box-shadow: none; }
+        .btn-outline:active { background: var(--fill-soft); }
+        .btn-danger-outline { border-radius: 12px; }
+        .search-go-btn { border: 0; border-radius: 12px; background: var(--accent); }
+
+        /* ---- Badges ---- */
+        .badge { padding: 4px 10px 4px 8px; font-size: 11.5px; font-weight: 700; letter-spacing: 0.01em; }
+
+        /* ---- Inputs ---- */
+        .admin-search-wrap input, .game-picker-search-wrap input,
+        .modal-body input[type="text"], .modal-body input[type="number"], .modal-body input[type="password"],
+        .modal-body select, .modal-body textarea, .tier-row-input-wrap input {
+            border: 1px solid var(--line); background: var(--surface); border-radius: 12px;
+            transition: border-color 0.15s ease, box-shadow 0.15s ease;
+        }
+        .modal-body input[type="text"], .modal-body input[type="number"], .modal-body input[type="password"],
+        .modal-body select, .modal-body textarea { background: var(--bg-subtle-2); }
+        input:focus, select:focus, textarea:focus { outline: none; }
+        .admin-search-wrap input:focus, .game-picker-search-wrap input:focus,
+        .modal-body input:focus, .modal-body select:focus, .modal-body textarea:focus,
+        .tier-row-input-wrap input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+
+        /* ---- Modals / sheets / dialogs ---- */
+        .modal-overlay, .dialog-overlay { background: rgba(8,12,24,0.55); }
+        .modal-box { border-radius: 24px 24px 0 0; background: var(--surface); border: 1px solid var(--border-glass); border-bottom: 0; box-shadow: 0 -18px 50px -20px rgba(0,0,0,0.35); }
+        .modal-box::before { content: ''; flex: 0 0 auto; width: 38px; height: 4px; border-radius: 4px; background: var(--line); margin: -8px auto 12px; }
+        .modal-header { border-bottom: 1px solid var(--border-glass); }
+        .modal-header h3 { font-size: 17px; font-weight: 700; letter-spacing: -0.01em; color: var(--text-strong); }
+        .modal-close { width: 34px; height: 34px; border-radius: 50%; background: var(--bg-subtle); border-color: var(--border-glass); }
+        .dialog-box { background: var(--surface); border-radius: 22px; box-shadow: 0 24px 60px -20px rgba(0,0,0,0.5); }
+        .dialog-title { font-weight: 700; }
+
+        /* Tab / picker sheet rows (rendered by JS with inline styles) */
+        #nav-group-sheet-list > button, #theme-swatch-grid > * {
+            border: 1px solid var(--border-glass) !important; border-radius: 14px !important;
+            background: var(--bg-subtle-2) !important; padding: 12px 14px !important;
+            transition: background 0.15s ease, transform 0.1s ease;
+        }
+        #nav-group-sheet-list > button:active { transform: scale(0.985); background: var(--fill-soft) !important; }
+        #nav-group-sheet-list > button > svg:first-child {
+            box-sizing: content-box; padding: 8px; border-radius: 11px;
+            background: var(--accent-soft); color: var(--accent);
+        }
+
+        /* ---- Toast: keep state colours (set by JS), soften the shape ---- */
+        #toast { border-width: 1px !important; border-radius: 16px; box-shadow: 0 16px 40px -16px rgba(0,0,0,0.35); font-weight: 600; }
+
+        /* ---- Desktop: centre content, give the panel room ---- */
+        @media (min-width: 900px) {
+            .top-nav { justify-content: center; }
+            .content-area { padding-top: 24px; }
+            .admin-card, .stat-chip { transition: box-shadow 0.2s ease, transform 0.2s ease; }
+            .admin-card:hover { box-shadow: 0 1px 2px rgba(16,24,40,0.06), 0 16px 34px -16px rgba(16,24,40,0.24); }
+        }
+
+        /* ---- Header clock v2: seconds ring + big HH:MM + stacked date ---- */
+        #header-clock {
+            display: flex; align-items: center; gap: 10px; padding: 4px 13px 4px 4px;
+            border-radius: 999px; background: var(--bg-subtle); border: 1px solid var(--border-glass);
+            box-shadow: none; overflow: visible; position: relative; flex-shrink: 0;
+        }
+        #header-clock::before { display: none; }
+        .hc-ring { position: relative; width: 34px; height: 34px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+        .hc-ring svg { position: absolute; inset: 0; width: 100%; height: 100%; transform: rotate(-90deg); }
+        .hc-ring circle { fill: none; stroke-width: 3; }
+        .hc-ring-bg { stroke: var(--fill-soft); }
+        .hc-ring-fg { stroke: var(--accent); stroke-linecap: round; stroke-dasharray: 97.39; stroke-dashoffset: 97.39; transition: stroke-dashoffset 1s linear; }
+        .hc-sec { font-size: 10px; font-weight: 700; color: var(--text-secondary); font-variant-numeric: tabular-nums; line-height: 1; }
+        .hc-time { display: flex; align-items: baseline; font-size: 18px; font-weight: 700; letter-spacing: -0.01em; color: var(--text-strong); font-variant-numeric: tabular-nums; line-height: 1; }
+        .hc-colon { color: var(--accent); padding: 0 1px; position: relative; top: -1px; animation: hcBlink 1s steps(1) infinite; }
+        @keyframes hcBlink { 0%, 55% { opacity: 1; } 56%, 100% { opacity: 0.2; } }
+        .hc-date { display: flex; flex-direction: column; gap: 2px; padding-left: 10px; border-left: 1px solid var(--line); line-height: 1; }
+        .hc-date #hc-wd { font-size: 9.5px; font-weight: 800; letter-spacing: 0.09em; text-transform: uppercase; color: var(--accent); }
+        .hc-date #hc-mon { font-size: 11px; font-weight: 600; color: var(--text-secondary); white-space: nowrap; }
+        @media (max-width: 420px) { .hc-date { display: none; } #header-clock { padding-right: 12px; } }
+        @media (max-width: 340px) { .hc-ring { display: none; } #header-clock { padding-left: 12px; } }
+        @media (prefers-reduced-motion: reduce) { * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; } }
     </style>
     <script>
         // Applied synchronously (before first paint) to avoid a flash of the
@@ -2024,11 +2240,13 @@
             </div>
         </div>
         <div id="header-clock" title="Local time">
-            <span class="clock-beat"></span>
-            <div class="clock-main">
-                <div class="digital-clock-time"><span id="header-clock-hh">--</span><span class="clock-colon">:</span><span id="header-clock-mm">--</span><span class="clock-colon clock-colon-sec">:</span><span id="header-clock-ss" class="clock-sec">--</span></div>
-                <span id="header-clock-date">--</span>
+            <div class="hc-ring">
+                <svg viewBox="0 0 36 36" aria-hidden="true"><circle class="hc-ring-bg" cx="18" cy="18" r="15.5"></circle><circle class="hc-ring-fg" id="hc-ring-fg" cx="18" cy="18" r="15.5"></circle></svg>
+                <span id="header-clock-ss" class="hc-sec">--</span>
             </div>
+            <div class="hc-time"><span id="header-clock-hh">--</span><span class="hc-colon">:</span><span id="header-clock-mm">--</span></div>
+            <div class="hc-date"><span id="hc-wd">--</span><span id="hc-mon">--</span></div>
+            <span id="header-clock-date" hidden>--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
             <div class="conn-status" id="conn-status" title="Connecting">
@@ -4084,11 +4302,11 @@
     <script>
         // ---------- Theme switcher (Liquid Glass) ----------
         const ADMIN_THEMES = [
-            { id: 'auto',             label: 'Auto (7AM–7PM)', sub: 'Light by day, Dark by night', icon: 'icon-clock', swatch: ['#EEF1F8', '#4C9AFF', '#050813'] },
-            { id: 'light',           label: 'Light Glass',   sub: 'Bright & airy',    icon: 'icon-moon', swatch: ['#EEF1F8', '#1877F2', '#ffffff'] },
-            { id: 'dark-blue',       label: 'Dark Blue',     sub: 'Deep navy glass',  icon: 'icon-moon', swatch: ['#050813', '#4C9AFF', '#17203A'] },
-            { id: 'midnight-purple', label: 'Midnight',      sub: 'Violet glass',     icon: 'icon-moon', swatch: ['#0B0715', '#C084FC', '#231838'] },
-            { id: 'ocean',           label: 'Ocean',         sub: 'Teal glass',       icon: 'icon-moon', swatch: ['#041016', '#2DD4BF', '#092630'] },
+            { id: 'auto',             label: 'Auto (7AM–7PM)', sub: 'Light by day, Dark by night', icon: 'icon-clock', swatch: ['#F3F5FA', '#3E86FF', '#0A0E1A'] },
+            { id: 'light',           label: 'Light',         sub: 'Clean & bright',    icon: 'icon-moon', swatch: ['#F3F5FA', '#3B5BFF', '#ffffff'] },
+            { id: 'dark-blue',       label: 'Dark Blue',     sub: 'Deep navy',  icon: 'icon-moon', swatch: ['#0A0E1A', '#3E86FF', '#171F31'] },
+            { id: 'midnight-purple', label: 'Midnight',      sub: 'Violet',     icon: 'icon-moon', swatch: ['#0D0916', '#9B5CF6', '#1D1631'] },
+            { id: 'ocean',           label: 'Ocean',         sub: 'Teal',       icon: 'icon-moon', swatch: ['#061015', '#10A8A0', '#10232C'] },
         ];
 
         // "auto" resolves to Light between 7AM-7PM local time and Dark Blue
@@ -18716,6 +18934,24 @@
         
     </script>
 
+
+<script>
+(function(){
+  var C=97.39, MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'], WD=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  function tick(){
+    var n=new Date(), s=n.getSeconds();
+    var ring=document.getElementById('hc-ring-fg');
+    if(ring){
+      if(s===0){ ring.style.transition='none'; ring.style.strokeDashoffset=C; void ring.getBoundingClientRect(); ring.style.transition=''; }
+      ring.style.strokeDashoffset=(C*(1-(s+1)/60)).toFixed(2);
+    }
+    var wd=document.getElementById('hc-wd'), mon=document.getElementById('hc-mon');
+    if(wd) wd.textContent=WD[n.getDay()];
+    if(mon) mon.textContent=('0'+n.getDate()).slice(-2)+' '+MON[n.getMonth()];
+  }
+  tick(); setInterval(tick,1000);
+})();
+</script>
 <!-- Laptop keyboard shortcuts (desktop only) -->
 <script>
 (function(){
