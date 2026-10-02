@@ -1176,6 +1176,19 @@
         .udp-tabs::-webkit-scrollbar { display: none; }
         .udp-tab { flex: 0 0 auto; white-space: nowrap; padding: 9px 14px; border: none; background: transparent; border-radius: 10px; font-size: 12.5px; font-weight: 600; color: var(--text-secondary); cursor: pointer; transition: 0.15s; }
         .udp-tab.active { background: var(--surface); color: var(--accent); box-shadow: var(--shadow-soft); }
+        /* ---- Compact transaction rows (user details > Transactions) ---- */
+        .wtx-chip { flex-shrink: 0; border: 1px solid var(--border-glass); background: var(--surface); color: var(--text-secondary); border-radius: 999px; padding: 4px 11px; font-size: 11.5px; font-weight: 500; cursor: pointer; }
+        .wtx-chip.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+        .wtx-row { display: flex; align-items: center; gap: 9px; background: var(--surface); border: 1px solid var(--border-glass); border-radius: 11px; padding: 7px 10px; margin-bottom: 5px; }
+        .wtx-ico { width: 26px; height: 26px; border-radius: 8px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; }
+        .wtx-ico.in { background: rgba(16,185,129,.15); color: #10B981; }
+        .wtx-ico.out { background: rgba(239,68,68,.15); color: #EF4444; }
+        .wtx-ico.buy { background: rgba(99,102,241,.15); color: #6366F1; }
+        .wtx-body { flex: 1; min-width: 0; }
+        .wtx-title { font-size: 12.5px; font-weight: 500; color: var(--text-strong); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .wtx-sub { font-size: 10.5px; color: var(--text-muted); margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .wtx-amt { font-size: 12.5px; font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; }
+        .wtx-amt.in { color: #10B981; } .wtx-amt.out { color: #EF4444; } .wtx-amt.buy { color: var(--text-strong); }
         .udp-tab-content { display: none; }
         .udp-tab-content.active { display: block; animation: fadeIn 0.25s ease-in-out; }
         .udp-stat-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
@@ -2486,6 +2499,14 @@
                     <div class="stat-card-value" id="stat-total-users">...</div>
                     <div class="stat-card-sub"><span class="stat-card-sub-text">Registered users</span></div>
                 </div>
+                <div class="stat-card" style="cursor:pointer;" onclick="refreshWalletTotalStat(true)" title="Tap to refresh">
+                    <div class="stat-card-top">
+                        <span class="stat-card-label">Total Wallet Balance</span>
+                        <div class="stat-card-icon" style="background:#0EA5E9;"><svg class="ui-icon"><use href="#icon-dollar"></use></svg></div>
+                    </div>
+                    <div class="stat-card-value" id="stat-total-wallet">...</div>
+                    <div class="stat-card-sub"><span class="stat-card-sub-text" id="stat-total-wallet-sub">All users combined · MMK</span></div>
+                </div>
                 <div class="stat-card">
                     <div class="stat-card-top">
                         <span class="stat-card-label">Today's Profit</span>
@@ -2905,6 +2926,19 @@
                     </div>
                     <p id="admin-push-status" style="font-size:12px;color:var(--text-secondary);margin-top:8px;"></p>
                 </div>
+            </div>
+
+            <div class="admin-card" id="settings-card-walletcleanup" style="margin-top:14px;">
+                <span style="font-size:15px;font-weight: 600;">No-History Wallet Cleanup</span>
+                <p style="font-size:11px;color:var(--text-secondary);line-height:1.5;margin:8px 0;">Wallet ထဲမှာ ငွေရှိပေမဲ့ <b>Completed top-up မရှိ၊ Wallet နဲ့ order လည်းမရှိ</b> တဲ့ user တွေကို ရှာပါမယ်။ Scan လုပ်ပြီး စာရင်းကြည့်ပြီးမှ အတည်ပြုရင် Wallet ကို 0 လုပ်ပြီး warning ပို့ပါမယ် (အလိုအလျောက် မဖျက်ပါ)။</p>
+                <button class="btn btn-outline" id="wallet-cleanup-scan-btn" onclick="scanNoHistoryWallets(this)">Scan</button>
+                <div id="wallet-cleanup-result" style="margin-top:10px;font-size:12px;"></div>
+            </div>
+
+            <div class="admin-card" id="settings-card-costmigrate" style="margin-top:14px;">
+                <span style="font-size:15px;font-weight: 600;">Cost Privacy Migration</span>
+                <p style="font-size:11px;color:var(--text-secondary);line-height:1.5;margin:8px 0;">Package Cost တွေကို ပြည်သူဖတ်လို့ရတဲ့ <b>games</b> ထဲကနေ admin-only <b>gameCosts</b> ထဲ ရွှေ့ပါမယ် (ထပ်နှိပ်လည်း အန္တရာယ်မရှိပါ)။</p>
+                <button class="btn btn-primary" onclick="migrateCostsToAdminOnly(this)">Move Costs to Private</button>
             </div>
 
             <div class="admin-card" id="settings-card-autoprice" style="margin-top:14px;">
@@ -3446,6 +3480,10 @@
                 <button class="btn btn-primary" style="flex:unset; padding: 4px 10px; font-size:12px;" onclick="fetchUsers()"><svg class="ui-icon" style="width:13px;height:13px;"><use href="#icon-refresh"></use></svg> Refresh</button>
                 <button class="btn btn-outline" style="flex:unset; padding: 4px 10px; font-size:12px;" onclick="exportUsersCSV()"><svg class="ui-icon" style="width:13px;height:13px;"><use href="#icon-download"></use></svg> Export CSV</button>
             </h2>
+            <div class="udp-tabs" id="user-list-tabs" style="margin-bottom:10px;">
+                <button type="button" class="udp-tab active" data-utab="all" onclick="setUserListTab('all')">All Users <span id="ult-count-all">0</span></button>
+                <button type="button" class="udp-tab" data-utab="admin" onclick="setUserListTab('admin')">Admin <span id="ult-count-admin">0</span></button>
+            </div>
             <div class="admin-search-wrap">
                 <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
                 <input type="text" id="user-search" placeholder="Search Users..." autocomplete="off" oninput="renderAdminUsersList()">
@@ -3494,6 +3532,7 @@
                 <button type="button" class="udp-tab" data-tab="loginlist" onclick="switchUserDetailTab('loginlist')">Login List</button>
                 <button type="button" class="udp-tab" data-tab="orders" onclick="switchUserDetailTab('orders')">Order List</button>
                 <button type="button" class="udp-tab" data-tab="topup" onclick="switchUserDetailTab('topup')">Top Up List</button>
+                <button type="button" class="udp-tab" data-tab="txns" onclick="switchUserDetailTab('txns')">Transactions</button>
                 <button type="button" class="udp-tab" data-tab="logintime" onclick="switchUserDetailTab('logintime')">Login Time</button>
             </div>
 
@@ -3527,6 +3566,7 @@
                 <button class="btn btn-outline" style="margin-top:8px;padding:7px 14px;font-size:12px;" onclick="saveUserAdminNote()">Save Note</button>
 
                 <div style="display:flex;gap:8px;margin-top:20px;">
+                    <button class="btn btn-outline" id="ud-admin-btn" onclick="toggleStoreAdminCurrentUser()">Set as Admin</button>
                     <button class="btn btn-outline" id="ud-ban-btn" onclick="toggleBanCurrentUser()">Ban User</button>
                     <button class="btn btn-danger" onclick="deleteCurrentUser()">Delete User</button>
                 </div>
@@ -3556,6 +3596,18 @@
                 <div id="ud-orders-container">
                     <p class="empty-msg">No orders yet.</p>
                 </div>
+            </div>
+
+            <!-- Transactions (deposits / withdrawals / purchases) -->
+            <div class="udp-tab-content" id="udp-tab-txns">
+                <div style="display:flex;gap:6px;overflow-x:auto;margin-bottom:8px;" id="ud-txn-tabs">
+                    <button type="button" class="wtx-chip active" data-f="all" onclick="setUserTxnFilter('all')">All</button>
+                    <button type="button" class="wtx-chip" data-f="in" onclick="setUserTxnFilter('in')">Deposits</button>
+                    <button type="button" class="wtx-chip" data-f="out" onclick="setUserTxnFilter('out')">Withdrawals</button>
+                    <button type="button" class="wtx-chip" data-f="buy" onclick="setUserTxnFilter('buy')">Purchases</button>
+                    <button type="button" class="wtx-chip" onclick="refreshUserTxnsIfOpen()">↻ Refresh</button>
+                </div>
+                <div id="ud-txn-container"><p class="empty-msg">No transactions yet.</p></div>
             </div>
 
             <!-- Top Up List -->
@@ -4502,6 +4554,7 @@
             if (pageId === 'notify-list') listenNotifications();
             if (pageId === 'ticker-list') listenAnnouncementsAdmin();
             if (pageId === 'payment-list') listenPaymentMethods();
+            if (pageId === 'topup-list') fetchWalletTopups();
             // Settings page: three single-doc onSnapshot listeners that only
             // ever fill in fields living inside #settings (Social Links).
             // Nothing outside that page
@@ -4539,6 +4592,10 @@
                 if (paymentUnsub) { paymentUnsub(); paymentUnsub = null; }
                 paymentListenerAttached = false;
                 clearTimeout(paymentLoadWatchdog);
+            }
+            if (prevPageId === 'topup-list' && nextPageId !== 'topup-list') {
+                if (topupsUnsub) { topupsUnsub(); topupsUnsub = null; }
+                topupsListenerAttached = false;
             }
             if (prevPageId === 'settings' && nextPageId !== 'settings') {
                 if (socialUnsub) { socialUnsub(); socialUnsub = null; }
@@ -4874,7 +4931,7 @@
     <!-- FIREBASE CODE -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { initializeFirestore, collection, getDocs as _fsGetDocs, getDoc as _fsGetDoc, getCountFromServer as _fsGetCount, addDoc as _fsAddDoc, doc, setDoc as _fsSetDoc, updateDoc as _fsUpdateDoc, deleteDoc as _fsDeleteDoc, deleteField, query, where, orderBy, onSnapshot as _fsOnSnapshot, serverTimestamp, increment, runTransaction as _fsRunTransaction, writeBatch as _fsWriteBatch, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { initializeFirestore, collection, getDocs as _fsGetDocs, getDoc as _fsGetDoc, getCountFromServer as _fsGetCount, addDoc as _fsAddDoc, doc, setDoc as _fsSetDoc, updateDoc as _fsUpdateDoc, deleteDoc as _fsDeleteDoc, deleteField, query, where, orderBy, onSnapshot as _fsOnSnapshot, serverTimestamp, increment, runTransaction as _fsRunTransaction, writeBatch as _fsWriteBatch, arrayUnion, arrayRemove, getAggregateFromServer as _fsGetAggregate, sum as _fsSum } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
         import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signInAnonymously, onAuthStateChanged, signOut, setPersistence, browserLocalPersistence, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { getMessaging, getToken, isSupported as isMessagingSupported } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-messaging.js";
 
@@ -4935,8 +4992,29 @@
             }
             GAMES[gameId] = cur;
         }
+        // ---- Cost split --------------------------------------------------
+        // Package COST is private: it lives in the admin-only collection
+        // gameCosts/{gameId} = { costs: [n0, n1, ...], updatedAt } (same order as
+        // games/{gameId}.packages). The public games doc never carries `cost`.
+        // GAMES in memory still has p.cost merged back in (see loadGames), so the
+        // rest of this panel is unchanged.
+        function _splitCosts(data) {
+            if (!data || typeof data !== 'object' || !Array.isArray(data.packages)) return null;
+            const costs = data.packages.map(p => Number(p && p.cost) || 0);
+            const packages = data.packages.map(p => {
+                if (!p || typeof p !== 'object') return p;
+                const { cost, ...rest } = p;
+                return rest;
+            });
+            return { clean: { ...data, packages }, costs };
+        }
+        async function _writeCosts(gameId, costs) {
+            await _fsSetDoc(doc(db, 'gameCosts', gameId), { costs, updatedAt: Date.now() });
+        }
         async function addDoc(colRef, data) {
-            const res = await _fsAddDoc(colRef, data);
+            const _sp = (colRef && colRef.path === 'games') ? _splitCosts(data) : null;
+            const res = await _fsAddDoc(colRef, _sp ? _sp.clean : data);
+            if (_sp && res && res.id) await _writeCosts(res.id, _sp.costs);
             _usage.fsWrite(1, _fsLabel(colRef));
             if (colRef && typeof colRef.path === 'string' && colRef.path === 'games' && res && res.id) {
                 _mergeGameData(res.id, data);
@@ -4945,9 +5023,14 @@
             return res;
         }
         async function setDoc(ref, ...args) {
+            const _origSet = args[0];
+            if (ref && typeof ref.path === 'string' && ref.path.startsWith('games/')) {
+                const _sp = _splitCosts(args[0]);
+                if (_sp) { await _writeCosts(ref.path.slice(6), _sp.costs); args = [_sp.clean, ...args.slice(1)]; }
+            }
             const res = await _fsSetDoc(ref, ...args);
             _usage.fsWrite(1, _fsLabel(ref));
-            _noteGamesWrite(ref, args[0]);
+            _noteGamesWrite(ref, _origSet);
             return res;
         }
         // With no live orders listener, mirror our own writes to orders/{id} into the
@@ -4982,7 +5065,12 @@
             } catch (e) { /* cache mirror must never break a write */ }
         }
         async function updateDoc(ref, ...args) {
-            const res = await _fsUpdateDoc(ref, ...args);
+            let _sendArgs = args;
+            if (ref && typeof ref.path === 'string' && ref.path.startsWith('games/')) {
+                const _sp = _splitCosts(args[0]);
+                if (_sp) { await _writeCosts(ref.path.slice(6), _sp.costs); _sendArgs = [_sp.clean, ...args.slice(1)]; }
+            }
+            const res = await _fsUpdateDoc(ref, ..._sendArgs);
             _usage.fsWrite(1, _fsLabel(ref));
             _mirrorOrderWrite(ref, args);
             _noteGamesWrite(ref, args[0]);
@@ -4993,6 +5081,7 @@
             _usage.fsDelete(1, _fsLabel(ref));
             if (ref && typeof ref.path === 'string' && ref.path.startsWith('games/')) {
                 const gameId = ref.path.slice(6);
+                try { await _fsDeleteDoc(doc(db, 'gameCosts', gameId)); } catch (e) { /* no costs doc - fine */ }
                 delete GAMES[gameId];
                 scheduleGamesRefetch();
             }
@@ -5065,10 +5154,17 @@
                 const gameId = ref.path.slice(6);
                 if (gameId) gameWrites.push(isDelete ? { id: gameId, deleted: true } : { id: gameId, data });
             };
+            const _bc = (ref, a) => {
+                if (!ref || typeof ref.path !== 'string' || !ref.path.startsWith('games/')) return a;
+                const sp = _splitCosts(a[0]);
+                if (!sp) return a;
+                b.set(doc(database, 'gameCosts', ref.path.slice(6)), { costs: sp.costs, updatedAt: Date.now() });
+                return [sp.clean, ...a.slice(1)];
+            };
             const wb = {
-                set: (ref, ...a) => { b.set(ref, ...a); _tg(ref, a[0]); w.push(_fsLabel(ref)); return wb; },
-                update: (ref, ...a) => { b.update(ref, ...a); _tg(ref, a[0]); w.push(_fsLabel(ref)); return wb; },
-                delete: (ref) => { b.delete(ref); _tg(ref, null, true); d.push(_fsLabel(ref)); return wb; },
+                set: (ref, ...a) => { b.set(ref, ..._bc(ref, a)); _tg(ref, a[0]); w.push(_fsLabel(ref)); return wb; },
+                update: (ref, ...a) => { b.update(ref, ..._bc(ref, a)); _tg(ref, a[0]); w.push(_fsLabel(ref)); return wb; },
+                delete: (ref) => { b.delete(ref); if (ref && typeof ref.path === 'string' && ref.path.startsWith('games/')) b.delete(doc(database, 'gameCosts', ref.path.slice(6))); _tg(ref, null, true); d.push(_fsLabel(ref)); return wb; },
                 commit: () => b.commit().then((res) => {
                     w.forEach((l) => _usage.fsWrite(1, l));
                     d.forEach((l) => _usage.fsDelete(1, l));
@@ -8693,6 +8789,7 @@
         // wallet directly (e.g. bonuses/refunds) without a customer request.
         // ============================================================
         let topupsListenerAttached = false;
+        let topupsUnsub = null; // closed by unsubscribeTabListeners() when the Top Up tab is left
         let WALLET_TOPUPS = {}; // { id: {...data, id} }
         let currentTopupTab = 'Pending';
         const topupsContainer = document.getElementById('topups-container');
@@ -8771,7 +8868,7 @@
             topupsListenerAttached = true;
 
             const q = query(collection(db, "walletTopups"));
-            onSnapshot(q, (querySnapshot) => {
+            topupsUnsub = onSnapshot(q, (querySnapshot) => {
                 const items = {};
                 querySnapshot.forEach(docSnap => { items[docSnap.id] = { id: docSnap.id, ...docSnap.data() }; });
                 WALLET_TOPUPS = items;
@@ -8788,6 +8885,7 @@
                 });
             }, (error) => {
                 console.error("Wallet topups fetch error:", error);
+                topupsListenerAttached = false;
                 if (topupsContainer) topupsContainer.innerHTML = '<p class="empty-msg" style="color:red;">Error connecting to server.</p>';
             });
         }
@@ -9517,7 +9615,34 @@
             if (window.refreshG2BulkBalance) refreshG2BulkBalance(false);
             if (window.refreshJCPlaysBalance) refreshJCPlaysBalance(false);
             refreshTotalUsersStat();
+            refreshWalletTotalStat();
         }
+
+        // Total of every user's wallet (users.walletBalance). Uses a server-side sum()
+        // aggregation - one cheap read per 1000 users instead of downloading every user doc.
+        // Cached 5 min; tap the card to force a refresh. Falls back to the loaded USERS cache.
+        let walletTotalAt = 0, walletTotalValue = null;
+        async function refreshWalletTotalStat(force) {
+            const el = document.getElementById('stat-total-wallet');
+            if (!el) return;
+            const fmt = n => Number(n || 0).toLocaleString() + ' MMK';
+            if (!force && walletTotalValue !== null && Date.now() - walletTotalAt < 5 * 60 * 1000) { el.innerText = fmt(walletTotalValue); return; }
+            const sub = document.getElementById('stat-total-wallet-sub');
+            try {
+                const snap = await _fsGetAggregate(collection(db, "users"), { total: _fsSum('walletBalance') });
+                _usage.fsRead(1, 'users');
+                walletTotalValue = Number(snap.data().total) || 0;
+            } catch (error) {
+                console.error('Wallet total aggregate error:', error);
+                if (typeof usersLoadedAt !== 'undefined' && usersLoadedAt) {
+                    walletTotalValue = Object.values(USERS).reduce((s, u) => s + (Number(u.walletBalance) || 0), 0);
+                } else { el.innerText = '—'; return; }
+            }
+            walletTotalAt = Date.now();
+            el.innerText = fmt(walletTotalValue);
+            if (sub) sub.innerText = 'All users combined · tap to refresh';
+        }
+        window.refreshWalletTotalStat = refreshWalletTotalStat;
 
         // "Registered users" stat used to only ever get set inside a full
         // Users onSnapshot listener (every user doc, kept live all
@@ -10685,6 +10810,18 @@
                     const snap = await getDocs(collection(db, "games"));
                     const newGames = {};
                     snap.forEach(docSnap => { newGames[docSnap.id] = docSnap.data(); });
+                    // Merge the admin-only costs back in (games docs no longer carry them).
+                    // A game with no gameCosts doc yet (not migrated) keeps its legacy p.cost.
+                    try {
+                        const costSnap = await getDocs(collection(db, "gameCosts"));
+                        costSnap.forEach(cs => {
+                            const g = newGames[cs.id];
+                            const arr = cs.data().costs;
+                            if (g && Array.isArray(g.packages) && Array.isArray(arr)) {
+                                g.packages = g.packages.map((p, i) => ({ ...p, cost: Number(arr[i]) || 0 }));
+                            }
+                        });
+                    } catch (e) { console.error('gameCosts load error:', e); }
                     GAMES = newGames;
                     gamesLoadedAt = Date.now();
                     try { localStorage.setItem(GAMES_CACHE_KEY, JSON.stringify({ ts: gamesLoadedAt, games: newGames })); } catch (e) { /* storage full/unavailable - cache is best-effort */ }
@@ -10728,6 +10865,135 @@
                 scheduleGamesRefetch();
             } catch (e) { /* never break a write */ }
         }
+        // ---------- No-history wallet cleanup ----------
+        // "History" = at least one Completed walletTopups doc (customer top-up, admin
+        // top-up, Telegram top-up) OR at least one order paid from the wallet (that is
+        // the only way a refund can ever land). A wallet > 0 with NEITHER did not come
+        // from any legitimate path. Scan first (read-only), then confirm to zero + warn.
+        let _noHistoryWallets = [];
+        window.scanNoHistoryWallets = async function (btn) {
+            const out = document.getElementById('wallet-cleanup-result');
+            const label = btn ? btn.innerText : '';
+            if (btn) { btn.disabled = true; btn.innerText = 'Scanning...'; }
+            out.innerHTML = '<span style="color:var(--text-secondary);">Scanning users, top-ups and orders…</span>';
+            try {
+                const [usersSnap, topSnap, ordSnap, arcSnap] = await Promise.all([
+                    getDocs(collection(db, 'users')),
+                    getDocs(query(collection(db, 'walletTopups'), where('status', '==', 'Completed'))),
+                    getDocs(query(collection(db, 'orders'), where('paidFromWallet', '==', true))),
+                    getDocs(query(collection(db, 'ordersArchive'), where('paidFromWallet', '==', true))).catch(() => null)
+                ]);
+                const hasHistory = new Set();
+                topSnap.forEach(d => { const u = d.data().userId; if (u) hasHistory.add(String(u)); });
+                ordSnap.forEach(d => { const u = d.data().userId; if (u) hasHistory.add(String(u)); });
+                if (arcSnap) arcSnap.forEach(d => { const u = d.data().userId; if (u) hasHistory.add(String(u)); });
+                _noHistoryWallets = [];
+                usersSnap.forEach(d => {
+                    const u = d.data();
+                    const bal = Number(u.walletBalance) || 0;
+                    if (bal > 0 && !hasHistory.has(d.id)) _noHistoryWallets.push({ id: d.id, name: u.name || u.googleEmail || d.id, balance: bal, telegramId: u.telegramId || '' });
+                });
+                if (!_noHistoryWallets.length) {
+                    out.innerHTML = '<b style="color:#10B981;">✓ History မရှိဘဲ ငွေရှိတဲ့ wallet မတွေ့ပါ။</b>';
+                } else {
+                    const total = _noHistoryWallets.reduce((s, x) => s + x.balance, 0);
+                    out.innerHTML = `<div style="margin-bottom:8px;"><b>${_noHistoryWallets.length}</b> user · စုစုပေါင်း <b>${fmtMoney(total)}</b></div>`
+                        + `<div style="max-height:220px;overflow:auto;border:1px solid var(--border-glass);border-radius:10px;padding:6px 8px;">`
+                        + _noHistoryWallets.map(x => `<div style="display:flex;justify-content:space-between;gap:8px;padding:4px 0;border-bottom:1px solid var(--border-glass);"><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(String(x.name))}<br><small style="color:var(--text-muted);">${escapeHtml(x.id)}</small></span><b style="white-space:nowrap;">${fmtMoney(x.balance)}</b></div>`).join('')
+                        + `</div><button class="btn btn-primary" style="margin-top:10px;background:#EF4444;width:100%;justify-content:center;" onclick="confirmZeroNoHistoryWallets(this)">Zero all &amp; send warning</button>`;
+                }
+            } catch (err) {
+                console.error('Wallet cleanup scan error:', err);
+                out.innerHTML = '<span style="color:#EF4444;">Scan failed: ' + escapeHtml(err.message || String(err)) + '</span>';
+            } finally {
+                if (btn) { btn.disabled = false; btn.innerText = label; }
+            }
+        };
+
+        window.confirmZeroNoHistoryWallets = function (btn) {
+            if (!_noHistoryWallets.length) return;
+            const total = _noHistoryWallets.reduce((s, x) => s + x.balance, 0);
+            window.showActionDialog({
+                type: 'delete',
+                title: 'Zero these wallets?',
+                message: `${_noHistoryWallets.length} user ရဲ့ Wallet (စုစုပေါင်း ${fmtMoney(total)}) ကို 0 လုပ်ပြီး warning ပို့ပါမယ်။ ပြန်မရနိုင်ပါ။`,
+                confirmText: 'Zero & Warn',
+                onConfirm: () => runZeroNoHistoryWallets(btn)
+            });
+        };
+
+        async function runZeroNoHistoryWallets(btn) {
+            const out = document.getElementById('wallet-cleanup-result');
+            if (btn) { btn.disabled = true; btn.innerText = 'Working...'; }
+            const list = _noHistoryWallets.slice();
+            let done = 0, skipped = 0, notified = 0;
+            for (const x of list) {
+                try {
+                    let removed = 0;
+                    await runTransaction(db, async (tx) => {
+                        const ref = doc(db, 'users', x.id);
+                        const snap = await tx.get(ref);
+                        const bal = Number((snap.exists() && snap.data().walletBalance) || 0);
+                        if (bal <= 0 || bal !== x.balance) { removed = 0; return; } // changed since scan - leave it alone
+                        removed = bal;
+                        tx.set(ref, {
+                            walletBalance: 0,
+                            walletUpdatedAt: serverTimestamp(),
+                            walletWarning: { amount: bal, reason: 'no_history', at: Date.now() }
+                        }, { merge: true });
+                        tx.set(doc(collection(db, 'walletAdjustments')), {
+                            userId: x.id, userName: x.name, amount: -bal, balanceBefore: bal, balanceAfter: 0,
+                            reason: 'No wallet history (no completed top-up, no wallet order)',
+                            timestamp: serverTimestamp()
+                        });
+                    });
+                    if (!removed) { skipped++; continue; }
+                    done++;
+                    if (x.telegramId && ADMIN_BROADCAST_SECRET) {
+                        try {
+                            const r = await fetch(`${AUTH_WORKER_URL}/notify-wallet-warning`, {
+                                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ secret: ADMIN_BROADCAST_SECRET, telegramId: String(x.telegramId), amount: removed })
+                            });
+                            if (r.ok) notified++;
+                        } catch (e) { /* in-app warning is still set */ }
+                    }
+                } catch (err) { console.error('Zero wallet failed for', x.id, err); skipped++; }
+            }
+            _noHistoryWallets = [];
+            logAdminActivity('Zeroed no-history wallets', `${done} user(s)`);
+            out.innerHTML = `<b style="color:#10B981;">✓ ${done} wallet 0 လုပ်ပြီး · Telegram warning ${notified} ခု ပို့ပြီး${skipped ? ` · ${skipped} ခု ကျော်ခဲ့ (balance ပြောင်းသွား/error)` : ''}</b>`;
+            try { await fetchUsers(true); } catch (e) {}
+            if (window.refreshWalletTotalStat) refreshWalletTotalStat(true);
+            window.showToast(`${done} wallet cleared`, 'success');
+        }
+
+        // One-time: move every package's cost out of the public games docs into gameCosts.
+        window.migrateCostsToAdminOnly = async function (btn) {
+            if (!confirm('Package Cost တွေကို games ထဲကနေ admin-only (gameCosts) ထဲ ရွှေ့မလား?')) return;
+            const label = btn ? btn.innerText : '';
+            if (btn) { btn.disabled = true; btn.innerText = 'Moving...'; }
+            try {
+                const snap = await _fsGetDocs(collection(db, 'games'));
+                let moved = 0;
+                for (const d of snap.docs) {
+                    const g = d.data();
+                    if (!Array.isArray(g.packages) || !g.packages.some(p => p && Object.prototype.hasOwnProperty.call(p, 'cost'))) continue;
+                    const sp = _splitCosts(g);
+                    await _writeCosts(d.id, sp.costs);                          // 1) save costs privately
+                    await _fsUpdateDoc(d.ref, { packages: sp.clean.packages }); // 2) then strip them from the public doc
+                    moved++;
+                }
+                try { localStorage.removeItem(GAMES_CACHE_KEY); } catch (e) {}
+                await loadGames(false, true);
+                window.showToast(moved ? `${moved} game(s) migrated ✓` : 'Nothing to migrate - already clean', 'success');
+            } catch (err) {
+                console.error('Cost migration error:', err);
+                window.showToast('Migration failed: ' + (err.message || err), 'fail');
+            } finally {
+                if (btn) { btn.disabled = false; btn.innerText = label; }
+            }
+        };
         window.refreshGames = () => loadGames(false, true); // explicit tap on ↻ Refresh always forces a real fetch, bypassing the cache
         function listenGames() { return loadGames(true); } // kept so the startup call site is unchanged
 
@@ -13391,6 +13657,43 @@
         // switching pages). Keyed by user id; each entry remembers the last
         // HTML string written so unchanged cards are skipped entirely.
         const userCardNodes = new Map();
+        // "Admin" tab = store accounts flagged users/{id}.storeAdmin === true. Those accounts
+        // see each package's cost (not just the price) inside the Store app.
+        let userListTab = 'all';
+        function setUserListTab(tab) {
+            userListTab = tab === 'admin' ? 'admin' : 'all';
+            document.querySelectorAll('#user-list-tabs .udp-tab').forEach(b => b.classList.toggle('active', b.dataset.utab === userListTab));
+            userCardNodes.clear();
+            const c = document.getElementById('admin-users-container'); if (c) c.innerHTML = '';
+            renderAdminUsersList();
+        }
+        window.setUserListTab = setUserListTab;
+        function toggleStoreAdminCurrentUser() {
+            if (!currentUserDetailsId) return;
+            const userId = currentUserDetailsId;
+            const u = USERS[userId];
+            if (!u) return;
+            const makeAdmin = u.storeAdmin !== true;
+            window.showActionDialog({
+                type: 'warning',
+                title: makeAdmin ? 'Set as Admin?' : 'Remove Admin?',
+                message: makeAdmin
+                    ? 'This account will see each package\'s cost (not only the price) in the Store app.'
+                    : 'This account will go back to seeing prices only.',
+                confirmText: makeAdmin ? 'Set Admin' : 'Remove',
+                onConfirm: async () => {
+                    try {
+                        await updateDoc(doc(db, "users", userId), { storeAdmin: makeAdmin });
+                        logAdminActivity(makeAdmin ? 'Set store Admin' : 'Removed store Admin', u.name || userId);
+                        window.showToast(makeAdmin ? 'Set as Admin' : 'Admin removed');
+                    } catch (error) {
+                        console.error("Store admin toggle error:", error);
+                        window.showToast('Failed to update user.', 'fail');
+                    }
+                }
+            });
+        }
+        window.toggleStoreAdminCurrentUser = toggleStoreAdminCurrentUser;
         function buildUserCardInnerHtml(id, u, agg) {
             const displayName = (u.name && u.name.trim()) ? u.name.trim() : (u.guestId || id);
             const orderCount = agg.count;
@@ -13399,6 +13702,7 @@
             return `
                 <div class="ugc-top">
                     <span class="badge ${u.banned ? 'badge-danger' : 'badge-success'}">${statusBadgeHtml(u.banned ? 'badge-danger' : 'badge-success', u.banned ? 'Banned' : 'Active')}</span>
+                    ${u.storeAdmin === true ? '<span class="badge badge-warning" style="margin-left:6px;" title="Sees package cost in the Store">Admin</span>' : ''}
                 </div>
                 <div class="ugc-identity">
                     <div class="user-avatar" style="width:48px;height:48px;flex-shrink:0;">
@@ -13428,6 +13732,11 @@
             const container = document.getElementById('admin-users-container');
             const searchTerm = (document.getElementById('user-search')?.value || '').trim().toLowerCase();
             let ids = Object.keys(USERS);
+            const adminCount = ids.filter(id => USERS[id].storeAdmin === true).length;
+            const cAll = document.getElementById('ult-count-all'), cAdm = document.getElementById('ult-count-admin');
+            if (cAll) cAll.textContent = ids.length;
+            if (cAdm) cAdm.textContent = adminCount;
+            if (userListTab === 'admin') ids = ids.filter(id => USERS[id].storeAdmin === true);
             if (searchTerm) {
                 ids = ids.filter(id => {
                     const u = USERS[id];
@@ -13441,6 +13750,8 @@
             if (ids.length === 0) {
                 container.innerHTML = searchTerm
                     ? '<p class="empty-msg">No users match your search.</p>'
+                    : userListTab === 'admin'
+                    ? '<p class="empty-msg">No Admin accounts yet. Open a user and tap "Set as Admin".</p>'
                     : '<p class="empty-msg">No users yet. They\'ll appear here once someone opens the Store app.</p>';
                 userCardNodes.clear();
                 return;
@@ -13535,6 +13846,8 @@
                     renderAdminUsersList();
                     const totalUsersEl = document.getElementById('stat-total-users');
                     if (totalUsersEl) totalUsersEl.innerText = Object.keys(USERS).length.toLocaleString();
+                    walletTotalValue = Object.values(USERS).reduce((s, u) => s + (Number(u.walletBalance) || 0), 0); walletTotalAt = Date.now();
+                    { const wEl = document.getElementById('stat-total-wallet'); if (wEl) wEl.innerText = walletTotalValue.toLocaleString() + ' MMK'; }
                     const userListCountBadge = document.getElementById('user-list-count-badge');
                     if (userListCountBadge) userListCountBadge.innerText = Object.keys(USERS).length.toLocaleString();
                     if (currentUserDetailsId && USERS[currentUserDetailsId]) {
@@ -13706,6 +14019,13 @@
                 avatarImg.src = ''; avatarImg.style.display = 'none'; avatarIcon.style.display = 'block';
             }
 
+            const adminBtn = document.getElementById('ud-admin-btn');
+            if (adminBtn) {
+                const isAdm = u.storeAdmin === true;
+                adminBtn.innerText = isAdm ? 'Remove Admin' : 'Set as Admin';
+                adminBtn.classList.toggle('btn-primary', isAdm);
+                adminBtn.classList.toggle('btn-outline', !isAdm);
+            }
             const banBtn = document.getElementById('ud-ban-btn');
             if (u.banned) {
                 banBtn.innerText = 'Unban User';
@@ -13732,24 +14052,114 @@
         function switchUserDetailTab(tab) {
             document.querySelectorAll('.udp-tab').forEach(el => el.classList.toggle('active', el.dataset.tab === tab));
             document.querySelectorAll('.udp-tab-content').forEach(el => el.classList.toggle('active', el.id === 'udp-tab-' + tab));
+            if (tab === 'txns' && currentUserDetailsId) loadUserTxns(currentUserDetailsId);
         }
         window.switchUserDetailTab = switchUserDetailTab;
 
+        // ---------- User Details > Transactions ----------
+        // Fresh per-user queries (not the global caches: top-ups are auto-deleted after 2 months
+        // from the live list, and Orders may not be loaded yet). Deposits = Completed top-ups +
+        // refunded wallet orders; Withdrawals = walletAdjustments; Purchases = wallet-paid orders.
+        let _userTxnRows = [], _userTxnFilter = 'all', _userTxnFor = null;
+        async function loadUserTxns(userId) {
+            const box = document.getElementById('ud-txn-container');
+            if (!box || !userId) return;
+            if (_userTxnFor !== userId) { _userTxnRows = []; _userTxnFilter = 'all'; }
+            document.querySelectorAll('#ud-txn-tabs .wtx-chip').forEach(b => b.classList.toggle('active', b.dataset.f === _userTxnFilter));
+            box.innerHTML = '<p class="empty-msg">Loading…</p>';
+            try {
+                const [topSnap, ordSnap, adjSnap] = await Promise.all([
+                    getDocs(query(collection(db, 'walletTopups'), where('userId', '==', userId))),
+                    getDocs(query(collection(db, 'orders'), where('userId', '==', userId), where('paidFromWallet', '==', true))),
+                    getDocs(query(collection(db, 'walletAdjustments'), where('userId', '==', userId)))
+                ]);
+                if (currentUserDetailsId !== userId) return; // admin moved on while loading
+                const ms = (ts) => (ts && ts.toMillis) ? ts.toMillis() : (typeof ts === 'number' ? ts : 0);
+                const rows = [];
+                topSnap.forEach(d => {
+                    const t = d.data();
+                    if (t.status !== 'Completed') return;
+                    rows.push({ type: 'in', amount: Number(t.amount) || 0, title: t.source === 'admin' ? 'Top Up (Admin)' : 'Top Up', sub: t.paymentMethod || '', at: ms(t.confirmedAt) || ms(t.timestamp) });
+                });
+                ordSnap.forEach(d => {
+                    const o = d.data();
+                    const label = `${o.game || 'Order'}${o.itemAmount ? ' · ' + o.itemAmount : ''}`;
+                    if (o.walletFlow !== 2 || o.walletDebited === true) {
+                        rows.push({ type: 'buy', amount: Number(o.price) || 0, title: label, sub: o.status || 'Pending', at: ms(o.timestamp) });
+                    }
+                    if (o.walletRefunded === true) {
+                        rows.push({ type: 'in', amount: Number(o.price) || 0, title: 'Refund', sub: label, at: ms(o.refundedAt) || ms(o.timestamp) });
+                    }
+                });
+                adjSnap.forEach(d => {
+                    const x = d.data();
+                    const amt = Number(x.amount) || 0;
+                    if (!amt) return;
+                    rows.push({ type: amt < 0 ? 'out' : 'in', amount: Math.abs(amt), title: amt < 0 ? 'Wallet Deduction' : 'Wallet Adjustment', sub: x.reason || '', at: ms(x.timestamp) });
+                });
+                rows.sort((p, q) => q.at - p.at);
+                _userTxnRows = rows;
+                _userTxnFor = userId;
+                renderUserTxns();
+            } catch (err) {
+                console.error('User transactions load error:', err);
+                box.innerHTML = '<p class="empty-msg" style="color:#EF4444;">Could not load transactions.</p>';
+            }
+        }
+        // Reloads the Transactions list if that tab is the one currently showing.
+        function refreshUserTxnsIfOpen() {
+            const pane = document.getElementById('udp-tab-txns');
+            if (pane && pane.classList.contains('active') && currentUserDetailsId) loadUserTxns(currentUserDetailsId);
+        }
+        window.refreshUserTxnsIfOpen = refreshUserTxnsIfOpen;
+        function setUserTxnFilter(f) {
+            _userTxnFilter = f;
+            document.querySelectorAll('#ud-txn-tabs .wtx-chip').forEach(b => b.classList.toggle('active', b.dataset.f === f));
+            renderUserTxns();
+        }
+        function renderUserTxns() {
+            const box = document.getElementById('ud-txn-container');
+            if (!box) return;
+            const rows = _userTxnFilter === 'all' ? _userTxnRows : _userTxnRows.filter(r => r.type === _userTxnFilter);
+            if (!rows.length) { box.innerHTML = '<p class="empty-msg">No transactions yet.</p>'; return; }
+            const sign = { in: '+', out: '−', buy: '−' }, glyph = { in: '↓', out: '↑', buy: '🛍' };
+            box.innerHTML = rows.map(r => `
+                <div class="wtx-row">
+                    <div class="wtx-ico ${r.type}">${glyph[r.type]}</div>
+                    <div class="wtx-body">
+                        <div class="wtx-title">${escapeHtml(r.title)}</div>
+                        <div class="wtx-sub">${r.sub ? escapeHtml(String(r.sub)) + ' • ' : ''}${r.at ? new Date(r.at).toLocaleString([], { month: 'short', day: 'numeric', year: '2-digit', hour: '2-digit', minute: '2-digit' }) : 'Just now'}</div>
+                    </div>
+                    <div class="wtx-amt ${r.type}">${sign[r.type]}${r.amount.toLocaleString()}</div>
+                </div>`).join('');
+        }
+        window.setUserTxnFilter = setUserTxnFilter;
+
         // Top Up List tab — every wallet top-up request this customer has submitted.
-        function renderUserTopups(userId) {
+        async function renderUserTopups(userId) {
             const container = document.getElementById('ud-topups-container');
             if (!container) return;
-            const userTopups = Object.values(WALLET_TOPUPS)
-                .filter(t => t.userId === userId)
-                .sort((a, b) => (b.timestamp ? b.timestamp.toMillis() : 0) - (a.timestamp ? a.timestamp.toMillis() : 0));
+            container.innerHTML = '<p class="empty-msg">Loading…</p>';
+            let userTopups = [];
+            try {
+                // Own per-user query: the global top-up listener only runs while the Top Up tab is open.
+                const snap = await getDocs(query(collection(db, 'walletTopups'), where('userId', '==', userId)));
+                snap.forEach(d => userTopups.push({ id: d.id, ...d.data() }));
+            } catch (err) {
+                console.error('User top-ups load error:', err);
+                if (currentUserDetailsId === userId) container.innerHTML = '<p class="empty-msg" style="color:#EF4444;">Could not load top-ups.</p>';
+                return;
+            }
+            if (currentUserDetailsId !== userId) return; // admin moved on while loading
+            userTopups.sort((a, b) => (b.timestamp && b.timestamp.toMillis ? b.timestamp.toMillis() : 0) - (a.timestamp && a.timestamp.toMillis ? a.timestamp.toMillis() : 0));
 
             if (userTopups.length === 0) {
                 container.innerHTML = '<p class="empty-msg">No top-up requests yet.</p>';
                 return;
             }
-            const badgeClassByStatus = { Pending: 'badge-pending', Processing: 'badge-processing', Success: 'badge-success', Approved: 'badge-success', Rejected: 'badge-danger', Fail: 'badge-danger' };
+            const badgeClassByStatus = { Pending: 'badge-pending', Processing: 'badge-processing', Success: 'badge-success', Approved: 'badge-success', Completed: 'badge-success', Rejected: 'badge-danger', Fail: 'badge-danger' };
             container.innerHTML = userTopups.map(t => {
-                const dateStr = t.timestamp ? t.timestamp.toDate().toLocaleString() : 'Just now';
+                const dateStr = t.timestamp && t.timestamp.toDate ? t.timestamp.toDate().toLocaleString() : 'Just now';
                 const badgeClass = badgeClassByStatus[t.status] || 'badge-pending';
                 return `
                     <div class="admin-card" style="padding:12px;">
@@ -13757,7 +14167,7 @@
                             <span class="ac-id">${fmtMoney(t.amount || 0)}</span>
                             <span class="badge ${badgeClass}">${statusBadgeHtml(badgeClass, orderStatusLabel(t.status || 'Pending'))}</span>
                         </div>
-                        <p style="font-size:13px;color:var(--text-secondary);">${t.paymentMethod || 'N/A'}</p>
+                        <p style="font-size:13px;color:var(--text-secondary);">${escapeHtml(t.paymentMethod || 'N/A')}</p>
                         <p style="font-size:12px;color:var(--text-muted);margin-top:4px;">${dateStr}</p>
                     </div>
                 `;
@@ -13955,9 +14365,21 @@
                                 throw new Error('INSUFFICIENT_BALANCE');
                             }
                             tx.set(userRef, { walletBalance: increment(-amount) }, { merge: true });
+                            tx.set(doc(collection(db, "walletAdjustments")), {
+                                userId, userName: (snap.data() && snap.data().name) || userId,
+                                amount: -amount, balanceBefore: balance, balanceAfter: balance - amount,
+                                reason: (note && String(note).trim()) || 'Admin deduction',
+                                timestamp: serverTimestamp()
+                            });
                         });
                         input.value = '';
                         window.showToast(`Deducted ${fmtMoney(amount)} ✓`, 'success');
+                        if (USERS[userId]) USERS[userId].walletBalance = Math.max(0, currentBalance - amount);
+                        if (currentUserDetailsId === userId) {
+                            const balEl = document.getElementById('ud-wallet-balance-h');
+                            if (balEl) balEl.innerText = fmtMoney(Math.max(0, currentBalance - amount));
+                            refreshUserTxnsIfOpen();
+                        }
                     } catch (error) {
                         console.error('Deduct wallet error:', error);
                         if (error.message === 'INSUFFICIENT_BALANCE') {
