@@ -3670,6 +3670,9 @@
                 <label>Description <span style="font-weight:400;color:var(--text-muted);">(optional — shown to customers under the game banner)</span></label>
                 <textarea id="edit-game-description" rows="4" placeholder="Enter Description" style="width:100%;padding:10px;border-radius:12px;border:1px solid var(--border-glass);background:var(--bg-subtle-2);color:var(--text-primary);font-size:14px;font-family:inherit;resize:vertical;box-sizing:border-box;"></textarea>
 
+                <label>Redeem Link <span style="font-weight:400;color:var(--text-muted);">(optional — "Redeem Now" button under the Description opens this link)</span></label>
+                <input type="text" id="edit-game-redeem-link" inputmode="url" autocapitalize="off" autocomplete="off" spellcheck="false" placeholder="https://..." style="width:100%;padding:10px;border-radius:12px;border:1px solid var(--border-glass);background:var(--bg-subtle-2);color:var(--text-primary);font-size:14px;font-family:inherit;box-sizing:border-box;">
+
                 <!-- App deep-link fields: purely optional. When set, Store.html
                      shows a "Game ဖွင့်မယ်" button on the game detail page and
                      order success screen that jumps straight into the app (via
@@ -12340,6 +12343,7 @@
                 document.getElementById('edit-game-category').value = g.category || '';
                 renderGameCategorySelect();
                 document.getElementById('edit-game-description').value = g.description || '';
+                document.getElementById('edit-game-redeem-link').value = g.redeemLink || '';
                 document.getElementById('edit-game-app-android-package').value = g.appAndroidPackage || '';
                 document.getElementById('edit-game-app-android-scheme').value = g.appAndroidScheme || '';
                 document.getElementById('edit-game-app-android-store-url').value = g.appAndroidStoreUrl || '';
@@ -12413,6 +12417,7 @@
                 document.getElementById('edit-game-category').value = '';
                 renderGameCategorySelect();
                 document.getElementById('edit-game-description').value = '';
+                document.getElementById('edit-game-redeem-link').value = '';
                 document.getElementById('edit-game-app-android-package').value = '';
                 document.getElementById('edit-game-app-android-scheme').value = '';
                 document.getElementById('edit-game-app-android-store-url').value = '';
@@ -12653,6 +12658,7 @@
             const g2bulkIdCheckCode = document.getElementById('edit-game-g2bulk-idcheck-code').value.trim();
             const category = document.getElementById('edit-game-category').value;
             const description = document.getElementById('edit-game-description').value.trim();
+            const redeemLink = document.getElementById('edit-game-redeem-link').value.trim();
             const appAndroidPackage = document.getElementById('edit-game-app-android-package').value.trim();
             const appAndroidScheme = document.getElementById('edit-game-app-android-scheme').value.trim();
             const appAndroidStoreUrl = document.getElementById('edit-game-app-android-store-url').value.trim();
@@ -12732,7 +12738,7 @@
                 // currently sit in them - without this, a tab created but left empty (or
                 // emptied out later) would vanish on reload since nothing else in the
                 // saved data would reference it.
-                const data = { name, serverName: serverName || '', image: imageUrl, banner: bannerUrl || imageUrl, bannerImages: existingBanners.length ? existingBanners : [imageUrl], packages, packageTabs: customPkgTabs.slice(), packageTabLabels: { package: builtinPkgTabLabels.package, currency: builtinPkgTabLabels.currency }, g2bulkCode: g2bulkCode || '', jcplaysProduct: jcplaysProduct || '', g2bulkVoucherCategory: g2bulkVoucherCategory || '', fazercardCategoryId: fazercardCategoryId || '', fazercardFields: fazercardCategoryId ? pendingFazerCardFields.slice() : [], fazercardServerMode: pendingFazerCardServerMode || '', fazercardServerOptions: pendingFazerCardServerOptions || [], g2bulkIdCheckCode: fazercardCategoryId ? (g2bulkIdCheckCode || '') : '', fazercardGiftCategoryId: fazercardGiftCategoryId || '', g2bulkServerMode: pendingG2BulkServerMode || '', g2bulkServerOptions: pendingG2BulkServerOptions || [], fulfillProvider: currentFulfillProvider, category: category || '', description: description || '', appAndroidPackage: appAndroidPackage || '', appAndroidScheme: appAndroidScheme || '', appAndroidStoreUrl: appAndroidStoreUrl || '', appIosScheme: appIosScheme || '', appIosStoreUrl: appIosStoreUrl || '', popular, autoPriceUpdate, autoPriceSync, playerIdRequired, serverIdRequired, charNameRequired };
+                const data = { name, serverName: serverName || '', image: imageUrl, banner: bannerUrl || imageUrl, bannerImages: existingBanners.length ? existingBanners : [imageUrl], packages, packageTabs: customPkgTabs.slice(), packageTabLabels: { package: builtinPkgTabLabels.package, currency: builtinPkgTabLabels.currency }, g2bulkCode: g2bulkCode || '', jcplaysProduct: jcplaysProduct || '', g2bulkVoucherCategory: g2bulkVoucherCategory || '', fazercardCategoryId: fazercardCategoryId || '', fazercardFields: fazercardCategoryId ? pendingFazerCardFields.slice() : [], fazercardServerMode: pendingFazerCardServerMode || '', fazercardServerOptions: pendingFazerCardServerOptions || [], g2bulkIdCheckCode: fazercardCategoryId ? (g2bulkIdCheckCode || '') : '', fazercardGiftCategoryId: fazercardGiftCategoryId || '', g2bulkServerMode: pendingG2BulkServerMode || '', g2bulkServerOptions: pendingG2BulkServerOptions || [], fulfillProvider: currentFulfillProvider, category: category || '', description: description || '', redeemLink: redeemLink || '', appAndroidPackage: appAndroidPackage || '', appAndroidScheme: appAndroidScheme || '', appAndroidStoreUrl: appAndroidStoreUrl || '', appIosScheme: appIosScheme || '', appIosStoreUrl: appIosStoreUrl || '', popular, autoPriceUpdate, autoPriceSync, playerIdRequired, serverIdRequired, charNameRequired };
 
                 if (gameId) {
                     await updateDoc(doc(db, "games", gameId), data);
@@ -19216,6 +19222,7 @@
             document.getElementById('edit-game-category').value = base.category || '';
             renderGameCategorySelect();
             document.getElementById('edit-game-description').value = base.description || '';
+            document.getElementById('edit-game-redeem-link').value = base.redeemLink || '';
             document.getElementById('edit-game-app-android-package').value = base.appAndroidPackage || '';
             document.getElementById('edit-game-app-android-scheme').value = base.appAndroidScheme || '';
             document.getElementById('edit-game-app-android-store-url').value = base.appAndroidStoreUrl || '';
