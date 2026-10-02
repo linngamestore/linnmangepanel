@@ -3483,6 +3483,7 @@
             <div class="udp-tabs" id="user-list-tabs" style="margin-bottom:10px;">
                 <button type="button" class="udp-tab active" data-utab="all" onclick="setUserListTab('all')">All Users <span id="ult-count-all">0</span></button>
                 <button type="button" class="udp-tab" data-utab="admin" onclick="setUserListTab('admin')">Admin <span id="ult-count-admin">0</span></button>
+                <button type="button" class="udp-tab" data-utab="bot" onclick="setUserListTab('bot')">Bot /start <span id="ult-count-bot">0</span></button>
             </div>
             <div class="admin-search-wrap">
                 <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
@@ -3540,6 +3541,8 @@
             <div class="udp-tab-content active" id="udp-tab-info">
                 <div class="details-grid">
                     <div class="details-grid-item"><span>Phone</span><b id="ud-phone">N/A</b></div>
+                    <div class="details-grid-item"><span>Telegram ID</span><b id="ud-telegram-id" style="word-break:break-all;">N/A</b></div>
+                    <div class="details-grid-item"><span>Telegram Username</span><b id="ud-telegram-username">N/A</b></div>
                     <div class="details-grid-item"><span>Favorite Game</span><b id="ud-fav-game">N/A</b></div>
                 </div>
 
@@ -3580,6 +3583,7 @@
                     <div class="details-grid-item"><span>User ID (doc)</span><b id="ud-reg-docid" style="font-size:11.5px;word-break:break-all;">N/A</b></div>
                     <div class="details-grid-item"><span>Phone</span><b id="ud-reg-phone">N/A</b></div>
                     <div class="details-grid-item" style="grid-column:1/-1;"><span>Google Account</span><b id="ud-reg-google">Not linked</b> <button type="button" id="ud-reg-google-link-btn" onclick="adminLinkGoogleEmail()" style="display:none;margin-left:8px;font-size:11.5px;padding:2px 8px;border-radius:6px;border:1px solid var(--border,#ccc);background:var(--bg-subtle,#f2f2f2);cursor:pointer;">Link</button></div>
+                    <div class="details-grid-item" style="grid-column:1/-1;"><span>Telegram Account</span><b id="ud-reg-telegram">Not linked</b> <button type="button" id="ud-reg-telegram-link-btn" onclick="adminLinkTelegram()" style="display:none;margin-left:8px;font-size:11.5px;padding:2px 8px;border-radius:6px;border:1px solid var(--border,#ccc);background:var(--bg-subtle,#f2f2f2);cursor:pointer;">Link</button></div>
                     <div class="details-grid-item" style="grid-column:1/-1;"><span>Account Status</span><b id="ud-reg-status">Active</b></div>
                 </div>
             </div>
@@ -13574,7 +13578,7 @@
         function exportUsersCSV() {
             const ids = Object.keys(USERS);
             if (ids.length === 0) { window.showToast('No users to export.', 'warning'); return; }
-            const headers = ['UID', 'Name', 'Phone', 'Wallet Balance (MMK)', 'Order Count', 'Total Spend (MMK)', 'Tier', 'Status', 'Google Verified', 'Last Seen'];
+            const headers = ['UID', 'Name', 'Phone', 'Telegram ID', 'Wallet Balance (MMK)', 'Order Count', 'Total Spend (MMK)', 'Tier', 'Status', 'Google Verified', 'Last Seen'];
             const csvRows = ids.map(id => {
                 const u = USERS[id];
                 const userOrders = Object.values(ORDERS).filter(o => o.userId === id);
@@ -13583,6 +13587,7 @@
                     u.guestId || id,
                     u.name || '',
                     u.phone || '',
+                    u.telegramId ? String(u.telegramId) : '',
                     Number(u.walletBalance) || 0,
                     userOrders.length,
                     spend,
@@ -13660,8 +13665,10 @@
         // "Admin" tab = store accounts flagged users/{id}.storeAdmin === true. Those accounts
         // see each package's cost (not just the price) inside the Store app.
         let userListTab = 'all';
+        // telegramBotUsers/{telegramId} = everyone who pressed /start in linngamestorebot (admin-readable only).
+        let BOT_USERS = {};
         function setUserListTab(tab) {
-            userListTab = tab === 'admin' ? 'admin' : 'all';
+            userListTab = (tab === 'admin' || tab === 'bot') ? tab : 'all';
             document.querySelectorAll('#user-list-tabs .udp-tab').forEach(b => b.classList.toggle('active', b.dataset.utab === userListTab));
             userCardNodes.clear();
             const c = document.getElementById('admin-users-container'); if (c) c.innerHTML = '';
@@ -13722,6 +13729,10 @@
                     <svg class="ui-icon" style="width:14px;height:14px;color:var(--text-muted);"><use href="#icon-phone"></use></svg>
                     ${u.phone || 'No phone on file'}
                 </div>
+                <div class="ugc-contact">
+                    <svg class="ui-icon" style="width:14px;height:14px;color:var(--text-muted);"><use href="#icon-telegram"></use></svg>
+                    ${u.telegramId ? 'TG: ' + escapeHtml(String(u.telegramId)) + (u.telegramUsername ? ' (@' + escapeHtml(u.telegramUsername) + ')' : '') + (BOT_USERS[String(u.telegramId)] ? ' \u00b7 Bot \u2713' : '') : 'No Telegram linked'}
+                </div>
                 <div class="ugc-actions">
                     <button type="button" class="btn btn-primary" onclick="openUserDetails('${id}')">Visit</button>
                     <button type="button" class="btn btn-danger-outline" onclick="quickDeleteUser('${id}')">Delete</button>
@@ -13736,6 +13747,7 @@
             const cAll = document.getElementById('ult-count-all'), cAdm = document.getElementById('ult-count-admin');
             if (cAll) cAll.textContent = ids.length;
             if (cAdm) cAdm.textContent = adminCount;
+            if (userListTab === 'bot') { userCardNodes.clear(); renderBotUsersTab(container, searchTerm); return; }
             if (userListTab === 'admin') ids = ids.filter(id => USERS[id].storeAdmin === true);
             if (searchTerm) {
                 ids = ids.filter(id => {
@@ -13744,6 +13756,8 @@
                     return displayName.toLowerCase().includes(searchTerm)
                         || (u.guestId || '').toLowerCase().includes(searchTerm)
                         || (u.phone || '').toLowerCase().includes(searchTerm)
+                        || String(u.telegramId || '').includes(searchTerm)
+                        || (u.telegramUsername || '').toLowerCase().includes(searchTerm)
                         || id.toLowerCase().includes(searchTerm);
                 });
             }
@@ -13843,6 +13857,13 @@
                     snap.forEach(docSnap => { newUsers[docSnap.id] = docSnap.data(); });
                     USERS = newUsers;
                     usersLoadedAt = Date.now();
+                    try {
+                        const bs = await getDocs(collection(db, "telegramBotUsers"));
+                        const nb = {};
+                        bs.forEach(d => { nb[d.id] = d.data(); });
+                        BOT_USERS = nb;
+                        const bc = document.getElementById('ult-count-bot'); if (bc) bc.innerText = Object.keys(BOT_USERS).length.toLocaleString();
+                    } catch (e) { console.error('Bot users fetch error:', e); }
                     renderAdminUsersList();
                     const totalUsersEl = document.getElementById('stat-total-users');
                     if (totalUsersEl) totalUsersEl.innerText = Object.keys(USERS).length.toLocaleString();
@@ -13979,6 +14000,8 @@
             document.getElementById('ud-google-badge').innerHTML = googleVerifiedBadgeHTML(u);
             document.getElementById('ud-guestid').innerText = 'ID: ' + (u.guestId || userId);
             document.getElementById('ud-phone').innerText = u.phone || 'N/A';
+            document.getElementById('ud-telegram-id').innerText = u.telegramId ? String(u.telegramId) : 'N/A';
+            document.getElementById('ud-telegram-username').innerText = u.telegramUsername ? '@' + u.telegramUsername : 'N/A';
             document.getElementById('ud-last-seen-h').innerText = lastSeenStr;
             document.getElementById('ud-join-date').innerText = joinDateStr;
             document.getElementById('ud-admin-note').value = u.adminNote || '';
@@ -14000,6 +14023,15 @@
             // Gmail address that now becomes their wallet's permanent owner.
             const linkBtn = document.getElementById('ud-reg-google-link-btn');
             if (linkBtn) linkBtn.style.display = u.googleEmail ? 'none' : 'inline-block';
+            // Telegram wallet-ownership status: wallet orders need users/{id}.authUid == tg_<telegramId>.
+            // Accounts that already hold a balance can't claim it themselves (firestore.rules), so link here.
+            const tgEl = document.getElementById('ud-reg-telegram');
+            const tgBtn = document.getElementById('ud-reg-telegram-link-btn');
+            if (tgEl) {
+                const tgOk = u.telegramId && u.authUid === 'tg_' + u.telegramId;
+                tgEl.innerText = u.telegramId ? (u.telegramId + (u.telegramUsername ? ' (@' + u.telegramUsername + ')' : '') + (tgOk ? ' \u2713 Linked' : ' \u26a0 not verified')) : 'Not linked';
+                if (tgBtn) tgBtn.style.display = (u.authUid && u.authUid !== ('tg_' + (u.telegramId || ''))) ? 'none' : (tgOk ? 'none' : 'inline-block');
+            }
             document.getElementById('ud-reg-status').innerHTML = u.banned ? `<span class="badge badge-danger">${statusBadgeHtml('badge-danger', 'Banned')}</span>` : `<span class="badge badge-success">${statusBadgeHtml('badge-success', 'Active')}</span>`;
 
             // Login Time tab
@@ -14302,6 +14334,109 @@
             });
         }
         window.adminLinkGoogleEmail = adminLinkGoogleEmail;
+
+        // Admin links a customer's account to their Telegram id (sets telegramId + authUid=tg_<id>
+        // and the telegramAccounts link doc) so Wallet purchases pass firestore.rules. Needed for
+        // accounts that already hold a balance: the browser is not allowed to claim those itself.
+        function adminLinkTelegram() {
+            if (!currentUserDetailsId) return;
+            const userId = currentUserDetailsId;
+            const u = USERS[userId];
+            if (!u) return;
+            if (u.authUid && u.authUid !== 'tg_' + (u.telegramId || '')) { window.showToast('This account is already owned by another login.', 'fail'); return; }
+            const tgId = (prompt('Telegram ID (numbers only) - verify it really belongs to this customer first:', u.telegramId || '') || '').trim();
+            if (!tgId) return;
+            if (!/^[0-9]{5,15}$/.test(tgId)) { window.showToast('Telegram ID must be numbers only.', 'fail'); return; }
+            const uid = 'tg_' + tgId;
+            window.showActionDialog({
+                type: 'warning',
+                title: 'Link Telegram account?',
+                message: `This makes Telegram ID ${tgId} the permanent wallet owner of ${u.name || u.guestId || userId}. Only confirm once you've verified it's really them.`,
+                confirmText: 'Link',
+                onConfirm: async () => { await performTelegramLink(userId, tgId); }
+            });
+        }
+        window.adminLinkTelegram = adminLinkTelegram;
+
+        // Shared by the User Registered "Link" button and the Bot /start tab.
+        async function performTelegramLink(userId, tgId) {
+            const u = USERS[userId] || {};
+            const uid = 'tg_' + tgId;
+            try {
+                const linkRef = doc(db, "telegramAccounts", uid);
+                const linkSnap = await getDoc(linkRef);
+                if (linkSnap.exists() && linkSnap.data().guestId && linkSnap.data().guestId !== userId) {
+                    window.showToast('That Telegram ID is already linked to another account (' + linkSnap.data().guestId + ').', 'fail');
+                    return false;
+                }
+                const bot = BOT_USERS[tgId] || {};
+                const patch = { telegramId: tgId, authUid: uid };
+                if (bot.username && !u.telegramUsername) patch.telegramUsername = bot.username;
+                await updateDoc(doc(db, "users", userId), patch);
+                await setDoc(linkRef, { guestId: userId, telegramId: tgId, linkedAt: serverTimestamp() });
+                logAdminActivity('Linked Telegram account', `${u.name || u.guestId || userId} \u2192 ${tgId}`);
+                window.showToast('Telegram account linked.');
+                if (USERS[userId]) Object.assign(USERS[userId], patch);
+                if (currentUserDetailsId === userId) openUserDetails(userId); else renderAdminUsersList();
+                return true;
+            } catch (error) {
+                console.error("Telegram link error:", error);
+                window.showToast('Failed to link Telegram account.', 'fail');
+                return false;
+            }
+        }
+
+        // "Bot /start" tab: everyone who pressed /start in linngamestorebot, matched against users.telegramId.
+        function renderBotUsersTab(container, searchTerm) {
+            const byTg = {};
+            for (const [id, u] of Object.entries(USERS)) if (u.telegramId) byTg[String(u.telegramId)] = id;
+            let rows = Object.entries(BOT_USERS).map(([tgId, b]) => ({ tgId, b, userId: byTg[tgId] || '' }));
+            if (searchTerm) rows = rows.filter(r => r.tgId.includes(searchTerm) || (r.b.username || '').toLowerCase().includes(searchTerm) || (r.b.firstName || '').toLowerCase().includes(searchTerm) || (r.userId || '').toLowerCase().includes(searchTerm));
+            if (!rows.length) { container.innerHTML = searchTerm ? '<p class="empty-msg">No bot users match your search.</p>' : '<p class="empty-msg">Nobody has pressed /start in the bot yet.</p>'; return; }
+            const ms = r => (r.b.lastSeen && r.b.lastSeen.toMillis) ? r.b.lastSeen.toMillis() : 0;
+            rows.sort((a, b) => ms(b) - ms(a));
+            container.innerHTML = rows.map(r => {
+                const linkedUser = r.userId ? USERS[r.userId] : null;
+                const last = r.b.lastSeen && r.b.lastSeen.toDate ? r.b.lastSeen.toDate().toLocaleString() : 'N/A';
+                const status = linkedUser
+                    ? `<span class="badge badge-success">Linked</span>`
+                    : `<span class="badge badge-warning">Not linked</span>`;
+                const action = linkedUser
+                    ? `<button type="button" class="btn btn-primary" onclick="openUserDetails('${escapeHtml(r.userId)}')">Visit</button>`
+                    : `<button type="button" class="btn btn-primary" onclick="adminLinkBotUser('${escapeHtml(r.tgId)}')">Link to account</button>`;
+                return `<div class="user-grid-card">
+                    <div class="ugc-top">${status}</div>
+                    <div class="ugc-identity"><div style="min-width:0;">
+                        <h5>${escapeHtml(r.b.firstName || 'Telegram user')}${r.b.username ? ' (@' + escapeHtml(r.b.username) + ')' : ''}</h5>
+                        <div class="ugc-id">TG ID: ${escapeHtml(r.tgId)} <svg class="ui-icon copy-id-btn" style="width:12px;height:12px;cursor:pointer;" onclick="copyUserId(event, '${escapeHtml(r.tgId)}')"><use href="#icon-copy"></use></svg></div>
+                    </div></div>
+                    <div class="ugc-meta">
+                        <div class="ugc-meta-cell"><span>Account</span><b>${linkedUser ? escapeHtml(linkedUser.name || linkedUser.guestId || r.userId) : '-'}</b></div>
+                        <div class="ugc-meta-cell"><span>Wallet</span><b>${linkedUser ? fmtMoney(linkedUser.walletBalance || 0) : '-'}</b></div>
+                    </div>
+                    <div class="ugc-contact">Last /start: ${escapeHtml(last)}</div>
+                    <div class="ugc-actions">${action}</div>
+                </div>`;
+            }).join('');
+        }
+
+        // From the Bot /start tab: pick which store account this Telegram id belongs to.
+        function adminLinkBotUser(tgId) {
+            const raw = (prompt('Store account User ID (the "ID:" shown on the user card) to link Telegram ' + tgId + ' to:') || '').trim();
+            if (!raw) return;
+            const userId = USERS[raw] ? raw : Object.keys(USERS).find(k => (USERS[k].guestId || '') === raw);
+            if (!userId) { window.showToast('No user found with that ID.', 'fail'); return; }
+            const u = USERS[userId];
+            if (u.authUid && u.authUid !== 'tg_' + tgId) { window.showToast('This account is already owned by another login.', 'fail'); return; }
+            window.showActionDialog({
+                type: 'warning',
+                title: 'Link Telegram account?',
+                message: `This makes Telegram ID ${tgId} the permanent wallet owner of ${u.name || u.guestId || userId}. Only confirm once you've verified it's really them.`,
+                confirmText: 'Link',
+                onConfirm: async () => { await performTelegramLink(userId, tgId); }
+            });
+        }
+        window.adminLinkBotUser = adminLinkBotUser;
 
         // Banning blocks the customer from placing new orders (checked in the
         // Store app before it submits an order) — it doesn't touch their past
