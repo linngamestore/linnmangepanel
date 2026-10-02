@@ -982,6 +982,9 @@
             box-shadow: var(--shadow-soft), inset 0 1px 0 var(--border-glass);
         }
         .pkg-bulk-bar.active { display: flex; }
+        .pkg-bulk-bar { flex-wrap: wrap; }
+        .pkg-bulk-pct-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; width: 100%; flex-wrap: wrap; padding-top: 8px; border-top: 1px solid var(--border-glass); }
+        .pkg-bulk-pct-label { font-size: 11px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: var(--text-muted); }
         .pkg-bulk-bar-count { font-size: 12.5px; font-weight: 600; color: var(--text-primary); white-space: nowrap; }
         .pkg-bulk-bar-actions { display: flex; gap: 6px; flex-shrink: 0; }
         .pkg-bulk-bar-actions .btn { flex: unset; padding: 8px 12px; font-size: 12.5px; white-space: nowrap; }
@@ -1590,13 +1593,7 @@
            a plain price/name line. */
         .pkg-summary { display: flex; flex-direction: column; gap: 6px; padding: 9px 10px; min-height: 48px; cursor: pointer; }
         .pkg-summary:active { background: var(--bg-subtle); }
-        /* Price card turns red while its margin sits below the 4% floor
-           (MIN_PROFIT_MARGIN_PCT, see updatePackageProfit) — reverts to the
-           normal look automatically once Cost/Price clears 4% again. */
-        .pkg-summary.pkg-summary-low-margin { background: var(--danger-soft); }
-        .pkg-summary.pkg-summary-low-margin .pkg-summary-value { background: rgba(250,62,62,0.16); }
-        .pkg-summary.pkg-summary-low-margin .pkg-summary-price-text,
-        .pkg-summary.pkg-summary-low-margin .pkg-summary-price-unit { color: var(--danger-strong); }
+
         .pkg-summary-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
         .pkg-summary-label { display: flex; align-items: center; gap: 7px; min-width: 0; flex: 1; }
         .pkg-summary-thumb { flex-shrink: 0; width: 24px; height: 24px; border-radius: 7px; overflow: hidden; background: var(--accent-soft); border: 1px solid var(--fill-soft); display: flex; align-items: center; justify-content: center; }
@@ -2270,6 +2267,9 @@
                 <span class="conn-dot conn-connecting" id="conn-dot"></span>
                 <span class="conn-label" id="conn-label">Connecting</span>
             </div>
+            <div class="header-icon" id="theme-toggle-btn" title="Theme" role="button" aria-label="Change theme" onclick="openThemeSheet()" style="flex-shrink:0;">
+                <svg class="ui-icon" style="width:20px;"><use href="#icon-palette"></use></svg>
+            </div>
             <div class="header-icon" id="low-balance-alert-btn" title="Low balance" onclick="openLowBalanceAlert()" style="display:none;position:relative;">
                 <svg class="ui-icon" style="width:20px;"><use href="#icon-bell"></use></svg>
                 <span class="low-balance-dot"></span>
@@ -2852,7 +2852,7 @@
                              Falls back to the Light Mode logo when not set. -->
                         <div>
                             <label style="font-size:13px;font-weight:500;color:var(--text-secondary);">Logo (Dark Mode)</label>
-                            <p style="font-size:11.5px;color:var(--text-secondary);margin:4px 0 8px;">Optional — shown automatically in dark themes. Uses the Light Mode logo if left empty.</p>
+                            <div style="margin:6px 0 4px;">
                             <label class="img-update-box" id="logo-dark-img-update-box" for="edit-logo-dark-file">
                                 <div class="img-update-icon"><svg class="ui-icon"><use href="#icon-camera"></use></svg></div>
                                 <span class="img-update-label">Image Update</span>
@@ -2863,12 +2863,12 @@
                             </label>
                             <input type="file" id="edit-logo-dark-file" class="img-update-input" accept="image/*" onchange="previewLogoDarkImage(event)">
                             <p id="logo-dark-upload-status" style="font-size:12px;color:var(--text-secondary);display:none;"></p>
-                            <div style="display:flex;gap:8px;margin-top:10px;">
-                                <button class="btn btn-primary" id="save-logo-dark-btn" style="flex:1;" onclick="saveLogoDark()">Save Dark Logo</button>
-                                <button class="btn" id="remove-logo-dark-btn" style="flex:unset;padding:10px 14px;background:var(--fill-soft);color:var(--text-secondary);display:none;" onclick="removeLogoDark()">Remove</button>
+                            <button class="btn btn-primary" id="save-logo-dark-btn" style="margin-top:10px;width:100%;white-space:nowrap;" onclick="saveLogoDark()">Save Dark Logo</button>
+                            <button class="btn" id="remove-logo-dark-btn" style="margin-top:8px;width:100%;background:var(--fill-soft);color:var(--text-secondary);display:none;" onclick="removeLogoDark()">Remove</button>
                             </div>
                         </div>
                     </div>
+                    <p style="font-size:11.5px;color:var(--text-secondary);margin:8px 0 0;">Dark Mode logo is optional — shown automatically in dark themes. Uses the Light Mode logo if left empty.</p>
 
                     <!-- Logo Size: scales the logo image inside its fixed,
                          overflow-hidden badge box (here and in the Store app
@@ -3741,7 +3741,7 @@
                 </div>
 
                 <div style="display:flex;gap:10px;align-items:flex-start;">
-                    <div style="flex:0 0 36%;min-width:0;">
+                    <div style="flex:0 0 calc((100% - 10px) * 0.36);min-width:0;">
                         <label>Game Image <span style="font-weight:400;color:var(--text-muted);">(1:1)</span></label>
                         <label class="img-update-box ratio-square" id="game-img-update-box" for="edit-game-file">
                             <div class="img-update-icon"><svg class="ui-icon"><use href="#icon-camera"></use></svg></div>
@@ -3899,13 +3899,22 @@
 
                 <label>Top-up Packages</label>
                 <div class="pkg-tab-bar" id="pkg-tab-bar"></div>
-                <!-- Bulk price-image bar — appears once one or more package rows are
+                <!-- Bulk bar (image upload + Price % for selected cards) — appears once one or more package rows are
                      selected (long-press a row's summary to start, tap more to add) -->
                 <div class="pkg-bulk-bar" id="pkg-bulk-bar">
                     <span class="pkg-bulk-bar-count" id="pkg-bulk-bar-count">0 selected</span>
                     <div class="pkg-bulk-bar-actions">
                         <button type="button" class="btn btn-primary" onclick="document.getElementById('pkg-bulk-image-file').click()">Upload Price Image</button>
                         <button type="button" class="btn btn-outline" onclick="clearPkgSelection()">Cancel</button>
+                    </div>
+                    <div class="pkg-bulk-pct-row">
+                        <span class="pkg-bulk-pct-label">Price %</span>
+                        <div class="resync-pct-control">
+                            <button type="button" class="resync-pct-btn" onclick="adjustResyncPct(-1)" aria-label="Decrease percent">&minus;</button>
+                            <span id="pkg-bulk-pct-value" class="resync-pct-val" onclick="promptResyncPct()" style="min-width:52px;white-space:nowrap;cursor:pointer;text-align:center;font-size:12px;font-weight:700;color:var(--text-primary);">0.00%</span>
+                            <button type="button" class="resync-pct-btn" onclick="adjustResyncPct(1)" aria-label="Increase percent">+</button>
+                            <button type="button" class="resync-pct-go" onclick="resyncSelectedPrices()"><svg class="ui-icon" style="width:13px;height:13px;"><use href="#icon-refresh"></use></svg> Apply to selected</button>
+                        </div>
                     </div>
                 </div>
                 <input type="file" accept="image/*" id="pkg-bulk-image-file" style="display:none;" onchange="handleBulkPkgImageSelect(this)">
@@ -4541,8 +4550,7 @@
             if (pageId === 'usage-page' && window.LinnUsage) window.LinnUsage.render();
             // Cloudflare/Firestore usage no longer auto-loads (saves Worker requests); use the Refresh buttons.
             if (pageId === 'g2bulk' && window.refreshG2BulkBalance) window.refreshG2BulkBalance();
-            if (['order-list', 'analytics', 'user-list'].includes(pageId) && window.ensureOrdersLoaded) window.ensureOrdersLoaded();
-            if (pageId === 'dashboard' && window.ordersAreLoaded && !window.ordersAreLoaded() && window.showToast) window.showToast('Order stats load when you open Orders');
+            if (['dashboard', 'order-list', 'analytics', 'user-list'].includes(pageId) && window.ensureOrdersLoaded) window.ensureOrdersLoaded();
             unsubscribeTabListeners(previousPageId, pageId);
             subscribeTabListeners(pageId);
         }
@@ -11526,10 +11534,8 @@
                 badge.innerText = (pct > 0 ? '+' : '') + pct.toFixed(0) + '%';
                 lowMargin = price > 0 && pct < MIN_PROFIT_MARGIN_PCT;
             }
-            // Price card (the collapsed summary row) turns red while its margin
-            // sits below the MIN_PROFIT_MARGIN_PCT (4%) floor, and reverts to
-            // normal the moment Cost/Price puts it back at or above 4%.
-            row.querySelector('.pkg-summary').classList.toggle('pkg-summary-low-margin', lowMargin);
+            // (Red price-card highlight for margin below 4% removed.)
+            row.querySelector('.pkg-summary').classList.remove('pkg-summary-low-margin');
             syncPkgSummary(row);
         }
         window.updatePackageProfit = updatePackageProfit;
@@ -12103,6 +12109,8 @@
         function updateResyncPctDisplay() {
             const el = document.getElementById('resync-pct-value');
             if (el) el.textContent = fmtResyncPct(resyncPct);
+            const el2 = document.getElementById('pkg-bulk-pct-value');
+            if (el2) el2.textContent = fmtResyncPct(resyncPct);
         }
         // direction is -1 / +1 from the buttons; each tap moves RESYNC_PCT_STEP.
         function adjustResyncPct(direction) {
@@ -12218,6 +12226,43 @@
             });
         }
         window.resyncAllPricesToMargin = resyncAllPricesToMargin;
+
+        // Same rule as Resync (Cost x (1 + %), snapped to allowed endings), but
+        // only for the package rows currently long-press-selected. Use the
+        // -/+ stepper (or tap the % to type one) then press "Apply to selected".
+        function resyncSelectedPrices() {
+            const rows = Array.from(selectedPkgRows);
+            if (rows.length === 0) {
+                window.showToast('Select package cards first (hold a card)', 'fail');
+                return;
+            }
+            const pct = resyncPct;
+            window.showActionDialog({
+                type: 'warning',
+                title: `Set ${fmtResyncPct(pct)} on ${rows.length} card(s)?`,
+                message: `Price of the ${rows.length} selected package(s) will be set to Cost ${fmtResyncPct(pct)}. Other cards are not touched. Continue?`,
+                confirmText: 'Apply',
+                onConfirm: () => {
+                    let changed = 0, skipped = 0;
+                    rows.forEach(row => {
+                        const costInput = row.querySelector('.pkg-cost');
+                        const priceInput = row.querySelector('.pkg-price');
+                        const cost = Number(costInput.value);
+                        if (!cost || cost <= 0) { skipped++; return; }
+                        const newPrice = roundToResyncEnding(cost * (1 + pct / 100), pct >= 0 ? cost : 0);
+                        if (Number(priceInput.value) === newPrice) return;
+                        priceInput.value = newPrice;
+                        updatePackageProfit(priceInput);
+                        changed++;
+                    });
+                    window.showToast(changed === 0
+                        ? (skipped ? `${skipped} card(s) skipped (no Cost set)` : 'Selected cards already match this %')
+                        : `${changed} card(s) set to ${fmtResyncPct(pct)} ✓${skipped ? ` (${skipped} skipped — no Cost)` : ''}`, changed === 0 ? 'fail' : 'success');
+                    if (changed > 0) clearPkgSelection();
+                }
+            });
+        }
+        window.resyncSelectedPrices = resyncSelectedPrices;
 
         // One-tap reorder: swaps the row with its immediate neighbor. Simpler
         // and more reliable than drag on a small phone screen (which fights
