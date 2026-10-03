@@ -2895,6 +2895,29 @@
                 </div>
             </div>
 
+            <div class="admin-card" id="settings-card-maintenance" style="margin-top:14px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;cursor:pointer;" onclick="toggleMaintenanceSettings()">
+                    <span style="font-size:15px;font-weight:600;">🔧 Maintenance (Kill Switch) <span id="maint-status-pill" style="margin-left:8px;font-size:11px;padding:2px 8px;border-radius:99px;background:rgba(34,197,94,.18);color:#22c55e;">OPEN</span></span>
+                    <svg class="ui-icon" id="maint-chevron" style="width:18px;height:18px;color:var(--text-secondary);transition:transform 0.2s;"><use href="#icon-chevron-down"></use></svg>
+                </div>
+                <div id="maint-body" style="display:none;margin-top:12px;">
+                    <p style="font-size:12px;color:var(--text-secondary);margin:0 0 12px;">Website နှင့် Bot ကို ခေတ္တပိတ်ရန်။ ပိတ်ခင် Store users (in-app + push) နှင့် Bot users အားလုံးကို အသိပေးစာ အလိုအလျောက်ပို့ပါမည်။ ပိတ်နေစဉ် Pending အော်ဒါများ မဆုံးရှုံးပါ၊ ပြန်ဖွင့်ပြီးမှ ဆက်လုပ်ပါမည်။ Telegram မှ: /maintenance in 10 reason · /maintenance on · /maintenance off</p>
+                    <div id="maint-detail" style="font-size:12px;color:var(--text-secondary);margin-bottom:10px;"></div>
+                    <select id="maint-minutes" style="width:100%;padding:10px;border:1px solid var(--border-glass);background:var(--bg-subtle-2);color:var(--text-primary);border-radius:10px;margin-bottom:8px;">
+                        <option value="5">Warn now → close in 5 min</option>
+                        <option value="10" selected>Warn now → close in 10 min</option>
+                        <option value="15">Warn now → close in 15 min</option>
+                        <option value="30">Warn now → close in 30 min</option>
+                        <option value="0">Warn + close right now</option>
+                    </select>
+                    <input type="text" id="maint-reason-input" maxlength="300" placeholder="Reason (optional) e.g. Fixing provider error" style="width:100%;padding:10px;border:1px solid var(--border-glass);background:var(--bg-subtle-2);color:var(--text-primary);border-radius:10px;margin-bottom:10px;">
+                    <div style="display:flex;gap:8px;">
+                        <button class="btn btn-primary" id="maint-start-btn" style="flex:1;" onclick="maintenanceAction('start')">Notify &amp; Close</button>
+                        <button class="btn" id="maint-stop-btn" style="flex:1;" onclick="maintenanceAction('stop')">Reopen</button>
+                    </div>
+                </div>
+            </div>
+
             <div class="admin-card" id="settings-card-adminbroadcastsecret" style="margin-top:14px;">
                 <div style="display:flex;justify-content:space-between;align-items:center;cursor:pointer;" onclick="toggleAdminBroadcastSecretSettings()">
                     <span style="font-size:15px;font-weight: 600;">Admin Broadcast Secret</span>
@@ -3196,7 +3219,7 @@
             <div class="api-doc-card">
                 <div class="api-doc-icon" style="background:#E67E22;"><svg class="ui-icon" style="stroke:#fff;"><use href="#icon-camera"></use></svg></div>
                 <div class="api-doc-info">
-                    <span class="api-doc-title">ImgBB API Key</span>
+                    <span class="api-doc-title">Image Upload (R2)</span>
                 </div>
                 <span class="api-doc-static-key">Server-side (Worker)</span>
             </div>
@@ -4599,27 +4622,17 @@
         function unsubscribeTabListeners(prevPageId, nextPageId) {
             if (!prevPageId || prevPageId === nextPageId) return;
             if (prevPageId === 'notify-list') prevPageId = 'settings';
-            if (prevPageId === 'ticker-list' && nextPageId !== 'ticker-list') {
-                if (tickerUnsub) { tickerUnsub(); tickerUnsub = null; }
-                tickerListenerAttached = false;
-            }
-            if (prevPageId === 'payment-list' && nextPageId !== 'payment-list') {
-                if (paymentUnsub) { paymentUnsub(); paymentUnsub = null; }
-                paymentListenerAttached = false;
-                clearTimeout(paymentLoadWatchdog);
-            }
-            if (prevPageId === 'topup-list' && nextPageId !== 'topup-list') {
-                if (topupsUnsub) { topupsUnsub(); topupsUnsub = null; }
-                topupsListenerAttached = false;
-            }
-            if (prevPageId === 'settings' && nextPageId !== 'settings') {
-                if (socialUnsub) { socialUnsub(); socialUnsub = null; }
-                socialListenerAttached = false;
-            }
-            if ((prevPageId === 'tier-list' || prevPageId === 'user-list') && nextPageId !== 'tier-list' && nextPageId !== 'user-list') {
-                if (tierUnsub) { tierUnsub(); tierUnsub = null; }
-                tierListenerAttached = false;
-            }
+            // The listener handles (xxxUnsub / xxxListenerAttached) live inside the module script,
+            // which this classic script cannot see - bare references here threw ReferenceError and
+            // aborted showPage() before subscribeTabListeners() ran. The module exposes
+            // window.closeTabListener(key) instead; each call is isolated so one failure can't
+            // stop the page switch.
+            const close = (key) => { try { if (window.closeTabListener) window.closeTabListener(key); } catch (e) { console.error('closeTabListener', key, e); } };
+            if (prevPageId === 'ticker-list' && nextPageId !== 'ticker-list') close('ticker');
+            if (prevPageId === 'payment-list' && nextPageId !== 'payment-list') close('payment');
+            if (prevPageId === 'topup-list' && nextPageId !== 'topup-list') close('topups');
+            if (prevPageId === 'settings' && nextPageId !== 'settings') close('social');
+            if ((prevPageId === 'tier-list' || prevPageId === 'user-list') && nextPageId !== 'tier-list' && nextPageId !== 'user-list') close('tier');
         }
 
         // ---------- Grouped Side-Nav Picker Sheet ----------
@@ -5379,6 +5392,76 @@
         window.callAdminSyncClaims = callAdminSyncClaims;
 
         // ---------- Cloudflare account-wide usage (Dashboard → Request Usage) ----------
+
+        // ---------- Maintenance kill switch ----------
+        // State lives in settings/maintenance. Changes go through the order Worker's /maintenance
+        // route (admin ID token) so it can also notify every store user + every bot user.
+        let maintListenerAttached = false;
+        function renderMaintStatus(m) {
+            const pill = document.getElementById('maint-status-pill');
+            const det = document.getElementById('maint-detail');
+            if (!pill) return;
+            const at = m && m.scheduledAt ? Date.parse(m.scheduledAt) : NaN;
+            if (m && m.enabled) {
+                pill.textContent = 'CLOSED'; pill.style.background = 'rgba(239,68,68,.18)'; pill.style.color = '#ef4444';
+                if (det) det.textContent = 'Store + bot are closed' + (m.reason ? ' — ' + m.reason : '') + (m.updatedBy ? ' (by ' + m.updatedBy + ')' : '');
+            } else if (!isNaN(at)) {
+                pill.textContent = 'CLOSING'; pill.style.background = 'rgba(245,158,11,.18)'; pill.style.color = '#f59e0b';
+                if (det) det.textContent = 'Closes at ' + new Date(at).toLocaleTimeString() + (m.reason ? ' — ' + m.reason : '');
+            } else {
+                pill.textContent = 'OPEN'; pill.style.background = 'rgba(34,197,94,.18)'; pill.style.color = '#22c55e';
+                if (det) det.textContent = '';
+            }
+        }
+        function attachMaintListener() {
+            if (maintListenerAttached) return;
+            maintListenerAttached = true;
+            onSnapshot(doc(db, "settings", "maintenance"), (snap) => renderMaintStatus(snap.exists() ? snap.data() : {}),
+                (err) => console.error('maintenance listener error:', err));
+        }
+        function toggleMaintenanceSettings() {
+            const body = document.getElementById('maint-body');
+            const chev = document.getElementById('maint-chevron');
+            const open = body.style.display === 'none';
+            body.style.display = open ? 'block' : 'none';
+            if (chev) chev.style.transform = open ? 'rotate(180deg)' : '';
+            attachMaintListener();
+        }
+        async function maintenanceAction(action) {
+            if (!auth.currentUser) { window.showToast('Sign in first', 'fail'); return; }
+            const minutes = Number(document.getElementById('maint-minutes').value) || 0;
+            const reason = document.getElementById('maint-reason-input').value.trim();
+            const question = action === 'start'
+                ? (minutes > 0 ? `Warn ALL users now and close the store + bot in ${minutes} min?` : 'Close the store + bot RIGHT NOW and notify all users?')
+                : 'Reopen the store + bot and notify all users?';
+            if (!window.confirm(question)) return;
+            const btn = document.getElementById(action === 'start' ? 'maint-start-btn' : 'maint-stop-btn');
+            const old = btn.innerText; btn.disabled = true; btn.innerText = 'Working…';
+            try {
+                const token = await auth.currentUser.getIdToken();
+                const res = await fetch(`${ADMIN_SYNC_WORKER_URL}/maintenance`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action, minutes, reason })
+                });
+                const data = await res.json().catch(() => null);
+                if (res.status === 404) { window.showToast("The /maintenance route isn't deployed on the Worker yet.", 'fail'); return; }
+                if (res.status === 401) { window.showToast('Not authorised - sign in again / run Sync Claims.', 'fail'); return; }
+                if (!data || !data.ok) { window.showToast((data && data.error) || ('Worker returned HTTP ' + res.status), 'fail'); return; }
+                const n = data.notice;
+                const note = n ? ` · store notice ${n.store ? 'sent' : 'FAILED'} · bot ${n.botRecipients !== null && n.botRecipients !== undefined ? n.botRecipients + ' users' : 'FAILED'}` : '';
+                window.showToast((action === 'start' ? (data.enabled ? 'Store + bot closed' : 'Warning sent, closing soon') : 'Reopened') + note, 'success');
+            } catch (e) {
+                console.error('maintenance action failed:', e);
+                window.showToast('Request failed: ' + (e && e.message || e), 'fail');
+            } finally {
+                btn.disabled = false; btn.innerText = old;
+            }
+        }
+        window.toggleMaintenanceSettings = toggleMaintenanceSettings;
+        window.maintenanceAction = maintenanceAction;
+        attachMaintListener();
+
         // Asks the telegram-order Worker's /cf-usage route (see cf-usage-route.js) for today's
         // real request/error totals from Cloudflare Analytics - every Worker, storefront
         // traffic included. Sent with the admin's Firebase ID token; the Cloudflare API token
@@ -7497,7 +7580,7 @@
                                     </div>
                                     ${data.serverId ? `<div class="od-cell">
                                         <div class="od-label">Server ID</div>
-                                        <div class="od-value mono">${data.serverId}</div>
+                                        <div class="od-value mono">${escapeHtml(data.serverId ?? '')}</div>
                                     </div>` : ''}
                                     ${data.jcplaysProductId ? `<div class="od-cell span-2" id="jcplays-role-cell-${orderId}">
                                         <div class="od-label">JCPlays Redeem Code</div>
@@ -7537,7 +7620,7 @@
                                     </div>
                                     <div class="od-cell">
                                         <div class="od-label">Paid Via</div>
-                                        <div class="od-value">${data.paymentMethod || 'N/A'}</div>
+                                        <div class="od-value">${escapeHtml(data.paymentMethod || 'N/A')}</div>
                                     </div>
                                     <div class="od-cell span-2">
                                         <div class="od-label">Date</div>
@@ -8878,6 +8961,29 @@
             }
         }
 
+        window.fetchWalletTopups = fetchWalletTopups;
+        // Called by unsubscribeTabListeners() (classic script) when a tab is left. Same teardown the
+        // classic script used to attempt directly, but done here where these variables are in scope.
+        window.closeTabListener = function (key) {
+            if (key === 'ticker') {
+                if (tickerUnsub) { tickerUnsub(); tickerUnsub = null; }
+                tickerListenerAttached = false;
+            } else if (key === 'payment') {
+                if (paymentUnsub) { paymentUnsub(); paymentUnsub = null; }
+                paymentListenerAttached = false;
+                clearTimeout(paymentLoadWatchdog);
+            } else if (key === 'topups') {
+                if (topupsUnsub) { topupsUnsub(); topupsUnsub = null; }
+                topupsListenerAttached = false;
+            } else if (key === 'social') {
+                if (socialUnsub) { socialUnsub(); socialUnsub = null; }
+                socialListenerAttached = false;
+            } else if (key === 'tier') {
+                if (tierUnsub) { tierUnsub(); tierUnsub = null; }
+                tierListenerAttached = false;
+            }
+        };
+
         function fetchWalletTopups() {
             if (topupsListenerAttached) return;
             topupsListenerAttached = true;
@@ -8976,7 +9082,7 @@
                             ${walletThumb}
                             <div class="oc-info">
                                 <span class="oc-game-name">+${Number(t.amount || 0).toLocaleString()} MMK</span>
-                                <p class="oc-meta">${t.userName || t.userId || 'Guest'} &middot; ${t.paymentMethod || 'N/A'}${t.fazercardPaymentId ? ' &middot; <span style="color:var(--accent);">Auto-verified</span>' : ''}</p>
+                                <p class="oc-meta">${escapeHtml(t.userName || t.userId || 'Guest')} &middot; ${escapeHtml(t.paymentMethod || 'N/A')}${t.fazercardPaymentId ? ' &middot; <span style="color:var(--accent);">Auto-verified</span>' : ''}</p>
                             </div>
                             <div class="oc-status">
                                 <span class="badge ${badgeClass}">${statusBadgeHtml(badgeClass, orderStatusLabel(t.status))}</span>
@@ -8990,7 +9096,7 @@
                                         ${walletThumb}
                                         <div class="od-card-title-text">
                                             <span class="oc-game-name">+${Number(t.amount || 0).toLocaleString()} MMK</span>
-                                            <p class="oc-meta">${t.paymentMethod || 'N/A'} &middot; <span class="badge ${badgeClass}">${statusBadgeHtml(badgeClass, orderStatusLabel(t.status))}</span></p>
+                                            <p class="oc-meta">${escapeHtml(t.paymentMethod || 'N/A')} &middot; <span class="badge ${badgeClass}">${statusBadgeHtml(badgeClass, orderStatusLabel(t.status))}</span></p>
                                         </div>
                                     </div>
                                     <div class="od-card-close" onclick="toggleTopupCard('${t.id}')">
@@ -8999,9 +9105,9 @@
                                 </div>
                                 <div style="display:flex;gap:10px;align-items:stretch;">
                                     <div class="od-grid" style="flex:1;grid-template-columns:1fr;">
-                                        <div class="od-cell"><div class="od-label">UID</div><div class="od-value highlight-id">${t.userId || 'N/A'}</div></div>
-                                        ${t.userPhone ? `<div class="od-cell"><div class="od-label">Phone</div><div class="od-value"><a href="tel:${t.userPhone}">${t.userPhone}</a></div></div>` : ''}
-                                        <div class="od-cell"><div class="od-label">Payment</div><div class="od-value">${t.paymentMethod || 'N/A'}</div></div>
+                                        <div class="od-cell"><div class="od-label">UID</div><div class="od-value highlight-id">${escapeHtml(t.userId || 'N/A')}</div></div>
+                                        ${t.userPhone ? `<div class="od-cell"><div class="od-label">Phone</div><div class="od-value"><a href="tel:${escapeHtml(t.userPhone)}">${escapeHtml(t.userPhone)}</a></div></div>` : ''}
+                                        <div class="od-cell"><div class="od-label">Payment</div><div class="od-value">${escapeHtml(t.paymentMethod || 'N/A')}</div></div>
                                     </div>
                                     ${t.receiptUrl ? `<a href="${escapeHtml(t.receiptUrl)}" target="_blank" title="View full screenshot" style="flex-shrink:0;width:90px;height:90px;border-radius:12px;overflow:hidden;display:block;background:var(--bg-subtle);border:1px solid var(--border-glass);">
                                         <img src="${escapeHtml(t.receiptUrl)}" alt="Receipt" loading="lazy" decoding="async" style="width:100%;height:100%;object-fit:cover;">
@@ -9743,7 +9849,7 @@
             donutEl.style.background = `conic-gradient(${stops})`;
             legendEl.innerHTML = entries.map(([name, val], i) => {
                 const pct = Math.round((val / total) * 100);
-                return `<div class="donut-legend-row"><span class="name"><span class="donut-legend-dot" style="background:${colors[i]};"></span>${name}</span><b>${pct}%</b></div>`;
+                return `<div class="donut-legend-row"><span class="name"><span class="donut-legend-dot" style="background:${colors[i]};"></span>${escapeHtml(name)}</span><b>${pct}%</b></div>`;
             }).join('');
         }
 
@@ -13214,12 +13320,12 @@
                     return `
                         <div class="admin-card">
                             <div class="ac-header">
-                                <span class="ac-id">${data.title}</span>
+                                <span class="ac-id">${escapeHtml(data.title ?? '')}</span>
                                 ${data.targetUserId ? `<span class="badge badge-warning" style="margin-left:8px;">To: ${data.targetUserId}</span>` : `<span class="badge badge-success" style="margin-left:8px;">All Users</span>`}
                             </div>
                             <div class="ac-body">
-                                <p style="font-weight:500;">${data.intro || ''}</p>
-                                <p>${data.details || data.message || ''}</p>
+                                <p style="font-weight:500;">${escapeHtml(data.intro || '')}</p>
+                                <p>${escapeHtml(data.details || data.message || '')}</p>
                                 <p style="color:var(--text-secondary); font-size:12px;">Sent: ${dateStr}</p>
                             </div>
                             <div class="ac-footer">
@@ -13300,7 +13406,7 @@
                     return `
                         <div class="admin-card">
                             <div class="ac-body">
-                                <p>${data.text}</p>
+                                <p>${escapeHtml(data.text ?? '')}</p>
                             </div>
                             <div class="ac-footer">
                                 <button class="btn btn-danger" onclick="deleteAnnouncement('${docSnap.id}')">Delete</button>
@@ -13391,12 +13497,12 @@
                 const p = PAYMENT_METHODS[id];
                 return `
                     <div class="admin-card">
-                        <div class="ac-header"><span class="ac-id">${p.name}</span>${p.hot ? ' <span class="badge badge-danger">🔥 Hot</span>' : ''}</div>
+                        <div class="ac-header"><span class="ac-id">${escapeHtml(p.name ?? '')}</span>${p.hot ? ' <span class="badge badge-danger">🔥 Hot</span>' : ''}</div>
                         <div class="ac-body" style="display:flex;gap:10px;align-items:center;">
                             ${p.image ? `<div style="width:56px;height:56px;flex-shrink:0;border-radius:8px;overflow:hidden;background:var(--bg-subtle);border:1px solid var(--fill-soft);"><img src="${p.image}" loading="lazy" decoding="async" style="width:100%;height:100%;object-fit:cover;display:block;"></div>` : ''}
                             <div>
                                 <p><b>Number:</b> ${p.number}</p>
-                                <p><b>Account Name:</b> ${p.accountName}</p>
+                                <p><b>Account Name:</b> ${escapeHtml(p.accountName ?? '')}</p>
                                 ${p.availabilityNote ? `<p><b>Availability:</b> ${p.availabilityNote}</p>` : ''}
                             </div>
                         </div>
@@ -13778,7 +13884,7 @@
                 </div>
                 <div class="ugc-contact">
                     <svg class="ui-icon" style="width:14px;height:14px;color:var(--text-muted);"><use href="#icon-phone"></use></svg>
-                    ${u.phone || 'No phone on file'}
+                    ${escapeHtml(u.phone || 'No phone on file')}
                 </div>
                 <div class="ugc-contact">
                     <svg class="ui-icon" style="width:14px;height:14px;color:var(--text-muted);"><use href="#icon-telegram"></use></svg>
@@ -13990,7 +14096,7 @@
                                 <svg class="ui-icon" id="ud-oc-chevron-${orderId}" style="width:15px;height:15px;color:var(--text-muted);transition:transform 0.2s;transform:rotate(${isOpen ? '180' : '0'}deg);"><use href="#icon-chevron-down"></use></svg>
                             </div>
                         </div>
-                        <p style="font-size:13px;color:var(--text-secondary);">${fmtMoney(o.price)} &middot; ${o.paymentMethod || 'N/A'}</p>
+                        <p style="font-size:13px;color:var(--text-secondary);">${fmtMoney(o.price)} &middot; ${escapeHtml(o.paymentMethod || 'N/A')}</p>
                         <p style="font-size:12px;color:var(--text-muted);margin-top:4px;">${dateStr}</p>
                         <div id="ud-oc-body-${orderId}" style="display:${isOpen ? 'block' : 'none'};padding-top:10px;margin-top:10px;border-top:1px solid var(--bg-subtle);">
                             <div class="od-grid">
@@ -14000,11 +14106,11 @@
                                 </div>
                                 <div class="od-cell">
                                     <div class="od-label">Player ID</div>
-                                    <div class="od-value mono">${o.playerId || 'N/A'}</div>
+                                    <div class="od-value mono">${escapeHtml(o.playerId || 'N/A')}</div>
                                 </div>
                                 ${o.serverId ? `<div class="od-cell">
                                     <div class="od-label">Server ID</div>
-                                    <div class="od-value mono">${o.serverId}</div>
+                                    <div class="od-value mono">${escapeHtml(o.serverId ?? '')}</div>
                                 </div>` : ''}
                                 <div class="od-cell">
                                     <div class="od-label">Order ID</div>
@@ -14018,11 +14124,11 @@
                                 </div>` : ''}
                                 <div class="od-cell">
                                     <div class="od-label">Transaction ID</div>
-                                    <div class="od-value mono">${o.transactionId || 'N/A'}</div>
+                                    <div class="od-value mono">${escapeHtml(o.transactionId || 'N/A')}</div>
                                 </div>
                                 <div class="od-cell">
                                     <div class="od-label">Paid Via</div>
-                                    <div class="od-value">${o.paymentMethod || 'N/A'}</div>
+                                    <div class="od-value">${escapeHtml(o.paymentMethod || 'N/A')}</div>
                                 </div>
                                 <div class="od-cell span-2">
                                     <div class="od-label">Date</div>
@@ -14707,7 +14813,7 @@
         }
         function adminTierBadgeHTML(tier) {
             return `<span class="tier-mini-badge" style="background:${tier.bg};color:${tier.color};">
-                <svg class="ui-icon"><use href="#icon-trophy"></use></svg>${tier.name}
+                <svg class="ui-icon"><use href="#icon-trophy"></use></svg>${escapeHtml(tier.name)}
             </span>`;
         }
 
@@ -14732,7 +14838,7 @@
                 return `
                     <div class="tier-row">
                         <span class="tier-row-badge" style="background:${t.bg};color:${t.color};">
-                            <svg class="ui-icon"><use href="#icon-trophy"></use></svg>${t.name}
+                            <svg class="ui-icon"><use href="#icon-trophy"></use></svg>${escapeHtml(t.name)}
                         </span>
                         <div class="tier-row-input-wrap">
                             <input type="number" min="0" step="1000" inputmode="numeric"
@@ -15698,7 +15804,7 @@
                 }
             } catch (error) {
                 console.error("FazerCards webhook deliveries error:", error);
-                listEl.innerHTML = `<span style="color:var(--fail);">${error.message || 'Failed to load deliveries.'}</span>`;
+                listEl.innerHTML = `<span style="color:var(--fail);">${escapeHtml(error.message || 'Failed to load deliveries.')}</span>`;
             } finally {
                 btn.disabled = false; btn.innerText = originalText;
             }
@@ -16189,7 +16295,6 @@
                 logAdminActivity('Saved Telegram Bot settings', enabled ? 'Enabled' : 'Disabled');
                 window.showToast('Telegram Bot settings saved!', 'success');
                 closeTelegramBotModal();
-                if (enabled && botToken) startTelegramPollingOnce();
             } catch (error) {
                 console.error('Save Telegram settings error:', error);
                 window.showToast('Failed to save Telegram settings.', 'fail');
@@ -16402,7 +16507,7 @@
                 }).join('');
             } catch (error) {
                 console.error("G2Bulk transactions error:", error);
-                listEl.innerHTML = `<p class="empty-msg" style="color:red;">${error.message}</p>`;
+                listEl.innerHTML = `<p class="empty-msg" style="color:red;">${escapeHtml(error.message)}</p>`;
             } finally {
                 btn.disabled = false;
                 btn.innerText = originalText;
@@ -19254,6 +19359,7 @@
         function startAddServerForGame(name) {
             const base = addServerPickerGroups.find(g => g.name === name);
             if (!base) return;
+            const wantVoucher = gameListTab === 'voucher'; // read BEFORE openGameEditor() can change anything
             openGameEditor();
             // openGameEditor() already defaults the provider from gameListTab,
             // but set it explicitly here too so this stays correct even if
@@ -19577,8 +19683,8 @@
             try {
                 const text = [
                     isNewIp ? '🔐 <b>New IP Admin Login</b>' : '🔐 <b>Admin Login</b>',
-                    `Admin: <code>${username}</code>`,
-                    `IP: <code>${ip}</code>`,
+                    `Admin: <code>${escapeHtml(username)}</code>`,
+                    `IP: <code>${escapeHtml(ip)}</code>`,
                     `Time: ${new Date().toLocaleString()}`
                 ].join('\n');
                 await fetch(`https://api.telegram.org/bot${TELEGRAM_SETTINGS.botToken}/sendMessage`, {
