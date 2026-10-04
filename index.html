@@ -1417,9 +1417,84 @@
         /* Date-range calendar — sized down noticeably from the original (was
            reading too large / heavy on screen): smaller card, tighter padding,
            smaller day cells and text throughout while staying tappable. */
+        /* ===== Date-range calendar (redesign) ===== */
+        #cal2-box.cal2-box { display: flex; flex-direction: column; gap: 14px; padding: 18px 16px calc(16px + env(safe-area-inset-bottom)); max-height: 92vh; overflow-y: auto; -webkit-overflow-scrolling: touch; --cal-cell: 40px; }
+        .cal2-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+        .cal2-top h3 { margin: 0; font-size: 17px; font-weight: 700; color: var(--text-strong); letter-spacing: -0.01em; }
+        .cal2-fields { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 8px; }
+        .cal2-field-arrow { width: 16px; height: 16px; color: var(--text-muted); }
+        .cal2-field { display: flex; flex-direction: column; gap: 2px; padding: 9px 12px; border: 1.5px solid var(--border-glass); border-radius: 12px; background: var(--bg-subtle); min-width: 0; transition: border-color .15s, box-shadow .15s, background .15s; }
+        .cal2-field small { font-size: 10.5px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--text-muted); }
+        .cal2-field b { font-size: 14px; font-weight: 600; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .cal2-field.filled b { color: var(--text-strong); }
+        .cal2-field.active { border-color: var(--accent); background: var(--surface); box-shadow: 0 0 0 3px rgba(var(--accent-rgb), .14); }
+        .cal2-field.active small { color: var(--accent); }
+        .cal2-presets { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch; padding-bottom: 2px; }
+        .cal2-presets::-webkit-scrollbar { display: none; }
+        .cal2-presets button { flex: 0 0 auto; padding: 6px 12px; border: 1px solid var(--border-glass); border-radius: 999px; background: var(--surface); color: var(--text-secondary); font: 600 12px/1.2 inherit; font-family: inherit; cursor: pointer; white-space: nowrap; transition: background .15s, color .15s, border-color .15s; }
+        .cal2-presets button:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+        .cal2-presets button:active { transform: scale(.96); }
+        .cal2-nav { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+        .cal2-nav-btn { width: 34px; height: 34px; display: grid; place-items: center; border: 1px solid var(--border-glass); border-radius: 10px; background: var(--surface); color: var(--text-strong); font-size: 18px; line-height: 1; cursor: pointer; transition: background .15s; }
+        .cal2-nav-btn:hover { background: var(--fill-soft); }
+        .cal2-nav-btn:active { transform: scale(.94); }
+        .cal2-nav-title { display: inline-flex; align-items: center; justify-content: center; gap: 6px; flex: 1; min-width: 0; padding: 7px 12px; border: 0; border-radius: 10px; background: transparent; color: var(--text-strong); font: 700 14.5px/1.2 inherit; font-family: inherit; cursor: pointer; }
+        .cal2-nav-title:hover { background: var(--fill-soft); }
+        .cal2-nav-title svg { width: 14px; height: 14px; color: var(--text-muted); }
+        .cal2-dual .cal2-nav-title { pointer-events: none; display: none; }
+        .cal2-dual .cal2-nav { justify-content: space-between; position: absolute; left: 16px; right: 16px; top: 0; pointer-events: none; }
+        .cal2-body { position: relative; }
+        .cal2-months { display: grid; grid-template-columns: 1fr; gap: 20px; }
+        .cal2-month { min-width: 0; }
+        .cal2-month-title { text-align: center; font-size: 14.5px; font-weight: 700; color: var(--text-strong); margin-bottom: 10px; }
+        .cal2-dow, .cal2-grid { display: grid; grid-template-columns: repeat(7, 1fr); }
+        .cal2-dow span { text-align: center; font-size: 11px; font-weight: 600; color: var(--text-muted); padding: 4px 0 6px; text-transform: uppercase; letter-spacing: .04em; }
+        .cal2-grid { row-gap: 2px; }
+        .cal2-blank { height: var(--cal-cell); }
+        .cal2-day { position: relative; height: var(--cal-cell); padding: 0; border: 0; background: transparent; cursor: pointer; display: grid; place-items: center; font-family: inherit; color: var(--text-primary); -webkit-tap-highlight-color: transparent; }
+        .cal2-day b { position: relative; z-index: 2; width: calc(var(--cal-cell) - 6px); height: calc(var(--cal-cell) - 6px); display: grid; place-items: center; border-radius: 50%; font-size: 13.5px; font-weight: 500; transition: background .12s, color .12s; }
+        .cal2-day:hover b { background: var(--fill-soft); }
+        .cal2-day.muted { color: var(--text-muted); opacity: .45; }
+        .cal2-day.today b { box-shadow: inset 0 0 0 1.5px var(--accent); font-weight: 700; color: var(--accent); }
+        .cal2-day.in-range::before, .cal2-day.range-start.has-tail::before, .cal2-day.range-end.has-head::before, .cal2-day.preview::before { content: ""; position: absolute; top: 3px; bottom: 3px; left: 0; right: 0; background: var(--accent-soft); z-index: 1; }
+        .cal2-day.range-start.has-tail::before { left: 50%; }
+        .cal2-day.range-end.has-head::before { right: 50%; }
+        .cal2-day.preview::before { background: rgba(var(--accent-rgb), .08); }
+        .cal2-day.preview-end b { box-shadow: inset 0 0 0 1.5px rgba(var(--accent-rgb), .5); }
+        .cal2-day.in-range b { color: var(--accent); }
+        .cal2-day.sel b, .cal2-day.range-start b, .cal2-day.range-end b { background: var(--accent); color: #fff; font-weight: 700; box-shadow: 0 2px 8px rgba(var(--accent-rgb), .35); }
+        .cal2-day.sel:hover b, .cal2-day.range-start:hover b, .cal2-day.range-end:hover b { background: var(--accent); }
+        .cal2-picker { position: absolute; inset: 0; z-index: 5; display: flex; flex-direction: column; gap: 12px; background: var(--surface); padding-top: 2px; }
+        .cal2-picker-year { display: flex; align-items: center; justify-content: space-between; }
+        .cal2-picker-year b { font-size: 15px; font-weight: 700; color: var(--text-strong); }
+        .cal2-picker-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; flex: 1; }
+        .cal2-picker-grid button { border: 1px solid var(--border-glass); border-radius: 12px; background: var(--bg-subtle); color: var(--text-primary); font: 600 13.5px/1 inherit; font-family: inherit; cursor: pointer; min-height: 44px; }
+        .cal2-picker-grid button:hover { border-color: var(--accent); color: var(--accent); }
+        .cal2-picker-grid button.active, .cal2-picker-grid button.sel { background: var(--accent); border-color: var(--accent); color: #fff; }
+        .cal2-foot { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-top: 12px; border-top: 1px solid var(--line); }
+        .cal2-count { font-size: 12.5px; font-weight: 600; color: var(--text-secondary); min-width: 0; }
+        .cal2-actions { display: flex; gap: 8px; flex-shrink: 0; }
+        .cal2-actions .btn { padding: 9px 18px; font-size: 13.5px; border-radius: 10px; width: auto; }
+        .cal2-actions .btn[disabled], .cal2-actions .btn:disabled { opacity: .45; pointer-events: none; }
 
-
-
+        /* Tablet */
+        @media (min-width: 600px) { #cal2-box.cal2-box { --cal-cell: 42px; padding: 20px 22px 18px; } }
+        /* Laptop / Desktop: centered dialog, two months side by side */
+        @media (min-width: 900px) {
+            #cal2-box.cal2-box { width: min(94vw, 460px); max-width: none !important; --cal-cell: 42px; border-radius: 20px !important; border-bottom: 1px solid var(--border-glass) !important; box-shadow: 0 24px 60px -16px rgba(0,0,0,.4) !important; }
+            #cal2-box.cal2-box.cal2-dual { width: min(94vw, 760px); --cal-cell: 44px; padding: 22px 26px 20px; gap: 16px; }
+            #cal2-box.cal2-dual .cal2-fields { max-width: 420px; }
+            #cal2-box.cal2-dual .cal2-presets { flex-wrap: wrap; overflow: visible; }
+            #cal2-box.cal2-dual .cal2-months { grid-template-columns: 1fr 1fr; gap: 36px; }
+            #cal2-box.cal2-dual .cal2-body { padding-top: 0; }
+            .cal2-dual .cal2-nav { position: static; pointer-events: auto; margin-bottom: -8px; }
+            .cal2-dual .cal2-nav-title { display: none; }
+            .cal2-dual .cal2-nav { justify-content: space-between; }
+            .cal2-dual .cal2-month-title { margin-top: -34px; margin-bottom: 14px; }
+        }
+        @media (min-width: 900px) { #cal2-box.cal2-box::before { display: none !important; } }
+        @media (min-width: 1400px) { #cal2-box.cal2-box.cal2-dual { width: 820px; --cal-cell: 46px; } }
+        @media (max-height: 640px) { #cal2-box.cal2-box { --cal-cell: 36px; gap: 10px; } }
 
 
         .game-picker-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; overflow-y: auto; padding-bottom: 6px; scroll-behavior: smooth; scroll-snap-type: y mandatory; -webkit-overflow-scrolling: touch; }
