@@ -1417,31 +1417,10 @@
         /* Date-range calendar — sized down noticeably from the original (was
            reading too large / heavy on screen): smaller card, tighter padding,
            smaller day cells and text throughout while staying tappable. */
-        .cal-modal-box { max-width: 300px; }
-        .cal-presets { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 10px; }
-        .cal-presets button { padding: 5px 10px; border-radius: 20px; border: 1px solid var(--border-glass); background: var(--bg-subtle-2); color: var(--text-secondary); font-size: 10.5px; font-family: inherit; cursor: pointer; }
-        .cal-presets button:active { background: var(--accent-soft); color: var(--accent); }
 
-        .cal-card { background: var(--bg-subtle); border-radius: 14px; padding: 10px; border: 1px solid var(--border-glass); }
-        .cal-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
-        .cal-title { font-size: 13px; font-weight: 700; color: var(--text-strong); }
-        .cal-nav-btn { width: 25px; height: 25px; border-radius: 8px; border: 1px solid var(--border-glass); background: var(--surface); color: var(--text-primary); font-size: 14px; line-height: 1; display: flex; align-items: center; justify-content: center; cursor: pointer; font-family: inherit; }
-        .cal-nav-btn:active { background: var(--fill-soft); }
 
-        .cal-dow-row { display: grid; grid-template-columns: repeat(7, 1fr); margin-bottom: 4px; }
-        .cal-dow-row span { text-align: center; font-size: 9px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.02em; }
 
-        .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); row-gap: 1px; }
-        .cal-day { position: relative; aspect-ratio: 1 / 1; border: none; background: transparent; color: var(--text-primary); font-size: 11px; font-weight: 500; cursor: pointer; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: inherit; }
-        .cal-day.muted { color: var(--text-muted); opacity: 0.4; }
-        .cal-day.today:not(.range-start):not(.range-end) { box-shadow: inset 0 0 0 1.5px var(--accent); color: var(--accent); font-weight: 700; }
-        .cal-day.in-range { background: var(--accent-soft); border-radius: 0; }
-        .cal-day.range-start, .cal-day.range-end { background: var(--accent); color: #fff; font-weight: 700; }
-        .cal-day.range-start { border-radius: 50% 0 0 50%; }
-        .cal-day.range-end { border-radius: 0 50% 50% 0; }
-        .cal-day.range-start.range-end { border-radius: 50%; }
 
-        .cal-range-display { text-align: center; margin-top: 8px; font-size: 11px; color: var(--text-secondary); }
 
         .game-picker-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; overflow-y: auto; padding-bottom: 6px; scroll-behavior: smooth; scroll-snap-type: y mandatory; -webkit-overflow-scrolling: touch; }
         .game-picker-card { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 10px 6px; border: 1.5px solid var(--fill-soft); border-radius: 14px; cursor: pointer; text-align: center; transition: border-color 0.15s ease, background 0.15s ease, transform 0.1s ease; content-visibility: auto; contain-intrinsic-size: 0 96px; scroll-snap-align: start; }
@@ -2295,20 +2274,52 @@
         .content-area .admin-search-wrap input { border-radius: 999px; }
 
         /* ---- v4: smaller tab-picker sheet (Game / Setting / Wallet ...) ---- */
-        #nav-group-sheet-overlay .modal-box { padding: 14px 14px 16px; max-width: 380px; }
-        #nav-group-sheet-overlay .modal-header { padding-bottom: 8px; margin-bottom: 10px; }
-        #nav-group-sheet-overlay .modal-header h3 { font-size: 15px; }
-        #nav-group-sheet-overlay .modal-close { width: 28px; height: 28px; }
-        #nav-group-sheet-overlay .modal-close .ui-icon { width: 13px !important; }
-        #nav-group-sheet-overlay #nav-group-sheet-list { gap: 6px !important; }
+        #nav-group-sheet-overlay .modal-box { padding: 10px 12px 12px; max-width: 340px; }
+        #nav-group-sheet-overlay .modal-header { padding-bottom: 6px; margin-bottom: 8px; }
+        #nav-group-sheet-overlay .modal-header h3 { font-size: 13px; }
+        #nav-group-sheet-overlay .modal-close { width: 24px; height: 24px; }
+        #nav-group-sheet-overlay .modal-close .ui-icon { width: 11px !important; }
+        #nav-group-sheet-overlay #nav-group-sheet-list { gap: 5px !important; }
         #nav-group-sheet-overlay #nav-group-sheet-list > button {
-            min-height: 44px; gap: 10px !important; padding: 6px 12px 6px 6px !important;
-            border-radius: 15px !important; font-size: 13px !important;
+            min-height: 40px !important; gap: 9px !important; padding: 5px 11px 5px 5px !important;
+            border-radius: 14px !important; font-size: 13px !important;
         }
         #nav-group-sheet-overlay #nav-group-sheet-list > button > svg:first-child {
-            width: 17px !important; height: 17px !important; padding: 6px; border-radius: 11px;
+            width: 15px !important; height: 15px !important; padding: 6px; border-radius: 10px;
         }
-        #nav-group-sheet-overlay #nav-group-sheet-list > button:not(:has(> span:nth-child(3)))::after { width: 6px; height: 6px; }
+        #nav-group-sheet-overlay #nav-group-sheet-list > button:not(:has(> span:nth-child(3)))::after { width: 5px; height: 5px; border-width: 0 1.5px 1.5px 0; }
+
+        /* ---- PERF: backdrop-filter blur re-computes every scroll frame and is the
+           main cause of lag on phones. Turned off everywhere; the headers and
+           sheets get an opaque surface instead so they stay readable. ---- */
+        .glass, .modal-box, .dialog-box, .login-box, .header, .top-nav, #toast, .login-card,
+        .login-box input, .login-box button, .login-secondary-btn, .order-bulk-bar,
+        .game-variant-count-badge, .top-nav-wrap, .top-nav-wrap .top-nav,
+        .pkg-type-tabs, .udp-tabs, .game-list-tabs, .stat-card, .chart-card, .stat-chip,
+        .btn-outline, .admin-search-wrap input, .game-picker-search-wrap input, .date-filter-trigger,
+        .modal-overlay, .dialog-overlay,
+        #nav-group-sheet-overlay #nav-group-sheet-list > button {
+            -webkit-backdrop-filter: none !important; backdrop-filter: none !important;
+        }
+        .header, .modal-box, .dialog-box { background-color: var(--surface) !important; }
+        /* Nav bar floats on its own: no strip behind it, only the pill itself is visible */
+        .top-nav-wrap {
+            background: transparent !important; pointer-events: none;
+            transition: transform 0.34s cubic-bezier(0.2, 0.9, 0.25, 1), opacity 0.24s ease;
+        }
+        .top-nav-wrap .top-nav {
+            pointer-events: auto;
+            background:
+                linear-gradient(180deg, rgba(255,255,255,0.22), rgba(255,255,255,0.03)),
+                linear-gradient(var(--fill-soft), var(--fill-soft)),
+                var(--surface) !important;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.35), 0 10px 24px -12px rgba(0,0,0,0.38);
+        }
+        /* scrolling down: the bar slides up in under the header; scrolling up: it slides back out */
+        .top-nav-wrap.nav-hidden { transform: translateY(calc(-100% - 10px)); opacity: 0; }
+        .top-nav-wrap.nav-hidden .top-nav { pointer-events: none; }
+        .modal-overlay, .dialog-overlay { background: rgba(6,10,22,0.58) !important; }
+        .login-mesh { animation: none !important; filter: none !important; }
 
         /* ---- Header clock v2: seconds ring + big HH:MM + stacked date ---- */
         #header-clock {
@@ -2332,6 +2343,105 @@
         @media (max-width: 420px) { .hc-date { display: none; } #header-clock { padding-right: 12px; } }
         @media (max-width: 340px) { .hc-ring { display: none; } #header-clock { padding-left: 12px; } }
         @media (prefers-reduced-motion: reduce) { * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; } }
+
+        /* ---- Gradient accent header (follows the active theme's accent) ---- */
+        /* Each theme gets its own gradient pair, dark enough for white text */
+        :root { --hdr-a: #3B5BFF; --hdr-b: #7C4DFF; }
+        [data-theme="light"] { --hdr-a: #3B5BFF; --hdr-b: #7C4DFF; }
+        [data-theme="dark"], [data-theme="dark-blue"] { --hdr-a: #1D4ED8; --hdr-b: #4F46E5; }
+        [data-theme="midnight-purple"] { --hdr-a: #6D28D9; --hdr-b: #C026D3; }
+        [data-theme="ocean"] { --hdr-a: #0D9488; --hdr-b: #0369A1; }
+        .header {
+            background-color: var(--hdr-a) !important;
+            background-image: linear-gradient(135deg, var(--hdr-a) 0%, var(--hdr-b) 100%) !important;
+            border-bottom: 1px solid rgba(255,255,255,0.18) !important;
+            box-shadow: 0 8px 22px -12px color-mix(in srgb, var(--hdr-a) 70%, #000) !important;
+            color: #fff;
+        }
+        /* The picker panel + nav pill pick up the theme's accent in their edge/glow */
+        .top-nav-wrap .top-nav { border-color: color-mix(in srgb, var(--hdr-a) 22%, var(--border-glass)); }
+        #nav-group-sheet-overlay .modal-box { border-color: color-mix(in srgb, var(--hdr-a) 28%, var(--border-glass)); }
+        #nav-group-sheet-overlay .modal-box::before { border-color: color-mix(in srgb, var(--hdr-a) 28%, var(--border-glass)); }
+        :is([data-theme="dark"], [data-theme="dark-blue"], [data-theme="midnight-purple"], [data-theme="ocean"]) #nav-group-sheet-overlay { background: linear-gradient(to bottom, transparent var(--sheet-top, 118px), rgba(0,0,0,0.62) var(--sheet-top, 118px)) !important; }
+
+        /* ---- Order list: Game tabs switch + strip ---- */
+        .og-toggle-row { padding: 10px 14px; margin-bottom: 12px; border-radius: 16px; background: var(--bg-subtle); border: 1px solid var(--border-glass); }
+        .og-toggle-row .switch-hint { margin: 1px 0 0; }
+        .order-game-tabs { margin-bottom: 14px; }
+        .order-game-tabs .pkg-type-tab { flex: 0 0 auto; display: inline-flex; align-items: center; gap: 6px; }
+        .ogt-count { font-size: 10px; font-weight: 700; line-height: 1; padding: 3px 6px; border-radius: 999px; background: rgba(var(--t), 0.18); }
+        .order-game-tabs .pkg-type-tab.active .ogt-count { background: rgba(255,255,255,0.28); color: #fff; }
+        .header .logo-icon { background: rgba(255,255,255,0.20); border: 1px solid rgba(255,255,255,0.35); color: #fff; }
+        .header .logo-icon.is-loading { background: rgba(255,255,255,0.22); }
+        .header .header-icon { background: rgba(255,255,255,0.18); border: 1px solid rgba(255,255,255,0.30); color: #fff; }
+        .header .header-icon .ui-icon { stroke: #fff; }
+        .header #header-clock { background: rgba(255,255,255,0.16); border: 1px solid rgba(255,255,255,0.30); }
+        .header .hc-ring-bg { stroke: rgba(255,255,255,0.30); }
+        .header .hc-ring-fg { stroke: #fff; }
+        .header .hc-sec { color: rgba(255,255,255,0.88); }
+        .header .hc-time, .header .hc-colon, .header .hc-date #hc-wd { color: #fff; }
+        .header .hc-date { border-left-color: rgba(255,255,255,0.35); }
+        .header .hc-date #hc-mon { color: rgba(255,255,255,0.85); }
+        .header .conn-status { background: rgba(255,255,255,0.16); border: 1px solid rgba(255,255,255,0.30); }
+        .header .conn-label { color: #fff; }
+
+        /* ---- Top Up status tabs: colour matches the status ---- */
+        #topup-status-tabs .pkg-type-tab { flex: 1 0 auto; }
+        #topup-status-tabs .pkg-type-tab[data-status="All"]        { --t: 139,92,246; }
+        #topup-status-tabs .pkg-type-tab[data-status="Pending"]    { --t: 245,158,11; }
+        #topup-status-tabs .pkg-type-tab[data-status="Processing"] { --t: 14,165,233; }
+        #topup-status-tabs .pkg-type-tab[data-status="Completed"]  { --t: 16,185,129; }
+        #topup-status-tabs .pkg-type-tab[data-status="Rejected"]   { --t: 244,63,94; }
+
+        /* ---- Badges: .badge-warning was used in 4 places but never defined (no colour) ---- */
+        .badge-warning { background: rgba(251,191,36,0.16); color: #B45309; }
+        /* Dark themes: the light-theme badge text is too dark to read, use lighter tones */
+        :is([data-theme="dark"], [data-theme="dark-blue"], [data-theme="midnight-purple"], [data-theme="ocean"]) .badge-pending,
+        :is([data-theme="dark"], [data-theme="dark-blue"], [data-theme="midnight-purple"], [data-theme="ocean"]) .badge-warning { color: #FCD34D; }
+        :is([data-theme="dark"], [data-theme="dark-blue"], [data-theme="midnight-purple"], [data-theme="ocean"]) .badge-processing { color: #7DD3FC; }
+        :is([data-theme="dark"], [data-theme="dark-blue"], [data-theme="midnight-purple"], [data-theme="ocean"]) .badge-success { color: #6EE7B7; }
+        :is([data-theme="dark"], [data-theme="dark-blue"], [data-theme="midnight-purple"], [data-theme="ocean"]) .badge-danger { color: #FDA4AF; }
+
+        /* ---- Picker sheet rows drop in from the top, one by one ---- */
+        @keyframes navRowIn {
+            from { opacity: 0; transform: translateY(-24px) scale(0.95); }
+            to   { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        /* Starts only once the panel is shown, each row ~0.12s after the previous one */
+        #nav-group-sheet-overlay.show #nav-group-sheet-list > button {
+            animation: navRowIn 0.42s cubic-bezier(0.2, 0.9, 0.25, 1) backwards;
+        }
+        #nav-group-sheet-overlay.show #nav-group-sheet-list > button:nth-child(1) { animation-delay: 0.12s; }
+        #nav-group-sheet-overlay.show #nav-group-sheet-list > button:nth-child(2) { animation-delay: 0.24s; }
+        #nav-group-sheet-overlay.show #nav-group-sheet-list > button:nth-child(3) { animation-delay: 0.36s; }
+        #nav-group-sheet-overlay.show #nav-group-sheet-list > button:nth-child(4) { animation-delay: 0.48s; }
+        #nav-group-sheet-overlay.show #nav-group-sheet-list > button:nth-child(5) { animation-delay: 0.60s; }
+        #nav-group-sheet-overlay.show #nav-group-sheet-list > button:nth-child(n+6) { animation-delay: 0.72s; }
+
+        /* ---- Picker panel: drops DOWN out of the top nav bar (not up from the bottom) ---- */
+        #nav-group-sheet-overlay {
+            align-items: flex-start; justify-content: flex-start;
+            /* nav bar stays undimmed; only the page below it is dimmed */
+            background: linear-gradient(to bottom, transparent var(--sheet-top, 118px), rgba(6,10,22,0.5) var(--sheet-top, 118px)) !important;
+        }
+        #nav-group-sheet-overlay .modal-box {
+            position: relative;
+            width: min(340px, calc(100vw - 16px));
+            margin: var(--sheet-top, 118px) 0 0 var(--sheet-left, calc(50vw - 170px));
+            border: 1px solid var(--border-glass); border-radius: 20px;
+            box-shadow: 0 18px 40px -16px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.25);
+            transform-origin: var(--sheet-origin-x, 50%) 0;
+            transform: translateY(-10px) scale(0.9, 0.55); opacity: 0;
+            transition: transform 0.3s cubic-bezier(0.2, 0.9, 0.25, 1), opacity 0.2s ease;
+        }
+        #nav-group-sheet-overlay.show .modal-box { transform: none; opacity: 1; }
+        /* little caret pointing up at the tapped nav icon (replaces the bottom-sheet drag handle) */
+        #nav-group-sheet-overlay .modal-box::before {
+            content: ''; position: absolute; top: -7px; left: calc(var(--sheet-origin-x, 50%) - 7px);
+            width: 12px; height: 12px; margin: 0; flex: none; border-radius: 3px 0 0 0;
+            transform: rotate(45deg); background: var(--surface);
+            border: 1px solid var(--border-glass); border-right: 0; border-bottom: 0;
+        }
     </style>
     <script>
         // Applied synchronously (before first paint) to avoid a flash of the
@@ -3630,6 +3740,23 @@
                 <input type="hidden" id="order-date-to">
             </div>
 
+            <!-- Game tabs: off by default. When switched on, one glass tab per game
+                 name appears (with its order count) so the list can be filtered by game. -->
+            <div class="switch-row og-toggle-row">
+                <div style="display:flex;align-items:center;gap:10px;">
+                    <svg class="ui-icon" style="width:18px;height:18px;color:var(--accent);"><use href="#icon-gamepad"></use></svg>
+                    <div>
+                        <span class="switch-label">Game tabs</span>
+                        <p class="switch-hint">Show a tab for each game to filter orders</p>
+                    </div>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="order-game-tabs-toggle" onchange="toggleOrderGameTabs(this.checked)">
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+            <div class="pkg-type-tabs order-game-tabs" id="order-game-tabs" style="display:none;"></div>
+
             <!-- Bulk actions bar — appears once one or more Pending orders are checked -->
             <div class="order-bulk-bar" id="order-bulk-bar">
                 <div class="obb-left">
@@ -3667,6 +3794,7 @@
             </div>
 
             <div class="pkg-type-tabs" id="topup-status-tabs" style="margin-bottom:14px;">
+                <button type="button" class="pkg-type-tab" data-status="All" onclick="switchTopupTab('All')">All</button>
                 <button type="button" class="pkg-type-tab active" data-status="Pending" onclick="switchTopupTab('Pending')">Pending</button>
                 <button type="button" class="pkg-type-tab" data-status="Processing" onclick="switchTopupTab('Processing')">Processing</button>
                 <button type="button" class="pkg-type-tab" data-status="Completed" onclick="switchTopupTab('Completed')">Completed</button>
@@ -3696,32 +3824,51 @@
 
         <!-- Custom Calendar Date-Range Picker Modal (shared by Orders + Wallet Top Ups) -->
         <div class="modal-overlay" id="date-range-modal-overlay" onclick="if(event.target===this) closeDateRangeModal()">
-            <div class="modal-box cal-modal-box">
-                <div class="modal-header">
-                    <h3>Select Date Range</h3>
-                    <div class="modal-close" onclick="closeDateRangeModal()"><svg class="ui-icon" style="width:16px;"><use href="#icon-close"></use></svg></div>
+            <div class="modal-box cal2-box" id="cal2-box" role="dialog" aria-label="Select date range">
+                <div class="cal2-top">
+                    <h3>Select dates</h3>
+                    <div class="modal-close" onclick="closeDateRangeModal()"><svg class="ui-icon" style="width:14px;"><use href="#icon-close"></use></svg></div>
                 </div>
-                <div class="modal-body">
-                    <div class="cal-presets">
-                        <button type="button" onclick="calApplyPreset('today')">Today</button>
-                        <button type="button" onclick="calApplyPreset('yesterday')">Yesterday</button>
-                        <button type="button" onclick="calApplyPreset('last7')">Last 7 days</button>
-                        <button type="button" onclick="calApplyPreset('thismonth')">This month</button>
-                    </div>
-                    <div class="cal-card">
-                        <div class="cal-head">
-                            <button type="button" class="cal-nav-btn" onclick="calPrevMonth()" aria-label="Previous month">‹</button>
-                            <div class="cal-title" id="cal-title">—</div>
-                            <button type="button" class="cal-nav-btn" onclick="calNextMonth()" aria-label="Next month">›</button>
+
+                <div class="cal2-fields">
+                    <div class="cal2-field" id="cal-field-from"><small>From</small><b id="cal-from-val">Start date</b></div>
+                    <svg class="ui-icon cal2-field-arrow" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="13 6 19 12 13 18"></polyline></svg>
+                    <div class="cal2-field" id="cal-field-to"><small>To</small><b id="cal-to-val">End date</b></div>
+                </div>
+
+                <div class="cal2-presets">
+                    <button type="button" onclick="calApplyPreset('today')">Today</button>
+                    <button type="button" onclick="calApplyPreset('yesterday')">Yesterday</button>
+                    <button type="button" onclick="calApplyPreset('last7')">Last 7 days</button>
+                    <button type="button" onclick="calApplyPreset('last30')">Last 30 days</button>
+                    <button type="button" onclick="calApplyPreset('thismonth')">This month</button>
+                    <button type="button" onclick="calApplyPreset('lastmonth')">Last month</button>
+                </div>
+
+                <div class="cal2-nav">
+                    <button type="button" class="cal2-nav-btn" onclick="calPrevMonth()" aria-label="Previous month"><svg class="ui-icon" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"></polyline></svg></button>
+                    <button type="button" class="cal2-nav-title" id="cal-title" onclick="calToggleMonthPicker()" aria-label="Pick month and year">-</button>
+                    <button type="button" class="cal2-nav-btn" onclick="calNextMonth()" aria-label="Next month"><svg class="ui-icon" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"></polyline></svg></button>
+                </div>
+
+                <div class="cal2-body">
+                    <div class="cal2-months" id="cal-months"></div>
+                    <div class="cal2-picker" id="cal-picker" style="display:none;">
+                        <div class="cal2-picker-year">
+                            <button type="button" class="cal2-nav-btn" onclick="calYearShift(-1)" aria-label="Previous year"><svg class="ui-icon" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"></polyline></svg></button>
+                            <b id="cal-picker-year">2026</b>
+                            <button type="button" class="cal2-nav-btn" onclick="calYearShift(1)" aria-label="Next year"><svg class="ui-icon" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"></polyline></svg></button>
                         </div>
-                        <div class="cal-dow-row" id="cal-dow-row"></div>
-                        <div class="cal-grid" id="cal-grid"></div>
+                        <div class="cal2-picker-grid" id="cal-picker-grid"></div>
                     </div>
-                    <div class="cal-range-display" id="cal-range-display">Select a start date</div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-outline" onclick="calClear()">Clear</button>
-                    <button type="button" class="btn btn-primary" onclick="calApply()">Apply</button>
+
+                <div class="cal2-foot">
+                    <span class="cal2-count" id="cal-count">No dates selected</span>
+                    <div class="cal2-actions">
+                        <button type="button" class="btn btn-outline" onclick="calClear()">Clear</button>
+                        <button type="button" class="btn btn-primary" id="cal-apply-btn" onclick="calApply()">Apply</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -5000,13 +5147,48 @@
         }
         function openNavGroupSheet(groupKey) {
             renderNavGroupSheet(groupKey);
-            document.getElementById('nav-group-sheet-overlay').classList.add('show');
+            const ov = document.getElementById('nav-group-sheet-overlay');
+            // Drop the panel out of the top nav bar, right under the tapped icon.
+            try {
+                const nav = document.getElementById('admin-top-nav');
+                const item = document.getElementById('group-' + groupKey);
+                const vw = window.innerWidth, w = Math.min(340, vw - 16);
+                if (nav) ov.style.setProperty('--sheet-top', Math.round(nav.getBoundingClientRect().bottom + 8) + 'px');
+                if (item) {
+                    const r = item.getBoundingClientRect(), cx = r.left + r.width / 2;
+                    const left = Math.max(8, Math.min(cx - w / 2, vw - w - 8));
+                    ov.style.setProperty('--sheet-left', Math.round(left) + 'px');
+                    ov.style.setProperty('--sheet-origin-x', Math.round(cx - left) + 'px');
+                }
+            } catch (e) {}
+            ov.classList.add('show');
         }
         function closeNavGroupSheet() {
             document.getElementById('nav-group-sheet-overlay').classList.remove('show');
         }
         window.openNavGroupSheet = openNavGroupSheet;
         window.closeNavGroupSheet = closeNavGroupSheet;
+
+        // Top nav bar tucks up under the header when scrolling down and slides
+        // back out when scrolling up (see .top-nav-wrap.nav-hidden in the CSS).
+        (function () {
+            const wrap = document.querySelector('.top-nav-wrap');
+            if (!wrap) return;
+            let lastY = window.scrollY, ticking = false;
+            function update() {
+                ticking = false;
+                const y = Math.max(0, window.scrollY);
+                const delta = y - lastY;
+                if (document.querySelector('.modal-overlay.show')) { lastY = y; return; }
+                if (y < 40) wrap.classList.remove('nav-hidden');
+                else if (delta > 6) wrap.classList.add('nav-hidden');
+                else if (delta < -6) wrap.classList.remove('nav-hidden');
+                if (Math.abs(delta) > 6) lastY = y;
+            }
+            window.addEventListener('scroll', function () {
+                if (!ticking) { ticking = true; requestAnimationFrame(update); }
+            }, { passive: true });
+        })();
 
 
         // ---------- Single store (Store 1 / Store 2 switcher removed) ----------
@@ -7483,18 +7665,116 @@
             const base = calRangeStart || new Date();
             calViewYear = base.getFullYear();
             calViewMonth = base.getMonth();
-            renderCalDowRow();
+            calHoverDate = null;
+            const picker = document.getElementById('cal-picker');
+            const months = document.getElementById('cal-months');
+            if (picker) picker.style.display = 'none';
+            if (months) months.style.display = '';
             renderCalendar();
             document.getElementById('date-range-modal-overlay').classList.add('show');
         }
         function closeDateRangeModal() {
             document.getElementById('date-range-modal-overlay').classList.remove('show');
         }
-        function renderCalDowRow() {
-            const dow = document.getElementById('cal-dow-row');
-            if (!dow) return;
-            dow.innerHTML = ['MO','TU','WE','TH','FR','SA','SU'].map(l => `<span>${l}</span>`).join('');
+
+        // ---- Redesigned calendar: From/To fields, preset chips, 1 month on phones,
+        // 2 months side by side on laptops/desktops, hover preview, month/year jump ----
+        var calHoverDate = null;
+        const CAL_MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+        const CAL_MONTHS_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+        function calIsDual() { return window.innerWidth >= 900; }
+
+        function calMonthPanelHtml(year, month, showOutside, showTitle) {
+            const first = new Date(year, month, 1);
+            const startOffset = (first.getDay() + 6) % 7; // Monday first
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            const daysInPrev = new Date(year, month, 0).getDate();
+            const today = new Date(); today.setHours(0, 0, 0, 0);
+            const cells = [];
+            for (let i = startOffset - 1; i >= 0; i--) cells.push({ date: new Date(year, month - 1, daysInPrev - i), muted: true });
+            for (let d = 1; d <= daysInMonth; d++) cells.push({ date: new Date(year, month, d), muted: false });
+            let nd = 1;
+            while (cells.length % 7 !== 0) cells.push({ date: new Date(year, month + 1, nd++), muted: true });
+
+            const dow = ['Mo','Tu','We','Th','Fr','Sa','Su'].map(l => `<span>${l}</span>`).join('');
+            const days = cells.map(c => {
+                if (c.muted && !showOutside) return '<span class="cal2-blank"></span>';
+                const d = c.date;
+                const cls = ['cal2-day'];
+                if (c.muted) cls.push('muted');
+                if (isSameDay(d, today)) cls.push('today');
+                const isStart = calRangeStart && isSameDay(d, calRangeStart);
+                const isEnd = calRangeEnd && isSameDay(d, calRangeEnd);
+                if (isStart) cls.push('range-start', 'sel');
+                if (isEnd) cls.push('range-end', 'sel');
+                if (calRangeStart && calRangeEnd && d > calRangeStart && d < calRangeEnd) cls.push('in-range');
+                if (isStart && calRangeEnd && !isSameDay(calRangeStart, calRangeEnd)) cls.push('has-tail');
+                if (isEnd && calRangeStart && !isSameDay(calRangeStart, calRangeEnd)) cls.push('has-head');
+                const y = d.getFullYear(), m = d.getMonth(), dd = d.getDate();
+                return `<button type="button" class="${cls.join(' ')}" data-ts="${d.getTime()}" onclick="calSelectDay(${y},${m},${dd})" onmouseenter="calHoverDay(${d.getTime()})"><b>${dd}</b></button>`;
+            }).join('');
+            return `<div class="cal2-month">${showTitle ? `<div class="cal2-month-title">${CAL_MONTHS[month]} ${year}</div>` : ''}<div class="cal2-dow">${dow}</div><div class="cal2-grid" onmouseleave="calHoverDay(null)">${days}</div></div>`;
         }
+
+        function renderCalendar() {
+            const wrap = document.getElementById('cal-months');
+            if (!wrap) return;
+            const dual = calIsDual();
+            const box = document.getElementById('cal2-box');
+            if (box) box.classList.toggle('cal2-dual', dual);
+
+            let html = calMonthPanelHtml(calViewYear, calViewMonth, !dual, dual);
+            let title = `${CAL_MONTHS[calViewMonth]} ${calViewYear}`;
+            if (dual) {
+                const ny = calViewMonth === 11 ? calViewYear + 1 : calViewYear;
+                const nm = (calViewMonth + 1) % 12;
+                html += calMonthPanelHtml(ny, nm, false, true);
+                title = `${CAL_MONTHS_SHORT[calViewMonth]} ${calViewYear} - ${CAL_MONTHS_SHORT[nm]} ${ny}`;
+            }
+            wrap.innerHTML = html;
+            const titleEl = document.getElementById('cal-title');
+            if (titleEl) titleEl.innerHTML = `<span>${title}</span><svg class="ui-icon" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"></polyline></svg>`;
+            calUpdateSummary();
+        }
+
+        // From / To fields, active-field highlight, day count and the Apply state.
+        function calUpdateSummary() {
+            const fromEl = document.getElementById('cal-from-val');
+            const toEl = document.getElementById('cal-to-val');
+            const fromBox = document.getElementById('cal-field-from');
+            const toBox = document.getElementById('cal-field-to');
+            const count = document.getElementById('cal-count');
+            const applyBtn = document.getElementById('cal-apply-btn');
+            if (fromEl) fromEl.textContent = calRangeStart ? fmtCalShort(calRangeStart) : 'Start date';
+            if (toEl) toEl.textContent = calRangeEnd ? fmtCalShort(calRangeEnd) : (calRangeStart ? 'Pick end date' : 'End date');
+            const pickingEnd = !!calRangeStart && !calRangeEnd;
+            if (fromBox) { fromBox.classList.toggle('active', !pickingEnd); fromBox.classList.toggle('filled', !!calRangeStart); }
+            if (toBox) { toBox.classList.toggle('active', pickingEnd); toBox.classList.toggle('filled', !!calRangeEnd); }
+            if (count) {
+                if (calRangeStart && calRangeEnd) {
+                    const n = Math.round((calRangeEnd - calRangeStart) / 86400000) + 1;
+                    count.textContent = n === 1 ? '1 day selected' : `${n} days selected`;
+                } else if (calRangeStart) count.textContent = '1 day selected';
+                else count.textContent = 'No dates selected';
+            }
+            if (applyBtn) applyBtn.disabled = !calRangeStart;
+        }
+
+        // Hover preview while the end date is still being picked. Classes are toggled
+        // in place (not re-rendered) so a click is never lost to a replaced element.
+        function calHoverDay(ts) {
+            calHoverDate = ts;
+            const cells = document.querySelectorAll('#cal-months .cal2-day');
+            const picking = calRangeStart && !calRangeEnd && ts !== null;
+            let lo = 0, hi = 0;
+            if (picking) { const s = calRangeStart.getTime(); lo = Math.min(s, ts); hi = Math.max(s, ts); }
+            cells.forEach(c => {
+                const t = Number(c.dataset.ts);
+                c.classList.toggle('preview', !!picking && t > lo && t < hi);
+                c.classList.toggle('preview-end', !!picking && t === ts && t !== calRangeStart.getTime());
+            });
+        }
+
         function calPrevMonth() {
             calViewMonth--;
             if (calViewMonth < 0) { calViewMonth = 11; calViewYear--; }
@@ -7505,57 +7785,32 @@
             if (calViewMonth > 11) { calViewMonth = 0; calViewYear++; }
             renderCalendar();
         }
-        function renderCalendar() {
-            const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-            const titleEl = document.getElementById('cal-title');
-            if (titleEl) titleEl.textContent = `${monthNames[calViewMonth]} ${calViewYear}`;
 
-            const grid = document.getElementById('cal-grid');
-            if (!grid) return;
-
-            const firstOfMonth = new Date(calViewYear, calViewMonth, 1);
-            const startOffset = (firstOfMonth.getDay() + 6) % 7; // Monday-first offset
-            const daysInMonth = new Date(calViewYear, calViewMonth + 1, 0).getDate();
-            const daysInPrevMonth = new Date(calViewYear, calViewMonth, 0).getDate();
-            const today = new Date(); today.setHours(0,0,0,0);
-
-            let cells = [];
-            for (let i = startOffset - 1; i >= 0; i--) {
-                cells.push(new Date(calViewYear, calViewMonth - 1, daysInPrevMonth - i));
-            }
-            for (let d = 1; d <= daysInMonth; d++) {
-                cells.push(new Date(calViewYear, calViewMonth, d));
-            }
-            let nextDay = 1;
-            while (cells.length % 7 !== 0) {
-                cells.push(new Date(calViewYear, calViewMonth + 1, nextDay));
-                nextDay++;
-            }
-
-            grid.innerHTML = cells.map(date => {
-                const muted = date.getMonth() !== calViewMonth;
-                const classes = ['cal-day'];
-                if (muted) classes.push('muted');
-                if (isSameDay(date, today)) classes.push('today');
-                if (calRangeStart && isSameDay(date, calRangeStart)) classes.push('range-start');
-                if (calRangeEnd && isSameDay(date, calRangeEnd)) classes.push('range-end');
-                if (calRangeStart && !calRangeEnd && isSameDay(date, calRangeStart)) classes.push('range-end');
-                if (calRangeStart && calRangeEnd && date > calRangeStart && date < calRangeEnd) classes.push('in-range');
-                const y = date.getFullYear(), m = date.getMonth(), d = date.getDate();
-                return `<button type="button" class="${classes.join(' ')}" onclick="calSelectDay(${y},${m},${d})">${d}</button>`;
-            }).join('');
-
-            const rd = document.getElementById('cal-range-display');
-            if (rd) {
-                if (calRangeStart && calRangeEnd && !isSameDay(calRangeStart, calRangeEnd)) {
-                    rd.textContent = `${fmtCalShort(calRangeStart)} – ${fmtCalShort(calRangeEnd)}`;
-                } else if (calRangeStart) {
-                    rd.textContent = calRangeEnd ? fmtCalShort(calRangeStart) : `${fmtCalShort(calRangeStart)} – Select end date`;
-                } else {
-                    rd.textContent = 'Select a start date';
-                }
-            }
+        // Month / year quick jump (tap the month title).
+        function calToggleMonthPicker() {
+            const picker = document.getElementById('cal-picker');
+            const months = document.getElementById('cal-months');
+            if (!picker || !months) return;
+            const opening = picker.style.display === 'none';
+            picker.style.display = opening ? '' : 'none';
+            months.style.display = opening ? 'none' : '';
+            if (opening) calRenderPicker();
         }
+        function calRenderPicker() {
+            const y = document.getElementById('cal-picker-year');
+            const grid = document.getElementById('cal-picker-grid');
+            if (y) y.textContent = calViewYear;
+            if (grid) grid.innerHTML = CAL_MONTHS_SHORT.map((m, i) =>
+                `<button type="button" class="${i === calViewMonth ? 'active' : ''}" onclick="calPickMonth(${i})">${m}</button>`).join('');
+        }
+        function calYearShift(delta) { calViewYear += delta; calRenderPicker(); }
+        function calPickMonth(m) {
+            calViewMonth = m;
+            document.getElementById('cal-picker').style.display = 'none';
+            document.getElementById('cal-months').style.display = '';
+            renderCalendar();
+        }
+
         function calSelectDay(y, m, d) {
             const clicked = new Date(y, m, d);
             if (!calRangeStart || (calRangeStart && calRangeEnd)) {
@@ -7567,7 +7822,8 @@
             } else {
                 calRangeEnd = clicked;
             }
-            if (m !== calViewMonth || y !== calViewYear) { calViewYear = y; calViewMonth = m; }
+            // Only jump the view when a greyed-out day from a neighbouring month was tapped (phone view).
+            if (!calIsDual() && (m !== calViewMonth || y !== calViewYear)) { calViewYear = y; calViewMonth = m; }
             renderCalendar();
         }
         function calApplyPreset(type) {
@@ -7575,11 +7831,22 @@
             if (type === 'today') { calRangeStart = today; calRangeEnd = today; }
             else if (type === 'yesterday') { const y = new Date(today); y.setDate(y.getDate()-1); calRangeStart = y; calRangeEnd = y; }
             else if (type === 'last7') { const s = new Date(today); s.setDate(s.getDate()-6); calRangeStart = s; calRangeEnd = today; }
+            else if (type === 'last30') { const s = new Date(today); s.setDate(s.getDate()-29); calRangeStart = s; calRangeEnd = today; }
             else if (type === 'thismonth') { calRangeStart = new Date(today.getFullYear(), today.getMonth(), 1); calRangeEnd = today; }
+            else if (type === 'lastmonth') { calRangeStart = new Date(today.getFullYear(), today.getMonth() - 1, 1); calRangeEnd = new Date(today.getFullYear(), today.getMonth(), 0); }
             calViewYear = calRangeStart.getFullYear();
             calViewMonth = calRangeStart.getMonth();
+            const picker = document.getElementById('cal-picker');
+            const months = document.getElementById('cal-months');
+            if (picker) picker.style.display = 'none';
+            if (months) months.style.display = '';
             renderCalendar();
         }
+        // Switch between 1 and 2 month layouts when the window is resized while open.
+        window.addEventListener('resize', function () {
+            const ov = document.getElementById('date-range-modal-overlay');
+            if (ov && ov.classList.contains('show')) renderCalendar();
+        }, { passive: true });
         function calApply() {
             if (!calRangeContext) return;
             const fromInput = document.getElementById(calRangeContext + '-date-from');
@@ -7629,6 +7896,51 @@
         window.calApplyPreset = calApplyPreset;
         window.calApply = calApply;
         window.calClear = calClear;
+        window.calToggleMonthPicker = calToggleMonthPicker;
+        window.calYearShift = calYearShift;
+        window.calPickMonth = calPickMonth;
+        window.calHoverDay = calHoverDay;
+
+        // ---------- Order list: per-game tabs (opt-in via the "Game tabs" switch) ----------
+        // `var` on purpose (hoisted) so an early render can never hit a TDZ error.
+        var orderGameTabsEnabled = false;
+        var currentOrderGame = 'All';
+        try { orderGameTabsEnabled = localStorage.getItem('linn-order-game-tabs') === '1'; } catch (e) {}
+        (function () { const t = document.getElementById('order-game-tabs-toggle'); if (t) t.checked = orderGameTabsEnabled; })();
+
+        function toggleOrderGameTabs(on) {
+            orderGameTabsEnabled = !!on;
+            if (!on) currentOrderGame = 'All';
+            try { localStorage.setItem('linn-order-game-tabs', on ? '1' : '0'); } catch (e) {}
+            renderOrdersList();
+        }
+        window.toggleOrderGameTabs = toggleOrderGameTabs;
+
+        function setOrderGameTab(game) {
+            currentOrderGame = game || 'All';
+            document.querySelectorAll('#order-game-tabs .pkg-type-tab').forEach(b => {
+                const active = b.dataset.game === currentOrderGame;
+                b.classList.toggle('active', active);
+                if (active) { try { b.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' }); } catch (e) {} }
+            });
+            renderOrdersList();
+        }
+        window.setOrderGameTab = setOrderGameTab;
+
+        // Builds the tab strip from the orders that pass the search/date/cleaned
+        // filters, so each tab's count matches what tapping it will show.
+        function renderOrderGameTabs(orders) {
+            const bar = document.getElementById('order-game-tabs');
+            if (!bar) return;
+            if (!orderGameTabsEnabled) { bar.style.display = 'none'; bar.innerHTML = ''; return; }
+            const counts = {};
+            orders.forEach(o => { const g = (o.game || '').trim() || 'Unknown'; counts[g] = (counts[g] || 0) + 1; });
+            const names = Object.keys(counts).sort((a, b) => counts[b] - counts[a] || a.localeCompare(b));
+            if (currentOrderGame !== 'All' && !counts[currentOrderGame]) currentOrderGame = 'All';
+            const tab = (name, n) => `<button type="button" class="pkg-type-tab${currentOrderGame === name ? ' active' : ''}" data-game="${escapeHtml(name)}" onclick="setOrderGameTab(this.dataset.game)"><span class="ogt-name">${escapeHtml(name)}</span><span class="ogt-count">${n}</span></button>`;
+            bar.innerHTML = tab('All', orders.length) + names.map(n => tab(n, counts[n])).join('');
+            bar.style.display = 'flex';
+        }
 
         function renderOrdersList() {
             clearTimeout(ordersRenderScheduled);
@@ -7719,7 +8031,11 @@
                     || (o.id || '').toLowerCase().includes(searchTerm);
             });
             const cleanedCount = allOrders.filter(o => o.adminCleared).length;
-            const visibleOrders = allOrders.filter(o => !!o.adminCleared === showCleanedOrders);
+            const visibleOrdersBase = allOrders.filter(o => !!o.adminCleared === showCleanedOrders);
+            renderOrderGameTabs(visibleOrdersBase);
+            const visibleOrders = (orderGameTabsEnabled && currentOrderGame !== 'All')
+                ? visibleOrdersBase.filter(o => ((o.game || '').trim() || 'Unknown') === currentOrderGame)
+                : visibleOrdersBase;
             const hasFilters = !!(searchTerm || dateFrom || dateTo);
 
             if (allOrders.length === 0) {
@@ -9195,6 +9511,7 @@
             currentTopupTab = status;
             document.querySelectorAll('#topup-status-tabs .pkg-type-tab').forEach(el => {
                 el.classList.toggle('active', el.dataset.status === status);
+                if (el.dataset.status === status) { try { el.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' }); } catch (e) {} }
             });
             renderTopupsList();
         }
@@ -9326,7 +9643,7 @@
             const all = Object.values(WALLET_TOPUPS);
             const visible = all.filter(t => {
                 if (!matchesCurrentStore(t)) return false;
-                if (t.status !== currentTopupTab) return false;
+                if (currentTopupTab !== 'All' && t.status !== currentTopupTab) return false;
                 if (!isWithinDateRange(t.timestamp, dateFrom, dateTo)) return false;
                 if (!searchTerm) return true;
                 return (t.userName || '').toLowerCase().includes(searchTerm)
@@ -9337,7 +9654,7 @@
             const hasFilters = !!(searchTerm || dateFrom || dateTo);
 
             if (visible.length === 0) {
-                container.innerHTML = `<p class="empty-msg">${hasFilters ? `No matching ${currentTopupTab.toLowerCase()} top ups.` : `No ${currentTopupTab.toLowerCase()} top ups.`}</p>`;
+                container.innerHTML = `<p class="empty-msg">${hasFilters ? `No matching ${currentTopupTab === 'All' ? '' : currentTopupTab.toLowerCase() + ' '}top ups.` : `No ${currentTopupTab === 'All' ? '' : currentTopupTab.toLowerCase() + ' '}top ups.`}</p>`;
                 return;
             }
 
