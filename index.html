@@ -16541,7 +16541,8 @@
             try {
                 const bal = await fazercardRequest('/balance', { settings: FAZERCARD_SETTINGS });
                 const balanceNum = Number(bal.balance) || 0;
-                const text = `$${balanceNum.toLocaleString()}`;
+                const fazerRate = FAZERCARD_SETTINGS.usdRate || 4500;
+                const text = `$${balanceNum.toLocaleString()} (~${Math.round(balanceNum * fazerRate).toLocaleString()} MMK)`;
                 displayEls.forEach(el => { el.innerText = text; el.style.color = 'var(--accent)'; });
                 fazercardLastBalance = balanceNum;
             } catch (error) {
@@ -17051,7 +17052,10 @@
                 if (data.error) throw new Error(data.error);
 
                 const balanceNum = Number(data.balance) || 0;
-                const text = `${balanceNum.toFixed(2)} ${data.currency || 'USD'}`;
+                const balCur = data.currency || 'USD';
+                const g2bulkRate = G2BULK_SETTINGS.usdRate || 4500; // same saved USD → MMK rate used everywhere else
+                const text = `${balanceNum.toFixed(2)} ${balCur}`
+                    + (balCur === 'USD' ? ` (~${Math.round(balanceNum * g2bulkRate).toLocaleString()} MMK)` : '');
                 displayEls.forEach(el => { el.innerText = text; el.style.color = 'var(--accent)'; });
                 g2bulkLastBalance = balanceNum;
                 checkLowBalanceAlerts();
