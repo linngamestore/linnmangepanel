@@ -2448,6 +2448,9 @@
         .order-game-tabs .pkg-type-tab.active .ogt-count { background: rgba(255,255,255,0.28); color: #fff; }
         .header .logo-icon { background: rgba(255,255,255,0.20); border: 1px solid rgba(255,255,255,0.35); color: #fff; }
         .header .logo-icon.is-loading { background: rgba(255,255,255,0.22); }
+        /* Custom logo: no border, no tinted box, no rounded crop - the WHOLE logo shows as uploaded. */
+        .header .logo-icon.has-custom-logo { border: none; background: transparent; border-radius: 0; overflow: visible; }
+        .header .logo-icon.has-custom-logo img { object-fit: contain !important; border-radius: 0 !important; }
         .header .header-icon { background: rgba(255,255,255,0.18); border: 1px solid rgba(255,255,255,0.30); color: #fff; }
         .header .header-icon .ui-icon { stroke: #fff; }
         .header #header-clock { background: rgba(255,255,255,0.16); border: 1px solid rgba(255,255,255,0.30); }
@@ -12856,11 +12859,9 @@
         function autoPriceForCost(cost) {
             if (!cost || cost <= 0) return 0;
             const rawTarget = cost * (1 + AUTO_PRICE_MARGIN_PCT / 100); // exact target margin above cost
-            const hardCeiling = cost * (1 + (AUTO_PRICE_MARGIN_PCT + 2) / 100); // margin must never drift more than ~2 points past the target
-            const step = 50; // round up to a clean 50-MMK grid (…00 / …50 endings, no odd …90-style prices)
-            let price = Math.ceil(rawTarget / step) * step;
-            if (price > hardCeiling) price = Math.ceil(rawTarget); // step rounding would overshoot the ceiling (tiny Cost values) — fall back to the exact target price instead
-            return price;
+            // Prices may ONLY end in 00 or 50: always round UP to the next 50 (530 -> 550, 560 -> 600).
+            const step = 50;
+            return Math.ceil(rawTarget / step) * step;
         }
         window.autoPriceForCost = autoPriceForCost;
 
@@ -12873,23 +12874,16 @@
         function fmtResyncPct(p) { return (p > 0 ? '+' : '') + p.toFixed(2) + '%'; }
         window.fmtResyncPct = fmtResyncPct;
 
-        // Resync only lands on prices whose last two digits are 60/70/80/90/00 (never 10/20/30/40 endings).
-        // Picks the allowed price NEAREST to x (a tie goes up). minPrice, when given, is a floor: the
-        // result is never below it (used so a 0% / positive resync can't drop Price under Cost).
-        const RESYNC_ENDINGS = [0, 60, 70, 80, 90];
+        // Resync only lands on prices whose last two digits are 00 or 50 (never 10/20/30/40/60/70/80/90).
+        // Always rounds UP to the next 50: 510/520/530/540 -> 550, 560...590 -> next 600, 550 stays.
+        // minPrice, when given, is a floor: the result is never below it (used so a 0% / positive
+        // resync can't drop Price under Cost). The floor is also lifted onto the 50 grid.
+        const RESYNC_STEP = 50;
         function roundToResyncEnding(x, minPrice) {
-            const base = Math.floor(x / 100) * 100;
-            let best = null;
-            for (const b of [base - 100, base, base + 100, base + 200]) {
-                for (const e of RESYNC_ENDINGS) {
-                    const c = b + e;
-                    if (c <= 0 || (minPrice && c < minPrice)) continue;
-                    if (best === null) { best = c; continue; }
-                    const d = Math.abs(c - x), bd = Math.abs(best - x);
-                    if (d < bd || (d === bd && c > best)) best = c;
-                }
-            }
-            return best;
+            let c = Math.ceil(x / RESYNC_STEP) * RESYNC_STEP;
+            if (minPrice && c < minPrice) c = Math.ceil(minPrice / RESYNC_STEP) * RESYNC_STEP;
+            if (c <= 0) c = RESYNC_STEP;
+            return c;
         }
         function updateResyncPctDisplay() {
             const el = document.getElementById('resync-pct-value');
@@ -12915,7 +12909,7 @@
         updateResyncPctDisplay();
 
         // Shifts every matched row's Price or Cost by the given percentage —
-        // rounds Price to the 60/70/80/90/00 endings (roundToResyncEnding, same rule as Resync) and Cost via roundBulkPrice() (see above), and skips
+        // rounds Price UP to the next 50 (…00/…50 endings only, roundToResyncEnding, same rule as Resync) and Cost via roundBulkPrice() (see above), and skips
         // rows where the field is blank or zero, so an unset package never
         // gets a value invented for it. Reuses updatePackageProfit() per row
         // so the profit badge AND the collapsed summary line (via
