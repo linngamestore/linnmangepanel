@@ -1705,6 +1705,8 @@
            list's own box instead of the viewport. Cancel it too while any row
            inside is open for editing. */
         #edit-packages-list.pkg-editing-open { transform: none; }
+        /* While a row is being dragged: no smooth/snap scrolling (fights auto-scroll). */
+        #edit-packages-list.pkg-dragging { scroll-behavior: auto; scroll-snap-type: none; }
         .pkg-card { background: var(--surface-strong); width: 100%; max-width: 420px; max-height: 85vh; overflow-y: auto; border-radius: 14px; padding: 14px; box-shadow: 0 10px 40px rgba(0,0,0,0.25); display: flex; flex-direction: column; gap: 8px; }
         .pkg-card-header { display: flex; align-items: center; justify-content: space-between; font-size: 14px; font-weight: 500; color: var(--text-primary); padding-bottom: 2px; }
         .pkg-card-close { font-size: 20px; color: var(--text-muted); cursor: pointer; padding: 2px 8px; display: inline-flex; align-items: center; justify-content: center; }
@@ -1739,24 +1741,29 @@
         .pkg-picker-chip-value { display: flex; align-items: center; justify-content: space-between; gap: 4px; font-size: 12.5px; font-weight: 600; min-width: 0; }
         .pkg-picker-chip-text { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         .pkg-picker-chev { width: 12px; height: 12px; flex-shrink: 0; opacity: 0.6; }
-        .pkg-picker-overlay { position: fixed; inset: 0; z-index: 99990; display: flex; align-items: flex-end; justify-content: center; background: rgba(8,10,20,0); visibility: hidden; transition: background 0.22s ease, visibility 0s linear 0.22s; }
-        .pkg-picker-overlay.open { background: rgba(8,10,20,0.55); visibility: visible; transition: background 0.22s ease; }
-        .pkg-picker-sheet { width: 100%; max-width: 480px; background: var(--surface-strong); border-radius: 22px 22px 0 0; padding: 8px 14px calc(16px + env(safe-area-inset-bottom, 0px)); box-shadow: 0 -12px 40px rgba(0,0,0,0.35); transform: translateY(100%); transition: transform 0.26s cubic-bezier(0.2,0.9,0.3,1); }
-        .pkg-picker-overlay.open .pkg-picker-sheet { transform: translateY(0); }
-        .pkg-picker-grab { width: 38px; height: 4px; border-radius: 4px; background: var(--border-glass); margin: 4px auto 10px; }
-        .pkg-picker-title { font-size: 13px; font-weight: 700; color: var(--text-secondary); text-align: center; margin-bottom: 10px; }
-        .pkg-picker-list { display: flex; flex-direction: column; gap: 8px; max-height: 60vh; overflow-y: auto; }
-        .pkg-picker-opt { display: flex; align-items: center; gap: 12px; width: 100%; padding: 11px 12px; border-radius: 14px; border: 1.5px solid transparent; background: var(--fill-soft); color: var(--text-primary); font-family: inherit; text-align: left; cursor: pointer; transition: 0.15s ease; }
-        .pkg-picker-opt:active { transform: scale(0.98); }
-        .pkg-picker-opt-ic { width: 38px; height: 38px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; background: rgba(var(--opt-tint, 99,102,241), 0.16); color: rgb(var(--opt-tint, 99,102,241)); }
-        .pkg-picker-opt-ic svg { width: 20px; height: 20px; }
-        .pkg-picker-opt-txt { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
-        .pkg-picker-opt-name { font-size: 14.5px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        .pkg-picker-opt-sub { font-size: 11px; color: var(--text-muted); }
-        .pkg-picker-opt-check { width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--border-glass); flex-shrink: 0; display: flex; align-items: center; justify-content: center; box-sizing: border-box; }
-        .pkg-picker-opt.selected { border-color: rgb(var(--opt-tint, 99,102,241)); background: rgba(var(--opt-tint, 99,102,241), 0.10); }
-        .pkg-picker-opt.selected .pkg-picker-opt-check { background: rgb(var(--opt-tint, 99,102,241)); border-color: transparent; }
-        .pkg-picker-opt.selected .pkg-picker-opt-check::after { content: ''; width: 9px; height: 5px; border-left: 2.5px solid #fff; border-bottom: 2.5px solid #fff; transform: rotate(-45deg) translate(1px, -1px); }
+        /* Popover anchored right under the tapped chip (replaces the old full-width bottom sheet).
+           Transparent backdrop only catches outside taps; no dimming. */
+        .pkg-picker-chip.open { border-color: var(--accent); }
+        .pkg-picker-chip.open .pkg-picker-chev { transform: rotate(180deg); opacity: 1; }
+        .pkg-picker-chev { transition: transform 0.18s ease; }
+        .pkg-picker-overlay { position: fixed; inset: 0; z-index: 99990; background: transparent; visibility: hidden; }
+        .pkg-picker-overlay.open { visibility: visible; }
+        .pkg-picker-sheet { position: fixed; min-width: 150px; max-width: calc(100vw - 16px); background: var(--surface-strong); border: 1px solid var(--border-glass); border-radius: 12px; padding: 4px; box-shadow: 0 10px 28px rgba(0,0,0,0.28); opacity: 0; transform: translateY(-4px) scale(0.97); transform-origin: top center; transition: opacity 0.14s ease, transform 0.14s ease; }
+        .pkg-picker-overlay.open .pkg-picker-sheet { opacity: 1; transform: none; }
+        .pkg-picker-sheet.above { transform-origin: bottom center; }
+        .pkg-picker-grab, .pkg-picker-title { display: none; }
+        .pkg-picker-list { display: flex; flex-direction: column; gap: 2px; max-height: 40vh; overflow-y: auto; overscroll-behavior: contain; }
+        .pkg-picker-opt { display: flex; align-items: center; gap: 8px; width: 100%; padding: 7px 9px; border-radius: 8px; border: none; background: transparent; color: var(--text-primary); font-family: inherit; text-align: left; cursor: pointer; transition: background 0.12s ease; }
+        .pkg-picker-opt:active { background: var(--fill-soft); }
+        .pkg-picker-opt-ic { width: 16px; height: 16px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: rgb(var(--opt-tint, 99,102,241)); }
+        .pkg-picker-opt-ic svg { width: 15px; height: 15px; }
+        .pkg-picker-opt-txt { flex: 1; min-width: 0; display: flex; }
+        .pkg-picker-opt-name { font-size: 12.5px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .pkg-picker-opt-sub { display: none; }
+        .pkg-picker-opt-check { width: 12px; height: 12px; flex-shrink: 0; position: relative; }
+        .pkg-picker-opt.selected { background: rgba(var(--opt-tint, 99,102,241), 0.12); }
+        .pkg-picker-opt.selected .pkg-picker-opt-name { color: rgb(var(--opt-tint, 99,102,241)); }
+        .pkg-picker-opt.selected .pkg-picker-opt-check::after { content: ''; position: absolute; left: 1px; top: 1px; width: 8px; height: 4px; border-left: 2px solid rgb(var(--opt-tint, 99,102,241)); border-bottom: 2px solid rgb(var(--opt-tint, 99,102,241)); transform: rotate(-45deg); }
         .pkg-profit-badge.negative { background: var(--danger-soft); color: var(--danger-strong); }
         .pkg-cost-update-btn { margin-top: 4px; width: 100%; border: none; border-radius: 6px; padding: 5px 6px; font-size: 11px; font-weight: 600; color: #fff; background: #FF9500; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; animation: pkgUpdatePulse 1.4s ease-in-out infinite; }
         .pkg-cost-update-btn:active { transform: scale(0.97); animation: none; }
@@ -2874,6 +2881,13 @@
                 </div>
                 <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px 0;border-top:1px solid var(--border-glass);">
                     <div style="min-width:0;">
+                        <span style="font-size:12.5px;font-weight:600;color:var(--text-primary);">🔁 Order Transfer</span>
+                        <span id="my-account-transfer-status" style="font-size:11px;color:var(--text-muted);display:block;"></span>
+                    </div>
+                    <label style="display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer;"><input type="checkbox" id="my-account-transfer-toggle" onchange="toggleMyTransfer(this.checked)" style="width:18px;height:18px;"> ON</label>
+                </div>
+                <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px 0;border-top:1px solid var(--border-glass);">
+                    <div style="min-width:0;">
                         <span style="font-size:12.5px;font-weight:600;color:var(--text-primary);display:flex;align-items:center;gap:5px;">
                             <svg class="ui-icon" style="width:13px;height:13px;flex-shrink:0;color:var(--accent);"><use href="#icon-shield"></use></svg>
                             Authenticator (2FA)
@@ -3421,6 +3435,33 @@
                 </div>
             </div>
 
+            <div class="admin-card" id="settings-card-orderrouting" style="margin-top:14px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;cursor:pointer;" onclick="toggleOrderRoutingSettings()">
+                    <span style="font-size:15px;font-weight:600;">👥 Order Routing (Multi-Admin)</span>
+                    <svg class="ui-icon" id="order-routing-chevron" style="width:18px;height:18px;color:var(--text-secondary);transition:transform 0.2s;"><use href="#icon-chevron-down"></use></svg>
+                </div>
+                <div id="order-routing-body" style="display:none;margin-top:12px;">
+                    <p style="font-size:12px;color:var(--text-secondary);margin:0 0 12px;line-height:1.55;">Order / Top Up အသစ်အားလုံးကို <b>Main Admin</b> တစ်ယောက်ထဲဆီပဲ Telegram နဲ့ ပို့ပါတယ် (random မပို့ပါ)။ Main Admin မအားရင် Confirm/Reject အောက်က <b>🔁 Transfer Order</b> ခလုတ်နဲ့ တခြား admin ဆီ လွှဲနိုင်ပါတယ်၊ မလွှဲရင် အောက်က မိနစ်ပြည့်တဲ့အခါ auto transfer ဖြစ်ပါမယ်။<br>ဒီ feature ကို ပိတ်ထားရင် (သို့) Main Admin က မိမိ Transfer ကို ပိတ်ထားရင် Order အားလုံး Main Admin ဆီပဲသွားပြီး Transfer ခလုတ်မပေါ်ပါ။ တခြား admin တစ်ယောက်က Transfer ပိတ်ထားရင် သူ့ဆီ Order မရောက်ပါ။ Admin တိုင်း Settings → Admin Accounts မှာ Telegram Link အရင်လုပ်ထားရပါမယ်။</p>
+                    <label style="font-size:12px;color:var(--text-secondary);display:block;margin-bottom:6px;">Main Admin</label>
+                    <select id="order-routing-main" style="width:100%;padding:10px;border:1px solid var(--border-glass);background:var(--bg-subtle-2);color:var(--text-primary);border-radius:12px;font-size:14px;box-sizing:border-box;margin:0 0 6px;"><option value="">— Not set (shared chat) —</option></select>
+                    <p id="order-routing-main-hint" style="font-size:11.5px;color:var(--text-muted);margin:0 0 14px;"></p>
+                    <label style="display:flex;align-items:center;gap:10px;font-size:14px;margin-bottom:12px;cursor:pointer;">
+                        <input type="checkbox" id="order-routing-enabled" style="width:18px;height:18px;"> Enable Transfer feature (🔁 Transfer Order button + auto transfer)
+                    </label>
+                    <label style="font-size:12px;color:var(--text-secondary);display:block;margin-bottom:6px;">Auto-transfer after (minutes) — admin မကိုင်ရင် နောက် admin ဆီ ရွှေ့မယ့်အချိန်၊ 0 = ပိတ်</label>
+                    <input type="number" id="order-routing-minutes" min="0" max="1440" step="1" value="10" style="width:100%;padding:10px;border:1px solid var(--border-glass);background:var(--bg-subtle-2);color:var(--text-primary);border-radius:12px;font-size:14px;box-sizing:border-box;margin:0 0 14px;">
+                    <button class="btn btn-primary" id="save-order-routing-btn" style="width:100%;" onclick="saveOrderRoutingSettings()">Save</button>
+                    <div style="margin-top:18px;padding-top:14px;border-top:1px solid var(--border-glass);">
+                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+                            <span style="font-size:13px;font-weight:600;">🚫 Blocked Telegram users</span>
+                            <button type="button" class="btn btn-outline" style="flex:unset;padding:4px 10px;font-size:12px;" onclick="loadBlockedTelegram()">Refresh</button>
+                        </div>
+                        <p style="font-size:11.5px;color:var(--text-muted);margin:0 0 8px;">Bot ကို တိုက်ဆိုင်စွာတွေ့ပြီး /link code ၅ ကြိမ်မှားတဲ့သူတွေ အလိုအလျောက် ပိတ်ခံရပါတယ်။ ပိတ်ခံရတဲ့သူကို bot က ဘာမှပြန်မပြောတော့ပါ။</p>
+                        <div id="blocked-telegram-list" style="font-size:12.5px;color:var(--text-secondary);">—</div>
+                    </div>
+                </div>
+            </div>
+
             <div class="admin-card" id="settings-card-adminbroadcastsecret" style="margin-top:14px;">
                 <div style="display:flex;justify-content:space-between;align-items:center;cursor:pointer;" onclick="toggleAdminBroadcastSecretSettings()">
                     <span style="font-size:15px;font-weight: 600;">Admin Broadcast Secret</span>
@@ -3633,6 +3674,8 @@
                     </div>
                     <p style="font-size:12px;color:var(--text-muted);text-align:center;margin-top:10px;">as <code style="background:var(--fill-soft);padding:2px 6px;border-radius:5px;">/link <span id="telegram-link-code-inline">------</span></code></p>
                     <a id="telegram-link-open-btn" href="#" target="_blank" rel="noopener" class="btn btn-primary" style="display:none;margin-top:14px;text-decoration:none;text-align:center;">Open Telegram</a>
+                    <button type="button" id="telegram-link-copy-btn" class="btn btn-outline" style="display:block;width:100%;margin-top:8px;" onclick="copyTelegramLinkCommand(this)">Copy /link</button>
+                    <p id="telegram-link-nobot" style="display:none;font-size:11.5px;color:var(--text-muted);text-align:center;margin-top:10px;">Bot username မထည့်ရသေးလို့ Open ခလုတ်မပေါ်ပါ — Telegram ထဲက bot ကို ကိုယ်တိုင်ဖွင့်ပြီး အပေါ်က code ကို ပို့ပါ။ (Settings → Telegram → Bot Username ထည့်ရင် ခလုတ်ပေါ်ပါမယ်)</p>
                     <p id="telegram-link-status" style="font-size:12.5px;color:var(--text-secondary);text-align:center;margin-top:14px;">Waiting for code · expires in <span id="telegram-link-countdown">5:00</span></p>
                 </div>
             </div>
@@ -5543,7 +5586,7 @@
     <!-- FIREBASE CODE -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { initializeFirestore, collection, getDocs as _fsGetDocs, getDoc as _fsGetDoc, getCountFromServer as _fsGetCount, addDoc as _fsAddDoc, doc, setDoc as _fsSetDoc, updateDoc as _fsUpdateDoc, deleteDoc as _fsDeleteDoc, deleteField, query, where, orderBy, onSnapshot as _fsOnSnapshot, serverTimestamp, increment, runTransaction as _fsRunTransaction, writeBatch as _fsWriteBatch, arrayUnion, arrayRemove, getAggregateFromServer as _fsGetAggregate, sum as _fsSum } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager, collection, getDocs as _fsGetDocs, getDoc as _fsGetDoc, getCountFromServer as _fsGetCount, addDoc as _fsAddDoc, doc, setDoc as _fsSetDoc, updateDoc as _fsUpdateDoc, deleteDoc as _fsDeleteDoc, deleteField, query, where, orderBy, onSnapshot as _fsOnSnapshot, serverTimestamp, increment, runTransaction as _fsRunTransaction, writeBatch as _fsWriteBatch, arrayUnion, arrayRemove, getAggregateFromServer as _fsGetAggregate, sum as _fsSum } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
         import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signInAnonymously, onAuthStateChanged, signOut, setPersistence, browserLocalPersistence, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { getMessaging, getToken, isSupported as isMessagingSupported } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-messaging.js";
 
@@ -5676,7 +5719,23 @@
                 }
             } catch (e) { /* cache mirror must never break a write */ }
         }
+        // Reviewer tracking: every status change an admin makes on an order / top-up from this panel is stamped with WHO did it
+        // (same fields the Telegram Worker writes: confirmedBy / rejectedBy / completedBy + reviewedBy). Only applied when the
+        // write sets `status` and a real admin is signed in, so provider webhooks / system updates are never mislabelled.
+        function _reviewerStamp(ref, data) {
+            try {
+                if (!ref || typeof ref.path !== 'string' || !data || typeof data !== 'object' || typeof data.status !== 'string') return data;
+                if (!(ref.path.startsWith('orders/') || ref.path.startsWith('walletTopups/'))) return data;
+                const who = (typeof currentAdminUsername !== 'undefined' && currentAdminUsername) ? currentAdminUsername : '';
+                if (!who) return data;
+                const kind = { Processing: 'confirmed', Success: 'completed', Completed: 'confirmed', Fail: 'rejected', Rejected: 'rejected' }[data.status];
+                if (!kind) return data;
+                return { ...data, [kind + 'By']: who, [kind + 'At']: serverTimestamp(), reviewedBy: who };
+            } catch (e) { return data; }
+        }
+        window._reviewerStamp = _reviewerStamp;
         async function updateDoc(ref, ...args) {
+            if (args[0] && typeof args[0] === 'object' && !Array.isArray(args[0])) args = [_reviewerStamp(ref, args[0]), ...args.slice(1)];
             let _sendArgs = args;
             if (ref && typeof ref.path === 'string' && ref.path.startsWith('games/')) {
                 const _sp = _splitCosts(args[0]);
@@ -6003,6 +6062,123 @@
             onSnapshot(doc(db, "settings", "maintenance"), (snap) => renderMaintStatus(snap.exists() ? snap.data() : {}),
                 (err) => console.error('maintenance listener error:', err));
         }
+        // ---------- Order Routing (Main Admin + Transfer) settings ----------
+        // settings/orderRouting = { mainAdmin, enabled, transferMinutes } - read by the Cloudflare Worker (takes effect within ~20s).
+        // Per-admin switch: adminUsernames/{name}.transferEnabled (default ON) - see toggleMyTransfer().
+        let orderRoutingLoaded = false;
+        let ORDER_ROUTING = { mainAdmin: '', enabled: false };
+        let orderRoutingListenerAttached = false;
+        function attachOrderRoutingListener() {
+            if (orderRoutingListenerAttached) return;
+            orderRoutingListenerAttached = true;
+            onSnapshot(doc(db, "settings", "orderRouting"), (snap) => {
+                const d = snap.exists() ? snap.data() : {};
+                ORDER_ROUTING = { mainAdmin: String(d.mainAdmin || ''), enabled: d.enabled === true };
+                renderAdminAccountsList();
+                if (typeof renderMyAccountModal === 'function') renderMyAccountModal();
+            }, (e) => { orderRoutingListenerAttached = false; console.warn('orderRouting listener:', e && e.message); });
+        }
+        function fillMainAdminSelect(selected) {
+            const sel = document.getElementById('order-routing-main');
+            if (!sel) return;
+            const keep = selected !== undefined ? selected : sel.value;
+            const rows = [...ADMIN_ACCOUNTS].sort((a, b) => a.username.localeCompare(b.username));
+            sel.innerHTML = '<option value="">— Not set (shared chat) —</option>' + rows.map(a =>
+                `<option value="${escapeHtml(a.username)}">${escapeHtml(a.username)}${a.telegramChatId ? '' : ' (Telegram not linked)'}</option>`).join('');
+            sel.value = rows.some(a => a.username === keep) ? keep : '';
+            updateMainAdminHint();
+        }
+        function updateMainAdminHint() {
+            const sel = document.getElementById('order-routing-main'), hint = document.getElementById('order-routing-main-hint');
+            if (!sel || !hint) return;
+            const a = ADMIN_ACCOUNTS.find(x => x.username === sel.value);
+            hint.textContent = !sel.value ? 'Main Admin မရွေးရသေးရင် Order တွေ shared Telegram chat ကိုပဲ သွားပါမယ်။'
+                : (!a || !a.telegramChatId) ? '⚠️ ဒီ admin Telegram မချိတ်ရသေးလို့ Order တွေ shared chat ကိုပဲ ဆက်သွားပါမယ်။'
+                : (a.transferEnabled === false ? 'ℹ️ Main Admin က Transfer ပိတ်ထားတယ် — Order အားလုံး Main Admin ဆီပဲသွားမယ်၊ Transfer ခလုတ်မပေါ်ဘူး။' : '✅ Order အသစ်အားလုံး ဒီ admin ဆီကို သွားပါမယ်။');
+        }
+        async function toggleOrderRoutingSettings() {
+            const body = document.getElementById('order-routing-body');
+            const chev = document.getElementById('order-routing-chevron');
+            const open = body.style.display === 'none';
+            body.style.display = open ? 'block' : 'none';
+            if (chev) chev.style.transform = open ? 'rotate(180deg)' : 'rotate(0deg)';
+            if (open) {
+                const sel = document.getElementById('order-routing-main');
+                if (sel && !sel.dataset.bound) { sel.dataset.bound = '1'; sel.addEventListener('change', updateMainAdminHint); }
+                if (!orderRoutingLoaded) {
+                    try {
+                        const snap = await getDoc(doc(db, "settings", "orderRouting"));
+                        const d = snap.exists() ? snap.data() : {};
+                        document.getElementById('order-routing-enabled').checked = d.enabled === true;
+                        document.getElementById('order-routing-minutes').value = Number.isFinite(Number(d.transferMinutes)) ? Number(d.transferMinutes) : 10;
+                        ORDER_ROUTING = { mainAdmin: String(d.mainAdmin || ''), enabled: d.enabled === true };
+                        orderRoutingLoaded = true;
+                    } catch (e) { console.error('orderRouting load error:', e); window.showToast('Could not load routing settings.', 'fail'); return; }
+                }
+                fillMainAdminSelect(ORDER_ROUTING.mainAdmin);
+                loadBlockedTelegram();
+            }
+        }
+        async function saveOrderRoutingSettings() {
+            const btn = document.getElementById('save-order-routing-btn');
+            const minutes = Math.max(0, Math.min(1440, Math.floor(Number(document.getElementById('order-routing-minutes').value) || 0)));
+            const mainAdmin = document.getElementById('order-routing-main').value || '';
+            btn.disabled = true;
+            try {
+                await setDoc(doc(db, "settings", "orderRouting"), {
+                    mainAdmin,
+                    enabled: document.getElementById('order-routing-enabled').checked,
+                    transferMinutes: minutes,
+                    updatedAt: serverTimestamp()
+                }, { merge: true });
+                document.getElementById('order-routing-minutes').value = minutes;
+                window.showToast('Order routing saved ✓');
+            } catch (e) {
+                console.error('orderRouting save error:', e);
+                window.showToast('Save failed: ' + (e.message || e), 'fail');
+            } finally { btn.disabled = false; }
+        }
+        // Each admin's own Transfer switch (only the account owner can flip it - same self-service rule as Link Telegram).
+        async function toggleMyTransfer(on) {
+            try {
+                await setDoc(doc(db, "adminUsernames", currentAdminUsername), { transferEnabled: !!on }, { merge: true });
+                window.showToast(on ? 'Transfer ON ✓' : 'Transfer OFF ✓', 'success');
+            } catch (e) {
+                console.error('transfer toggle error:', e);
+                window.showToast('Could not change Transfer switch.', 'fail');
+                renderAdminAccountsList();
+            }
+        }
+        async function loadBlockedTelegram() {
+            const el = document.getElementById('blocked-telegram-list');
+            if (!el) return;
+            el.textContent = 'Loading…';
+            try {
+                const snap = await getDocs(collection(db, "telegramBlocked"));
+                const rows = snap.docs.map(d => ({ id: d.id, ...d.data() })).filter(r => r.blocked === true);
+                el.innerHTML = rows.length ? rows.map(r => `
+                    <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border-glass);">
+                        <span style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(r.name || 'Unknown')}${r.telegramUsername ? ' (@' + escapeHtml(r.telegramUsername) + ')' : ''} · <code>${escapeHtml(r.id)}</code></span>
+                        <button type="button" onclick="unblockTelegram('${escapeHtml(r.id)}')" style="background:none;border:none;color:var(--accent);font-size:12px;font-weight:600;cursor:pointer;padding:0;">Unblock</button>
+                    </div>`).join('') : 'No blocked users.';
+            } catch (e) {
+                console.error('blocked list error:', e);
+                el.textContent = 'Could not load (check Firestore rules for telegramBlocked).';
+            }
+        }
+        async function unblockTelegram(chatId) {
+            try {
+                await deleteDoc(doc(db, "telegramBlocked", chatId));
+                window.showToast('Unblocked ✓', 'success');
+                loadBlockedTelegram();
+            } catch (e) { console.error('unblock error:', e); window.showToast('Unblock failed.', 'fail'); }
+        }
+        window.loadBlockedTelegram = loadBlockedTelegram;
+        window.unblockTelegram = unblockTelegram;
+        window.toggleMyTransfer = toggleMyTransfer;
+        window.toggleOrderRoutingSettings = toggleOrderRoutingSettings;
+        window.saveOrderRoutingSettings = saveOrderRoutingSettings;
+
         function toggleMaintenanceSettings() {
             const body = document.getElementById('maint-body');
             const chev = document.getElementById('maint-chevron');
@@ -6146,7 +6322,14 @@
         // exactly the "stuck on ..." symptom this was causing. This setting
         // makes the SDK detect that case and transparently fall back to
         // long-polling instead of hanging indefinitely.
-        const db = initializeFirestore(app, { experimentalAutoDetectLongPolling: true });
+        // Persistent local cache: on reload each live listener resumes from IndexedDB and is billed only for
+        // docs that changed, instead of re-reading every doc (notifications, payments, top-ups, ...).
+        let db;
+        try {
+            db = initializeFirestore(app, { experimentalAutoDetectLongPolling: true, localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() }) });
+        } catch (e) {
+            db = initializeFirestore(app, { experimentalAutoDetectLongPolling: true });
+        }
         attachMaintListener();
         // Exposed on window so the earlier, non-module <script> block can
         // resolve these as bare identifiers - module top-level bindings are
@@ -6785,6 +6968,8 @@
                 const initial = escapeHtml((a.username || '?').trim().charAt(0).toUpperCase() || '?');
                 const avatarInner = a.avatarUrl ? `<img src="${a.avatarUrl}" alt="" loading="lazy" decoding="async" style="width:100%;height:100%;object-fit:cover;">` : initial;
                 const roleSafe = a.username.replace(/'/g, "\\'");
+                const isMain = ORDER_ROUTING.mainAdmin === a.username;
+                const transferOnFlag = a.transferEnabled !== false;
                 // Revoking someone (removing their login entirely) is never
                 // allowed on your own account, to avoid locking the store out.
                 const canRevoke = !isYou;
@@ -6814,7 +6999,7 @@
                             </label>
                             <div style="min-width:0;">
                                 <div style="font-size:14px;font-weight: 600;color:var(--text-primary);display:flex;align-items:center;gap:6px;">
-                                    ${escapeHtml(a.username)}${isYou ? ' <span style="font-size:10.5px;font-weight:600;color:var(--accent);">(you)</span>' : ''}
+                                    ${escapeHtml(a.username)}${isYou ? ' <span style="font-size:10.5px;font-weight:600;color:var(--accent);">(you)</span>' : ''}${isMain ? ' <span style="font-size:10px;font-weight:700;color:#fff;background:var(--accent);padding:1px 6px;border-radius:6px;">MAIN</span>' : ''}
                                 </div>
                                 <div style="font-size:11.5px;color:var(--text-muted);margin-top:2px;">Last login: ${lastLogin}${a.lastLoginIp ? ' · IP: ' + escapeHtml(a.lastLoginIp) : ''}</div>
                             </div>
@@ -6833,8 +7018,17 @@
                         </div>
                         ${telegramAction}
                     </div>
+                    <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border-glass);display:flex;justify-content:space-between;align-items:center;gap:8px;">
+                        <div style="min-width:0;">
+                            <span style="font-size:11.5px;color:var(--text-secondary);display:block;margin-bottom:3px;">Order Transfer</span>
+                            <span style="font-size:12.5px;font-weight:600;color:${transferOnFlag ? 'var(--text-primary)' : 'var(--text-muted)'};">${transferOnFlag ? 'ON ✅' : 'OFF ⛔'}</span>
+                        </div>
+                        ${isYou ? `<label style="display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer;"><input type="checkbox" ${transferOnFlag ? 'checked' : ''} onchange="toggleMyTransfer(this.checked)" style="width:18px;height:18px;"> ${transferOnFlag ? 'Turn OFF' : 'Turn ON'}</label>` : ''}
+                    </div>
                 </div>`;
             }).join('');
+            attachOrderRoutingListener();
+            if (document.getElementById('order-routing-main') && orderRoutingLoaded) fillMainAdminSelect();
         }
         window.renderAdminAccountsList = renderAdminAccountsList;
 
@@ -6919,32 +7113,51 @@
         // needed, no polling from the client either.
         let telegramLinkCountdownTimer = null;
         let telegramLinkUnsub = null;
-        function openTelegramLinkModal(username) {
+        async function openTelegramLinkModal(username) {
             if (username !== currentAdminUsername) return; // self-service only — see comment above
             const code = String(Math.floor(100000 + Math.random() * 900000));
             const expiresAt = new Date(Date.now() + 5 * 60 * 1000);
-            setDoc(doc(db, "adminUsernames", username), { telegramLinkCode: code, telegramLinkCodeExpiresAt: expiresAt }, { merge: true })
-                .catch(e => { console.error('Telegram link code error:', e); window.showToast('Could not generate a code — try again.', 'fail'); });
-
+            // Save the code FIRST - if the admin taps "Open Telegram" before this write lands the worker would say "invalid code".
+            try {
+                await setDoc(doc(db, "adminUsernames", username), { telegramLinkCode: code, telegramLinkCodeExpiresAt: expiresAt }, { merge: true });
+            } catch (e) {
+                console.error('Telegram link code error:', e);
+                window.showToast('Could not generate a code — try again.', 'fail');
+                return;
+            }
+            // Bot username may not be loaded yet (settings listener only starts on the Telegram settings page) - fetch it on demand.
+            if (!TELEGRAM_SETTINGS.botUsername) {
+                try {
+                    const bs = await getDoc(doc(db, "settings", "telegramBot"));
+                    if (bs.exists()) TELEGRAM_SETTINGS.botUsername = String(bs.data().botUsername || '').trim().replace(/^@/, '');
+                } catch (e) { console.warn('botUsername fetch failed', e && e.message); }
+            }
             document.getElementById('telegram-link-code').textContent = code;
             document.getElementById('telegram-link-code-inline').textContent = code;
             const openBtn = document.getElementById('telegram-link-open-btn');
+            const noBotEl = document.getElementById('telegram-link-nobot');
             if (TELEGRAM_SETTINGS.botUsername) {
                 openBtn.href = `https://t.me/${TELEGRAM_SETTINGS.botUsername}?start=link_${code}`;
-                openBtn.style.display = '';
+                openBtn.style.display = 'block';
+                if (noBotEl) noBotEl.style.display = 'none';
             } else {
                 openBtn.style.display = 'none';
+                if (noBotEl) noBotEl.style.display = '';
             }
+            const copyBtn = document.getElementById('telegram-link-copy-btn');
+            if (copyBtn) { copyBtn.textContent = 'Copy /link ' + code; copyBtn.dataset.code = code; }
             const statusEl = document.getElementById('telegram-link-status');
+            // Rebuilt every time - the expired message below replaces the countdown <span>, so a reused reference would go stale.
+            statusEl.innerHTML = 'Waiting for code · expires in <span id="telegram-link-countdown">5:00</span>';
             const countdownEl = document.getElementById('telegram-link-countdown');
-            statusEl.style.display = '';
             let secondsLeft = 5 * 60;
             if (telegramLinkCountdownTimer) clearInterval(telegramLinkCountdownTimer);
             const tick = () => {
-                const m = Math.floor(secondsLeft / 60), s = secondsLeft % 60;
+                const m = Math.floor(Math.max(secondsLeft, 0) / 60), s = Math.max(secondsLeft, 0) % 60;
                 countdownEl.textContent = `${m}:${String(s).padStart(2, '0')}`;
                 if (secondsLeft <= 0) {
                     clearInterval(telegramLinkCountdownTimer);
+                    telegramLinkCountdownTimer = null;
                     statusEl.textContent = 'Code expired — close and try again for a new one.';
                 }
                 secondsLeft--;
@@ -6964,6 +7177,13 @@
             });
             document.getElementById('telegram-link-modal-overlay').classList.add('show');
         }
+        function copyTelegramLinkCommand(btn) {
+            const text = '/link ' + (btn.dataset.code || '');
+            const done = () => { const o = btn.textContent; btn.textContent = 'Copied ✓'; setTimeout(() => { btn.textContent = o; }, 1500); };
+            if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(done, () => window.showToast('Copy failed — type it manually.', 'fail'));
+            else window.showToast('Copy not supported — type it manually.', 'fail');
+        }
+        window.copyTelegramLinkCommand = copyTelegramLinkCommand;
         window.openTelegramLinkModal = openTelegramLinkModal;
 
         function closeTelegramLinkModal() {
@@ -6981,12 +7201,13 @@
             window.showActionDialog({
                 type: 'delete',
                 title: 'Unlink Telegram?',
-                message: `Support chat messages for "${username}" will go to the shared Telegram chat instead until they link again.`,
+                message: `Support chat messages and order cards for "${username}" will go to the shared Telegram chat instead until they link again.${ORDER_ROUTING.mainAdmin === username ? ' This admin is the Main Admin — new orders will also go to the shared chat until Telegram is linked again.' : ''}`,
                 confirmText: 'Unlink',
                 onConfirm: async () => {
                     try {
                         await setDoc(doc(db, "adminUsernames", username), {
-                            telegramChatId: deleteField(), telegramName: deleteField(), telegramUsername: deleteField(), telegramLinkedAt: deleteField()
+                            telegramChatId: deleteField(), telegramName: deleteField(), telegramUsername: deleteField(), telegramLinkedAt: deleteField(),
+                            telegramLinkCode: deleteField(), telegramLinkCodeExpiresAt: deleteField()
                         }, { merge: true });
                         window.showToast('Telegram unlinked ✓', 'success');
                     } catch (e) {
@@ -7027,6 +7248,13 @@
                 ? `<button type="button" onclick="unlinkAdminTelegram(currentAdminUsername)" style="background:none;border:none;color:var(--danger);font-size:12px;font-weight:600;cursor:pointer;padding:0;">Unlink</button>`
                 : `<button type="button" onclick="closeMyAccountModal(); openTelegramLinkModal(currentAdminUsername)" style="background:none;border:none;color:var(--accent);font-size:12px;font-weight:600;cursor:pointer;padding:0;">Link Telegram</button>`;
 
+            const trToggle = document.getElementById('my-account-transfer-toggle');
+            if (trToggle) {
+                trToggle.checked = me.transferEnabled !== false;
+                document.getElementById('my-account-transfer-status').innerText = ORDER_ROUTING.mainAdmin === currentAdminUsername
+                    ? (me.transferEnabled !== false ? 'You are Main Admin — others can be sent orders' : 'You are Main Admin — all orders stay with you, no Transfer')
+                    : (me.transferEnabled !== false ? 'Others can transfer orders to you' : 'Nobody can transfer orders to you');
+            }
             const tfaEnabled = !!me.totpEnabled;
             const tfaStatusEl = document.getElementById('my-account-tfa-status');
             const tfaActionEl = document.getElementById('my-account-tfa-action');
@@ -7696,13 +7924,25 @@
             clearTimeout(_ordersRenderTimer);
             _ordersRenderTimer = setTimeout(() => { try { renderOrdersDependents(); } catch (e) { console.error(e); } }, 80);
         }
+        // Finished (Success/Fail) orders disappear from the admin panel after 7 days (they are NOT deleted -
+        // the customer's own history is untouched). The Telegram archive digest below runs on orders aged
+        // 6+ days so it still sees every order once before it leaves the panel.
+        const ADMIN_ORDER_WINDOW_DAYS = 7;
         function fetchOrders(silent) {
             if (ordersLoadPromise) return ordersLoadPromise;
             ordersLoadPromise = (async () => {
                 try {
-                    const querySnapshot = await getDocs(query(collection(db, "orders")));
+                    // Admin only loads what it needs: orders from the last ADMIN_ORDER_WINDOW_DAYS days, plus any
+                    // order that is NOT finished yet (Pending/Processing/other) however old. Finished (Success/Fail)
+                    // orders older than that simply stop appearing here - they are NOT deleted, so the customer's
+                    // own Order History in the store is untouched. Two cheap single-field queries (no new index).
+                    const sinceDate = new Date(Date.now() - ADMIN_ORDER_WINDOW_DAYS * 24 * 60 * 60 * 1000);
+                    const [recentSnap, openSnap] = await Promise.all([
+                        getDocs(query(collection(db, "orders"), where("timestamp", ">=", sinceDate))),
+                        getDocs(query(collection(db, "orders"), where("status", "not-in", ["Success", "Fail"])))
+                    ]);
                     const newOrders = {};
-                    querySnapshot.forEach(docSnap => { newOrders[docSnap.id] = { id: docSnap.id, ...docSnap.data() }; });
+                    [recentSnap, openSnap].forEach(snap => snap.forEach(docSnap => { newOrders[docSnap.id] = { id: docSnap.id, ...docSnap.data() }; }));
                     ORDERS = newOrders;
                     ordersLoadedAt = Date.now();
                     renderOrdersDependents();
@@ -8341,6 +8581,10 @@
                                         <div class="od-label">Paid Via</div>
                                         <div class="od-value">${escapeHtml(data.paymentMethod || 'N/A')}</div>
                                     </div>
+                                    ${(data.confirmedBy || data.rejectedBy || data.completedBy) ? `<div class="od-cell span-2">
+                                        <div class="od-label">Reviewed By</div>
+                                        <div class="od-value">${data.confirmedBy ? '✅ Confirmed: <b>' + escapeHtml(data.confirmedBy) + '</b>' : ''}${data.rejectedBy ? ' ❌ Rejected: <b>' + escapeHtml(data.rejectedBy) + '</b>' : ''}${data.completedBy ? ' 🏁 Completed: <b>' + escapeHtml(data.completedBy) + '</b>' : ''}</div>
+                                    </div>` : ''}
                                     <div class="od-cell span-2">
                                         <div class="od-label">Date</div>
                                         <div class="od-value">${dateStr}</div>
@@ -8628,9 +8872,9 @@
                     if (eligibleForRefund) {
                         const userRef = doc(db, "users", order.userId);
                         tx.set(userRef, { walletBalance: increment(order.price) }, { merge: true });
-                        tx.update(orderRef, { ...extraFields, status: 'Fail', walletRefunded: true, refundedAt: serverTimestamp() });
+                        tx.update(orderRef, _reviewerStamp(orderRef, { ...extraFields, status: 'Fail', walletRefunded: true, refundedAt: serverTimestamp() }));
                     } else {
-                        tx.update(orderRef, { ...extraFields, status: 'Fail' });
+                        tx.update(orderRef, _reviewerStamp(orderRef, { ...extraFields, status: 'Fail' }));
                     }
                     notifyInfo = { ...order, ...extraFields, refunded: eligibleForRefund };
                 });
@@ -9836,6 +10080,7 @@
                                 </div>
                                 <p style="color:var(--text-secondary); font-size:12px;">Requested: ${dateStr}</p>
                                 ${t.statusNote ? `<p style="color:var(--text-secondary); font-size:12px;">Note: ${escapeHtml(t.statusNote)}</p>` : ''}
+                                ${(t.confirmedBy || t.rejectedBy) ? `<p style="color:var(--text-secondary); font-size:12px;">👤 ${t.confirmedBy ? 'Confirmed' : 'Rejected'} by <b>${escapeHtml(t.confirmedBy || t.rejectedBy)}</b></p>` : ''}
                                 <div class="od-card-footer" id="topup-footer-${t.id}">
                                     ${actionButtons}
                                 </div>
@@ -9896,7 +10141,7 @@
                 tx.set(userRef, { walletBalance: increment(amount) }, { merge: true });
                 tx.update(topupRef, {
                     status: 'Completed',
-                    confirmedAt: serverTimestamp(),
+                    ...(currentAdminUsername ? { confirmedBy: currentAdminUsername, confirmedAt: serverTimestamp(), reviewedBy: currentAdminUsername } : {}),
                     ...(note ? { statusNote: note } : {})
                 });
                 creditedAmount = amount;
@@ -10568,7 +10813,7 @@
             const rows = osRows();
             if (!rows.length) { _osPages = []; body.innerHTML = '<p class="stat-card-sub-text" style="padding:24px;text-align:center;">No orders in this period</p>'; return; }
             try { _osPages = osDraw(rows); } catch (e) { console.error('Order sheet error:', e); body.innerHTML = '<p class="stat-card-sub-text" style="padding:24px;color:red;">Could not draw the image.</p>'; return; }
-            body.innerHTML = _osPages.map((u, i) => `<img src="${u}" alt="Orders page ${i + 1}" style="width:100%;display:block;border-radius:10px;margin-bottom:10px;border:1px solid var(--border-glass);">`).join('');
+            body.innerHTML = _osPages.map((u, i) => `<img loading="lazy" decoding="async" src="${u}" alt="Orders page ${i + 1}" style="width:100%;display:block;border-radius:10px;margin-bottom:10px;border:1px solid var(--border-glass);">`).join('');
         }
         function osDownload() {
             _osPages.forEach((u, i) => setTimeout(() => {
@@ -12698,20 +12943,42 @@
             star: '<svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><polygon points="12 2 15.1 8.6 22 9.5 17 14.3 18.2 21.2 12 17.9 5.8 21.2 7 14.3 2 9.5 8.9 8.6"/></svg>',
             none: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><line x1="5.6" y1="5.6" x2="18.4" y2="18.4"/></svg>'
         };
-        function closePkgPicker() { if (_pkgPickerEl) _pkgPickerEl.classList.remove('open'); }
+        let _pkgPickerAnchor = null;
+        function closePkgPicker() {
+            if (_pkgPickerEl) _pkgPickerEl.classList.remove('open');
+            if (_pkgPickerAnchor) { _pkgPickerAnchor.classList.remove('open'); _pkgPickerAnchor = null; }
+        }
         window.closePkgPicker = closePkgPicker;
+        // Places the popover directly under the anchor chip (flips above if there is no room below).
+        function positionPkgPicker(anchor) {
+            const sheet = _pkgPickerEl.querySelector('.pkg-picker-sheet');
+            const r = anchor.getBoundingClientRect();
+            const vw = window.innerWidth, vh = window.innerHeight;
+            sheet.style.minWidth = Math.max(150, r.width) + 'px';
+            sheet.style.left = '0px'; sheet.style.top = '0px';
+            const w = sheet.offsetWidth, h = sheet.offsetHeight;
+            let left = Math.min(Math.max(8, r.left), vw - w - 8);
+            const below = vh - r.bottom - 8, above = r.top - 8;
+            const flip = h > below && above > below;
+            sheet.classList.toggle('above', flip);
+            sheet.style.left = left + 'px';
+            sheet.style.top = (flip ? Math.max(8, r.top - h - 4) : r.bottom + 4) + 'px';
+            const list = sheet.querySelector('.pkg-picker-list');
+            list.style.maxHeight = Math.max(80, (flip ? above : below) - 12) + 'px';
+        }
         function openPkgPicker(cfg) {
             if (!_pkgPickerEl) {
                 const el = document.createElement('div');
                 el.className = 'pkg-picker-overlay';
-                el.innerHTML = '<div class="pkg-picker-sheet" role="dialog" aria-modal="true"><div class="pkg-picker-grab"></div><div class="pkg-picker-title"></div><div class="pkg-picker-list"></div></div>';
-                el.addEventListener('click', (e) => { if (e.target === el) closePkgPicker(); });
+                el.innerHTML = '<div class="pkg-picker-sheet" role="listbox"><div class="pkg-picker-list"></div></div>';
+                el.addEventListener('pointerdown', (e) => { if (e.target === el) closePkgPicker(); });
                 document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closePkgPicker(); });
+                window.addEventListener('resize', closePkgPicker);
                 document.body.appendChild(el);
                 _pkgPickerEl = el;
             }
+            closePkgPicker();
             const el = _pkgPickerEl;
-            el.querySelector('.pkg-picker-title').textContent = cfg.title || '';
             const list = el.querySelector('.pkg-picker-list');
             list.innerHTML = '';
             cfg.options.forEach(o => {
@@ -12723,13 +12990,15 @@
                 const txt = document.createElement('span'); txt.className = 'pkg-picker-opt-txt';
                 const nm = document.createElement('span'); nm.className = 'pkg-picker-opt-name'; nm.textContent = o.label;   // textContent: custom tab names are user input
                 txt.appendChild(nm);
-                if (o.sub) { const sb = document.createElement('span'); sb.className = 'pkg-picker-opt-sub'; sb.textContent = o.sub; txt.appendChild(sb); }
                 const ck = document.createElement('span'); ck.className = 'pkg-picker-opt-check';
                 b.appendChild(ic); b.appendChild(txt); b.appendChild(ck);
                 b.addEventListener('click', () => { closePkgPicker(); if (cfg.onPick) cfg.onPick(o.value); });
                 list.appendChild(b);
             });
-            requestAnimationFrame(() => el.classList.add('open'));
+            if (cfg.anchor) { _pkgPickerAnchor = cfg.anchor; cfg.anchor.classList.add('open'); }
+            el.classList.add('open');
+            if (cfg.anchor) positionPkgPicker(cfg.anchor);
+            requestAnimationFrame(() => { if (cfg.anchor && _pkgPickerAnchor) positionPkgPicker(cfg.anchor); });
         }
         window.openPkgPicker = openPkgPicker;
 
@@ -12759,6 +13028,7 @@
                 return { value: v, label: o.textContent, sub: 'Custom tab', icon: _PK_ICON.folder, tint: customTints[ci++ % customTints.length] };
             });
             openPkgPicker({
+                anchor: btn,
                 title: 'Tab ရွေးပါ',
                 options,
                 current: sel.value,
@@ -12782,11 +13052,12 @@
             const sel = row.querySelector('.pkg-badge');
             if (!sel) return;
             openPkgPicker({
+                anchor: btn,
                 title: 'Badge ရွေးပါ',
                 options: [
-                    { value: '',    label: 'None', sub: 'ကတ်ပေါ်မှာ tag မပြပါ', icon: _PK_ICON.none, tint: '148,163,184' },
-                    { value: 'top', label: 'TOP',  sub: 'ရွှေရောင် ⭐ TOP tag', icon: _PK_ICON.star, tint: '255,152,0' },
-                    { value: 'hot', label: 'HOT',  sub: 'အနီရောင် ⭐ HOT tag', icon: _PK_ICON.star, tint: '255,61,87' }
+                    { value: '',    label: 'None', icon: _PK_ICON.none, tint: '148,163,184' },
+                    { value: 'top', label: 'TOP',  icon: _PK_ICON.star, tint: '255,152,0' },
+                    { value: 'hot', label: 'HOT',  icon: _PK_ICON.star, tint: '255,61,87' }
                 ],
                 current: sel.value,
                 onPick: (v) => {
@@ -12920,6 +13191,14 @@
             handle.addEventListener('pointerdown', (downEvent) => {
                 downEvent.preventDefault();
                 const list = document.getElementById('edit-packages-list');
+                // The modal box and this list both carry a permanent transform,
+                // which makes position:fixed relative to (and clipped by) them -
+                // that is what trapped a dragged row inside its box. Cancel
+                // those transforms for the duration of the drag (same classes
+                // the row-edit overlay already uses) before measuring.
+                const hostModal = list.closest('.modal-box');
+                if (hostModal) hostModal.classList.add('pkg-editing-open');
+                list.classList.add('pkg-editing-open', 'pkg-dragging');
                 const startRect = row.getBoundingClientRect();
                 const startX = downEvent.clientX;
                 const startY = downEvent.clientY;
@@ -12959,9 +13238,17 @@
                     // floating card itself doesn't force a reflow every frame.
                     row.style.transform = `translate3d(${deltaX}px, ${deltaY}px, 0)`;
 
-                    row.style.pointerEvents = 'none';
-                    const under = document.elementFromPoint(latestClientX, latestClientY);
-                    const target = under ? under.closest('.package-row') : null;
+                    // Nearest visible row by centre distance (not elementFromPoint),
+                    // so the drop still resolves when the finger is in a gap or
+                    // has drifted outside the list box.
+                    let target = null, nearestDist = Infinity;
+                    list.querySelectorAll('.package-row').forEach(c => {
+                        if (c === row || c.offsetParent === null) return;
+                        const r = c.getBoundingClientRect();
+                        if (!r.width) return;
+                        const d = (latestClientX - (r.left + r.width / 2)) ** 2 + (latestClientY - (r.top + r.height / 2)) ** 2;
+                        if (d < nearestDist) { nearestDist = d; target = c; }
+                    });
 
                     if (currentOverRow && currentOverRow !== target) {
                         currentOverRow.classList.remove('drag-over');
@@ -12978,14 +13265,54 @@
                     }
                 }
 
+                // Auto-scroll the editor's scrolling body when the finger nears
+                // (or leaves) its top/bottom edge, so a row can be carried to
+                // any spot without dropping and re-grabbing.
+                const bodyScroller = list.closest('.modal-body') || list.parentElement;
+                const EDGE_ZONE = 70, MAX_SCROLL_SPEED = 18;
+                let scrollRaf = null;
+                function blockTouchScroll(e) { if (e.cancelable) e.preventDefault(); }
+                window.addEventListener('touchmove', blockTouchScroll, { passive: false });
+                function edgeSpeed(el) {
+                    const r = el.getBoundingClientRect();
+                    if (latestClientY < r.top + EDGE_ZONE) return -MAX_SCROLL_SPEED * Math.min(1, (r.top + EDGE_ZONE - latestClientY) / EDGE_ZONE);
+                    if (latestClientY > r.bottom - EDGE_ZONE) return MAX_SCROLL_SPEED * Math.min(1, (latestClientY - (r.bottom - EDGE_ZONE)) / EDGE_ZONE);
+                    return 0;
+                }
+                function autoScrollStep() {
+                    scrollRaf = null;
+                    let moved = false, wants = false;
+                    // inner list first (it has its own max-height scroll), then the modal body
+                    [list, bodyScroller].forEach(el => {
+                        if (moved || el.scrollHeight <= el.clientHeight + 1) return;
+                        const speed = edgeSpeed(el);
+                        if (!speed) return;
+                        wants = true;
+                        const before = el.scrollTop;
+                        el.scrollTop += speed;
+                        if (el.scrollTop !== before) moved = true;
+                    });
+                    if (moved && rafId === null) rafId = requestAnimationFrame(processFrame);
+                    if (wants) scrollRaf = requestAnimationFrame(autoScrollStep);
+                }
+
                 function onMove(moveEvent) {
                     latestClientX = moveEvent.clientX;
                     latestClientY = moveEvent.clientY;
                     if (rafId === null) rafId = requestAnimationFrame(processFrame);
+                    if (scrollRaf === null) scrollRaf = requestAnimationFrame(autoScrollStep);
                 }
 
                 function onUp() {
                     if (rafId !== null) { cancelAnimationFrame(rafId); rafId = null; }
+                    if (scrollRaf !== null) { cancelAnimationFrame(scrollRaf); scrollRaf = null; }
+                    window.removeEventListener('touchmove', blockTouchScroll);
+                    // restore the transforms only if no row-edit card is open
+                    if (!document.querySelector('.package-row.editing')) {
+                        if (hostModal) hostModal.classList.remove('pkg-editing-open');
+                        list.classList.remove('pkg-editing-open');
+                    }
+                    list.classList.remove('pkg-dragging');
                     if (currentOverRow) currentOverRow.classList.remove('drag-over');
                     list.insertBefore(row, placeholder);
                     placeholder.remove();
@@ -14157,6 +14484,12 @@
 
                 function startDrag(atX, atY) {
                     try { card.setPointerCapture(pointerId); } catch (e) {}
+                    // The modal box has a transform (slide-up animation), which makes
+                    // position:fixed relative to - and clipped by - the box. Cancel
+                    // it while a card is held so the card moves freely over the
+                    // whole screen instead of being trapped inside the container.
+                    const hostModal = grid.closest('.modal-box');
+                    if (hostModal) hostModal.classList.add('pkg-editing-open');
                     const startRect = card.getBoundingClientRect();
                     // Offset between where the finger actually touched and
                     // the card's own top-left corner, so the card keeps
@@ -14178,6 +14511,44 @@
                     let currentOverCard = null;
                     let latestX = atX, latestY = atY;
                     let rafId = null;
+
+                    // The grid lives inside the modal's scrolling body. While a
+                    // card is held we (1) stop the browser's own touch-scroll
+                    // from stealing the gesture (touch-action is pan-y, which
+                    // would otherwise fire pointercancel and drop the card the
+                    // moment the finger moves), and (2) auto-scroll that body
+                    // when the finger nears - or leaves - its top/bottom edge,
+                    // so the card can be carried to any spot in the list
+                    // without letting go and re-grabbing from outside the box.
+                    const scroller = grid.closest('.modal-body') || grid.parentElement;
+                    const EDGE_ZONE = 70;      // px from the edge where scrolling kicks in
+                    const MAX_SCROLL_SPEED = 18; // px per frame at the very edge (or beyond)
+                    let scrollRaf = null;
+                    function blockTouchScroll(e) { if (e.cancelable) e.preventDefault(); }
+                    window.addEventListener('touchmove', blockTouchScroll, { passive: false });
+
+                    function autoScrollStep() {
+                        scrollRaf = null;
+                        const r = scroller.getBoundingClientRect();
+                        let speed = 0;
+                        if (latestY < r.top + EDGE_ZONE) {
+                            speed = -MAX_SCROLL_SPEED * Math.min(1, (r.top + EDGE_ZONE - latestY) / EDGE_ZONE);
+                        } else if (latestY > r.bottom - EDGE_ZONE) {
+                            speed = MAX_SCROLL_SPEED * Math.min(1, (latestY - (r.bottom - EDGE_ZONE)) / EDGE_ZONE);
+                        }
+                        if (speed !== 0) {
+                            const before = scroller.scrollTop;
+                            scroller.scrollTop += speed;
+                            if (scroller.scrollTop !== before) {
+                                // cards moved under the finger - re-pick the drop target
+                                if (rafId === null) rafId = requestAnimationFrame(processFrame);
+                            }
+                            scrollRaf = requestAnimationFrame(autoScrollStep);
+                        }
+                    }
+                    function kickAutoScroll() {
+                        if (scrollRaf === null) scrollRaf = requestAnimationFrame(autoScrollStep);
+                    }
 
                     // Picks the nearest OTHER card by center-to-pointer
                     // distance rather than document.elementFromPoint, which
@@ -14228,11 +14599,15 @@
                         latestX = moveEvent.clientX;
                         latestY = moveEvent.clientY;
                         if (rafId === null) rafId = requestAnimationFrame(processFrame);
+                        kickAutoScroll();
                     }
 
                     function onUp(upEvent) {
                         if (upEvent.pointerId !== pointerId) return;
                         if (rafId !== null) { cancelAnimationFrame(rafId); rafId = null; }
+                        if (scrollRaf !== null) { cancelAnimationFrame(scrollRaf); scrollRaf = null; }
+                        window.removeEventListener('touchmove', blockTouchScroll);
+                        if (hostModal) hostModal.classList.remove('pkg-editing-open');
                         if (currentOverCard) currentOverCard.classList.remove('drag-over');
                         try { card.releasePointerCapture(pointerId); } catch (e) {}
                         card.classList.remove('dragging');
@@ -15208,6 +15583,10 @@
                                     <div class="od-label">Paid Via</div>
                                     <div class="od-value">${escapeHtml(o.paymentMethod || 'N/A')}</div>
                                 </div>
+                                ${(o.confirmedBy || o.rejectedBy || o.completedBy) ? `<div class="od-cell span-2">
+                                    <div class="od-label">Reviewed By</div>
+                                    <div class="od-value">${o.confirmedBy ? '✅ Confirmed: <b>' + escapeHtml(o.confirmedBy) + '</b>' : ''}${o.rejectedBy ? ' ❌ Rejected: <b>' + escapeHtml(o.rejectedBy) + '</b>' : ''}${o.completedBy ? ' 🏁 Completed: <b>' + escapeHtml(o.completedBy) + '</b>' : ''}</div>
+                                </div>` : ''}
                                 <div class="od-cell span-2">
                                     <div class="od-label">Date</div>
                                     <div class="od-value">${dateStr}</div>
@@ -20600,7 +20979,7 @@
             if (alreadyRanToday) { archiveRanDate = todayStr; return; }
 
             if (!(await loadOrdersIfStale(10 * 60 * 1000))) return; // never run on an empty cache
-            const cutoffMs = now.getTime() - 7 * 24 * 60 * 60 * 1000;
+            const cutoffMs = now.getTime() - 6 * 24 * 60 * 60 * 1000; // 6d: must be < ADMIN_ORDER_WINDOW_DAYS so the panel still has them
             const targets = Object.values(ORDERS)
                 .filter(o => o.timestamp && o.timestamp.toMillis() <= cutoffMs && !o.archiveSentAt)
                 .sort((a, b) => a.timestamp.toMillis() - b.timestamp.toMillis());
