@@ -1179,6 +1179,12 @@
         .udp-tabs::-webkit-scrollbar { display: none; }
         .udp-tab { flex: 0 0 auto; white-space: nowrap; padding: 9px 14px; border: none; background: transparent; border-radius: 10px; font-size: 12.5px; font-weight: 600; color: var(--text-secondary); cursor: pointer; transition: 0.15s; }
         .udp-tab.active { background: var(--surface); color: var(--accent); box-shadow: var(--shadow-soft); }
+/* Overview period filter: glass segmented pill */
+#ov-period-bar, #os-seg { gap: 4px !important; padding: 4px; border-radius: 999px; background: var(--fill-soft); border: 1px solid var(--border-glass); -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(170%); backdrop-filter: blur(var(--glass-blur)) saturate(170%); box-shadow: inset 0 1px 0 rgba(255,255,255,0.35), 0 4px 16px rgba(0,0,0,0.06); scrollbar-width: none; }
+#ov-period-bar::-webkit-scrollbar, #os-seg::-webkit-scrollbar { display: none; }
+#ov-period-bar button, #os-seg button { flex: 1; white-space: nowrap; border: none; background: transparent; color: var(--text-secondary); font: inherit; font-size: 12.5px; font-weight: 600; padding: 8px 14px; border-radius: 999px; cursor: pointer; transition: background .2s, color .2s, box-shadow .2s, transform .1s; -webkit-tap-highlight-color: transparent; }
+#ov-period-bar button:active, #os-seg button:active { transform: scale(0.96); }
+#ov-period-bar button.active, #os-seg button.active { color: #fff; background: linear-gradient(135deg, rgba(255,255,255,0.28), rgba(255,255,255,0) 55%), var(--accent); box-shadow: 0 4px 14px rgba(59,130,246,0.38), inset 0 1px 0 rgba(255,255,255,0.45); }
         /* ---- Compact transaction rows (user details > Transactions) ---- */
         .wtx-chip { flex-shrink: 0; border: 1px solid var(--border-glass); background: var(--surface); color: var(--text-secondary); border-radius: 999px; padding: 4px 11px; font-size: 11.5px; font-weight: 500; cursor: pointer; }
         .wtx-chip.active { background: var(--accent); border-color: var(--accent); color: #fff; }
@@ -2915,6 +2921,12 @@
                 <span style="font-size:11.5px;font-weight: 500;color:var(--text-muted);"><span class="live-dot" style="display:inline-block;vertical-align:middle;margin-right:5px;"></span><span id="dash-today-date">...</span></span>
             </h2>
 
+            <div id="ov-period-bar" style="display:flex;gap:6px;margin:0 0 12px;overflow-x:auto;">
+                <button type="button" data-p="all" onclick="setOvPeriod('all')">All time</button>
+                <button type="button" data-p="daily" class="active" onclick="setOvPeriod('daily')">Daily</button>
+                <button type="button" data-p="weekly" onclick="setOvPeriod('weekly')">Weekly</button>
+                <button type="button" data-p="monthly" onclick="setOvPeriod('monthly')">Monthly</button>
+            </div>
             <!-- Auto-flags games/packages needing attention: pending G2Bulk/JCPlays
                  cost updates, sold-out voucher packages, or a package whose margin
                  has slipped below LOW_MARGIN_THRESHOLD_PCT. Hidden when nothing
@@ -2925,11 +2937,11 @@
                 <svg class="ui-icon" style="width:14px;flex-shrink:0;"><use href="#icon-chevron-right"></use></svg>
             </div>
 
-            <!-- Top stat cards, image-style -->
+            <!-- Top stat cards: Revenue, Profit, Orders, Wallet Balance (total top-up), Total Spend -->
             <div class="stat-grid">
                 <div class="stat-card">
                     <div class="stat-card-top">
-                        <span class="stat-card-label">Today's Revenue</span>
+                        <span class="stat-card-label" id="ov-lbl-rev">Today's Revenue</span>
                         <div class="stat-card-icon" style="background:#3B82F6;"><svg class="ui-icon"><use href="#icon-dollar"></use></svg></div>
                     </div>
                     <div class="stat-card-value" id="stat-total-sales">...</div>
@@ -2937,53 +2949,39 @@
                 </div>
                 <div class="stat-card">
                     <div class="stat-card-top">
-                        <span class="stat-card-label">Today's Orders</span>
-                        <div class="stat-card-icon" style="background:#8B5CF6;"><svg class="ui-icon"><use href="#icon-cart"></use></svg></div>
-                    </div>
-                    <div class="stat-card-value" id="stat-today">...</div>
-                    <div class="stat-card-sub" id="stat-orders-delta-wrap"><span class="stat-card-sub-text">vs. yesterday</span></div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-card-top">
-                        <span class="stat-card-label">Total Orders</span>
-                        <div class="stat-card-icon" style="background:#34D399;"><svg class="ui-icon"><use href="#icon-check"></use></svg></div>
-                    </div>
-                    <div class="stat-card-value" id="stat-total-orders">...</div>
-                    <div class="stat-card-sub"><span class="stat-card-sub-text" id="stat-total-orders-sub">All-time</span></div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-card-top">
-                        <span class="stat-card-label">Customers</span>
-                        <div class="stat-card-icon" style="background:#FB923C;"><svg class="ui-icon"><use href="#icon-users"></use></svg></div>
-                    </div>
-                    <div class="stat-card-value" id="stat-total-customers">...</div>
-                    <div class="stat-card-sub"><span class="stat-card-sub-text">Unique buyers</span></div>
-                </div>
-                <div class="stat-card" style="cursor:pointer;" onclick="showPage('user-list')">
-                    <div class="stat-card-top">
-                        <span class="stat-card-label">Userlist</span>
-                        <div class="stat-card-icon" style="background:#6366F1;"><svg class="ui-icon"><use href="#icon-users"></use></svg></div>
-                    </div>
-                    <div class="stat-card-value" id="stat-total-users">...</div>
-                    <div class="stat-card-sub"><span class="stat-card-sub-text">Registered users</span></div>
-                </div>
-                <div class="stat-card" style="cursor:pointer;" onclick="refreshWalletTotalStat(true)" title="Tap to refresh">
-                    <div class="stat-card-top">
-                        <span class="stat-card-label">Total Wallet Balance</span>
-                        <div class="stat-card-icon" style="background:#0EA5E9;"><svg class="ui-icon"><use href="#icon-dollar"></use></svg></div>
-                    </div>
-                    <div class="stat-card-value" id="stat-total-wallet">...</div>
-                    <div class="stat-card-sub"><span class="stat-card-sub-text" id="stat-total-wallet-sub">All users combined · MMK</span></div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-card-top">
-                        <span class="stat-card-label">Today's Profit</span>
+                        <span class="stat-card-label" id="ov-lbl-profit">Today's Profit</span>
                         <div class="stat-card-icon" style="background:#10B981;"><svg class="ui-icon"><use href="#icon-dollar"></use></svg></div>
                     </div>
                     <div class="stat-card-value" id="stat-total-profit">...</div>
                     <div class="stat-card-sub" id="stat-profit-delta-wrap"><span class="stat-card-sub-text">vs. yesterday</span></div>
                 </div>
-            </div>
+                <div class="stat-card">
+                    <div class="stat-card-top">
+                        <span class="stat-card-label" id="ov-lbl-ord">Today's Orders</span>
+                        <div class="stat-card-icon" style="background:#8B5CF6;"><svg class="ui-icon"><use href="#icon-cart"></use></svg></div>
+                    </div>
+                    <div class="stat-card-value" id="stat-today">...</div>
+                    <div class="stat-card-sub" id="stat-orders-delta-wrap"><span class="stat-card-sub-text">vs. yesterday</span></div>
+                </div>
+                <div class="stat-card" style="cursor:pointer;" onclick="refreshOverviewMoney(true)">
+                    <div class="stat-card-top">
+                        <span class="stat-card-label">Wallet Balance</span>
+                        <div class="stat-card-icon" style="background:#0EA5E9;"><svg class="ui-icon"><use href="#icon-dollar"></use></svg></div>
+                    </div>
+                    <div class="stat-card-value" id="stat-deposit">...</div>
+                    <div class="stat-card-sub"><span class="stat-card-sub-text" id="stat-deposit-sub">Total top-up · tap to refresh</span></div>
+                </div>
+                <div class="stat-card" style="cursor:pointer;grid-column:1 / -1;" onclick="refreshOverviewMoney(true)">
+                    <div class="stat-card-top">
+                        <span class="stat-card-label">Total Spend</span>
+                        <div class="stat-card-icon" style="background:#6366F1;"><svg class="ui-icon"><use href="#icon-check"></use></svg></div>
+                    </div>
+                    <div class="stat-card-value" id="stat-total-spend">...</div>
+                    <div class="stat-card-sub"><span class="stat-card-sub-text" id="stat-total-spend-sub">All users · Success orders</span></div>
+                </div>
+                </div>
+            <!-- Old cards (Total Orders / Customers / Userlist / current-balance total) are kept as hidden holders so existing code that writes to them keeps working. -->
+            <div style="display:none;"><span id="stat-total-orders"></span><span id="stat-total-orders-sub"></span><span id="stat-total-customers"></span><span id="stat-total-users"></span><span id="stat-total-wallet"></span><span id="stat-total-wallet-sub"></span></div>
 
             <div class="dashboard-charts-row">
                 <div class="chart-card">
@@ -3024,6 +3022,8 @@
                 </div>
             </div>
 
+            <div id="ov-detail"></div>
+
             <div class="dash-section-label" style="display:flex;align-items:center;justify-content:space-between;">
                 <span>Wallet Balances</span>
                 <button class="btn btn-outline" style="flex:unset; padding: 3px 10px; font-size:11px;" id="dash-wallet-refresh-btn" onclick="refreshDashboardWallets()">Refresh</button>
@@ -3045,30 +3045,39 @@
         <div id="analytics" class="page-section">
             <h2 class="title-header">
                 <span>API Balance</span>
-                <button class="btn btn-outline" style="flex:unset; padding: 4px 10px; font-size:12px;" onclick="renderAnalytics()">Refresh</button>
+                <span style="display:flex;gap:6px;align-items:center;">
+                    <span id="api-bal-cur-toggle" style="display:inline-flex;border:1px solid var(--border-glass);border-radius:999px;overflow:hidden;">
+                        <button type="button" data-cur="USD" onclick="setApiBalCur('USD')" style="border:none;background:transparent;color:var(--text-secondary);padding:4px 10px;font-size:12px;font-weight:600;cursor:pointer;">USD</button>
+                        <button type="button" data-cur="MMK" onclick="setApiBalCur('MMK')" style="border:none;background:transparent;color:var(--text-secondary);padding:4px 10px;font-size:12px;font-weight:600;cursor:pointer;">MMK</button>
+                    </span>
+                    <button class="btn btn-outline" style="flex:unset; padding: 4px 10px; font-size:12px;" onclick="renderAnalytics()">Refresh</button>
+                </span>
             </h2>
 
-            <div class="stat-grid" style="margin-top:0;">
-                <div class="stat-card">
+            <div class="stat-grid" style="margin-top:0;display:flex;flex-direction:column;gap:12px;">
+                <div class="stat-card" style="width:100%;box-sizing:border-box;padding:18px 16px;">
                     <div class="stat-card-top">
                         <span class="stat-card-label">G2Bulk</span>
                         <div class="stat-card-icon" style="background:#7C3AED;"><svg class="ui-icon" style="color:#fff;"><use href="#icon-g2bulk"></use></svg></div>
                     </div>
-                    <div class="stat-card-value" id="an-g2bulk-balance-display" style="color:var(--accent);font-size:17px;">—</div>
+                    <div class="stat-card-value" id="an-g2bulk-balance-display" style="color:var(--accent);font-size:28px;line-height:1.2;">—</div>
+                    <div class="stat-card-sub"><span class="stat-card-sub-text" id="an-g2bulk-rate-note" onclick="openG2BulkModal()" style="cursor:pointer;text-decoration:underline dotted;"></span></div>
                 </div>
-                <div class="stat-card">
+                <div class="stat-card" style="width:100%;box-sizing:border-box;padding:18px 16px;">
                     <div class="stat-card-top">
                         <span class="stat-card-label">JCPlays</span>
                         <div class="stat-card-icon" style="background:#16A34A;"><svg class="ui-icon"><use href="#icon-key"></use></svg></div>
                     </div>
-                    <div class="stat-card-value" id="an-jcplays-balance-display" style="color:var(--accent);font-size:17px;">—</div>
+                    <div class="stat-card-value" id="an-jcplays-balance-display" style="color:var(--accent);font-size:28px;line-height:1.2;">—</div>
+                    <div class="stat-card-sub"><span class="stat-card-sub-text" id="an-jcplays-rate-note" onclick="openJCPlaysModal()" style="cursor:pointer;text-decoration:underline dotted;"></span></div>
                 </div>
-                <div class="stat-card">
+                <div class="stat-card" style="width:100%;box-sizing:border-box;padding:18px 16px;">
                     <div class="stat-card-top">
                         <span class="stat-card-label">FazerCards</span>
                         <div class="stat-card-icon" style="background:#2563EB;"><svg class="ui-icon"><use href="#icon-key"></use></svg></div>
                     </div>
-                    <div class="stat-card-value" id="an-fazercard-balance-display" style="color:var(--accent);font-size:17px;">—</div>
+                    <div class="stat-card-value" id="an-fazercard-balance-display" style="color:var(--accent);font-size:28px;line-height:1.2;">—</div>
+                    <div class="stat-card-sub"><span class="stat-card-sub-text" id="an-fazercard-rate-note" onclick="openFazerCardModal()" style="cursor:pointer;text-decoration:underline dotted;"></span></div>
                 </div>
                 
             </div>
@@ -4723,6 +4732,9 @@
 
                 <label>Low Balance Alert <span style="font-weight:400;color:var(--text-muted);">(points, 0 = off)</span></label>
                 <input type="number" id="jcplays-low-balance-alert" placeholder="Enter Alert Amount" step="1" min="0" title="Header will show a warning when the smile points balance drops below this amount">
+
+                <label>USD → MMK Rate <span style="font-weight:400;color:var(--text-muted);">(JCPlays Cost + Balance တွက်ရန် — အလွတ်ထားရင် G2Bulk rate ကို သုံးမယ်)</span></label>
+                <input type="number" id="jcplays-usd-rate" placeholder="Blank = G2Bulk rate" step="1" min="0">
 
                 <div class="switch-row" style="margin-top:14px;">
                     <span class="switch-label" style="flex:1;font-weight:400;">Enabled — turn off to fully hide JCPlays (nav tab, wallet card, game-link picker) everywhere in the app</span>
@@ -9675,6 +9687,7 @@
                 const items = {};
                 querySnapshot.forEach(docSnap => { items[docSnap.id] = { id: docSnap.id, ...docSnap.data() }; });
                 WALLET_TOPUPS = items;
+                if (window.renderOverviewDetail && document.getElementById('dashboard')?.classList.contains('active')) window.renderOverviewDetail();
                 renderTopupsList();
                 checkWalletTopupsAutoDelete(items);
 
@@ -10278,10 +10291,11 @@
         // Renders a "+N% / -N%" pill comparing today's value against
         // yesterday's. Returns '' (no pill) when there's nothing to compare.
         function deltaBadgeHtml(curr, prev) {
+            if (window.__ovAll) return '<span class="stat-card-sub-text">All time</span>';
             if (!prev && !curr) return '<span class="stat-card-sub-text">vs. yesterday</span>';
             const diff = prev ? Math.round(((curr - prev) / prev) * 100) : 100;
             const up = diff >= 0;
-            return `<span class="stat-delta ${up ? 'up' : 'down'}">${up ? '▲' : '▼'} ${Math.abs(diff)}%</span><span class="stat-card-sub-text">vs. yesterday</span>`;
+            return `<span class="stat-delta ${up ? 'up' : 'down'}">${up ? '▲' : '▼'} ${Math.abs(diff)}%</span><span class="stat-card-sub-text">${window.__ovPrevLabel || 'vs. yesterday'}</span>`;
         }
 
         // Best-effort cost lookup for an order: orders don't store a cost
@@ -10308,6 +10322,258 @@
         // renderAnalytics below already relies on). That redundant fetch was
         // the stutter/freeze felt right at the moment of switching tabs.
         // Reading straight from ORDERS removes the network round-trip.
+
+        // ---------- Overview period filter + User / Wallet / Order detail ----------
+        // Period: All time | Daily (today) | Weekly (last 7 days) | Monthly (last 30 days).
+        // Weekly/Monthly are rolling windows ending now, compared with the window right before.
+        function ovPeriod() { try { return localStorage.getItem('linn_ov_period') || 'daily'; } catch (e) { return 'daily'; } }
+        function ovMs(t) { return t ? (typeof t.toMillis === 'function' ? t.toMillis() : (new Date(t).getTime() || 0)) : 0; }
+        function ovRange() {
+            const p = ovPeriod(), d = new Date(), day = 86400000;
+            const t0 = new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+            const days = p === 'weekly' ? 7 : p === 'monthly' ? 30 : 1;
+            const from = p === 'all' ? 0 : t0 - (days - 1) * day;
+            const names = { all: ['Total Revenue', 'Total Orders', 'Total Profit', 'All time'], daily: ["Today's Revenue", "Today's Orders", "Today's Profit", 'Today'], weekly: ['Revenue (7 days)', 'Orders (7 days)', 'Profit (7 days)', 'Last 7 days'], monthly: ['Revenue (30 days)', 'Orders (30 days)', 'Profit (30 days)', 'Last 30 days'] }[p] || [];
+            window.__ovAll = p === 'all';
+            window.__ovPrevLabel = p === 'daily' ? 'vs. yesterday' : 'vs. previous ' + days + ' days';
+            return { p, all: p === 'all', from, to: Infinity, pFrom: from - days * day, label: names[3] || 'Today', t: { rev: names[0], ord: names[1], profit: names[2] } };
+        }
+        function ovSyncBar() {
+            const p = ovPeriod();
+            document.querySelectorAll('#ov-period-bar button').forEach(b => b.classList.toggle('active', b.dataset.p === p));
+        }
+        function setOvPeriod(p) {
+            try { localStorage.setItem('linn_ov_period', p); } catch (e) { /* ignore */ }
+            ovSyncBar();
+            if (window.loadDashboardStats) window.loadDashboardStats();
+        }
+        window.setOvPeriod = setOvPeriod;
+        function ovPay(o) {
+            if (o.paidFromWallet === true) return 'Wallet';
+            const m = String(o.paymentMethod || '').toLowerCase();
+            if (/kpay|kbz/.test(m)) return 'KPay';
+            if (/wave/.test(m)) return 'Wave';
+            if (/usdt|crypto|binance|trc|bep/.test(m)) return 'Crypto';
+            return 'Other';
+        }
+        function ovProv(o) {
+            if (o.g2bulkOrderId || o.g2bulkVoucherProductId || (o.g2bulkGameCode && o.g2bulkCatalogueName)) return 'G2Bulk';
+            if (o.jcplaysProductId) return 'JCPlays';
+            if (o.fazercardOfferId || o.fazercardOrderId || o.fazercardCategoryId) return 'FazerCards';
+            return 'Manual';
+        }
+        const _ovUserCache = {};
+        async function ovFillUsers(OV) {
+            const set = (k, v) => { const e = document.getElementById('ov-u-' + k); if (e) e.innerText = v; };
+            let nu, au, tu;
+            if (typeof usersLoadedAt !== 'undefined' && usersLoadedAt) {
+                const us = Object.values(USERS);
+                tu = us.length;
+                nu = us.filter(u => ovMs(u.createdAt) >= OV.from).length;
+                au = us.filter(u => ovMs(u.lastSeen) >= OV.from).length;
+            } else {
+                const c = _ovUserCache[OV.p];
+                if (c && Date.now() - c.at < 120000) { ({ nu, au, tu } = c); }
+                else {
+                    try {
+                        const col = collection(db, 'users'), dt = new Date(OV.from);
+                        const [a, b, t] = await Promise.all([
+                            getCountFromServer(OV.all ? col : query(col, where('createdAt', '>=', dt))),
+                            getCountFromServer(OV.all ? query(col, where('lastSeen', '>', new Date(0))) : query(col, where('lastSeen', '>=', dt))),
+                            getCountFromServer(col)
+                        ]);
+                        nu = a.data().count; au = b.data().count; tu = t.data().count;
+                        _ovUserCache[OV.p] = { at: Date.now(), nu, au, tu };
+                    } catch (e) { console.error('Overview user counts error:', e); set('new', '—'); set('act', '—'); return; }
+                }
+            }
+            set('new', Number(nu).toLocaleString()); set('act', Number(au).toLocaleString()); set('tot', Number(tu).toLocaleString());
+        }
+        function renderOverviewDetail() {
+            const host = document.getElementById('ov-detail');
+            if (!host) return;
+            ovSyncBar();
+            const OV = ovRange();
+            try { if (typeof fetchWalletTopups === 'function') fetchWalletTopups(); } catch (e) { /* ignore */ }
+            const fmt = n => Math.round(n || 0).toLocaleString();
+            const pay = {}, prov = {}, games = {}, st = { Pending: 0, Processing: 0, Success: 0, Fail: 0 };
+            let walletSpent = 0, walletOrders = 0, total = 0;
+            const add = (m, k, o) => { const e = m[k] || (m[k] = { n: 0, ok: 0, rev: 0 }); e.n++; if (o.status === 'Success') { e.ok++; e.rev += Number(o.price) || 0; } };
+            Object.values(ORDERS).forEach(o => {
+                try {
+                    if (!matchesCurrentStore(o)) return;
+                    const ms = ovMs(o.timestamp);
+                    if (ms < OV.from || ms >= OV.to) return;
+                    total++;
+                    if (o.status in st) st[o.status]++;
+                    add(pay, ovPay(o), o); add(prov, ovProv(o), o); add(games, o.game || 'Other', o);
+                    if (o.paidFromWallet === true && o.status === 'Success') { walletSpent += Number(o.price) || 0; walletOrders++; }
+                } catch (e) { /* skip malformed order */ }
+            });
+            let topIn = 0, topAdmin = 0, topPendN = 0, topPendAmt = 0, topN = 0;
+            Object.values(typeof WALLET_TOPUPS !== 'undefined' ? WALLET_TOPUPS : {}).forEach(t => {
+                const ms = ovMs(t.timestamp);
+                if (ms < OV.from || ms >= OV.to) return;
+                const a = Number(t.amount) || 0;
+                if (t.status === 'Completed') { topN++; if (t.source === 'admin') topAdmin += a; else topIn += a; }
+                else if (t.status === 'Pending' || t.status === 'Processing') { topPendN++; topPendAmt += a; }
+            });
+            const item = (l, v, c) => `<div class="details-grid-item"><span>${l}</span><b${c ? ` style="color:${c};"` : ''}>${v}</b></div>`;
+            const bars = (m, limit) => {
+                const e = Object.entries(m).sort((a, b) => (b[1].rev - a[1].rev) || (b[1].n - a[1].n)).slice(0, limit);
+                if (!e.length) return '<p class="stat-card-sub-text" style="margin:4px 0 10px;">No orders in this period</p>';
+                const mx = Math.max(1, ...e.map(([, v]) => v.rev || v.n));
+                return '<div style="margin-bottom:10px;">' + e.map(([k, v]) => `<div style="margin:7px 0;"><div style="display:flex;justify-content:space-between;font-size:12px;gap:8px;"><span style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(k)}</span><b style="white-space:nowrap;">${fmt(v.rev)} MMK <span style="font-weight:400;color:var(--text-muted);">· ${v.ok}/${v.n}</span></b></div><div style="height:5px;border-radius:3px;background:var(--fill-soft);margin-top:3px;"><div style="height:100%;width:${Math.max(3, Math.round((v.rev || v.n) / mx * 100))}%;border-radius:3px;background:var(--accent);"></div></div></div>`).join('') + '</div>';
+            };
+            const lbl = t => `<div class="dash-section-label">${t} · ${OV.label}</div>`;
+            const sub = t => `<div class="stat-card-sub-text" style="margin:8px 0 2px;font-weight:600;">${t}</div>`;
+            const rate = total ? Math.round(st.Success / total * 100) : 0;
+            host.innerHTML =
+                `<div class="dash-section-label" style="display:flex;align-items:center;justify-content:space-between;"><span>Orders · ${OV.label}</span><button type="button" class="btn btn-outline" style="flex:unset;padding:3px 10px;font-size:11px;" onclick="openOrderSheet()">Sheet Image</button></div>` +
+                `<div class="details-grid" style="margin-top:0;">${item('Orders', total.toLocaleString())}${item('Success rate', rate + '%', rate >= 80 ? '#10B981' : '#F59E0B')}${item('Pending / Processing', st.Pending + ' / ' + st.Processing)}${item('Failed', st.Fail.toLocaleString(), st.Fail ? '#EF4444' : '')}</div>` +
+                sub('By payment method (Success revenue · success/total)') + bars(pay, 5) +
+                sub('By provider') + bars(prov, 4) +
+                sub('By game (top 8)') + bars(games, 8) +
+                lbl('Wallet') +
+                `<div class="details-grid" style="margin-top:0;">${item('Top-up in (customers)', fmt(topIn) + ' MMK', '#10B981')}${item('Admin top-up', fmt(topAdmin) + ' MMK')}${item('Spent via Wallet', fmt(walletSpent) + ' MMK', '#F59E0B')}${item('Net (in − spent)', fmt(topIn + topAdmin - walletSpent) + ' MMK')}${item('Wallet orders', walletOrders.toLocaleString())}${item('Pending top-ups', topPendN + ' · ' + fmt(topPendAmt) + ' MMK')}</div>` +
+                lbl('Users') +
+                `<div class="details-grid" style="margin-top:0;">${item('New users', '<span id="ov-u-new">…</span>')}${item('Active users', '<span id="ov-u-act">…</span>')}${item('Total users', '<span id="ov-u-tot">…</span>')}</div>`;
+            ovFillUsers(OV);
+        }
+        window.renderOverviewDetail = renderOverviewDetail;
+        setTimeout(ovSyncBar, 0);
+
+
+        // ---------- Wallet Balance (= total ever topped up) + Total Spend ----------
+        // Both orders and wallet top-ups are auto-archived/deleted after their retention period, so
+        // totals can't be summed from what is still in memory. Server-side sums are used instead:
+        //   Total Spend    = Success orders (live + ordersArchive)
+        //   Wallet Balance = sum of every user's current balance + what users already spent from Wallet
+        //                    (Success wallet-paid orders), i.e. top-ups that were later used still count.
+        let _ovMoneyAt = 0, _ovMoney = null;
+        function ovPaintMoney() {
+            const m = _ovMoney; if (!m) return;
+            const fmt = n => Math.round(n || 0).toLocaleString() + ' MMK';
+            const d = document.getElementById('stat-deposit'), sp = document.getElementById('stat-total-spend');
+            if (d) d.innerText = fmt(m.balances + m.walletSpent);
+            const ds = document.getElementById('stat-deposit-sub');
+            if (ds) ds.innerText = 'Balance ' + fmt(m.balances).replace(' MMK', '') + ' + Used ' + fmt(m.walletSpent).replace(' MMK', '');
+            if (sp) sp.innerText = fmt(m.spend);
+        }
+        async function refreshOverviewMoney(force) {
+            if (!document.getElementById('stat-deposit')) return;
+            if (!force && _ovMoney && Date.now() - _ovMoneyAt < 300000) { ovPaintMoney(); return; }
+            let ls = 0, lw = 0;
+            Object.values(ORDERS).forEach(o => { if (o.status === 'Success') { const p = Number(o.price) || 0; ls += p; if (o.paidFromWallet === true) lw += p; } });
+            const sum = async (q, f) => { const snap = await _fsGetAggregate(q, { t: _fsSum(f) }); _usage.fsRead(1, 'orders'); return Number(snap.data().t) || 0; };
+            try {
+                const S = where('status', '==', 'Success'), W = where('paidFromWallet', '==', true);
+                const ok = collection(db, 'orders'), ar = collection(db, 'ordersArchive');
+                const [a, b, c, d, e] = await Promise.all([
+                    sum(query(ok, S), 'price'), sum(query(ar, S), 'price').catch(() => 0),
+                    sum(query(ok, S, W), 'price'), sum(query(ar, S, W), 'price').catch(() => 0),
+                    sum(collection(db, 'users'), 'walletBalance')
+                ]);
+                _ovMoney = { spend: (a || ls) + b, walletSpent: (c || lw) + d, balances: e };
+            } catch (err) {
+                console.error('Overview money stats error:', err);
+                if (walletTotalValue === null) { const sp = document.getElementById('stat-total-spend'); if (sp) sp.innerText = Math.round(ls).toLocaleString() + ' MMK'; return; }
+                _ovMoney = { spend: ls, walletSpent: lw, balances: walletTotalValue };
+            }
+            _ovMoneyAt = Date.now();
+            ovPaintMoney();
+        }
+        window.refreshOverviewMoney = refreshOverviewMoney;
+
+        // ---------- Order sheet as an image (Today / Weekly) ----------
+        let _osRange = 'today', _osStatus = 'All', _osPages = [];
+        function osRows() {
+            const d = new Date(), t0 = new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+            const from = _osRange === 'weekly' ? t0 - 6 * 86400000 : t0;
+            return Object.values(ORDERS).filter(o => ovMs(o.timestamp) >= from && (_osStatus === 'All' || o.status === _osStatus))
+                .sort((a, b) => ovMs(b.timestamp) - ovMs(a.timestamp));
+        }
+        function osDraw(rows) {
+            const S = 2, W = 1200, PAD = 24, RH = 40, HEAD = 150, TH = 44, FOOT = 36, PER = 150;
+            const cols = [['#', 48, 'l'], ['Time', 130, 'l'], ['Game', 230, 'l'], ['Item', 220, 'l'], ['Player ID', 150, 'l'], ['Pay', 110, 'l'], ['Price', 150, 'r'], ['Status', 114, 'l']];
+            const sc = { Success: '#059669', Pending: '#D97706', Processing: '#2563EB', Fail: '#DC2626' };
+            const FONT = '"Poppins","Noto Sans Myanmar","Myanmar Text",sans-serif';
+            const ok = rows.filter(o => o.status === 'Success'), rev = ok.reduce((t, o) => t + (Number(o.price) || 0), 0);
+            const cnt = k => rows.filter(o => o.status === k).length;
+            const pages = Math.ceil(rows.length / PER), out = [], pad = n => String(n).padStart(2, '0');
+            for (let p = 0; p < pages; p++) {
+                const slice = rows.slice(p * PER, (p + 1) * PER), H = HEAD + TH + slice.length * RH + FOOT;
+                const c = document.createElement('canvas'); c.width = W * S; c.height = H * S;
+                const x = c.getContext('2d'); x.scale(S, S); x.textBaseline = 'middle';
+                const fit = (t, w) => { t = String(t == null ? '' : t); if (x.measureText(t).width <= w) return t; while (t.length > 1 && x.measureText(t + '…').width > w) t = t.slice(0, -1); return t + '…'; };
+                x.fillStyle = '#fff'; x.fillRect(0, 0, W, H);
+                const g = x.createLinearGradient(0, 0, W, 0); g.addColorStop(0, '#2563EB'); g.addColorStop(1, '#7C3AED');
+                x.fillStyle = g; x.fillRect(0, 0, W, HEAD - 20);
+                x.fillStyle = '#fff'; x.textAlign = 'left';
+                x.font = '700 30px ' + FONT; x.fillText('LINN GAME STORE — Orders', PAD, 42);
+                x.font = '500 17px ' + FONT; x.fillText((_osRange === 'weekly' ? 'Last 7 days' : 'Today') + (_osStatus !== 'All' ? ' · ' + _osStatus : '') + ' · ' + new Date().toLocaleString() + '   Page ' + (p + 1) + '/' + pages, PAD, 76);
+                x.font = '600 18px ' + FONT; x.fillText('Orders ' + rows.length + '   Success ' + ok.length + '   Pending ' + cnt('Pending') + '   Processing ' + cnt('Processing') + '   Fail ' + cnt('Fail') + '   Revenue ' + rev.toLocaleString() + ' MMK', PAD, 108);
+                x.fillStyle = '#F1F5F9'; x.fillRect(0, HEAD, W, TH); x.fillStyle = '#475569'; x.font = '700 15px ' + FONT;
+                let cx = PAD; cols.forEach(([n, w, al]) => { x.textAlign = al === 'r' ? 'right' : 'left'; x.fillText(n, al === 'r' ? cx + w - 12 : cx + 4, HEAD + TH / 2); cx += w; });
+                slice.forEach((o, i) => {
+                    const y = HEAD + TH + i * RH, d = new Date(ovMs(o.timestamp));
+                    if (i % 2) { x.fillStyle = '#F8FAFC'; x.fillRect(0, y, W, RH); }
+                    x.fillStyle = '#E2E8F0'; x.fillRect(0, y + RH - 1, W, 1);
+                    const vals = [String(p * PER + i + 1), pad(d.getDate()) + '/' + pad(d.getMonth() + 1) + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes()), o.game || '', o.itemAmount || '', (o.playerId || o.inGameId || '') + (o.serverId ? ' (' + o.serverId + ')' : ''), ovPay(o), (Number(o.price) || 0).toLocaleString(), o.status || ''];
+                    let px = PAD;
+                    cols.forEach(([, w, al], k) => {
+                        const last = k === cols.length - 1, price = k === 6;
+                        x.font = (price || last ? '700 ' : '500 ') + '14px ' + FONT;
+                        x.fillStyle = last ? (sc[o.status] || '#475569') : '#0F172A';
+                        x.textAlign = al === 'r' ? 'right' : 'left';
+                        x.fillText(fit(vals[k], w - 12), al === 'r' ? px + w - 12 : px + 4, y + RH / 2);
+                        px += w;
+                    });
+                });
+                x.textAlign = 'center'; x.fillStyle = '#94A3B8'; x.font = '500 13px ' + FONT;
+                x.fillText('Generated by LINN GAME STORE Admin', W / 2, H - FOOT / 2);
+                out.push(c.toDataURL('image/png'));
+            }
+            return out;
+        }
+        function osRefresh() {
+            const body = document.getElementById('os-body'); if (!body) return;
+            document.querySelectorAll('#os-seg button').forEach(b => b.classList.toggle('active', b.dataset.r === _osRange));
+            const rows = osRows();
+            if (!rows.length) { _osPages = []; body.innerHTML = '<p class="stat-card-sub-text" style="padding:24px;text-align:center;">No orders in this period</p>'; return; }
+            try { _osPages = osDraw(rows); } catch (e) { console.error('Order sheet error:', e); body.innerHTML = '<p class="stat-card-sub-text" style="padding:24px;color:red;">Could not draw the image.</p>'; return; }
+            body.innerHTML = _osPages.map((u, i) => `<img src="${u}" alt="Orders page ${i + 1}" style="width:100%;display:block;border-radius:10px;margin-bottom:10px;border:1px solid var(--border-glass);">`).join('');
+        }
+        function osDownload() {
+            _osPages.forEach((u, i) => setTimeout(() => {
+                const a = document.createElement('a'); a.href = u;
+                a.download = 'linn-orders-' + _osRange + '-' + new Date().toISOString().slice(0, 10) + (_osPages.length > 1 ? '-p' + (i + 1) : '') + '.png';
+                document.body.appendChild(a); a.click(); a.remove();
+            }, i * 500));
+        }
+        function openOrderSheet() {
+            if (window.ensureOrdersLoaded) window.ensureOrdersLoaded();
+            _osRange = (ovPeriod() === 'weekly' || ovPeriod() === 'monthly') ? 'weekly' : 'today'; _osStatus = 'All';
+            const old = document.getElementById('os-modal'); if (old) old.remove();
+            const m = document.createElement('div'); m.id = 'os-modal';
+            m.style.cssText = 'position:fixed;inset:0;z-index:10050;background:rgba(0,0,0,.45);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);display:flex;flex-direction:column;padding:calc(env(safe-area-inset-top,0px) + 12px) 12px calc(env(safe-area-inset-bottom,0px) + 12px);';
+            m.onclick = e => { if (e.target === m) m.remove(); };
+            m.innerHTML = `<div style="flex:1;min-height:0;display:flex;flex-direction:column;background:var(--surface);border:1px solid var(--border-glass);border-radius:20px;overflow:hidden;">
+                <div style="display:flex;align-items:center;gap:8px;padding:12px;flex-wrap:wrap;">
+                    <span id="os-seg" style="display:flex;gap:4px;"><button type="button" data-r="today" onclick="osSetRange('today')">Today</button><button type="button" data-r="weekly" onclick="osSetRange('weekly')">Weekly</button></span>
+                    <select id="os-status" onchange="osSetStatus(this.value)" style="padding:7px 8px;border:1px solid var(--border-glass);border-radius:10px;background:var(--bg-subtle-2);color:var(--text-primary);font-size:12px;"><option>All</option><option>Success</option><option>Pending</option><option>Processing</option><option>Fail</option></select>
+                    <span style="flex:1;"></span>
+                    <button class="btn btn-primary" style="flex:unset;padding:7px 14px;font-size:12px;" onclick="osDownload()">Download</button>
+                    <button class="btn btn-outline" style="flex:unset;padding:7px 12px;font-size:12px;" onclick="document.getElementById('os-modal').remove()">✕</button>
+                </div>
+                <div id="os-body" style="flex:1;overflow:auto;padding:0 12px 12px;"></div></div>`;
+            document.body.appendChild(m);
+            setTimeout(osRefresh, 30);
+        }
+        window.osSetRange = r => { _osRange = r; osRefresh(); };
+        window.osSetStatus = v => { _osStatus = v; osRefresh(); };
+        window.osDownload = osDownload; window.openOrderSheet = openOrderSheet;
+
         async function loadDashboardStats() {
             resetDashboardStatsToEmpty();
             try {
@@ -10317,6 +10583,7 @@
                 const now = new Date();
                 const todayStr = now.toDateString();
                 const yesterdayStr = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1).toDateString();
+                const OV = ovRange();
                 const customers = new Set();
 
                 // Last 7 days (oldest -> newest) for the revenue bar chart.
@@ -10345,16 +10612,17 @@
                                 ? data.timestamp.toDate().toDateString()
                                 : new Date(data.timestamp).toDateString();
                         }
-                        const isToday = dayStr === todayStr;
-                        const isYesterday = dayStr === yesterdayStr;
+                        // "isToday"/"isYesterday" now mean: inside the selected period / inside the previous period.
+                        const _ms = ovMs(data.timestamp);
+                        const isToday = _ms >= OV.from && _ms < OV.to;
+                        const isYesterday = !OV.all && _ms >= OV.pFrom && _ms < OV.from;
 
                         if (data.status === 'Success') {
                             completed++;
                             if (isToday) todaySales += price;
                             if (isYesterday) yesterdaySales += price;
                             if (dayStr && dayStr in revenueByDay) revenueByDay[dayStr] += price;
-                            const g = data.game || 'Other';
-                            revenueByGame[g] = (revenueByGame[g] || 0) + price;
+                            if (isToday) { const g = data.game || 'Other'; revenueByGame[g] = (revenueByGame[g] || 0) + price; }
 
                             if (isToday || isYesterday) {
                                 const cost = resolveOrderCost(data);
@@ -10371,7 +10639,7 @@
                         if (isToday) today++;
                         if (isYesterday) yesterdayOrders++;
                         const custKey = data.userPhone || data.userName;
-                        if (custKey) customers.add(custKey);
+                        if (custKey && isToday) customers.add(custKey);
                     } catch (orderErr) {
                         console.error('Dashboard stats: skipped a malformed order', data && data.id, orderErr);
                     }
@@ -10401,6 +10669,8 @@
 
                 renderRevenueChart(dayKeys, revenueByDay);
                 renderCategoryDonut(revenueByGame);
+                [['ov-lbl-rev', OV.t.rev], ['ov-lbl-ord', OV.t.ord], ['ov-lbl-profit', OV.t.profit]].forEach(([id, t]) => { const e = document.getElementById(id); if (e) e.innerText = t; });
+                renderOverviewDetail();
             } catch (error) {
                 console.error("Dashboard stats error: ", error);
                 // Keep the dashboard usable when Firestore is temporarily
@@ -10419,6 +10689,7 @@
             if (window.refreshJCPlaysBalance) refreshJCPlaysBalance(false);
             refreshTotalUsersStat();
             refreshWalletTotalStat();
+            refreshOverviewMoney();
         }
 
         // Total of every user's wallet (users.walletBalance). Uses a server-side sum()
@@ -10998,7 +11269,7 @@
                 if (g.jcplaysProduct && JCPLAYS_SETTINGS.uid && JCPLAYS_SETTINGS.email && JCPLAYS_SETTINGS.mKey) {
                     const data = await jcplaysRequest('productlist', { product: g.jcplaysProduct });
                     if (data.status === 200) {
-                        const liveById = new Map(((data.data && data.data.product) || []).map(r => [String(r.id), Math.round(Number(r.price) * rate)]));
+                        const liveById = new Map(((data.data && data.data.product) || []).map(r => [String(r.id), Math.round(Number(r.price) * jcplaysRate())]));
                         packages.forEach(p => {
                             const key = (p.jcplays || '').trim();
                             if (!key || !liveById.has(key)) return;
@@ -11207,7 +11478,7 @@
                         if (!JCPLAYS_SETTINGS.uid || !JCPLAYS_SETTINGS.email || !JCPLAYS_SETTINGS.mKey) throw new Error('Add your JCPlays credentials first.');
                         const data = await jcplaysRequest('productlist', { product: g.jcplaysProduct });
                         if (data.status !== 200) throw new Error(data.message || `status ${data.status}`);
-                        sources.push({ keyField: 'jcplays', liveByKey: new Map(((data.data && data.data.product) || []).map(r => [String(r.id), Math.round(Number(r.price) * rate)])) });
+                        sources.push({ keyField: 'jcplays', liveByKey: new Map(((data.data && data.data.product) || []).map(r => [String(r.id), Math.round(Number(r.price) * jcplaysRate())])) });
                     } catch (err) { sourceErrors.push(`JCPlays: ${err.message}`); }
                 }
                 if (g.fulfillProvider === 'g2bulk_voucher' && g.g2bulkVoucherCategory) {
@@ -11287,7 +11558,7 @@
             if (g.jcplaysProduct && JCPLAYS_SETTINGS.uid && JCPLAYS_SETTINGS.email && JCPLAYS_SETTINGS.mKey) {
                 try {
                     const data = await jcplaysRequest('productlist', { product: g.jcplaysProduct });
-                    if (data.status === 200) sources.push({ keyField: 'jcplays', liveByKey: new Map(((data.data && data.data.product) || []).map(r => [String(r.id), Math.round(Number(r.price) * rate)])) });
+                    if (data.status === 200) sources.push({ keyField: 'jcplays', liveByKey: new Map(((data.data && data.data.product) || []).map(r => [String(r.id), Math.round(Number(r.price) * jcplaysRate())])) });
                 } catch (error) { console.error('Auto price update — JCPlays fetch error:', gameId, error); }
             }
             if (g.fulfillProvider === 'g2bulk_voucher' && g.g2bulkVoucherCategory) {
@@ -14695,6 +14966,7 @@
                         const bc = document.getElementById('ult-count-bot'); if (bc) bc.innerText = Object.keys(BOT_USERS).length.toLocaleString();
                     } catch (e) { console.error('Bot users fetch error:', e); }
                     renderAdminUsersList();
+                    if (window.renderOverviewDetail && document.getElementById('dashboard')?.classList.contains('active')) window.renderOverviewDetail();
                     const totalUsersEl = document.getElementById('stat-total-users');
                     if (totalUsersEl) totalUsersEl.innerText = Object.keys(USERS).length.toLocaleString();
                     walletTotalValue = Object.values(USERS).reduce((s, u) => s + (Number(u.walletBalance) || 0), 0); walletTotalAt = Date.now();
@@ -16545,6 +16817,7 @@
                 const text = `$${balanceNum.toLocaleString()} (~${Math.round(balanceNum * fazerRate).toLocaleString()} MMK)`;
                 displayEls.forEach(el => { el.innerText = text; el.style.color = 'var(--accent)'; });
                 fazercardLastBalance = balanceNum;
+                if (window.renderApiBalanceCards) window.renderApiBalanceCards();
             } catch (error) {
                 console.error("FazerCards balance error:", error);
                 displayEls.forEach(el => { el.innerText = 'Error: ' + error.message; el.style.color = 'var(--danger-strong)'; });
@@ -17058,6 +17331,8 @@
                     + (balCur === 'USD' ? ` (~${Math.round(balanceNum * g2bulkRate).toLocaleString()} MMK)` : '');
                 displayEls.forEach(el => { el.innerText = text; el.style.color = 'var(--accent)'; });
                 g2bulkLastBalance = balanceNum;
+                window.__g2bulkLastCur = balCur;
+                if (window.renderApiBalanceCards) window.renderApiBalanceCards();
                 checkLowBalanceAlerts();
             } catch (error) {
                 console.error("G2Bulk balance error:", error);
@@ -19083,7 +19358,7 @@
                         if (!JCPLAYS_SETTINGS.uid || !JCPLAYS_SETTINGS.email || !JCPLAYS_SETTINGS.mKey) throw new Error('Add your JCPlays credentials first.');
                         const data = await jcplaysRequest('productlist', { product: jcplaysCodeVal });
                         if (data.status !== 200) throw new Error(data.message || `status ${data.status}`);
-                        const liveById = new Map(((data.data && data.data.product) || []).map(r => [String(r.id), Math.round(Number(r.price) * rate)]));
+                        const liveById = new Map(((data.data && data.data.product) || []).map(r => [String(r.id), Math.round(Number(r.price) * jcplaysRate())]));
                         anyChecked = true;
                         rows.forEach(row => {
                             const key = row.querySelector('.pkg-jcplays').value.trim();
@@ -19318,7 +19593,13 @@
         // verification, balance, product lookup, and order placement are all
         // wired up to the real endpoints.
         let jcplaysListenerAttached = false;
-        let JCPLAYS_SETTINGS = { baseUrl: 'https://jcplays.com/smilecoin/api', proxyUrl: '', uid: '', email: '', mKey: '', enabled: true, lowBalanceAlert: 0 };
+        let JCPLAYS_SETTINGS = { baseUrl: 'https://jcplays.com/smilecoin/api', proxyUrl: '', uid: '', email: '', mKey: '', enabled: true, lowBalanceAlert: 0, usdRate: 0 };
+        // USD -> MMK rate used for JCPlays prices (Cost) and the JCPlays balance.
+        // Own rate if one is saved in JCPlays Settings, otherwise it falls back to the
+        // G2Bulk rate (which is what JCPlays used before it had its own field).
+        function jcplaysRate() {
+            return Number(JCPLAYS_SETTINGS.usdRate) > 0 ? Number(JCPLAYS_SETTINGS.usdRate) : (Number(G2BULK_SETTINGS.usdRate) || 4500);
+        }
 
         // JCPlays' API sends no CORS headers, so a direct browser fetch() to
         // jcplays.com always fails with a NetworkError - this is the standalone
@@ -19396,6 +19677,7 @@
                 document.getElementById('jcplays-email').value = data.email || '';
                 document.getElementById('jcplays-mkey').value = data.mKey || '';
                 document.getElementById('jcplays-low-balance-alert').value = data.lowBalanceAlert || '';
+                const _jcRateEl = document.getElementById('jcplays-usd-rate'); if (_jcRateEl) _jcRateEl.value = data.usdRate || '';
                 // Field may not exist yet on older saved docs — default to on so
                 // existing setups keep working exactly as before this toggle existed.
                 const jcplaysEnabled = data.enabled !== false;
@@ -19407,9 +19689,11 @@
                     email: data.email || '',
                     mKey: data.mKey || '',
                     enabled: jcplaysEnabled,
-                    lowBalanceAlert: Number(data.lowBalanceAlert) || 0
+                    lowBalanceAlert: Number(data.lowBalanceAlert) || 0,
+                    usdRate: Number(data.usdRate) || 0
                 };
                 applyProviderVisibility('jcplays', jcplaysEnabled);
+                if (window.renderApiBalanceCards) window.renderApiBalanceCards();
                 if (window.refreshJCPlaysBalance) window.refreshJCPlaysBalance();
             }, (error) => {
                 console.error("JCPlays settings listener error:", error);
@@ -19423,6 +19707,7 @@
             const email = document.getElementById('jcplays-email').value.trim();
             const mKey = document.getElementById('jcplays-mkey').value.trim();
             const lowBalanceAlert = Number(document.getElementById('jcplays-low-balance-alert').value) || 0;
+            const usdRate = Number(document.getElementById('jcplays-usd-rate').value) || 0;
             const enabled = document.getElementById('jcplays-enabled').checked;
             const btn = document.getElementById('save-jcplays-btn');
             const originalText = btn.innerText;
@@ -19430,7 +19715,7 @@
             btn.innerText = 'Saving...';
 
             try {
-                await setDoc(doc(db, "settings", "jcplays"), { baseUrl, proxyUrl, uid, email, mKey, lowBalanceAlert, enabled }, { merge: true });
+                await setDoc(doc(db, "settings", "jcplays"), { baseUrl, proxyUrl, uid, email, mKey, lowBalanceAlert, usdRate, enabled }, { merge: true });
                 logAdminActivity('Saved JCPlays settings', enabled ? 'Enabled' : 'Disabled');
                 callAdminSyncClaims();
                 window.showToast('JCPlays credentials saved!', 'success');
@@ -19524,6 +19809,7 @@
                 const text = `${pointsNum.toLocaleString()} pts`;
                 displayEls.forEach(el => { el.innerText = text; el.style.color = 'var(--accent)'; });
                 jcplaysLastBalance = pointsNum;
+                if (window.renderApiBalanceCards) window.renderApiBalanceCards();
                 checkLowBalanceAlerts();
             } catch (error) {
                 console.error("JCPlays balance error:", error);
@@ -19535,6 +19821,48 @@
             }
         }
         window.refreshJCPlaysBalance = refreshJCPlaysBalance;
+
+        // ---------- API Balance page: one currency at a time (USD / MMK toggle) ----------
+        // The three provider balances arrive in different shapes (G2Bulk/FazerCards in USD,
+        // JCPlays in points that are priced 1 point = 1 USD, the same assumption the Cost
+        // conversion already makes). This renders all of them in the chosen currency and shows
+        // which USD -> MMK rate each card uses; tap the rate line to edit it in that provider's Settings.
+        function getApiBalCur() {
+            try { return localStorage.getItem('linn_api_bal_cur') === 'MMK' ? 'MMK' : 'USD'; } catch (e) { return 'USD'; }
+        }
+        function setApiBalCur(cur) {
+            try { localStorage.setItem('linn_api_bal_cur', cur === 'MMK' ? 'MMK' : 'USD'); } catch (e) { /* ignore */ }
+            renderApiBalanceCards();
+        }
+        window.setApiBalCur = setApiBalCur;
+        function renderApiBalanceCards() {
+            const cur = getApiBalCur();
+            const fmt = (usd, rate) => cur === 'MMK'
+                ? Math.round(usd * rate).toLocaleString() + ' MMK'
+                : '$' + usd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            const g2cur = window.__g2bulkLastCur || 'USD';
+            const rows = [
+                { id: 'g2bulk', val: g2bulkLastBalance, rate: Number(G2BULK_SETTINGS.usdRate) || 4500, note: 'G2Bulk rate', nonUsd: g2cur !== 'USD' ? g2cur : '' },
+                { id: 'jcplays', val: jcplaysLastBalance, rate: jcplaysRate(), note: Number(JCPLAYS_SETTINGS.usdRate) > 0 ? 'JCPlays rate' : 'G2Bulk rate (shared)', nonUsd: '' },
+                { id: 'fazercard', val: fazercardLastBalance, rate: Number(FAZERCARD_SETTINGS.usdRate) || 4500, note: 'FazerCards rate', nonUsd: '' }
+            ];
+            rows.forEach(r => {
+                const el = document.getElementById('an-' + r.id + '-balance-display');
+                if (el && typeof r.val === 'number' && isFinite(r.val)) {
+                    el.innerText = r.nonUsd ? (r.val.toFixed(2) + ' ' + r.nonUsd) : fmt(r.val, r.rate);
+                    el.style.color = 'var(--accent)';
+                }
+                const note = document.getElementById('an-' + r.id + '-rate-note');
+                if (note) note.innerText = '1 USD = ' + r.rate.toLocaleString() + ' MMK · ' + r.note + ' (edit)';
+            });
+            document.querySelectorAll('#api-bal-cur-toggle button').forEach(b => {
+                const on = b.dataset.cur === cur;
+                b.style.background = on ? 'var(--accent)' : 'transparent';
+                b.style.color = on ? '#fff' : 'var(--text-secondary)';
+            });
+        }
+        window.renderApiBalanceCards = renderApiBalanceCards;
+        setTimeout(renderApiBalanceCards, 0);
 
         // ---------- Dashboard wallet card refresh (both G2Bulk + JCPlays) ----------
         async function refreshDashboardWallets() {
@@ -19606,7 +19934,7 @@
 
                 let updatedCount = 0, addedCount = 0;
                 rows.forEach(r => {
-                    const cost = Math.round(Number(r.price) * rate);
+                    const cost = Math.round(Number(r.price) * jcplaysRate());
                     const existingRow = rowByJcplaysId.get(String(r.id));
                     if (existingRow) {
                         const costInput = existingRow.querySelector('.pkg-cost');
