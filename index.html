@@ -1731,6 +1731,32 @@
         .pkg-type-opt.active svg { opacity: 1; }
         .pkg-type-opt:active { transform: scale(0.96); }
         .pkg-img-remove { flex-shrink: 0; font-size: 11px; color: var(--danger); cursor: pointer; white-space: nowrap; }
+        /* ---- Package card: Tab / Badge pickers (custom popup instead of native <select>) ---- */
+        .pkg-picker-group { flex: 1; min-width: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+        .pkg-picker-chip { min-width: 0; text-align: left; display: flex; flex-direction: column; gap: 2px; padding: 6px 9px 7px; border: 1px solid var(--border-glass); background: var(--bg-subtle-2); border-radius: 10px; cursor: pointer; font-family: inherit; color: var(--text-primary); transition: 0.15s ease; }
+        .pkg-picker-chip:active { transform: scale(0.97); }
+        .pkg-picker-chip-label { font-size: 9px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-muted); }
+        .pkg-picker-chip-value { display: flex; align-items: center; justify-content: space-between; gap: 4px; font-size: 12.5px; font-weight: 600; min-width: 0; }
+        .pkg-picker-chip-text { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .pkg-picker-chev { width: 12px; height: 12px; flex-shrink: 0; opacity: 0.6; }
+        .pkg-picker-overlay { position: fixed; inset: 0; z-index: 99990; display: flex; align-items: flex-end; justify-content: center; background: rgba(8,10,20,0); visibility: hidden; transition: background 0.22s ease, visibility 0s linear 0.22s; }
+        .pkg-picker-overlay.open { background: rgba(8,10,20,0.55); visibility: visible; transition: background 0.22s ease; }
+        .pkg-picker-sheet { width: 100%; max-width: 480px; background: var(--surface-strong); border-radius: 22px 22px 0 0; padding: 8px 14px calc(16px + env(safe-area-inset-bottom, 0px)); box-shadow: 0 -12px 40px rgba(0,0,0,0.35); transform: translateY(100%); transition: transform 0.26s cubic-bezier(0.2,0.9,0.3,1); }
+        .pkg-picker-overlay.open .pkg-picker-sheet { transform: translateY(0); }
+        .pkg-picker-grab { width: 38px; height: 4px; border-radius: 4px; background: var(--border-glass); margin: 4px auto 10px; }
+        .pkg-picker-title { font-size: 13px; font-weight: 700; color: var(--text-secondary); text-align: center; margin-bottom: 10px; }
+        .pkg-picker-list { display: flex; flex-direction: column; gap: 8px; max-height: 60vh; overflow-y: auto; }
+        .pkg-picker-opt { display: flex; align-items: center; gap: 12px; width: 100%; padding: 11px 12px; border-radius: 14px; border: 1.5px solid transparent; background: var(--fill-soft); color: var(--text-primary); font-family: inherit; text-align: left; cursor: pointer; transition: 0.15s ease; }
+        .pkg-picker-opt:active { transform: scale(0.98); }
+        .pkg-picker-opt-ic { width: 38px; height: 38px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; background: rgba(var(--opt-tint, 99,102,241), 0.16); color: rgb(var(--opt-tint, 99,102,241)); }
+        .pkg-picker-opt-ic svg { width: 20px; height: 20px; }
+        .pkg-picker-opt-txt { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+        .pkg-picker-opt-name { font-size: 14.5px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .pkg-picker-opt-sub { font-size: 11px; color: var(--text-muted); }
+        .pkg-picker-opt-check { width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--border-glass); flex-shrink: 0; display: flex; align-items: center; justify-content: center; box-sizing: border-box; }
+        .pkg-picker-opt.selected { border-color: rgb(var(--opt-tint, 99,102,241)); background: rgba(var(--opt-tint, 99,102,241), 0.10); }
+        .pkg-picker-opt.selected .pkg-picker-opt-check { background: rgb(var(--opt-tint, 99,102,241)); border-color: transparent; }
+        .pkg-picker-opt.selected .pkg-picker-opt-check::after { content: ''; width: 9px; height: 5px; border-left: 2.5px solid #fff; border-bottom: 2.5px solid #fff; transform: rotate(-45deg) translate(1px, -1px); }
         .pkg-profit-badge.negative { background: var(--danger-soft); color: var(--danger-strong); }
         .pkg-cost-update-btn { margin-top: 4px; width: 100%; border: none; border-radius: 6px; padding: 5px 6px; font-size: 11px; font-weight: 600; color: #fff; background: #FF9500; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; animation: pkgUpdatePulse 1.4s ease-in-out infinite; }
         .pkg-cost-update-btn:active { transform: scale(0.97); animation: none; }
@@ -12408,10 +12434,6 @@
                             <div class="pkg-row-top">
                                 <input type="text" class="pkg-amount" placeholder="Enter Package Amount" value="${amount}" style="flex:1;min-width:0;padding:8px;border:1px solid var(--border-glass);background:var(--bg-subtle-2);color:var(--text-primary);border-radius:8px;font-size:13px;font-family:inherit;box-sizing:border-box;">
                             </div>
-                            <div class="pkg-price-field">
-                                <label>Tab (ဒီ package ကို ထားမည့် tab)</label>
-                                <select class="pkg-tab-select" onchange="movePackageToTab(this)" style="width:100%;box-sizing:border-box;padding:8px;border:1px solid var(--border-glass);border-radius:8px;font-size:13px;background:var(--bg-subtle-2);color:var(--text-primary);font-family:inherit;"></select>
-                            </div>
                             <div class="pkg-row-media">
                                 <div class="pkg-img-preview" data-url="${image}" onclick="this.nextElementSibling.click()">
                                     <img class="pkg-img-tag" src="${image}" loading="lazy" decoding="async" style="${image ? '' : 'display:none;'}">
@@ -12419,15 +12441,21 @@
                                 </div>
                                 <input type="file" accept="image/*" class="pkg-img-file" style="display:none;" onchange="handlePackageImageSelect(this)">
                                 <div class="pkg-media-right">
-                                    <div class="pkg-type-toggle">
-                                        <button type="button" class="pkg-type-opt ${type !== 'package' ? 'active' : ''}" data-value="currency" onclick="setPkgType(this,'currency')" title="How this package's card looks in the Store grid">
-                                            <svg class="ui-icon" style="width:12px;height:12px;"><use href="#icon-grid"></use></svg>
-                                            Currency
+                                    <div class="pkg-picker-group">
+                                        <button type="button" class="pkg-picker-chip" data-kind="tab" onclick="openPkgTabPicker(this)">
+                                            <span class="pkg-picker-chip-label">Tab</span>
+                                            <span class="pkg-picker-chip-value"><span class="pkg-picker-chip-text">${escapeHtml(pkgTabLabel(resolvedTab))}</span><svg class="ui-icon pkg-picker-chev"><use href="#icon-chevron-down"></use></svg></span>
                                         </button>
-                                        <button type="button" class="pkg-type-opt ${type === 'package' ? 'active' : ''}" data-value="package" onclick="setPkgType(this,'package')" title="How this package's card looks in the Store grid">
-                                            <svg class="ui-icon" style="width:12px;height:12px;"><use href="#icon-list"></use></svg>
-                                            Package
+                                        <button type="button" class="pkg-picker-chip" data-kind="badge" onclick="openPkgBadgePicker(this)">
+                                            <span class="pkg-picker-chip-label">Badge</span>
+                                            <span class="pkg-picker-chip-value"><span class="pkg-picker-chip-text">${badge === 'top' ? '⭐ TOP' : badge === 'hot' ? '⭐ HOT' : 'None'}</span><svg class="ui-icon pkg-picker-chev"><use href="#icon-chevron-down"></use></svg></span>
                                         </button>
+                                        <select class="pkg-tab-select" onchange="movePackageToTab(this)" style="display:none;"></select>
+                                        <select class="pkg-badge" onchange="updatePkgSummaryBadge(this)" style="display:none;">
+                                            <option value="" ${badge !== 'top' && badge !== 'hot' ? 'selected' : ''}>None</option>
+                                            <option value="top" ${badge === 'top' ? 'selected' : ''}>⭐ TOP</option>
+                                            <option value="hot" ${badge === 'hot' ? 'selected' : ''}>⭐ HOT</option>
+                                        </select>
                                     </div>
                                     <select class="pkg-type" style="display:none;">
                                         <option value="currency" ${type !== 'package' ? 'selected' : ''}>Currency (grid card)</option>
@@ -12435,14 +12463,6 @@
                                     </select>
                                     <div class="pkg-img-remove" onclick="removePackageImage(this)" style="${image ? '' : 'display:none;'}">Remove img</div>
                                 </div>
-                            </div>
-                            <div class="pkg-price-field">
-                                <label>Badge (Store ကတ်ပေါ်မှာ ⭐ tag ပြမည်)</label>
-                                <select class="pkg-badge" onchange="updatePkgSummaryBadge(this)" style="width:100%;box-sizing:border-box;padding:8px;border:1px solid var(--border-glass);border-radius:8px;font-size:13px;background:var(--bg-subtle-2);color:var(--text-primary);font-family:inherit;">
-                                    <option value="" ${badge !== 'top' && badge !== 'hot' ? 'selected' : ''}>None</option>
-                                    <option value="top" ${badge === 'top' ? 'selected' : ''}>⭐ TOP</option>
-                                    <option value="hot" ${badge === 'hot' ? 'selected' : ''}>⭐ HOT</option>
-                                </select>
                             </div>
                             <div class="pkg-row-pricing">
                                 <div class="pkg-price-field">
@@ -12666,6 +12686,118 @@
         }
         window.expandPackageRow = expandPackageRow;
 
+        // ---------- Custom option popup (bottom sheet) - replaces native <select> in the package card ----------
+        // The hidden <select class="pkg-tab-select"> / <select class="pkg-badge"> stay in the row as the
+        // single source of truth (saveGame, updatePkgSummaryBadge, movePackageToTab keep working unchanged);
+        // the popup only picks a value, writes it into that select and calls the same handler.
+        let _pkgPickerEl = null;
+        const _PK_ICON = {
+            grid: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>',
+            list: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><circle cx="3.5" cy="6" r="1"/><circle cx="3.5" cy="12" r="1"/><circle cx="3.5" cy="18" r="1"/></svg>',
+            folder: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>',
+            star: '<svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><polygon points="12 2 15.1 8.6 22 9.5 17 14.3 18.2 21.2 12 17.9 5.8 21.2 7 14.3 2 9.5 8.9 8.6"/></svg>',
+            none: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><line x1="5.6" y1="5.6" x2="18.4" y2="18.4"/></svg>'
+        };
+        function closePkgPicker() { if (_pkgPickerEl) _pkgPickerEl.classList.remove('open'); }
+        window.closePkgPicker = closePkgPicker;
+        function openPkgPicker(cfg) {
+            if (!_pkgPickerEl) {
+                const el = document.createElement('div');
+                el.className = 'pkg-picker-overlay';
+                el.innerHTML = '<div class="pkg-picker-sheet" role="dialog" aria-modal="true"><div class="pkg-picker-grab"></div><div class="pkg-picker-title"></div><div class="pkg-picker-list"></div></div>';
+                el.addEventListener('click', (e) => { if (e.target === el) closePkgPicker(); });
+                document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closePkgPicker(); });
+                document.body.appendChild(el);
+                _pkgPickerEl = el;
+            }
+            const el = _pkgPickerEl;
+            el.querySelector('.pkg-picker-title').textContent = cfg.title || '';
+            const list = el.querySelector('.pkg-picker-list');
+            list.innerHTML = '';
+            cfg.options.forEach(o => {
+                const b = document.createElement('button');
+                b.type = 'button';
+                b.className = 'pkg-picker-opt' + (o.value === cfg.current ? ' selected' : '');
+                if (o.tint) b.style.setProperty('--opt-tint', o.tint);
+                const ic = document.createElement('span'); ic.className = 'pkg-picker-opt-ic'; ic.innerHTML = o.icon || '';   // icon markup is our own constant
+                const txt = document.createElement('span'); txt.className = 'pkg-picker-opt-txt';
+                const nm = document.createElement('span'); nm.className = 'pkg-picker-opt-name'; nm.textContent = o.label;   // textContent: custom tab names are user input
+                txt.appendChild(nm);
+                if (o.sub) { const sb = document.createElement('span'); sb.className = 'pkg-picker-opt-sub'; sb.textContent = o.sub; txt.appendChild(sb); }
+                const ck = document.createElement('span'); ck.className = 'pkg-picker-opt-check';
+                b.appendChild(ic); b.appendChild(txt); b.appendChild(ck);
+                b.addEventListener('click', () => { closePkgPicker(); if (cfg.onPick) cfg.onPick(o.value); });
+                list.appendChild(b);
+            });
+            requestAnimationFrame(() => el.classList.add('open'));
+        }
+        window.openPkgPicker = openPkgPicker;
+
+        // Keeps the two chips in the package card showing the current Tab / Badge.
+        function syncPkgPickerLabels(row) {
+            if (!row) return;
+            const tabTxt = row.querySelector('.pkg-picker-chip[data-kind="tab"] .pkg-picker-chip-text');
+            if (tabTxt) tabTxt.textContent = pkgTabLabel(row.dataset.tab || 'currency');
+            const bSel = row.querySelector('.pkg-badge');
+            const badgeTxt = row.querySelector('.pkg-picker-chip[data-kind="badge"] .pkg-picker-chip-text');
+            if (badgeTxt && bSel) badgeTxt.textContent = bSel.value === 'top' ? '⭐ TOP' : bSel.value === 'hot' ? '⭐ HOT' : 'None';
+        }
+        window.syncPkgPickerLabels = syncPkgPickerLabels;
+
+        function openPkgTabPicker(btn) {
+            const row = btn.closest('.package-row');
+            if (!row) return;
+            populatePkgTabSelect(row);
+            const sel = row.querySelector('.pkg-tab-select');
+            if (!sel) return;
+            const customTints = ['236,72,153', '16,185,129', '245,158,11', '6,182,212', '139,92,246', '59,130,246'];
+            let ci = 0;
+            const options = Array.from(sel.options).map(o => {
+                const v = o.value;
+                if (v === 'currency') return { value: v, label: o.textContent, sub: 'Grid card', icon: _PK_ICON.grid, tint: '59,130,246' };
+                if (v === 'package') return { value: v, label: o.textContent, sub: 'Wide banner', icon: _PK_ICON.list, tint: '139,92,246' };
+                return { value: v, label: o.textContent, sub: 'Custom tab', icon: _PK_ICON.folder, tint: customTints[ci++ % customTints.length] };
+            });
+            openPkgPicker({
+                title: 'Tab ရွေးပါ',
+                options,
+                current: sel.value,
+                onPick: (v) => {
+                    sel.value = v;
+                    movePackageToTab(sel);
+                    // Built-in tabs mirror the Store card style (this used to be the Currency/Package toggle).
+                    if (v === 'currency' || v === 'package') {
+                        const typeSel = row.querySelector('.pkg-type');
+                        if (typeSel) typeSel.value = v;
+                    }
+                    syncPkgPickerLabels(row);
+                }
+            });
+        }
+        window.openPkgTabPicker = openPkgTabPicker;
+
+        function openPkgBadgePicker(btn) {
+            const row = btn.closest('.package-row');
+            if (!row) return;
+            const sel = row.querySelector('.pkg-badge');
+            if (!sel) return;
+            openPkgPicker({
+                title: 'Badge ရွေးပါ',
+                options: [
+                    { value: '',    label: 'None', sub: 'ကတ်ပေါ်မှာ tag မပြပါ', icon: _PK_ICON.none, tint: '148,163,184' },
+                    { value: 'top', label: 'TOP',  sub: 'ရွှေရောင် ⭐ TOP tag', icon: _PK_ICON.star, tint: '255,152,0' },
+                    { value: 'hot', label: 'HOT',  sub: 'အနီရောင် ⭐ HOT tag', icon: _PK_ICON.star, tint: '255,61,87' }
+                ],
+                current: sel.value,
+                onPick: (v) => {
+                    sel.value = v;
+                    updatePkgSummaryBadge(sel);
+                    syncPkgPickerLabels(row);
+                }
+            });
+        }
+        window.openPkgBadgePicker = openPkgBadgePicker;
+
         // Fills the card's "Tab" dropdown with every tab that currently exists
         // (the two built-ins plus any custom ones), selecting whichever tab this
         // package is presently in. Rebuilt fresh each time the card opens so a
@@ -12679,6 +12811,7 @@
             const allTabs = ['currency', 'package', ...customPkgTabs];
             if (!allTabs.includes(current)) allTabs.push(current); // safety net for stray/legacy tab values
             select.innerHTML = allTabs.map(t => `<option value="${escapeHtml(t)}" ${t === current ? 'selected' : ''}>${escapeHtml(pkgTabLabel(t))}</option>`).join('');
+            syncPkgPickerLabels(row);
         }
 
         // Moves this package into whichever tab was picked from the dropdown.
