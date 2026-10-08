@@ -2584,6 +2584,31 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <!-- Renders the QR code shown when an admin sets up Authenticator (2FA) in My Account. -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style id="hb-picker-css">
+.hb-pick-btn { flex:1; min-width:0; display:flex; align-items:center; justify-content:space-between; gap:8px; padding:9px 12px; border-radius:12px; cursor:pointer;
+    border:1px solid var(--border-glass); background:var(--surface-strong); color:var(--text-secondary); font-size:12.5px; font-weight:500; text-align:left; }
+.hb-pick-btn.has { color:var(--text-strong); font-weight:600; border-color:rgba(var(--accent-rgb),.45); }
+.hb-pick-label { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.hb-inline { flex:0 0 100%; box-sizing:border-box; padding:10px; border-radius:16px; background:var(--surface-strong); border:1px solid var(--border-glass); box-shadow:0 8px 22px rgba(20,30,70,.14); animation:hbOpen .18s ease; }
+@keyframes hbOpen { from { opacity:0; transform:translateY(-6px); } to { opacity:1; transform:none; } }
+.hb-search { width:100%; box-sizing:border-box; padding:9px 12px; border-radius:11px; border:1px solid var(--border-glass); background:var(--bg-subtle); color:var(--text-primary); font-size:13.5px; margin-bottom:8px; outline:none; }
+.hb-search:focus { border-color:rgba(var(--accent-rgb),.6); box-shadow:0 0 0 3px var(--accent-soft); }
+.hb-list { max-height:240px; overflow-y:auto; -webkit-overflow-scrolling:touch; display:flex; flex-direction:column; gap:6px; }
+.hb-row { display:flex; align-items:center; gap:10px; padding:7px 9px; border-radius:13px; cursor:pointer; background:var(--surface); border:1px solid var(--border-glass); color:var(--text-primary); font-size:13.5px; font-weight:500; }
+.hb-row:active { background:var(--accent-soft); }
+.hb-row.sel { border-color:rgba(var(--accent-rgb),.6); background:var(--accent-soft); }
+.hb-row span { flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.hb-row i { font-style:normal; color:var(--accent); font-weight:700; }
+.hb-ico { width:34px; height:34px; flex:0 0 auto; border-radius:9px; object-fit:cover; background:var(--bg-subtle); }
+.hb-ico-none { display:flex; align-items:center; justify-content:center; color:var(--text-muted); font-size:15px; }
+
+.hb-custom { display:flex; gap:6px; margin-bottom:6px; }
+.hb-custom-input { flex:1; min-width:0; box-sizing:border-box; padding:9px 12px; border-radius:11px; border:1px solid var(--border-glass); background:var(--bg-subtle); color:var(--text-primary); font-size:13px; outline:none; }
+.hb-custom-input:focus { border-color:rgba(var(--accent-rgb),.6); box-shadow:0 0 0 3px var(--accent-soft); }
+.hb-custom-set { flex:0 0 auto; padding:0 16px; border:0; border-radius:11px; background:var(--accent); color:#fff; font-weight:600; font-size:13px; cursor:pointer; }
+.hb-or { text-align:center; font-size:11px; color:var(--text-muted); margin:2px 0 8px; }
+.hb-empty { text-align:center; color:var(--text-muted); font-size:13px; padding:14px 0; margin:0; }
+</style>
 </head>
 <body>
 
@@ -16776,6 +16801,7 @@
         // so the order of `images` here is the order customers see them in.
         let editingHomeBannerFiles = [];
         let editingHomeBannerUrls = [];
+        let editingHomeBannerLinks = []; // parallel to editingHomeBannerUrls: game name each banner opens ('' = no link)
         let homeBannerListenerAttached = false;
 
         function toggleHomeBannerSettings() {
@@ -16784,6 +16810,10 @@
             const isOpen = body.style.display === 'block';
             body.style.display = isOpen ? 'none' : 'block';
             chevron.style.transform = isOpen ? 'rotate(0deg)' : 'rotate(180deg)';
+            if (!isOpen) {
+                try { const p = (typeof loadGames === 'function') ? loadGames(true) : null; if (p && p.then) p.then(() => renderHomeBannerGallery()).catch(() => {}); } catch (e) {}
+                renderHomeBannerGallery();
+            }
         }
         window.toggleHomeBannerSettings = toggleHomeBannerSettings;
 
@@ -16791,12 +16821,104 @@
             const gallery = document.getElementById('homebanner-gallery');
             if (!gallery) return;
             const urls = editingHomeBannerUrls.slice();
-            gallery.innerHTML = urls.map((url, i) => `<div class="game-banner-thumb" data-index="${i}"><img src="${url}" loading="lazy" decoding="async" alt="Banner ${i + 1}"><button type="button" onclick="removeHomeBannerImage(${i})" aria-label="Remove banner">×</button></div>`).join('');
+            while (editingHomeBannerLinks.length < urls.length) editingHomeBannerLinks.push('');
+            editingHomeBannerLinks.length = urls.length;
+            // Unique game names from the catalogue (same name = one game, several servers)
+            const seen = {};
+            const names = [];
+            Object.values(typeof GAMES === 'object' && GAMES ? GAMES : {}).forEach(g => {
+                const n = String((g && g.name) || '').trim();
+                if (n && !seen[n.toLowerCase()]) { seen[n.toLowerCase()] = 1; names.push(n); }
+            });
+            names.sort((a, b) => a.localeCompare(b));
+            const escA = (v) => String(v).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+            gallery.innerHTML = urls.map((url, i) => {
+                const cur = String(editingHomeBannerLinks[i] || '');
+                const hasCur = !cur || names.some(n => n.toLowerCase() === cur.toLowerCase());
+                const opts = `<option value="">No link</option>`
+                    + (hasCur ? '' : `<option value="${escA(cur)}" selected>${escA(cur)}</option>`)
+                    + names.map(n => `<option value="${escA(n)}"${n.toLowerCase() === cur.toLowerCase() ? ' selected' : ''}>${escA(n)}</option>`).join('');
+                return `<div class="hb-row-wrap" style="display:flex;flex-wrap:wrap;align-items:center;gap:8px;width:100%;">`
+                    + `<div class="game-banner-thumb" data-index="${i}" style="flex:0 0 auto;"><img src="${url}" loading="lazy" decoding="async" alt="Banner ${i + 1}"><button type="button" onclick="removeHomeBannerImage(${i})" aria-label="Remove banner">×</button></div>`
+                    + `<button type="button" class="hb-pick-btn${cur ? ' has' : ''}" onclick="openHomeBannerGamePicker(${i})" aria-label="Choose game for banner ${i + 1}"><span class="hb-pick-label">${cur ? (/^(https?:\/\/|tg:\/\/|mailto:|\/)/i.test(cur) ? '🔗 ' : '🎮 ') + escA(cur) : 'No link (tap to set link / game)'}</span><svg class="ui-icon" style="width:14px;height:14px;flex:0 0 auto;"><use href="#icon-chevron-down"></use></svg></button>`
+                    + `</div>`;
+            }).join('');
         }
+
+        function setHomeBannerLink(index, value) {
+            editingHomeBannerLinks[index] = String(value || '');
+        }
+        window.setHomeBannerLink = setHomeBannerLink;
+
+        // ---- Game picker for a home banner: opens right under that banner (inline panel) ----
+        function openHomeBannerGamePicker(index) {
+            const gallery = document.getElementById('homebanner-gallery');
+            if (!gallery) return;
+            const wrap = gallery.children[index];
+            if (!wrap) return;
+            const existing = wrap.querySelector('.hb-inline');
+            gallery.querySelectorAll('.hb-inline').forEach(el => el.remove());
+            if (existing) return; // tapping the button again just closes it
+
+            const escA = (v) => String(v).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+            const byName = {};
+            Object.values(typeof GAMES === 'object' && GAMES ? GAMES : {}).forEach(g => {
+                const n = String((g && g.name) || '').trim();
+                if (!n) return;
+                const k = n.toLowerCase();
+                if (!byName[k]) byName[k] = { name: n, image: g.image || '', hasDefault: !g.serverName };
+                else if (!byName[k].hasDefault && !g.serverName) { byName[k].image = g.image || byName[k].image; byName[k].hasDefault = true; }
+            });
+            const games = Object.values(byName).sort((x, y) => x.name.localeCompare(y.name));
+            const cur = String(editingHomeBannerLinks[index] || '');
+            const curL = cur.toLowerCase();
+
+            const panel = document.createElement('div');
+            panel.className = 'hb-inline';
+            const curIsUrl = /^(https?:\/\/|tg:\/\/|mailto:|\/)/i.test(cur);
+            panel.innerHTML = `<div class="hb-custom"><input type="url" class="hb-custom-input" placeholder="Custom link  (https://...)" value="${curIsUrl ? escA(cur) : ''}" autocomplete="off" autocapitalize="off" spellcheck="false"><button type="button" class="hb-custom-set">Set</button></div>`
+                + `<div class="hb-or">or choose a game</div>`
+                + `<input type="text" class="hb-search" placeholder="Search game..." autocomplete="off"><div class="hb-list"></div>`;
+            wrap.appendChild(panel);
+            const list = panel.querySelector('.hb-list');
+            const search = panel.querySelector('.hb-search');
+            const draw = () => {
+                const q = search.value.trim().toLowerCase();
+                const rows = [];
+                if (!q) rows.push(`<div class="hb-row${!cur ? ' sel' : ''}" data-v=""><div class="hb-ico hb-ico-none">⨯</div><span>No link</span>${!cur ? '<i>✓</i>' : ''}</div>`);
+                games.filter(g => !q || g.name.toLowerCase().includes(q)).forEach(g => {
+                    const on = g.name.toLowerCase() === curL;
+                    rows.push(`<div class="hb-row${on ? ' sel' : ''}" data-v="${escA(g.name)}"><img class="hb-ico" src="${escA(g.image)}" alt="" loading="lazy" onerror="this.style.visibility='hidden'"><span>${escA(g.name)}</span>${on ? '<i>✓</i>' : ''}</div>`);
+                });
+                list.innerHTML = rows.length ? rows.join('') : '<p class="hb-empty">No games found</p>';
+            };
+            draw();
+            search.addEventListener('input', draw);
+            const customInput = panel.querySelector('.hb-custom-input');
+            const applyCustom = () => {
+                const v = customInput.value.trim();
+                if (!/^(https?:\/\/|tg:\/\/|mailto:|\/(?!\/))/i.test(v)) {
+                    if (window.showToast) window.showToast('Link must start with https:// (or tg://, mailto:, /)', 'fail');
+                    return;
+                }
+                setHomeBannerLink(index, v);
+                renderHomeBannerGallery();
+            };
+            panel.querySelector('.hb-custom-set').addEventListener('click', applyCustom);
+            customInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); applyCustom(); } });
+            list.addEventListener('click', (e) => {
+                const r = e.target.closest('.hb-row');
+                if (!r) return;
+                setHomeBannerLink(index, r.getAttribute('data-v'));
+                renderHomeBannerGallery();
+            });
+        }
+        window.openHomeBannerGamePicker = openHomeBannerGamePicker;
 
         function removeHomeBannerImage(index) {
             editingHomeBannerUrls.splice(index, 1);
             editingHomeBannerFiles.splice(index, 1);
+            editingHomeBannerLinks.splice(index, 1);
             renderHomeBannerGallery();
         }
         window.removeHomeBannerImage = removeHomeBannerImage;
@@ -16827,6 +16949,7 @@
                 files.forEach((file, i) => {
                     editingHomeBannerFiles.push(file);
                     editingHomeBannerUrls.push(urls[i]);
+                    editingHomeBannerLinks.push('');
                 });
                 renderHomeBannerGallery();
             } catch (err) {
@@ -16842,6 +16965,7 @@
             onSnapshot(doc(db, "settings", "homeBanners"), (docSnap) => {
                 const data = docSnap.exists() ? docSnap.data() : {};
                 editingHomeBannerUrls = Array.isArray(data.images) ? data.images.slice() : [];
+                editingHomeBannerLinks = editingHomeBannerUrls.map((_, i) => String((Array.isArray(data.links) ? data.links[i] : '') || ''));
                 editingHomeBannerFiles = editingHomeBannerUrls.map(() => null); // null = already-uploaded URL, not a pending File
                 renderHomeBannerGallery();
             }, (error) => {
@@ -16867,11 +16991,12 @@
                         finalUrls.push(editingHomeBannerUrls[i]);
                     }
                 }
-                await setDoc(doc(db, "settings", "homeBanners"), { images: finalUrls }, { merge: true });
+                const finalLinks = finalUrls.map((_, i) => String(editingHomeBannerLinks[i] || ''));
+                await setDoc(doc(db, "settings", "homeBanners"), { images: finalUrls, links: finalLinks }, { merge: true });
                 editingHomeBannerUrls = finalUrls;
                 editingHomeBannerFiles = finalUrls.map(() => null);
                 renderHomeBannerGallery();
-                logAdminActivity('Updated home banner carousel', `${finalUrls.length} image(s)`);
+                logAdminActivity('Updated home banner carousel', `${finalUrls.length} image(s), ${finalLinks.filter(Boolean).length} linked`);
                 window.showToast('Home banners updated!', 'success');
             } catch (error) {
                 console.error("Save home banners error:", error);
