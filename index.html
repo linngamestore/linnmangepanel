@@ -902,6 +902,51 @@
             box-shadow: var(--shadow-soft), inset 0 1px 0 var(--border-glass);
         }
         #orders-container .admin-card:last-child { margin-bottom: 0; }
+        .orders-day-bar { display: flex; gap: 6px; overflow-x: auto; padding: 2px 0 10px; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+        .orders-day-bar::-webkit-scrollbar { display: none; }
+        .odb-chip { flex: 0 0 auto; position: relative; border: 1px solid var(--border-glass); background: var(--fill-soft); color: var(--text-secondary); font-size: 12px; font-family: inherit; padding: 6px 12px; border-radius: 999px; cursor: pointer; white-space: nowrap; }
+        .odb-chip.active { background: var(--accent); color: #fff; border-color: transparent; }
+        .odb-chip:disabled { opacity: 1; cursor: default; }
+        .odb-chip.loading { opacity: .6; }
+        .odb-date input { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
+        .od-day-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 12px; font-weight: 600; color: var(--text-secondary); margin: 12px 2px 6px; }
+        .od-day-head:first-child { margin-top: 0; }
+
+        /* =====================================================================
+           SHARED UI PRIMITIVES (replace repeated inline styles)
+           - Buttons:   .btn + .btn-primary/.btn-outline/.btn-danger, sizes .btn-xs/.btn-sm/.btn-md, .btn-block
+           - Cards:     .sc-head (collapsible header) .sc-title .sc-chevron
+           - Rows:      .row-center .row-end .row-split
+           - Fields:    .field (+ .field-grow / .field-full)
+           - Text:      .u-muted .u-label
+           Declarations carry !important where they replaced an inline style, so
+           the visual result is identical to before.
+           ===================================================================== */
+        .btn-xs { flex: unset !important; padding: 3px 10px !important; font-size: 11px !important; }
+        .btn-sm { flex: unset !important; padding: 4px 10px !important; font-size: 12px !important; }
+        .btn-md { flex: unset !important; padding: 8px 14px !important; font-size: 13px !important; }
+        .btn-block { width: 100% !important; justify-content: center !important; }
+        .sc-head { display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+        .sc-title { font-size: 15px !important; font-weight: 600 !important; }
+        .ui-icon.sc-chevron, .sc-chevron { width: 18px !important; height: 18px !important; color: var(--text-secondary); transition: transform 0.2s; }
+        .u-muted { font-weight: 400 !important; color: var(--text-muted); }
+        .u-label { font-size: 13px !important; font-weight: 500 !important; color: var(--text-secondary); }
+        .row-center { display: flex; align-items: center; gap: 8px; }
+        .row-mt { margin: 6px 0 4px; }
+        .row-end { display: flex; justify-content: flex-end; margin: 0 0 12px; }
+        .row-split { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 10px 0; border-top: 1px solid var(--border-glass); }
+        .field { padding: 10px !important; border: 1px solid var(--border-glass); background: var(--bg-subtle-2); color: var(--text-primary); border-radius: 12px !important; font-size: 14px !important; font-family: inherit !important; box-sizing: border-box !important; }
+        .field-grow { flex: 1 !important; }
+        .field-full { width: 100% !important; margin: 6px 0 12px !important; }
+
+        /* Glass-grid notes inside Settings tabs: green = on / safe, red = off / warning */
+        .note-glass { position: relative; overflow: hidden; padding: 12px 14px !important; border-radius: 16px; border: 1px solid var(--border-glass); backdrop-filter: blur(16px) saturate(170%); -webkit-backdrop-filter: blur(16px) saturate(170%); transition: background .25s, border-color .25s, box-shadow .25s, color .25s; }
+        /* glossy sheen across the top-left, like a glass pane */
+        .note-glass::before { content: ''; position: absolute; inset: 0; pointer-events: none; border-radius: inherit; background: linear-gradient(155deg, rgba(255,255,255,.38) 0%, rgba(255,255,255,.10) 28%, rgba(255,255,255,0) 55%); }
+        .note-glass b { color: inherit; font-weight: 700; }
+        .note-glass.note-ok { color: color-mix(in srgb, #16a34a 62%, var(--text-primary)) !important; background: linear-gradient(135deg, rgba(34,197,94,.26), rgba(34,197,94,.10)); border-color: rgba(134,239,172,.55); box-shadow: 0 8px 22px rgba(34,197,94,.18), inset 0 1px 0 rgba(255,255,255,.65), inset 0 -1px 0 rgba(34,197,94,.20); }
+        .note-glass.note-bad { color: color-mix(in srgb, #dc2626 62%, var(--text-primary)) !important; background: linear-gradient(135deg, rgba(239,68,68,.26), rgba(239,68,68,.10)); border-color: rgba(252,165,165,.55); box-shadow: 0 8px 22px rgba(239,68,68,.18), inset 0 1px 0 rgba(255,255,255,.65), inset 0 -1px 0 rgba(239,68,68,.20); }
+        .odb-hide { border: 0; background: var(--fill-soft); color: var(--text-secondary); font-size: 11px; font-family: inherit; padding: 3px 10px; border-radius: 999px; cursor: pointer; }
 
         /* Wallet Top Ups — same compact-row + tap-to-expand pattern as Orders:
            tight one-line summary by default, full detail (incl. receipt image)
@@ -2456,6 +2501,28 @@
         .hc-date #hc-mon { font-size: 11px; font-weight: 600; color: var(--text-secondary); white-space: nowrap; }
         @media (max-width: 420px) { .hc-date { display: none; } #header-clock { padding-right: 12px; } }
         @media (max-width: 340px) { .hc-ring { display: none; } #header-clock { padding-left: 12px; } }
+        /* ---- Header clock: tap to expand into an exact-date card ---- */
+        #header-clock { cursor: pointer; -webkit-tap-highlight-color: transparent; user-select: none; transition: box-shadow .25s ease, transform .2s ease; }
+        #header-clock:active { transform: scale(.96); }
+        #header-clock.hc-open { box-shadow: 0 0 0 2px var(--accent); }
+        #header-clock.hc-open .hc-ring-fg { stroke-width: 4; }
+        #hc-pop { position: fixed; z-index: 9999; width: min(300px, calc(100vw - 24px)); box-sizing: border-box; padding: 16px; border-radius: 22px;
+            background: var(--surface, var(--bg-subtle)); border: 1px solid var(--border-glass); backdrop-filter: blur(18px) saturate(150%); -webkit-backdrop-filter: blur(18px) saturate(150%);
+            box-shadow: 0 22px 50px rgba(0,0,0,.30), inset 0 1px 0 var(--border-glass);
+            transform-origin: var(--hc-ox, 40px) 0; transform: scale(.3, .15); opacity: 0; pointer-events: none;
+            transition: transform .42s cubic-bezier(.2,.9,.25,1.12), opacity .22s ease; }
+        #hc-pop.show { transform: scale(1); opacity: 1; pointer-events: auto; }
+        #hc-pop > * { opacity: 0; transform: translateY(8px); transition: opacity .3s ease, transform .35s cubic-bezier(.2,.9,.25,1); }
+        #hc-pop.show > * { opacity: 1; transform: none; }
+        #hc-pop.show > *:nth-child(1) { transition-delay: .10s; } #hc-pop.show > *:nth-child(2) { transition-delay: .16s; } #hc-pop.show > *:nth-child(3) { transition-delay: .22s; } #hc-pop.show > *:nth-child(4) { transition-delay: .28s; }
+        .hcp-time { font-size: 34px; font-weight: 800; letter-spacing: -0.02em; color: var(--text-strong, var(--text-primary)); font-variant-numeric: tabular-nums; line-height: 1.05; }
+        .hcp-day { margin-top: 10px; font-size: 12px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); }
+        .hcp-date { margin-top: 2px; font-size: 20px; font-weight: 700; color: var(--text-primary); }
+        .hcp-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 14px; }
+        .hcp-cell { padding: 8px 6px; border-radius: 12px; text-align: center; background: var(--fill-soft); border: 1px solid var(--border-glass); }
+        .hcp-cell b { display: block; font-size: 13px; color: var(--text-primary); white-space: nowrap; }
+        .hcp-cell span { display: block; margin-top: 2px; font-size: 9.5px; letter-spacing: .06em; text-transform: uppercase; color: var(--text-secondary); }
+        @media (prefers-reduced-motion: reduce) { #hc-pop { transform: none; transition: opacity .15s ease; } #hc-pop > * { transform: none; transition: none; } }
         @media (prefers-reduced-motion: reduce) { * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; } }
 
         /* ---- Gradient accent header (follows the active theme's accent) ---- */
@@ -2792,7 +2859,7 @@
             <div class="hc-date"><span id="hc-wd">--</span><span id="hc-mon">--</span></div>
             <span id="header-clock-date" hidden>--</span>
         </div>
-        <div style="display:flex;align-items:center;gap:8px;">
+        <div class="row-center">
             <div class="conn-status" id="conn-status" title="Connecting">
                 <span class="conn-dot conn-connecting" id="conn-dot"></span>
                 <span class="conn-label" id="conn-label">Connecting</span>
@@ -2894,7 +2961,7 @@
                         <div id="my-account-username" style="font-size:15px;font-weight:600;color:var(--text-primary);"></div>
                     </div>
                 </div>
-                <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px 0;border-top:1px solid var(--border-glass);">
+                <div class="row-split">
                     <div style="min-width:0;">
                         <span style="font-size:12.5px;font-weight:600;color:var(--text-primary);display:flex;align-items:center;gap:5px;">
                             <svg class="ui-icon" style="width:13px;height:13px;flex-shrink:0;color:#229ED9;"><use href="#icon-send"></use></svg>
@@ -2904,14 +2971,14 @@
                     </div>
                     <span id="my-account-telegram-action"></span>
                 </div>
-                <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px 0;border-top:1px solid var(--border-glass);">
+                <div class="row-split">
                     <div style="min-width:0;">
-                        <span style="font-size:12.5px;font-weight:600;color:var(--text-primary);">🔁 Order Transfer</span>
+                        <span style="font-size:12.5px;font-weight:600;color:var(--text-primary);">Order Transfer</span>
                         <span id="my-account-transfer-status" style="font-size:11px;color:var(--text-muted);display:block;"></span>
                     </div>
                     <label style="display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer;"><input type="checkbox" id="my-account-transfer-toggle" onchange="toggleMyTransfer(this.checked)" style="width:18px;height:18px;"> ON</label>
                 </div>
-                <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px 0;border-top:1px solid var(--border-glass);">
+                <div class="row-split">
                     <div style="min-width:0;">
                         <span style="font-size:12.5px;font-weight:600;color:var(--text-primary);display:flex;align-items:center;gap:5px;">
                             <svg class="ui-icon" style="width:13px;height:13px;flex-shrink:0;color:var(--accent);"><use href="#icon-shield"></use></svg>
@@ -3091,7 +3158,7 @@
 
             <div class="dash-section-label" style="display:flex;align-items:center;justify-content:space-between;">
                 <span>Wallet Balances</span>
-                <button class="btn btn-outline" style="flex:unset; padding: 3px 10px; font-size:11px;" id="dash-wallet-refresh-btn" onclick="refreshDashboardWallets()">Refresh</button>
+                <button class="btn btn-outline btn-xs" id="dash-wallet-refresh-btn" onclick="refreshDashboardWallets()">Refresh</button>
             </div>
             <div class="details-grid" style="margin-top:0;">
                 <div class="details-grid-item" id="dash-g2bulk-row">
@@ -3115,7 +3182,7 @@
                         <button type="button" data-cur="USD" onclick="setApiBalCur('USD')" style="border:none;background:transparent;color:var(--text-secondary);padding:4px 10px;font-size:12px;font-weight:600;cursor:pointer;">USD</button>
                         <button type="button" data-cur="MMK" onclick="setApiBalCur('MMK')" style="border:none;background:transparent;color:var(--text-secondary);padding:4px 10px;font-size:12px;font-weight:600;cursor:pointer;">MMK</button>
                     </span>
-                    <button class="btn btn-outline" style="flex:unset; padding: 4px 10px; font-size:12px;" onclick="renderAnalytics()">Refresh</button>
+                    <button class="btn btn-outline btn-sm" onclick="renderAnalytics()">Refresh</button>
                 </span>
             </h2>
 
@@ -3159,8 +3226,8 @@
             <div class="dash-section-label" style="display:flex;align-items:center;justify-content:space-between;">
                 <span>Request Usage · Today</span>
                 <div style="display:flex;gap:6px;">
-                    <button class="btn btn-outline" style="flex:unset; padding: 3px 10px; font-size:11px;" onclick="window.LinnUsage && window.LinnUsage.update && window.LinnUsage.update(); var b=this; var t=b.textContent; b.textContent='✓ Updated'; setTimeout(function(){ b.textContent=t; }, 900);">↻ Update</button>
-                    <button class="btn btn-outline" style="flex:unset; padding: 3px 10px; font-size:11px;" onclick="window.LinnUsage && window.LinnUsage.reset()">Reset</button>
+                    <button class="btn btn-outline btn-xs" onclick="window.LinnUsage && window.LinnUsage.update && window.LinnUsage.update(); var b=this; var t=b.textContent; b.textContent='✓ Updated'; setTimeout(function(){ b.textContent=t; }, 900);">↻ Update</button>
+                    <button class="btn btn-outline btn-xs" onclick="window.LinnUsage && window.LinnUsage.reset()">Reset</button>
                 </div>
             </div>
             <div class="usage-grid" id="usage-grid">
@@ -3232,7 +3299,7 @@
                         <h4>Cloudflare · all traffic today</h4>
                         <div class="chart-card-total" id="cf-real-sub">Tap Refresh to load</div>
                     </div>
-                    <button class="btn btn-outline" style="flex:unset; padding: 3px 10px; font-size:11px;" onclick="window.loadCloudflareUsage && window.loadCloudflareUsage(true)">Refresh</button>
+                    <button class="btn btn-outline btn-xs" onclick="window.loadCloudflareUsage && window.loadCloudflareUsage(true)">Refresh</button>
                 </div>
                 <div class="stat-card-value" id="cf-real-total">—</div>
                 <div class="usage-bar"><i id="cf-real-bar"></i></div>
@@ -3246,7 +3313,7 @@
                         <h4>Firestore · all traffic today</h4>
                         <div class="chart-card-total" id="fs-real-sub">Tap Refresh to load</div>
                     </div>
-                    <button class="btn btn-outline" style="flex:unset; padding: 3px 10px; font-size:11px;" onclick="window.loadFirestoreUsage && window.loadFirestoreUsage(true)">Refresh</button>
+                    <button class="btn btn-outline btn-xs" onclick="window.loadFirestoreUsage && window.loadFirestoreUsage(true)">Refresh</button>
                 </div>
                 <div class="usage-top-row"><span class="name">Reads</span><b id="fs-real-reads">—</b></div>
                 <div class="usage-bar"><i id="fs-real-reads-bar"></i></div>
@@ -3265,77 +3332,77 @@
             </h2>
 
             <div class="admin-card" id="settings-card-sociallinks" style="margin-top:0;">
-                <div style="display:flex;justify-content:space-between;align-items:center;cursor:pointer;" onclick="toggleSocialLinks()">
-                    <span style="font-size:15px;font-weight: 600;">Social Links</span>
-                    <svg class="ui-icon" id="social-links-chevron" style="width:18px;height:18px;color:var(--text-secondary);transition:transform 0.2s;"><use href="#icon-chevron-down"></use></svg>
+                <div class="sc-head" onclick="toggleSocialLinks()">
+                    <span class="sc-title">Social Links</span>
+                    <svg class="ui-icon sc-chevron" id="social-links-chevron"><use href="#icon-chevron-down"></use></svg>
                 </div>
                 <div id="social-links-body" style="display:none;margin-top:12px;">
-                    <label style="font-size:13px;font-weight: 500;color:var(--text-secondary);">Facebook</label>
-                    <div style="display:flex;gap:8px;align-items:center;margin:6px 0 4px;">
+                    <label class="u-label">Facebook</label>
+                    <div class="row-center row-mt">
                         <div class="pkg-img-preview" style="width:44px;height:44px;" onclick="document.getElementById('social-facebook-file').click()">
                             <img class="pkg-img-tag" id="social-facebook-img-tag" src="" loading="lazy" decoding="async" style="display:none;">
                             <span class="pkg-img-placeholder" id="social-facebook-img-placeholder">+ Icon</span>
                         </div>
-                        <input type="text" id="social-facebook" placeholder="Enter Facebook Page URL" style="flex:1;padding:10px;border:1px solid var(--border-glass);background:var(--bg-subtle-2);color:var(--text-primary);border-radius:12px;font-size:14px;font-family:inherit;box-sizing:border-box;">
+                        <input class="field field-grow" type="text" id="social-facebook" placeholder="Enter Facebook Page URL">
                         <input type="file" id="social-facebook-file" accept="image/*" style="display:none;" onchange="previewSocialImage(event,'facebook')">
                     </div>
-                    <div style="display:flex;justify-content:flex-end;margin:0 0 12px;">
+                    <div class="row-end">
                         <span id="social-facebook-remove" style="font-size:11px;color:var(--danger);cursor:pointer;display:none;" onclick="removeSocialImage('facebook')">Remove image</span>
                     </div>
 
-                    <label style="font-size:13px;font-weight: 500;color:var(--text-secondary);">Telegram</label>
-                    <div style="display:flex;gap:8px;align-items:center;margin:6px 0 4px;">
+                    <label class="u-label">Telegram</label>
+                    <div class="row-center row-mt">
                         <div class="pkg-img-preview" style="width:44px;height:44px;" onclick="document.getElementById('social-telegram-file').click()">
                             <img class="pkg-img-tag" id="social-telegram-img-tag" src="" loading="lazy" decoding="async" style="display:none;">
                             <span class="pkg-img-placeholder" id="social-telegram-img-placeholder">+ Icon</span>
                         </div>
-                        <input type="text" id="social-telegram" placeholder="Enter Telegram Channel URL" style="flex:1;padding:10px;border:1px solid var(--border-glass);background:var(--bg-subtle-2);color:var(--text-primary);border-radius:12px;font-size:14px;font-family:inherit;box-sizing:border-box;">
+                        <input class="field field-grow" type="text" id="social-telegram" placeholder="Enter Telegram Channel URL">
                         <input type="file" id="social-telegram-file" accept="image/*" style="display:none;" onchange="previewSocialImage(event,'telegram')">
                     </div>
-                    <div style="display:flex;justify-content:flex-end;margin:0 0 12px;">
+                    <div class="row-end">
                         <span id="social-telegram-remove" style="font-size:11px;color:var(--danger);cursor:pointer;display:none;" onclick="removeSocialImage('telegram')">Remove image</span>
                     </div>
 
-                    <label style="font-size:13px;font-weight: 500;color:var(--text-secondary);">TikTok</label>
-                    <div style="display:flex;gap:8px;align-items:center;margin:6px 0 4px;">
+                    <label class="u-label">TikTok</label>
+                    <div class="row-center row-mt">
                         <div class="pkg-img-preview" style="width:44px;height:44px;" onclick="document.getElementById('social-tiktok-file').click()">
                             <img class="pkg-img-tag" id="social-tiktok-img-tag" src="" loading="lazy" decoding="async" style="display:none;">
                             <span class="pkg-img-placeholder" id="social-tiktok-img-placeholder">+ Icon</span>
                         </div>
-                        <input type="text" id="social-tiktok" placeholder="Enter TikTok URL" style="flex:1;padding:10px;border:1px solid var(--border-glass);background:var(--bg-subtle-2);color:var(--text-primary);border-radius:12px;font-size:14px;font-family:inherit;box-sizing:border-box;">
+                        <input class="field field-grow" type="text" id="social-tiktok" placeholder="Enter TikTok URL">
                         <input type="file" id="social-tiktok-file" accept="image/*" style="display:none;" onchange="previewSocialImage(event,'tiktok')">
                     </div>
-                    <div style="display:flex;justify-content:flex-end;margin:0 0 12px;">
+                    <div class="row-end">
                         <span id="social-tiktok-remove" style="font-size:11px;color:var(--danger);cursor:pointer;display:none;" onclick="removeSocialImage('tiktok')">Remove image</span>
                     </div>
 
                     <div style="border-top:1px solid var(--fill-soft);margin:4px 0 14px;padding-top:14px;">
                         <span style="font-size:13px;font-weight:600;">Support Contact (Header Icons)</span>
-                        <p style="font-size:11.5px;color:var(--text-secondary);margin:4px 0 12px;">Messenger နဲ့ Telegram username ကိုပဲ ထည့်ပါ (link တစ်ခုလုံး မလိုပါ) - Store ရဲ့ header ပေါ်က Support icon တွေအတွက် ဖြစ်ပါတယ်။</p>
+                        <p class="note-glass note-ok" style="font-size:11.5px;color:var(--text-secondary);margin:4px 0 12px;">Messenger နဲ့ Telegram username ကိုပဲ ထည့်ပါ (link တစ်ခုလုံး မလိုပါ) - Store ရဲ့ header ပေါ်က Support icon တွေအတွက် ဖြစ်ပါတယ်။</p>
 
-                        <label style="font-size:13px;font-weight: 500;color:var(--text-secondary);">Messenger Username</label>
-                        <div style="display:flex;gap:8px;align-items:center;margin:6px 0 4px;">
+                        <label class="u-label">Messenger Username</label>
+                        <div class="row-center row-mt">
                             <div class="pkg-img-preview" style="width:44px;height:44px;" onclick="document.getElementById('social-supportMessenger-file').click()">
                                 <img class="pkg-img-tag" id="social-supportMessenger-img-tag" src="" loading="lazy" decoding="async" style="display:none;">
                                 <span class="pkg-img-placeholder" id="social-supportMessenger-img-placeholder">+ Icon</span>
                             </div>
-                            <input type="text" id="social-supportMessenger" placeholder="Enter Messenger Page" style="flex:1;padding:10px;border:1px solid var(--border-glass);background:var(--bg-subtle-2);color:var(--text-primary);border-radius:12px;font-size:14px;font-family:inherit;box-sizing:border-box;">
+                            <input class="field field-grow" type="text" id="social-supportMessenger" placeholder="Enter Messenger Page">
                             <input type="file" id="social-supportMessenger-file" accept="image/*" style="display:none;" onchange="previewSocialImage(event,'supportMessenger')">
                         </div>
-                        <div style="display:flex;justify-content:flex-end;margin:0 0 12px;">
+                        <div class="row-end">
                             <span id="social-supportMessenger-remove" style="font-size:11px;color:var(--danger);cursor:pointer;display:none;" onclick="removeSocialImage('supportMessenger')">Remove image</span>
                         </div>
 
-                        <label style="font-size:13px;font-weight: 500;color:var(--text-secondary);">Telegram Username</label>
-                        <div style="display:flex;gap:8px;align-items:center;margin:6px 0 4px;">
+                        <label class="u-label">Telegram Username</label>
+                        <div class="row-center row-mt">
                             <div class="pkg-img-preview" style="width:44px;height:44px;" onclick="document.getElementById('social-supportTelegram-file').click()">
                                 <img class="pkg-img-tag" id="social-supportTelegram-img-tag" src="" loading="lazy" decoding="async" style="display:none;">
                                 <span class="pkg-img-placeholder" id="social-supportTelegram-img-placeholder">+ Icon</span>
                             </div>
-                            <input type="text" id="social-supportTelegram" placeholder="Enter Telegram Username" style="flex:1;padding:10px;border:1px solid var(--border-glass);background:var(--bg-subtle-2);color:var(--text-primary);border-radius:12px;font-size:14px;font-family:inherit;box-sizing:border-box;">
+                            <input class="field field-grow" type="text" id="social-supportTelegram" placeholder="Enter Telegram Username">
                             <input type="file" id="social-supportTelegram-file" accept="image/*" style="display:none;" onchange="previewSocialImage(event,'supportTelegram')">
                         </div>
-                        <div style="display:flex;justify-content:flex-end;margin:0 0 12px;">
+                        <div class="row-end">
                             <span id="social-supportTelegram-remove" style="font-size:11px;color:var(--danger);cursor:pointer;display:none;" onclick="removeSocialImage('supportTelegram')">Remove image</span>
                         </div>
                     </div>
@@ -3346,12 +3413,12 @@
             </div>
 
             <div class="admin-card" id="settings-card-homebanner" style="margin-top:14px;">
-                <div style="display:flex;justify-content:space-between;align-items:center;cursor:pointer;" onclick="toggleHomeBannerSettings()">
-                    <span style="font-size:15px;font-weight: 600;">Home Banner Carousel</span>
-                    <svg class="ui-icon" id="homebanner-chevron" style="width:18px;height:18px;color:var(--text-secondary);transition:transform 0.2s;"><use href="#icon-chevron-down"></use></svg>
+                <div class="sc-head" onclick="toggleHomeBannerSettings()">
+                    <span class="sc-title">Home Banner Carousel</span>
+                    <svg class="ui-icon sc-chevron" id="homebanner-chevron"><use href="#icon-chevron-down"></use></svg>
                 </div>
                 <div id="homebanner-body" style="display:none;margin-top:12px;">
-                    <p style="font-size:12px;color:var(--text-secondary);margin:0 0 12px;">Images shown in the swipeable carousel at the top of the store's Home page (16:9). Add one or more; customers see them in this order.</p>
+                    <p class="note-glass note-ok" style="font-size:12px;color:var(--text-secondary);margin:0 0 12px;">Images shown in the swipeable carousel at the top of the store's Home page (16:9). Add one or more; customers see them in this order.</p>
                     <label class="img-update-box ratio-banner" id="homebanner-update-box" for="edit-homebanner-file">
                         <div class="img-update-icon"><svg class="ui-icon"><use href="#icon-camera"></use></svg></div>
                         <span class="img-update-label">Add Banner Images</span>
@@ -3364,9 +3431,9 @@
             </div>
 
             <div class="admin-card" id="settings-card-branding" style="margin-top:14px;">
-                <div style="display:flex;justify-content:space-between;align-items:center;cursor:pointer;" onclick="toggleBrandingSettings()">
-                    <span style="font-size:15px;font-weight: 600;">Store Logo</span>
-                    <svg class="ui-icon" id="branding-chevron" style="width:18px;height:18px;color:var(--text-secondary);transition:transform 0.2s;"><use href="#icon-chevron-down"></use></svg>
+                <div class="sc-head" onclick="toggleBrandingSettings()">
+                    <span class="sc-title">Store Logo</span>
+                    <svg class="ui-icon sc-chevron" id="branding-chevron"><use href="#icon-chevron-down"></use></svg>
                 </div>
                 <div id="branding-body" style="display:none;margin-top:12px;">
                     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
@@ -3410,7 +3477,7 @@
                             </div>
                         </div>
                     </div>
-                    <p style="font-size:11.5px;color:var(--text-secondary);margin:8px 0 0;">Dark Mode logo is optional — shown automatically in dark themes. Uses the Light Mode logo if left empty.</p>
+                    <p class="note-glass note-ok" style="font-size:11.5px;color:var(--text-secondary);margin:8px 0 0;">Dark Mode logo is optional — shown automatically in dark themes. Uses the Light Mode logo if left empty.</p>
 
                     <!-- Logo Size: scales the logo image inside its fixed,
                          overflow-hidden badge box (here and in the Store app
@@ -3432,18 +3499,18 @@
                                 <svg class="ui-icon" id="logo-scale-preview-default-icon" style="width:22px;height:22px;color:var(--text-secondary);"><use href="#icon-shield"></use></svg>
                             </div>
                         </div>
-                        <p style="font-size:11.5px;color:var(--text-secondary);margin-top:4px;">Preview shows the logo at actual Store header size.</p>
+                        <p class="note-glass note-ok" style="font-size:11.5px;color:var(--text-secondary);margin-top:4px;">Preview shows the logo at actual Store header size.</p>
                     </div>
                 </div>
             </div>
 
             <div class="admin-card" id="settings-card-maintenance" style="margin-top:14px;">
-                <div style="display:flex;justify-content:space-between;align-items:center;cursor:pointer;" onclick="toggleMaintenanceSettings()">
-                    <span style="font-size:15px;font-weight:600;">🔧 Maintenance (Kill Switch) <span id="maint-status-pill" style="margin-left:8px;font-size:11px;padding:2px 8px;border-radius:99px;background:rgba(34,197,94,.18);color:#22c55e;">OPEN</span></span>
-                    <svg class="ui-icon" id="maint-chevron" style="width:18px;height:18px;color:var(--text-secondary);transition:transform 0.2s;"><use href="#icon-chevron-down"></use></svg>
+                <div class="sc-head" onclick="toggleMaintenanceSettings()">
+                    <span class="sc-title">Maintenance (Kill Switch) <span id="maint-status-pill" style="margin-left:8px;font-size:11px;padding:2px 8px;border-radius:99px;background:rgba(34,197,94,.18);color:#22c55e;">OPEN</span></span>
+                    <svg class="ui-icon sc-chevron" id="maint-chevron"><use href="#icon-chevron-down"></use></svg>
                 </div>
                 <div id="maint-body" style="display:none;margin-top:12px;">
-                    <p style="font-size:12px;color:var(--text-secondary);margin:0 0 12px;">Website နှင့် Bot ကို ခေတ္တပိတ်ရန်။ ပိတ်ခင် Store users (in-app + push) နှင့် Bot users အားလုံးကို အသိပေးစာ အလိုအလျောက်ပို့ပါမည်။ ပိတ်နေစဉ် Pending အော်ဒါများ မဆုံးရှုံးပါ၊ ပြန်ဖွင့်ပြီးမှ ဆက်လုပ်ပါမည်။ Telegram မှ: /maintenance in 10 reason · /maintenance on · /maintenance off</p>
+                    <p class="note-glass note-ok" style="font-size:12px;color:var(--text-secondary);margin:0 0 12px;">Website နှင့် Bot ကို ခေတ္တပိတ်ရန်။ ပိတ်ခင် Store users (in-app + push) နှင့် Bot users အားလုံးကို အသိပေးစာ အလိုအလျောက်ပို့ပါမည်။ ပိတ်နေစဉ် Pending အော်ဒါများ မဆုံးရှုံးပါ၊ ပြန်ဖွင့်ပြီးမှ ဆက်လုပ်ပါမည်။ Telegram မှ: /maintenance in 10 reason · /maintenance on · /maintenance off</p>
                     <div id="maint-detail" style="font-size:12px;color:var(--text-secondary);margin-bottom:10px;"></div>
                     <select id="maint-minutes" style="width:100%;padding:10px;border:1px solid var(--border-glass);background:var(--bg-subtle-2);color:var(--text-primary);border-radius:10px;margin-bottom:8px;">
                         <option value="5">Warn now → close in 5 min</option>
@@ -3461,24 +3528,24 @@
             </div>
 
             <div class="admin-card" id="settings-card-orderrouting" style="margin-top:14px;">
-                <div style="display:flex;justify-content:space-between;align-items:center;cursor:pointer;" onclick="toggleOrderRoutingSettings()">
-                    <span style="font-size:15px;font-weight:600;">👥 Order Routing (Multi-Admin)</span>
-                    <svg class="ui-icon" id="order-routing-chevron" style="width:18px;height:18px;color:var(--text-secondary);transition:transform 0.2s;"><use href="#icon-chevron-down"></use></svg>
+                <div class="sc-head" onclick="toggleOrderRoutingSettings()">
+                    <span class="sc-title">Order Routing (Multi-Admin)</span>
+                    <svg class="ui-icon sc-chevron" id="order-routing-chevron"><use href="#icon-chevron-down"></use></svg>
                 </div>
                 <div id="order-routing-body" style="display:none;margin-top:12px;">
-                    <p style="font-size:12px;color:var(--text-secondary);margin:0 0 12px;line-height:1.55;">Order / Top Up အသစ်အားလုံးကို <b>Main Admin</b> တစ်ယောက်ထဲဆီပဲ Telegram နဲ့ ပို့ပါတယ် (random မပို့ပါ)။ Main Admin မအားရင် Confirm/Reject အောက်က <b>🔁 Transfer Order</b> ခလုတ်နဲ့ တခြား admin ဆီ လွှဲနိုင်ပါတယ်၊ မလွှဲရင် အောက်က မိနစ်ပြည့်တဲ့အခါ auto transfer ဖြစ်ပါမယ်။<br>ဒီ feature ကို ပိတ်ထားရင် (သို့) Main Admin က မိမိ Transfer ကို ပိတ်ထားရင် Order အားလုံး Main Admin ဆီပဲသွားပြီး Transfer ခလုတ်မပေါ်ပါ။ တခြား admin တစ်ယောက်က Transfer ပိတ်ထားရင် သူ့ဆီ Order မရောက်ပါ။ Admin တိုင်း Settings → Admin Accounts မှာ Telegram Link အရင်လုပ်ထားရပါမယ်။</p>
+                    <p class="note-glass note-ok" style="font-size:12px;color:var(--text-secondary);margin:0 0 12px;line-height:1.55;">Order / Top Up အသစ်အားလုံးကို <b>Main Admin</b> တစ်ယောက်ထဲဆီပဲ Telegram နဲ့ ပို့ပါတယ် (random မပို့ပါ)။ Main Admin မအားရင် Confirm/Reject အောက်က <b>Transfer Order</b> ခလုတ်နဲ့ တခြား admin ဆီ လွှဲနိုင်ပါတယ်၊ မလွှဲရင် အောက်က မိနစ်ပြည့်တဲ့အခါ auto transfer ဖြစ်ပါမယ်။<br>ဒီ feature ကို ပိတ်ထားရင် (သို့) Main Admin က မိမိ Transfer ကို ပိတ်ထားရင် Order အားလုံး Main Admin ဆီပဲသွားပြီး Transfer ခလုတ်မပေါ်ပါ။ တခြား admin တစ်ယောက်က Transfer ပိတ်ထားရင် သူ့ဆီ Order မရောက်ပါ။ Admin တိုင်း Settings → Admin Accounts မှာ Telegram Link အရင်လုပ်ထားရပါမယ်။</p>
                     <label style="font-size:12px;color:var(--text-secondary);display:block;margin-bottom:6px;">Main Admin</label>
                     <select id="order-routing-main" style="width:100%;padding:10px;border:1px solid var(--border-glass);background:var(--bg-subtle-2);color:var(--text-primary);border-radius:12px;font-size:14px;box-sizing:border-box;margin:0 0 6px;"><option value="">— Not set (shared chat) —</option></select>
                     <p id="order-routing-main-hint" style="font-size:11.5px;color:var(--text-muted);margin:0 0 14px;"></p>
                     <label style="display:flex;align-items:center;gap:10px;font-size:14px;margin-bottom:12px;cursor:pointer;">
-                        <input type="checkbox" id="order-routing-enabled" style="width:18px;height:18px;"> Enable Transfer feature (🔁 Transfer Order button + auto transfer)
+                        <input type="checkbox" id="order-routing-enabled" style="width:18px;height:18px;"> Enable Transfer feature (Transfer Order button + auto transfer)
                     </label>
                     <label style="font-size:12px;color:var(--text-secondary);display:block;margin-bottom:6px;">Auto-transfer after (minutes) — admin မကိုင်ရင် နောက် admin ဆီ ရွှေ့မယ့်အချိန်၊ 0 = ပိတ်</label>
                     <input type="number" id="order-routing-minutes" min="0" max="1440" step="1" value="10" style="width:100%;padding:10px;border:1px solid var(--border-glass);background:var(--bg-subtle-2);color:var(--text-primary);border-radius:12px;font-size:14px;box-sizing:border-box;margin:0 0 14px;">
                     <button class="btn btn-primary" id="save-order-routing-btn" style="width:100%;" onclick="saveOrderRoutingSettings()">Save</button>
                     <div style="margin-top:18px;padding-top:14px;border-top:1px solid var(--border-glass);">
                         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
-                            <span style="font-size:13px;font-weight:600;">🚫 Blocked Telegram users</span>
+                            <span style="font-size:13px;font-weight:600;">Blocked Telegram users</span>
                             <button type="button" class="btn btn-outline" style="flex:unset;padding:4px 10px;font-size:12px;" onclick="loadBlockedTelegram()">Refresh</button>
                         </div>
                         <p style="font-size:11.5px;color:var(--text-muted);margin:0 0 8px;">Bot ကို တိုက်ဆိုင်စွာတွေ့ပြီး /link code ၅ ကြိမ်မှားတဲ့သူတွေ အလိုအလျောက် ပိတ်ခံရပါတယ်။ ပိတ်ခံရတဲ့သူကို bot က ဘာမှပြန်မပြောတော့ပါ။</p>
@@ -3488,12 +3555,12 @@
             </div>
 
             <div class="admin-card" id="settings-card-adminbroadcastsecret" style="margin-top:14px;">
-                <div style="display:flex;justify-content:space-between;align-items:center;cursor:pointer;" onclick="toggleAdminBroadcastSecretSettings()">
-                    <span style="font-size:15px;font-weight: 600;">Admin Broadcast Secret</span>
-                    <svg class="ui-icon" id="admin-broadcast-secret-chevron" style="width:18px;height:18px;color:var(--text-secondary);transition:transform 0.2s;"><use href="#icon-chevron-down"></use></svg>
+                <div class="sc-head" onclick="toggleAdminBroadcastSecretSettings()">
+                    <span class="sc-title">Admin Broadcast Secret</span>
+                    <svg class="ui-icon sc-chevron" id="admin-broadcast-secret-chevron"><use href="#icon-chevron-down"></use></svg>
                 </div>
                 <div id="admin-broadcast-secret-body" style="display:none;margin-top:12px;">
-                    <p style="font-size:12px;color:var(--text-secondary);margin:0 0 12px;">Shared secret between this panel and the pcastore Worker (pcagamestore_bot) — used to authorize customer Telegram DMs (order status updates) and the /admin/broadcast announcement. Pick any long random string; changing it here takes effect immediately, no redeploy needed.</p>
+                    <p class="note-glass note-ok" style="font-size:12px;color:var(--text-secondary);margin:0 0 12px;">Shared secret between this panel and the pcastore Worker (pcagamestore_bot) — used to authorize customer Telegram DMs (order status updates) and the /admin/broadcast announcement. Pick any long random string; changing it here takes effect immediately, no redeploy needed.</p>
                     <input type="text" id="admin-broadcast-secret" placeholder="Enter Secret Key" style="width:100%;padding:10px;border:1px solid var(--border-glass);background:var(--bg-subtle-2);color:var(--text-primary);border-radius:12px;font-size:14px;box-sizing:border-box;margin:0 0 14px;font-family:monospace;">
                     <button class="btn btn-primary" id="save-admin-broadcast-secret-btn" style="width:100%;" onclick="saveAdminBroadcastSecret()">Save</button>
                 </div>
@@ -3501,15 +3568,15 @@
 
 
             <div class="admin-card" style="margin-top:14px;">
-                <div style="display:flex;justify-content:space-between;align-items:center;cursor:pointer;" onclick="togglePushNotificationSettings()">
-                    <span style="font-size:15px;font-weight: 600;">Push Notifications</span>
-                    <svg class="ui-icon" id="push-notif-chevron" style="width:18px;height:18px;color:var(--text-secondary);transition:transform 0.2s;"><use href="#icon-chevron-down"></use></svg>
+                <div class="sc-head" onclick="togglePushNotificationSettings()">
+                    <span class="sc-title">Push Notifications</span>
+                    <svg class="ui-icon sc-chevron" id="push-notif-chevron"><use href="#icon-chevron-down"></use></svg>
                 </div>
                 <div id="push-notif-body" style="display:none;margin-top:12px;">
                     <div class="switch-row">
                         <div>
                             <span class="switch-label">Alert this device</span>
-                            <p style="font-size:11px;color:var(--text-secondary);margin-top:2px;">ဖွင့်ထားရင် Order/Message အသစ်ဝင်တိုင်း ဒီ device ပေါ်မှာ Push notification တိုက်ရိုက်ရောက်မှာဖြစ်ပါတယ် — admin panel ကိုမဖွင့်ထားရင်တောင် ရောက်ပါမယ်။</p>
+                            <p class="note-glass note-ok" style="font-size:11px;color:var(--text-secondary);margin-top:2px;">ဖွင့်ထားရင် Order/Message အသစ်ဝင်တိုင်း ဒီ device ပေါ်မှာ Push notification တိုက်ရိုက်ရောက်မှာဖြစ်ပါတယ် — admin panel ကိုမဖွင့်ထားရင်တောင် ရောက်ပါမယ်။</p>
                         </div>
                         <label class="toggle-switch">
                             <input type="checkbox" id="admin-push-toggle" onchange="toggleAdminPushNotifications(this.checked)">
@@ -3521,29 +3588,29 @@
             </div>
 
             <div class="admin-card" id="settings-card-walletcleanup" style="margin-top:14px;">
-                <span style="font-size:15px;font-weight: 600;">No-History Wallet Cleanup</span>
-                <p style="font-size:11px;color:var(--text-secondary);line-height:1.5;margin:8px 0;">Wallet ထဲမှာ ငွေရှိပေမဲ့ <b>Completed top-up မရှိ၊ Wallet နဲ့ order လည်းမရှိ</b> တဲ့ user တွေကို ရှာပါမယ်။ Scan လုပ်ပြီး စာရင်းကြည့်ပြီးမှ အတည်ပြုရင် Wallet ကို 0 လုပ်ပြီး warning ပို့ပါမယ် (အလိုအလျောက် မဖျက်ပါ)။</p>
+                <span class="sc-title">No-History Wallet Cleanup</span>
+                <p class="note-glass note-bad" style="font-size:11px;color:var(--text-secondary);line-height:1.5;margin:8px 0;">Wallet ထဲမှာ ငွေရှိပေမဲ့ <b>Completed top-up မရှိ၊ Wallet နဲ့ order လည်းမရှိ</b> တဲ့ user တွေကို ရှာပါမယ်။ Scan လုပ်ပြီး စာရင်းကြည့်ပြီးမှ အတည်ပြုရင် Wallet ကို 0 လုပ်ပြီး warning ပို့ပါမယ် (အလိုအလျောက် မဖျက်ပါ)။</p>
                 <button class="btn btn-outline" id="wallet-cleanup-scan-btn" onclick="scanNoHistoryWallets(this)">Scan</button>
                 <div id="wallet-cleanup-result" style="margin-top:10px;font-size:12px;"></div>
             </div>
 
             <div class="admin-card" id="settings-card-costmigrate" style="margin-top:14px;">
-                <span style="font-size:15px;font-weight: 600;">Cost Privacy Migration</span>
-                <p style="font-size:11px;color:var(--text-secondary);line-height:1.5;margin:8px 0;">Package Cost တွေကို ပြည်သူဖတ်လို့ရတဲ့ <b>games</b> ထဲကနေ admin-only <b>gameCosts</b> ထဲ ရွှေ့ပါမယ် (ထပ်နှိပ်လည်း အန္တရာယ်မရှိပါ)။</p>
+                <span class="sc-title">Cost Privacy Migration</span>
+                <p class="note-glass note-ok" style="font-size:11px;color:var(--text-secondary);line-height:1.5;margin:8px 0;">Package Cost တွေကို ပြည်သူဖတ်လို့ရတဲ့ <b>games</b> ထဲကနေ admin-only <b>gameCosts</b> ထဲ ရွှေ့ပါမယ် (ထပ်နှိပ်လည်း အန္တရာယ်မရှိပါ)။</p>
                 <button class="btn btn-primary" onclick="migrateCostsToAdminOnly(this)">Move Costs to Private</button>
             </div>
 
             <div class="admin-card" id="settings-card-autoprice" style="margin-top:14px;">
-                <div style="display:flex;justify-content:space-between;align-items:center;cursor:pointer;" onclick="toggleAutoPriceSettings()">
-                    <span style="font-size:15px;font-weight: 600;">Auto Cost Update</span>
-                    <svg class="ui-icon" id="autoprice-chevron" style="width:18px;height:18px;color:var(--text-secondary);transition:transform 0.2s;"><use href="#icon-chevron-down"></use></svg>
+                <div class="sc-head" onclick="toggleAutoPriceSettings()">
+                    <span class="sc-title">Auto Cost Update</span>
+                    <svg class="ui-icon sc-chevron" id="autoprice-chevron"><use href="#icon-chevron-down"></use></svg>
                 </div>
                 <div id="autoprice-body" style="display:none;margin-top:12px;">
-                    <p style="font-size:11px;color:var(--text-secondary);line-height:1.5;">Cost update က အမြဲဖွင့်ထားပါတယ် (ပိတ်လို့မရ) — အောက်က Schedule အချိန်တွေမှာပဲ G2Bulk/JCPlays/Voucher/FazerCards ဈေးပြောင်းထားတဲ့ package တွေရဲ့ Cost ကို update လုပ်ပါမယ်။ Price ကိုတော့ မထိပါ — Price က အောက်က <b>Auto Price Update</b> ကတ်မှာ သီးသန့်ပါ။</p>
+                    <p class="note-glass note-ok" style="font-size:11px;color:var(--text-secondary);line-height:1.5;">Cost update က အမြဲဖွင့်ထားပါတယ် (ပိတ်လို့မရ) — အောက်က Schedule အချိန်တွေမှာပဲ G2Bulk/JCPlays/Voucher/FazerCards ဈေးပြောင်းထားတဲ့ package တွေရဲ့ Cost ကို update လုပ်ပါမယ်။ Price ကိုတော့ မထိပါ — Price က အောက်က <b>Auto Price Update</b> ကတ်မှာ သီးသန့်ပါ။</p>
 
                     <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border-glass);">
                         <span class="switch-label">Cost Update Schedule</span>
-                        <p style="font-size:11px;color:var(--text-secondary);margin-top:2px;">တစ်ရက်မှာ Cost ကို စစ်ပြီး update လုပ်မယ့် အချိန်တွေကို ရွေးပါ (ရန်ကုန်အချိန်)။ ကြိုက်သလောက် ထည့်လို့ရပါတယ်၊ Cost ကိုပဲ ပြင်ပြီး Price ကို မထိပါ။ အချိန်တစ်ခုမှ မထားရင် Cost auto update မလုပ်ပါ။</p>
+                        <p class="note-glass note-ok" style="font-size:11px;color:var(--text-secondary);margin-top:2px;">တစ်ရက်မှာ Cost ကို စစ်ပြီး update လုပ်မယ့် အချိန်တွေကို ရွေးပါ (ရန်ကုန်အချိန်)။ ကြိုက်သလောက် ထည့်လို့ရပါတယ်၊ Cost ကိုပဲ ပြင်ပြီး Price ကို မထိပါ။ အချိန်တစ်ခုမှ မထားရင် Cost auto update မလုပ်ပါ။</p>
                         <div id="cost-schedule-list" style="display:flex;flex-direction:column;gap:8px;margin-top:8px;"></div>
                         <div style="display:flex;gap:8px;margin-top:10px;">
                             <button class="btn btn-outline" onclick="addCostScheduleTime()">+ Add time</button>
@@ -3555,12 +3622,12 @@
             </div>
 
             <div class="admin-card" id="settings-card-autoprice-sell" style="margin-top:14px;">
-                <div style="display:flex;justify-content:space-between;align-items:center;cursor:pointer;" onclick="togglePriceUpdateSettings()">
-                    <span style="font-size:15px;font-weight: 600;">Auto Price Update</span>
-                    <svg class="ui-icon" id="priceupdate-chevron" style="width:18px;height:18px;color:var(--text-secondary);transition:transform 0.2s;"><use href="#icon-chevron-down"></use></svg>
+                <div class="sc-head" onclick="togglePriceUpdateSettings()">
+                    <span class="sc-title">Auto Price Update</span>
+                    <svg class="ui-icon sc-chevron" id="priceupdate-chevron"><use href="#icon-chevron-down"></use></svg>
                 </div>
                 <div id="priceupdate-body" style="display:none;margin-top:12px;">
-                    <p style="font-size:11px;color:var(--text-secondary);line-height:1.5;">Cost update နဲ့ သီးသန့်ပါ။ Game editor ထဲမှာ <b>Auto Update Price</b> ကို ဖွင့်ထားတဲ့ ဂိမ်းတွေရဲ့ Price ကိုပဲ အောက်က Schedule အချိန်တွေမှာ Cost အပေါ် Margin % ပေါင်းပြီး auto ချိန်ပေးပါမယ်။ မဖွင့်ထားတဲ့ ဂိမ်းတွေက Cost ပဲ update ဖြစ်ပါမယ်။</p>
+                    <p class="note-glass note-ok" style="font-size:11px;color:var(--text-secondary);line-height:1.5;">Cost update နဲ့ သီးသန့်ပါ။ Game editor ထဲမှာ <b>Auto Update Price</b> ကို ဖွင့်ထားတဲ့ ဂိမ်းတွေရဲ့ Price ကိုပဲ အောက်က Schedule အချိန်တွေမှာ Cost အပေါ် Margin % ပေါင်းပြီး auto ချိန်ပေးပါမယ်။ မဖွင့်ထားတဲ့ ဂိမ်းတွေက Cost ပဲ update ဖြစ်ပါမယ်။</p>
                     <div style="margin-top:12px;">
                         <span class="switch-label">Price Margin %</span>
                         <div style="display:flex;gap:8px;margin-top:6px;align-items:center;">
@@ -3570,7 +3637,7 @@
                     </div>
                     <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border-glass);">
                         <span class="switch-label">Price Update Schedule</span>
-                        <p style="font-size:11px;color:var(--text-secondary);margin-top:2px;">Price ကို ချိန်မယ့် အချိန်တွေ (ရန်ကုန်အချိန်)။ Cost Schedule နဲ့ မတူလည်း ရပါတယ်။ အချိန်တစ်ခုမှ မထားရင် Price auto update မလုပ်ပါ။</p>
+                        <p class="note-glass note-ok" style="font-size:11px;color:var(--text-secondary);margin-top:2px;">Price ကို ချိန်မယ့် အချိန်တွေ (ရန်ကုန်အချိန်)။ Cost Schedule နဲ့ မတူလည်း ရပါတယ်။ အချိန်တစ်ခုမှ မထားရင် Price auto update မလုပ်ပါ။</p>
                         <div id="price-schedule-list" style="display:flex;flex-direction:column;gap:8px;margin-top:8px;"></div>
                         <div style="display:flex;gap:8px;margin-top:10px;">
                             <button class="btn btn-outline" onclick="addPriceScheduleTime()">+ Add time</button>
@@ -3582,9 +3649,9 @@
             </div>
 
             <div class="admin-card" id="settings-card-adminlogin" style="margin-top:14px;">
-                <div style="display:flex;justify-content:space-between;align-items:center;cursor:pointer;" onclick="toggleAdminLoginSettings()">
-                    <span style="font-size:15px;font-weight: 600;">Admin Login</span>
-                    <svg class="ui-icon" id="admin-login-chevron" style="width:18px;height:18px;color:var(--text-secondary);transition:transform 0.2s;"><use href="#icon-chevron-down"></use></svg>
+                <div class="sc-head" onclick="toggleAdminLoginSettings()">
+                    <span class="sc-title">Admin Login</span>
+                    <svg class="ui-icon sc-chevron" id="admin-login-chevron"><use href="#icon-chevron-down"></use></svg>
                 </div>
                 <div id="admin-login-body" style="display:none;margin-top:12px;">
                     <div class="switch-row">
@@ -3604,26 +3671,26 @@
                  mirrored inside the My Account modal's row further up -
                  renderTwoFactorSettingsCard() keeps both in sync. -->
             <div class="admin-card" id="settings-card-2fa" style="margin-top:14px;">
-                <div style="display:flex;justify-content:space-between;align-items:center;cursor:pointer;" onclick="toggleTwoFactorSettings()">
-                    <div style="display:flex;align-items:center;gap:8px;">
+                <div class="sc-head" onclick="toggleTwoFactorSettings()">
+                    <div class="row-center">
                         <svg class="ui-icon" style="width:18px;height:18px;color:var(--text-secondary);"><use href="#icon-shield"></use></svg>
-                        <span style="font-size:15px;font-weight: 600;">Authenticator (2FA)</span>
+                        <span class="sc-title">Authenticator (2FA)</span>
                         <span id="tfa-status-badge" style="font-size:11.5px;font-weight:700;padding:2px 9px;border-radius:20px;background:var(--fill-soft);color:var(--text-secondary);">Off</span>
                     </div>
-                    <svg class="ui-icon" id="tfa-settings-chevron" style="width:18px;height:18px;color:var(--text-secondary);transition:transform 0.2s;"><use href="#icon-chevron-down"></use></svg>
+                    <svg class="ui-icon sc-chevron" id="tfa-settings-chevron"><use href="#icon-chevron-down"></use></svg>
                 </div>
                 <div id="tfa-settings-body" style="display:none;margin-top:12px;">
-                    <p style="font-size:12px;color:var(--text-secondary);line-height:1.5;margin-bottom:12px;">Adds a 6-digit code from an authenticator app (Google Authenticator, Authy, etc.) to your own login. Once enabled, this device won't ask again for 5 hours after your last successful check.</p>
-                    <button class="btn btn-primary" id="tfa-settings-enable-btn" style="width:100%;justify-content:center;" onclick="openTwoFactorSetupModal()">Set Up Authenticator</button>
+                    <p class="note-glass note-ok" style="font-size:12px;color:var(--text-secondary);line-height:1.5;margin-bottom:12px;">Adds a 6-digit code from an authenticator app (Google Authenticator, Authy, etc.) to your own login. Once enabled, this device won't ask again for 5 hours after your last successful check.</p>
+                    <button class="btn btn-primary btn-block" id="tfa-settings-enable-btn" onclick="openTwoFactorSetupModal()">Set Up Authenticator</button>
                     <button class="btn btn-danger" id="tfa-settings-disable-btn" style="width:100%;justify-content:center;display:none;" onclick="openTwoFactorDisableModal()">Disable Authenticator</button>
                 </div>
             </div>
 
             <div class="admin-card" style="margin-top:14px;" id="admin-accounts-card">
-                <div style="display:flex;justify-content:space-between;align-items:center;cursor:pointer;" onclick="toggleAdminAccounts()">
-                    <div style="display:flex;align-items:center;gap:8px;">
+                <div class="sc-head" onclick="toggleAdminAccounts()">
+                    <div class="row-center">
                         <svg class="ui-icon" style="width:18px;height:18px;color:var(--text-secondary);"><use href="#icon-users"></use></svg>
-                        <span style="font-size:15px;font-weight: 600;">Admin Accounts</span>
+                        <span class="sc-title">Admin Accounts</span>
                         <span id="admin-accounts-count" style="font-size:11.5px;font-weight: 700;padding:2px 9px;border-radius:20px;background:var(--accent-soft);color:var(--accent);">0</span>
                     </div>
                     <div style="display:flex;align-items:center;gap:10px;">
@@ -3639,12 +3706,12 @@
             </div>
 
             <div class="admin-card" style="margin-top:14px;border:1px solid rgba(250,62,62,0.35);">
-                <div style="display:flex;align-items:center;gap:8px;">
+                <div class="row-center">
                     <svg class="ui-icon" style="width:18px;height:18px;color:var(--danger);"><use href="#icon-warning"></use></svg>
                     <span style="font-size:15px;font-weight:700;color:var(--danger);">Dangerous Zone</span>
                 </div>
-                <p style="font-size:12px;color:var(--text-secondary);margin:8px 0 14px;">Sensitive account action below — you'll need to sign back in afterward.</p>
-                <button class="btn btn-danger" style="width:100%;justify-content:center;" onclick="handleAdminLogout()">Logout</button>
+                <p class="note-glass note-ok" style="font-size:12px;color:var(--text-secondary);margin:8px 0 14px;">Sensitive account action below — you'll need to sign back in afterward.</p>
+                <button class="btn btn-danger btn-block" onclick="handleAdminLogout()">Logout</button>
             </div>
 
         </div>
@@ -3665,7 +3732,7 @@
                         <input type="text" id="new-admin-username" placeholder="Enter Username" autocapitalize="none" autocorrect="off" autocomplete="off">
                         <label style="margin-top:14px;">Temporary Password</label>
                         <input type="password" id="new-admin-password" placeholder="Enter Password" autocomplete="new-password">
-                        <p style="font-size:12px;color:var(--text-secondary);margin-top:10px;">The new admin can sign in with this username/password right away and gets full access to the panel.</p>
+                        <p class="note-glass note-ok" style="font-size:12px;color:var(--text-secondary);margin-top:10px;">The new admin can sign in with this username/password right away and gets full access to the panel.</p>
                         <p id="add-admin-error" class="login-msg-error" style="display:none;"></p>
                     </div>
                 </div>
@@ -3693,7 +3760,7 @@
                     </div>
                 </div>
                 <div class="modal-body">
-                    <p style="font-size:13px;color:var(--text-secondary);line-height:1.5;margin-bottom:16px;">Open the Support Chat bot in Telegram and send this code:</p>
+                    <p class="note-glass note-ok" style="font-size:13px;color:var(--text-secondary);line-height:1.5;margin-bottom:16px;">Open the Support Chat bot in Telegram and send this code:</p>
                     <div class="code-secret-box" style="font-size:28px;font-weight:700;letter-spacing:4px;padding:18px;">
                         <span id="telegram-link-code">------</span>
                     </div>
@@ -3738,9 +3805,9 @@
             </div>
 
             <div class="admin-card" style="margin-top:14px;">
-                <div style="display:flex;justify-content:space-between;align-items:center;cursor:pointer;" onclick="toggleG2BulkTransactions()">
-                    <span style="font-size:15px;font-weight: 600;">G2Bulk Transactions</span>
-                    <svg class="ui-icon" id="g2bulk-tx-chevron" style="width:18px;height:18px;color:var(--text-secondary);transition:transform 0.2s;"><use href="#icon-chevron-down"></use></svg>
+                <div class="sc-head" onclick="toggleG2BulkTransactions()">
+                    <span class="sc-title">G2Bulk Transactions</span>
+                    <svg class="ui-icon sc-chevron" id="g2bulk-tx-chevron"><use href="#icon-chevron-down"></use></svg>
                 </div>
                 <div id="g2bulk-tx-body" style="display:none;margin-top:12px;">
                     <button class="btn btn-outline" id="g2bulk-tx-refresh-btn" onclick="loadG2BulkTransactions()" style="margin-bottom:10px;">Load / Refresh</button>
@@ -3808,8 +3875,8 @@
                 <button class="btn btn-outline game-edit-only" onclick="window.refreshGames && window.refreshGames()">↻ Refresh</button>
                 <button class="btn btn-outline game-edit-only" onclick="openGameReorder()">↕ Reorder</button>
                 <button class="btn btn-outline game-edit-only" onclick="openAddServerPicker()">+ Add Server</button>
-                <button class="btn btn-outline game-edit-only" onclick="copyAllGameNames()">📋 Copy Names</button>
-                <button type="button" class="btn btn-outline" id="game-edit-mode-btn" onclick="toggleGameListEditMode()">✏️ Edit Mode: Off</button>
+                <button class="btn btn-outline game-edit-only" onclick="copyAllGameNames()">Copy Names</button>
+                <button type="button" class="btn btn-outline" id="game-edit-mode-btn" onclick="toggleGameListEditMode()">Edit Mode: Off</button>
                 <button class="btn btn-primary game-edit-only" onclick="openGameEditor()">+ Add</button>
             </div>
             <div style="display:flex; align-items:center; gap:8px; margin-bottom:14px;">
@@ -3847,8 +3914,8 @@
                             <div id="game-action-sheet-server" style="font-size:12px;color:var(--text-secondary);margin-top:2px;"></div>
                         </div>
                     </div>
-                    <button class="btn btn-outline" style="width:100%;justify-content:center;" onclick="editGameFromSheet()">Edit</button>
-                    <button class="btn btn-danger" style="width:100%;justify-content:center;" onclick="deleteGameFromSheet()">Delete</button>
+                    <button class="btn btn-outline btn-block" onclick="editGameFromSheet()">Edit</button>
+                    <button class="btn btn-danger btn-block" onclick="deleteGameFromSheet()">Delete</button>
                 </div>
             </div>
         </div>
@@ -3882,8 +3949,8 @@
             <h2 class="title-header" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
                 <span>Active Orders</span>
                 <span style="display:flex;gap:6px;flex-wrap:wrap;">
-                    <button class="btn btn-outline" style="flex:unset; padding: 4px 10px; font-size:12px;" onclick="exportOrdersCSV()"><svg class="ui-icon" style="width:13px;height:13px;"><use href="#icon-download"></use></svg> Export CSV</button>
-                    <button class="btn btn-primary" style="flex:unset; padding: 4px 10px; font-size:12px;" onclick="fetchOrders()">Refresh</button>
+                    <button class="btn btn-outline btn-sm" onclick="exportOrdersCSV()"><svg class="ui-icon" style="width:13px;height:13px;"><use href="#icon-download"></use></svg> Export CSV</button>
+                    <button class="btn btn-primary btn-sm" onclick="fetchOrders()">Refresh</button>
                 </span>
             </h2>
 
@@ -3953,6 +4020,9 @@
                 </div>
             </div>
 
+            <!-- Earlier days: nothing is read until a day's button is tapped -->
+            <div class="orders-day-bar" id="orders-day-bar"></div>
+
             <!-- Firebase Container -->
             <div id="orders-container">
                 <p class="empty-msg">Loading orders...</p>
@@ -3963,7 +4033,7 @@
         <div id="topup-list" class="page-section">
             <h2 class="title-header">
                 <span>Wallet Top Ups</span>
-                <button class="btn btn-outline" style="flex:unset; padding: 4px 10px; font-size:12px;" onclick="exportTopupsCSV()"><svg class="ui-icon" style="width:13px;height:13px;"><use href="#icon-download"></use></svg> Export CSV</button>
+                <button class="btn btn-outline btn-sm" onclick="exportTopupsCSV()"><svg class="ui-icon" style="width:13px;height:13px;"><use href="#icon-download"></use></svg> Export CSV</button>
             </h2>
 
             <div class="quick-topup-grid">
@@ -4058,20 +4128,20 @@
         <div id="notify-list" class="page-section">
             <h2 class="title-header">Send Notification</h2>
             <div class="admin-card">
-                <label style="font-size:13px;font-weight: 500;color:var(--text-secondary);">Send to</label>
+                <label class="u-label">Send to</label>
                 <select id="notif-audience" onchange="onNotifAudienceChange()" style="width:100%;box-sizing:border-box;padding:10px;border:1px solid var(--border-glass);background:var(--bg-subtle-2);color:var(--text-primary);border-radius:12px;font-size:14px;font-family:inherit;margin:6px 0 12px;">
                     <option value="all">All Users</option>
                     <option value="user">Specific User (by ID)</option>
                 </select>
                 <div id="notif-target-user-wrap" style="display:none;">
-                    <label style="font-size:13px;font-weight: 500;color:var(--text-secondary);">User ID</label>
-                    <input type="text" id="notif-target-user" placeholder="Enter User ID" style="width:100%;padding:10px;border:1px solid var(--border-glass);background:var(--bg-subtle-2);color:var(--text-primary);border-radius:12px;font-size:14px;font-family:inherit;box-sizing:border-box;margin:6px 0 12px;">
+                    <label class="u-label">User ID</label>
+                    <input class="field field-full" type="text" id="notif-target-user" placeholder="Enter User ID">
                 </div>
-                <label style="font-size:13px;font-weight: 500;color:var(--text-secondary);">Title</label>
-                <input type="text" id="notif-title" placeholder="Enter Title" style="width:100%;padding:10px;border:1px solid var(--border-glass);background:var(--bg-subtle-2);color:var(--text-primary);border-radius:12px;font-size:14px;font-family:inherit;box-sizing:border-box;margin:6px 0 12px;">
-                <label style="font-size:13px;font-weight: 500;color:var(--text-secondary);">Intro</label>
-                <input type="text" id="notif-intro" placeholder="Enter Short Preview" style="width:100%;padding:10px;border:1px solid var(--border-glass);background:var(--bg-subtle-2);color:var(--text-primary);border-radius:12px;font-size:14px;font-family:inherit;box-sizing:border-box;margin:6px 0 12px;">
-                <label style="font-size:13px;font-weight: 500;color:var(--text-secondary);">Details</label>
+                <label class="u-label">Title</label>
+                <input class="field field-full" type="text" id="notif-title" placeholder="Enter Title">
+                <label class="u-label">Intro</label>
+                <input class="field field-full" type="text" id="notif-intro" placeholder="Enter Short Preview">
+                <label class="u-label">Details</label>
                 <textarea id="notif-details" placeholder="Enter Announcement Details" rows="5" style="width:100%;box-sizing:border-box;padding:10px;border:1px solid var(--border-glass);background:var(--bg-subtle-2);color:var(--text-primary);border-radius:12px;font-size:14px;margin:6px 0 12px;font-family:inherit;resize:vertical;"></textarea>
                 <button class="btn btn-primary" id="send-notif-btn" onclick="sendNotification()">Send to All Users</button>
             </div>
@@ -4086,8 +4156,8 @@
         <div id="ticker-list" class="page-section">
             <h2 class="title-header">Store Ticker</h2>
             <div class="admin-card">
-                <label style="font-size:13px;font-weight: 500;color:var(--text-secondary);">New message</label>
-                <input type="text" id="ticker-text" placeholder="Enter Ticker Text" maxlength="120" style="width:100%;padding:10px;border:1px solid var(--border-glass);background:var(--bg-subtle-2);color:var(--text-primary);border-radius:12px;font-size:14px;font-family:inherit;box-sizing:border-box;margin:6px 0 12px;">
+                <label class="u-label">New message</label>
+                <input class="field field-full" type="text" id="ticker-text" placeholder="Enter Ticker Text" maxlength="120">
                 <button class="btn btn-primary" id="add-ticker-btn" onclick="addAnnouncement()">Add to Ticker</button>
             </div>
             <h2 class="title-header" style="margin-top:20px;">Current Messages</h2>
@@ -4098,7 +4168,7 @@
 
         <!-- PAYMENT METHODS PAGE (Firebase Connected) -->
         <div id="payment-list" class="page-section">
-            <h2 class="title-header"><span>Payment Methods</span> <button class="btn btn-primary" style="flex:unset; padding: 4px 10px; font-size:12px;" onclick="openPaymentEditor()">+ Add</button></h2>
+            <h2 class="title-header"><span>Payment Methods</span> <button class="btn btn-primary btn-sm" onclick="openPaymentEditor()">+ Add</button></h2>
             <div id="admin-payment-container">
                 <p class="empty-msg">Loading payment methods...</p>
             </div>
@@ -4108,8 +4178,8 @@
         <div id="user-list" class="page-section">
             <h2 class="title-header">
                 <span>Manage Users <span id="user-list-count-badge" class="badge badge-success" style="margin-left:6px;vertical-align:middle;" title="Total registered users">0</span></span>
-                <button class="btn btn-primary" style="flex:unset; padding: 4px 10px; font-size:12px;" onclick="fetchUsers()"><svg class="ui-icon" style="width:13px;height:13px;"><use href="#icon-refresh"></use></svg> Refresh</button>
-                <button class="btn btn-outline" style="flex:unset; padding: 4px 10px; font-size:12px;" onclick="exportUsersCSV()"><svg class="ui-icon" style="width:13px;height:13px;"><use href="#icon-download"></use></svg> Export CSV</button>
+                <button class="btn btn-primary btn-sm" onclick="fetchUsers()"><svg class="ui-icon" style="width:13px;height:13px;"><use href="#icon-refresh"></use></svg> Refresh</button>
+                <button class="btn btn-outline btn-sm" onclick="exportUsersCSV()"><svg class="ui-icon" style="width:13px;height:13px;"><use href="#icon-download"></use></svg> Export CSV</button>
             </h2>
             <div class="udp-tabs" id="user-list-tabs" style="margin-bottom:10px;">
                 <button type="button" class="udp-tab active" data-utab="all" onclick="setUserListTab('all')">All Users <span id="ult-count-all">0</span></button>
@@ -4290,7 +4360,7 @@
                 </div>
                 <input type="text" id="edit-game-name" placeholder="Enter Game Name">
 
-                <label>Server / Region <span style="font-weight:400;color:var(--text-muted);">(optional)</span></label>
+                <label>Server / Region <span class="u-muted">(optional)</span></label>
                 <input type="text" id="edit-game-server-name" placeholder="Enter Server Name">
                 <div id="server-variant-thumbs" style="display:none;"></div>
 
@@ -4298,10 +4368,10 @@
                 <input type="hidden" id="edit-game-category" value="">
                 <div class="category-chip-select" id="game-category-select"></div>
 
-                <label>Description <span style="font-weight:400;color:var(--text-muted);">(optional — shown to customers under the game banner)</span></label>
+                <label>Description <span class="u-muted">(optional — shown to customers under the game banner)</span></label>
                 <textarea id="edit-game-description" rows="4" placeholder="Enter Description" style="width:100%;padding:10px;border-radius:12px;border:1px solid var(--border-glass);background:var(--bg-subtle-2);color:var(--text-primary);font-size:14px;font-family:inherit;resize:vertical;box-sizing:border-box;"></textarea>
 
-                <label>Redeem Link <span style="font-weight:400;color:var(--text-muted);">(optional — "Redeem Now" button under the Description opens this link)</span></label>
+                <label>Redeem Link <span class="u-muted">(optional — "Redeem Now" button under the Description opens this link)</span></label>
                 <input type="text" id="edit-game-redeem-link" inputmode="url" autocapitalize="off" autocomplete="off" spellcheck="false" placeholder="https://..." style="width:100%;padding:10px;border-radius:12px;border:1px solid var(--border-glass);background:var(--bg-subtle-2);color:var(--text-primary);font-size:14px;font-family:inherit;box-sizing:border-box;">
 
                 <!-- App deep-link fields: purely optional. When set, Store.html
@@ -4315,13 +4385,13 @@
                      this display:none once the feature's back in use. -->
                 <div style="display:none;margin:4px 0 2px;padding:12px;background:var(--fill-soft);border-radius:12px;border:1px solid var(--fill-soft);">
                     <p style="font-size:11px;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.3px;margin-bottom:8px;">App Link (optional)</p>
-                    <label style="margin-top:0;">Android Package <span style="font-weight:400;color:var(--text-muted);">(e.g. com.mobile.legends)</span></label>
+                    <label style="margin-top:0;">Android Package <span class="u-muted">(e.g. com.mobile.legends)</span></label>
                     <input type="text" id="edit-game-app-android-package" placeholder="Enter Android Package Name">
-                    <label>Android Scheme <span style="font-weight:400;color:var(--text-muted);">(custom URL scheme, without "://")</span></label>
+                    <label>Android Scheme <span class="u-muted">(custom URL scheme, without "://")</span></label>
                     <input type="text" id="edit-game-app-android-scheme" placeholder="Enter Android Scheme">
-                    <label>Android Store URL <span style="font-weight:400;color:var(--text-muted);">(optional — auto-built from package name if blank)</span></label>
+                    <label>Android Store URL <span class="u-muted">(optional — auto-built from package name if blank)</span></label>
                     <input type="text" id="edit-game-app-android-store-url" placeholder="Enter Play Store URL">
-                    <label>iOS Scheme <span style="font-weight:400;color:var(--text-muted);">(custom URL scheme, without "://")</span></label>
+                    <label>iOS Scheme <span class="u-muted">(custom URL scheme, without "://")</span></label>
                     <input type="text" id="edit-game-app-ios-scheme" placeholder="Enter iOS Scheme">
                     <label>iOS Store URL</label>
                     <input type="text" id="edit-game-app-ios-store-url" placeholder="Enter App Store URL">
@@ -4373,7 +4443,7 @@
 
                 <div style="display:flex;gap:10px;align-items:flex-start;">
                     <div style="flex:0 0 calc((100% - 10px) * 0.36);min-width:0;">
-                        <label>Game Image <span style="font-weight:400;color:var(--text-muted);">(1:1)</span></label>
+                        <label>Game Image <span class="u-muted">(1:1)</span></label>
                         <label class="img-update-box ratio-square" id="game-img-update-box" for="edit-game-file">
                             <div class="img-update-icon"><svg class="ui-icon"><use href="#icon-camera"></use></svg></div>
                             <span class="img-update-label">Image Update</span>
@@ -4386,7 +4456,7 @@
                         <p id="upload-status" style="font-size:12px;color:var(--text-secondary);display:none;"></p>
                     </div>
                     <div style="flex:1;min-width:0;">
-                        <label>Banner Image <span style="font-weight:400;color:var(--text-muted);">(16:9)</span></label>
+                        <label>Banner Image <span class="u-muted">(16:9)</span></label>
                         <label class="img-update-box ratio-banner" id="game-banner-update-box" for="edit-game-banner-file">
                             <div class="img-update-icon"><svg class="ui-icon"><use href="#icon-camera"></use></svg></div>
                             <span class="img-update-label">Banner Update</span>
@@ -4500,7 +4570,7 @@
                             <svg class="picker-btn-chevron ui-icon"><use href="#icon-chevron-down"></use></svg>
                         </div>
                         <p id="fazercard-import-status" style="font-size:11px;color:var(--text-muted);margin-top:-4px;white-space:pre-wrap;"></p>
-                        <label style="margin-top:10px;">G2Bulk ID-Check Code <span style="font-weight:400;color:var(--text-muted);">(optional fallback)</span></label>
+                        <label style="margin-top:10px;">G2Bulk ID-Check Code <span class="u-muted">(optional fallback)</span></label>
                         <input type="text" id="edit-game-g2bulk-idcheck-code" placeholder="Enter Game Code" style="text-transform:none;">
                         <p style="font-size:11px;color:var(--text-muted);margin-top:-4px;">FazerCards ID check ခ်လုပ်မရရင် (unsupported or down) ဒီ G2Bulk code ကို အသုံးပြုပြီး player name ကိုပဲ ပြပေးမယ် — order ကတော့ FazerCards ကနေပဲ ဆက်ဆောင်ရွက်ပါမယ်။</p>
                     </div>
@@ -4747,9 +4817,9 @@
 
                 <label style="display:flex;align-items:center;gap:8px;margin-top:14px;cursor:pointer;" for="edit-payment-hot">
                     <input type="checkbox" id="edit-payment-hot" style="width:auto;margin:0;">
-                    <span>🔥 Mark as Hot</span>
+                    <span>Mark as Hot</span>
                 </label>
-                <p style="font-size:12px;color:var(--text-secondary);margin-top:-6px;">Shows a "🔥 Hot" badge on this method here and on the Store checkout page.</p>
+                <p style="font-size:12px;color:var(--text-secondary);margin-top:-6px;">Shows a "Hot" badge on this method here and on the Store checkout page.</p>
 
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:6px;">
                     <div>
@@ -4808,7 +4878,7 @@
                 <label>Base URL</label>
                 <input type="text" id="jcplays-base-url" placeholder="Enter API Base URL">
 
-                <label>Proxy URL <span style="font-weight:400;color:var(--text-muted);">(your Cloudflare Worker's /jcplays-proxy route)</span></label>
+                <label>Proxy URL <span class="u-muted">(your Cloudflare Worker's /jcplays-proxy route)</span></label>
                 <input type="text" id="jcplays-proxy-url" placeholder="Enter Proxy URL" autocomplete="off">
                 <p style="font-size:11.5px;color:var(--text-muted);margin-top:-6px;">Required — JCPlays doesn't send CORS headers, so requests can't go straight from this browser to jcplays.com. They're signed and forwarded through this Worker route instead.</p>
 
@@ -4824,10 +4894,10 @@
                     <button type="button" class="secret-toggle-btn" tabindex="-1" aria-label="Show" onclick="toggleSecretVisibility('jcplays-mkey', this)"><svg class="ui-icon"><use href="#icon-eye"></use></svg></button>
                 </div>
 
-                <label>Low Balance Alert <span style="font-weight:400;color:var(--text-muted);">(points, 0 = off)</span></label>
+                <label>Low Balance Alert <span class="u-muted">(points, 0 = off)</span></label>
                 <input type="number" id="jcplays-low-balance-alert" placeholder="Enter Alert Amount" step="1" min="0" title="Header will show a warning when the smile points balance drops below this amount">
 
-                <label>USD → MMK Rate <span style="font-weight:400;color:var(--text-muted);">(JCPlays Cost + Balance တွက်ရန် — အလွတ်ထားရင် G2Bulk rate ကို သုံးမယ်)</span></label>
+                <label>USD → MMK Rate <span class="u-muted">(JCPlays Cost + Balance တွက်ရန် — အလွတ်ထားရင် G2Bulk rate ကို သုံးမယ်)</span></label>
                 <input type="number" id="jcplays-usd-rate" placeholder="Blank = G2Bulk rate" step="1" min="0">
 
                 <div class="switch-row" style="margin-top:14px;">
@@ -4867,10 +4937,10 @@
                 <label>USD → MMK Rate</label>
                 <input type="number" id="g2bulk-usd-rate" placeholder="Enter USD Rate" step="1">
 
-                <label>Low Balance Alert <span style="font-weight:400;color:var(--text-muted);">(USD, 0 = off)</span></label>
+                <label>Low Balance Alert <span class="u-muted">(USD, 0 = off)</span></label>
                 <input type="number" id="g2bulk-low-balance-alert" placeholder="Enter Alert Amount" step="1" min="0" title="Header will show a warning when the wallet balance drops below this amount">
 
-                <label>Webhook URL <span style="font-weight:400;color:var(--text-muted);">(optional)</span></label>
+                <label>Webhook URL <span class="u-muted">(optional)</span></label>
                 <input type="text" id="g2bulk-webhook-url" placeholder="Enter Webhook URL" autocomplete="off">
 
                 <label>Webhook Secret</label>
@@ -4912,13 +4982,13 @@
                 <p id="fazercard-status" style="font-size:12px;color:var(--text-secondary);display:none;margin-top:4px;"></p>
                 <div id="fazercard-result-grid" style="display:none;"></div>
 
-                <label>Proxy URL <span style="font-weight:400;color:var(--text-muted);">(optional — only if direct calls get CORS-blocked)</span></label>
+                <label>Proxy URL <span class="u-muted">(optional — only if direct calls get CORS-blocked)</span></label>
                 <input type="text" id="fazercard-proxy-url" placeholder="Enter Proxy URL" autocomplete="off">
                 <p style="font-size:11.5px;color:var(--text-muted);margin-top:-6px;">Leave blank to call api.fzr.cards directly from this browser (like G2Bulk). Only fill this in if Verify Key fails with a network/CORS error — then it needs a Worker route like JCPlays.</p>
-                <label>USD → MMK Rate <span style="font-weight:400;color:var(--text-muted);">(for catalogue import Cost conversion)</span></label>
+                <label>USD → MMK Rate <span class="u-muted">(for catalogue import Cost conversion)</span></label>
                 <input type="number" id="fazercard-usd-rate" placeholder="Enter USD Rate" step="1">
 
-                <label>Low Balance Alert <span style="font-weight:400;color:var(--text-muted);">(USD, 0 = off)</span></label>
+                <label>Low Balance Alert <span class="u-muted">(USD, 0 = off)</span></label>
                 <input type="number" id="fazercard-low-balance-alert" placeholder="Enter Alert Amount" step="1" min="0" title="Header will show a warning when the wallet balance drops below this amount">
 
                 <div class="switch-row" style="margin-top:14px;">
@@ -4936,7 +5006,7 @@
                      ever returned by the API right after creation or a regenerate,
                      so we never try to read it back — just display whatever the
                      last regenerate call returned. -->
-                <label style="margin-top:16px;border-top:1px solid var(--border);padding-top:14px;">Webhook URL <span style="font-weight:400;color:var(--text-muted);">(FazerCards pushes order/delivery events here)</span></label>
+                <label style="margin-top:16px;border-top:1px solid var(--border);padding-top:14px;">Webhook URL <span class="u-muted">(FazerCards pushes order/delivery events here)</span></label>
                 <input type="text" id="fazercard-webhook-url" placeholder="Enter Webhook URL" autocomplete="off">
                 <div class="switch-row" style="margin-top:8px;">
                     <span class="switch-label" style="flex:1;font-weight:400;">Webhook enabled</span>
@@ -4946,9 +5016,9 @@
                     </label>
                 </div>
                 <div style="display:flex;gap:8px;margin-top:8px;">
-                    <button type="button" class="btn btn-outline" style="flex:unset;padding:8px 14px;font-size:13px;" id="save-fazercard-webhook-btn" onclick="saveFazerCardWebhook()">Save Webhook</button>
-                    <button type="button" class="btn btn-outline" style="flex:unset;padding:8px 14px;font-size:13px;" id="delete-fazercard-webhook-btn" onclick="deleteFazerCardWebhook()">Remove Webhook</button>
-                    <button type="button" class="btn btn-outline" style="flex:unset;padding:8px 14px;font-size:13px;" id="check-fazercard-webhook-status-btn" onclick="loadFazerCardWebhookStatus()">Check Live Status</button>
+                    <button type="button" class="btn btn-outline btn-md" id="save-fazercard-webhook-btn" onclick="saveFazerCardWebhook()">Save Webhook</button>
+                    <button type="button" class="btn btn-outline btn-md" id="delete-fazercard-webhook-btn" onclick="deleteFazerCardWebhook()">Remove Webhook</button>
+                    <button type="button" class="btn btn-outline btn-md" id="check-fazercard-webhook-status-btn" onclick="loadFazerCardWebhookStatus()">Check Live Status</button>
                 </div>
                 <p id="fazercard-webhook-status" style="font-size:12px;color:var(--text-secondary);display:none;margin-top:6px;"></p>
                 <div id="fazercard-webhook-health" style="display:none;margin-top:6px;font-size:12px;color:var(--text-secondary);border:1px solid var(--border);border-radius:8px;padding:8px;"></div>
@@ -4960,8 +5030,8 @@
                 </div>
                 <p style="font-size:11.5px;color:var(--text-muted);margin-top:-6px;">Regenerating invalidates the old secret immediately — deliveries signed with it stop verifying.</p>
                 <div style="display:flex;gap:8px;margin-top:8px;">
-                    <button type="button" class="btn btn-outline" style="flex:unset;padding:8px 14px;font-size:13px;" id="regen-fazercard-secret-btn" onclick="regenerateFazerCardWebhookSecret()">Regenerate Secret</button>
-                    <button type="button" class="btn btn-outline" style="flex:unset;padding:8px 14px;font-size:13px;" id="view-fazercard-deliveries-btn" onclick="loadFazerCardWebhookDeliveries()">View Recent Deliveries</button>
+                    <button type="button" class="btn btn-outline btn-md" id="regen-fazercard-secret-btn" onclick="regenerateFazerCardWebhookSecret()">Regenerate Secret</button>
+                    <button type="button" class="btn btn-outline btn-md" id="view-fazercard-deliveries-btn" onclick="loadFazerCardWebhookDeliveries()">View Recent Deliveries</button>
                 </div>
                 <div id="fazercard-deliveries-list" style="display:none;margin-top:8px;max-height:180px;overflow-y:auto;font-size:12px;border:1px solid var(--border);border-radius:8px;padding:8px;"></div>
             </div>
@@ -4991,7 +5061,7 @@
                 <label>Chat ID</label>
                 <input type="text" id="tg-chat-id" placeholder="Enter Chat ID" autocomplete="off">
 
-                <label style="margin-top:14px;">Webhook URL <span style="font-weight:400;color:var(--text-muted);">(pca-telegram-bot Worker)</span></label>
+                <label style="margin-top:14px;">Webhook URL <span class="u-muted">(pca-telegram-bot Worker)</span></label>
                 <input type="text" id="tg-webhook-url" placeholder="Enter Webhook URL" autocomplete="off">
 
                 <label>Webhook Secret</label>
@@ -5000,7 +5070,7 @@
                     <button type="button" class="secret-toggle-btn" tabindex="-1" aria-label="Show" onclick="toggleSecretVisibility('tg-webhook-secret', this)"><svg class="ui-icon"><use href="#icon-eye"></use></svg></button>
                 </div>
 
-                <label style="margin-top:14px;">Bot Username <span style="font-weight:400;color:var(--text-muted);">(optional — for the "Open Telegram" link button)</span></label>
+                <label style="margin-top:14px;">Bot Username <span class="u-muted">(optional — for the "Open Telegram" link button)</span></label>
                 <input type="text" id="tg-bot-username" placeholder="Enter Bot Username" autocomplete="off">
 
                 <div class="switch-row" style="margin-top:14px;">
@@ -5108,9 +5178,79 @@
             if (mmEl) mmEl.textContent = String(now.getMinutes()).padStart(2, '0');
             if (ssEl) ssEl.textContent = String(now.getSeconds()).padStart(2, '0');
             if (dateEl) dateEl.textContent = now.toLocaleDateString('en-GB', { weekday: 'short', day: '2-digit', month: 'short' });
+            if (window.__hcTick) window.__hcTick(now);
         }
         updateHeaderClock();
         setInterval(updateHeaderClock, 1000);
+
+        // Tap the header clock -> it expands (animated) into a card with the exact date.
+        (function () {
+            let pop = null, isOpen = false;
+            const pad = n => String(n).padStart(2, '0');
+            function build() {
+                pop = document.createElement('div');
+                pop.id = 'hc-pop';
+                pop.setAttribute('role', 'dialog');
+                pop.setAttribute('aria-label', 'Current date and time');
+                pop.innerHTML = '<div class="hcp-time" id="hcp-time">--:--:--</div>'
+                    + '<div><div class="hcp-day" id="hcp-day">--</div><div class="hcp-date" id="hcp-date">--</div></div>'
+                    + '<div class="hcp-grid">'
+                    + '<div class="hcp-cell"><b id="hcp-doy">--</b><span>Day of year</span></div>'
+                    + '<div class="hcp-cell"><b id="hcp-wk">--</b><span>Week</span></div>'
+                    + '<div class="hcp-cell"><b id="hcp-tz">--</b><span id="hcp-tzn">Zone</span></div>'
+                    + '</div>';
+                document.body.appendChild(pop);
+            }
+            function fill(now) {
+                if (!pop) return;
+                const y = now.getFullYear();
+                const doy = Math.round((Date.UTC(y, now.getMonth(), now.getDate()) - Date.UTC(y, 0, 0)) / 86400000);
+                const daysInYear = ((y % 4 === 0 && y % 100 !== 0) || y % 400 === 0) ? 366 : 365;
+                // ISO-8601 week number
+                const t = new Date(Date.UTC(y, now.getMonth(), now.getDate()));
+                const dn = t.getUTCDay() || 7;
+                t.setUTCDate(t.getUTCDate() + 4 - dn);
+                const wk = Math.ceil((((t - Date.UTC(t.getUTCFullYear(), 0, 1)) / 86400000) + 1) / 7);
+                const off = -now.getTimezoneOffset(), sign = off >= 0 ? '+' : '-', ao = Math.abs(off);
+                const offTxt = 'UTC' + sign + Math.floor(ao / 60) + (ao % 60 ? ':' + pad(ao % 60) : '');
+                let zone = ''; try { zone = Intl.DateTimeFormat().resolvedOptions().timeZone || ''; } catch (e) { /* ignore */ }
+                const set = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+                set('hcp-time', pad(now.getHours()) + ':' + pad(now.getMinutes()) + ':' + pad(now.getSeconds()));
+                set('hcp-day', now.toLocaleDateString('en-GB', { weekday: 'long' }));
+                set('hcp-date', now.getDate() + ' ' + now.toLocaleDateString('en-GB', { month: 'long' }) + ' ' + y);
+                set('hcp-doy', doy + ' / ' + daysInYear);
+                set('hcp-wk', 'W' + pad(wk));
+                set('hcp-tz', offTxt);
+                set('hcp-tzn', zone ? zone.split('/').pop().replace(/_/g, ' ') : 'Zone');
+            }
+            function place() {
+                const clock = document.getElementById('header-clock');
+                if (!clock || !pop) return;
+                const r = clock.getBoundingClientRect(), w = pop.offsetWidth;
+                const left = Math.min(Math.max(12, r.left), Math.max(12, window.innerWidth - w - 12));
+                pop.style.left = left + 'px';
+                pop.style.top = (r.bottom + 8) + 'px';
+                pop.style.setProperty('--hc-ox', Math.max(0, r.left + r.width / 2 - left) + 'px');
+            }
+            function setOpen(v) {
+                const clock = document.getElementById('header-clock');
+                if (!clock) return;
+                if (!pop) build();
+                isOpen = v;
+                clock.classList.toggle('hc-open', v);
+                if (v) { fill(new Date()); place(); requestAnimationFrame(() => pop.classList.add('show')); }
+                else pop.classList.remove('show');
+            }
+            window.__hcTick = now => { if (isOpen) fill(now); };
+            document.addEventListener('click', (e) => {
+                const onClock = e.target.closest && e.target.closest('#header-clock');
+                if (onClock) { setOpen(!isOpen); return; }
+                if (isOpen && pop && !pop.contains(e.target)) setOpen(false);
+            });
+            document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && isOpen) setOpen(false); });
+            window.addEventListener('resize', () => { if (isOpen) place(); });
+            window.addEventListener('scroll', () => { if (isOpen) place(); }, true);
+        })();
 
         // Connection status — drives the #offline-banner strip plus a
         // dot+text chip next to the header clock, with four states:
@@ -5403,6 +5543,7 @@
             // this one waits its turn so back-to-back calls (e.g. reject then
             // confirm) don't overwrite each other before the user can read them.
             toastQueue.push({ message, type });
+            if (window.__onToast) { try { window.__onToast(message, type); } catch (e) { /* ignore */ } }
             processToastQueue();
         }
         function processToastQueue() {
@@ -5592,6 +5733,48 @@
 
         window.showPage = showPage;
         window.showToast = showToast;
+        // Settings tabs: after pressing Save (or a similar action button) and getting a success toast, the tab closes by itself.
+        (function () {
+            let pend = null;
+            document.addEventListener('click', (e) => {
+                const btn = e.target.closest && e.target.closest('button');
+                if (!btn) return;
+                const card = btn.closest('#settings .admin-card');
+                if (!card) return;
+                const head = Array.from(card.children).find(c => c.matches && c.matches('div[onclick^="toggle"]'));
+                if (!head || head.contains(btn)) return;
+                if (!/save|notify|reopen|apply|move costs/i.test((btn.id || '') + ' ' + btn.textContent)) return;
+                pend = { card, head, t: Date.now() };
+            }, true);
+            (function () {
+            const setNotes = (card, ok) => { if (!card) return; card.querySelectorAll('p.note-glass').forEach(n => { n.classList.toggle('note-ok', !!ok); n.classList.toggle('note-bad', !ok); }); };
+            const hasTimes = id => { const b = document.getElementById(id); return !!(b && b.querySelector('input, select')); };
+            const sync = () => {
+                const pill = document.getElementById('maint-status-pill');
+                if (pill) setNotes(document.getElementById('settings-card-maintenance'), /^\s*open\s*$/i.test(pill.textContent));
+                setNotes(document.getElementById('settings-card-autoprice'), hasTimes('cost-schedule-list'));
+                setNotes(document.getElementById('settings-card-autoprice-sell'), hasTimes('price-schedule-list'));
+            };
+            const start = () => {
+                sync();
+                ['maint-status-pill', 'cost-schedule-list', 'price-schedule-list'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) new MutationObserver(sync).observe(el, { childList: true, subtree: true, characterData: true });
+                });
+            };
+            if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start); else start();
+        })();
+        window.__onToast = (msg, type) => {
+                if (!pend) return;
+                if (type === 'fail' || type === 'warning' || type === 'cancel') { pend = null; return; }
+                if (Date.now() - pend.t > 15000) { pend = null; return; }
+                const p = pend; pend = null;
+                setTimeout(() => {
+                    const body = p.card.querySelector(':scope > div[id$="-body"]');
+                    if (body && body.style.display !== 'none') p.head.click();
+                }, 700);
+            };
+        })();
         window.showActionDialog = showActionDialog;
         window.closeActionDialog = closeActionDialog;
         window.confirmActionDialog = confirmActionDialog;
@@ -6118,8 +6301,8 @@
             if (!sel || !hint) return;
             const a = ADMIN_ACCOUNTS.find(x => x.username === sel.value);
             hint.textContent = !sel.value ? 'Main Admin မရွေးရသေးရင် Order တွေ shared Telegram chat ကိုပဲ သွားပါမယ်။'
-                : (!a || !a.telegramChatId) ? '⚠️ ဒီ admin Telegram မချိတ်ရသေးလို့ Order တွေ shared chat ကိုပဲ ဆက်သွားပါမယ်။'
-                : (a.transferEnabled === false ? 'ℹ️ Main Admin က Transfer ပိတ်ထားတယ် — Order အားလုံး Main Admin ဆီပဲသွားမယ်၊ Transfer ခလုတ်မပေါ်ဘူး။' : '✅ Order အသစ်အားလုံး ဒီ admin ဆီကို သွားပါမယ်။');
+                : (!a || !a.telegramChatId) ? 'ဒီ admin Telegram မချိတ်ရသေးလို့ Order တွေ shared chat ကိုပဲ ဆက်သွားပါမယ်။'
+                : (a.transferEnabled === false ? 'ℹ️ Main Admin က Transfer ပိတ်ထားတယ် — Order အားလုံး Main Admin ဆီပဲသွားမယ်၊ Transfer ခလုတ်မပေါ်ဘူး။' : 'Order အသစ်အားလုံး ဒီ admin ဆီကို သွားပါမယ်။');
         }
         async function toggleOrderRoutingSettings() {
             const body = document.getElementById('order-routing-body');
@@ -7046,7 +7229,7 @@
                     <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border-glass);display:flex;justify-content:space-between;align-items:center;gap:8px;">
                         <div style="min-width:0;">
                             <span style="font-size:11.5px;color:var(--text-secondary);display:block;margin-bottom:3px;">Order Transfer</span>
-                            <span style="font-size:12.5px;font-weight:600;color:${transferOnFlag ? 'var(--text-primary)' : 'var(--text-muted)'};">${transferOnFlag ? 'ON ✅' : 'OFF ⛔'}</span>
+                            <span style="font-size:12.5px;font-weight:600;color:${transferOnFlag ? 'var(--text-primary)' : 'var(--text-muted)'};">${transferOnFlag ? 'ON ' : 'OFF '}</span>
                         </div>
                         ${isYou ? `<label style="display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer;"><input type="checkbox" ${transferOnFlag ? 'checked' : ''} onchange="toggleMyTransfer(this.checked)" style="width:18px;height:18px;"> ${transferOnFlag ? 'Turn OFF' : 'Turn ON'}</label>` : ''}
                     </div>
@@ -7961,12 +8144,21 @@
                     // order that is NOT finished yet (Pending/Processing/other) however old. Finished (Success/Fail)
                     // orders older than that simply stop appearing here - they are NOT deleted, so the customer's
                     // own Order History in the store is untouched. Two cheap single-field queries (no new index).
-                    const sinceDate = new Date(Date.now() - ADMIN_ORDER_WINDOW_DAYS * 24 * 60 * 60 * 1000);
+                    // DAY-BY-DAY LOADING: only TODAY's orders + any order that is still open (Pending/Processing,
+                    // however old) are read here. Earlier days are read only when the admin taps that day's button
+                    // on the Orders page (loadOrdersDay) - or when the Dashboard needs its 7-day numbers
+                    // (ensureOrdersDays). Finished orders of days already read are kept in memory on Refresh, not re-read.
+                    const t0 = new Date(); t0.setHours(0, 0, 0, 0);
                     const [recentSnap, openSnap] = await Promise.all([
-                        getDocs(query(collection(db, "orders"), where("timestamp", ">=", sinceDate))),
+                        getDocs(query(collection(db, "orders"), where("timestamp", ">=", t0))),
                         getDocs(query(collection(db, "orders"), where("status", "not-in", ["Success", "Fail"])))
                     ]);
                     const newOrders = {};
+                    Object.values(ORDERS).forEach(o => {
+                        if (o.status !== 'Success' && o.status !== 'Fail') return;
+                        const ms = ovMs(o.timestamp);
+                        if (ms && ms < t0.getTime() && ordersLoadedDays.has(ordersDayKeyOf(o))) newOrders[o.id] = o;
+                    });
                     [recentSnap, openSnap].forEach(snap => snap.forEach(docSnap => { newOrders[docSnap.id] = { id: docSnap.id, ...docSnap.data() }; }));
                     ORDERS = newOrders;
                     ordersLoadedAt = Date.now();
@@ -7995,6 +8187,130 @@
         }
         window.ensureOrdersLoaded = ensureOrdersLoaded;
         window.ordersAreLoaded = () => !!ordersLoadedAt;
+
+        // ---------- Day-by-day orders (Orders page) ----------
+        // Today is always loaded. Earlier days are read from Firestore only when their button is tapped.
+        const ordersLoadedDays = new Set();   // 'yyyy-mm-dd' of EARLIER days already read (today is always re-read fresh)
+        const ordersDayLoading = new Set();
+        const ordersOpenDays = new Set();     // earlier days the admin chose to show on the Orders page
+        const _ordersDaysInflight = {};
+        const _ordersRangeTried = new Set();
+        let ordersRangeBusy = false;
+        function ordersDayKeyOf(o) {
+            return (o && o.timestamp && typeof o.timestamp.toDate === 'function') ? ymdLocal(o.timestamp.toDate()) : ymdLocal(new Date());
+        }
+        async function loadOrdersDay(key) {
+            if (ordersLoadedDays.has(key)) return true;
+            if (ordersDayLoading.has(key)) return false;
+            ordersDayLoading.add(key);
+            try {
+                const from = parseYmd(key), to = new Date(from.getFullYear(), from.getMonth(), from.getDate() + 1);
+                const snap = await getDocs(query(collection(db, "orders"), where("timestamp", ">=", from), where("timestamp", "<", to)));
+                snap.forEach(ds => { ORDERS[ds.id] = { id: ds.id, ...ds.data() }; });
+                ordersLoadedDays.add(key);
+                return true;
+            } catch (e) {
+                console.error('loadOrdersDay error:', e);
+                window.showToast('Could not load that day.', 'fail');
+                return false;
+            } finally {
+                ordersDayLoading.delete(key);
+            }
+        }
+        // For features that genuinely need the last N days (Dashboard 7-day chart, midnight summary,
+        // archive digest, weekly order sheet): one range query for whatever days are still missing.
+        async function ensureOrdersDays(n) {
+            const now = new Date(), keys = [];
+            for (let i = 1; i <= n; i++) {
+                const k = ymdLocal(new Date(now.getFullYear(), now.getMonth(), now.getDate() - i));
+                if (!ordersLoadedDays.has(k)) keys.push(k);
+            }
+            if (!keys.length) return true;
+            const oldest = keys[keys.length - 1], fk = 'r' + oldest;
+            if (_ordersDaysInflight[fk]) return _ordersDaysInflight[fk];
+            _ordersDaysInflight[fk] = (async () => {
+                try {
+                    const from = parseYmd(oldest), to = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+                    const snap = await getDocs(query(collection(db, "orders"), where("timestamp", ">=", from), where("timestamp", "<", to)));
+                    snap.forEach(ds => { ORDERS[ds.id] = { id: ds.id, ...ds.data() }; });
+                    for (let i = 1; i <= n; i++) ordersLoadedDays.add(ymdLocal(new Date(now.getFullYear(), now.getMonth(), now.getDate() - i)));
+                    return true;
+                } catch (e) { console.error('ensureOrdersDays error:', e); return false; }
+                finally { delete _ordersDaysInflight[fk]; }
+            })();
+            return _ordersDaysInflight[fk];
+        }
+        window.ensureOrdersDays = ensureOrdersDays;
+        // A date-range filter / search needs the days inside the range, so read the missing ones (max 31 days).
+        function ensureOrdersForRange(fromStr, toStr) {
+            const today = new Date(); today.setHours(0, 0, 0, 0);
+            let to = toStr ? parseYmd(toStr) : today;
+            if (to > today) to = today;
+            const from = fromStr ? parseYmd(fromStr) : new Date(to.getFullYear(), to.getMonth(), to.getDate() - 6);
+            const todayKey = ymdLocal(today), keys = [];
+            for (let d = new Date(from); d <= to && keys.length < 31; d.setDate(d.getDate() + 1)) {
+                const k = ymdLocal(d);
+                if (k !== todayKey && !ordersLoadedDays.has(k) && !_ordersRangeTried.has(k)) keys.push(k);
+            }
+            if (!keys.length) return;
+            keys.forEach(k => _ordersRangeTried.add(k));
+            ordersRangeBusy = true;
+            Promise.all(keys.map(loadOrdersDay)).finally(() => { ordersRangeBusy = false; renderOrdersList(); });
+        }
+        async function toggleOrdersDay(key) {
+            if (ordersOpenDays.has(key)) { ordersOpenDays.delete(key); renderOrdersList(); return; }
+            ordersOpenDays.add(key);
+            renderOrdersList();
+            const ok = await loadOrdersDay(key);
+            if (!ok) ordersOpenDays.delete(key);
+            renderOrdersList();
+        }
+        function openOrdersDayFromInput(inp) {
+            const v = inp.value; inp.value = '';
+            if (!v || v === ymdLocal(new Date())) return;
+            if (!ordersOpenDays.has(v)) toggleOrdersDay(v); else renderOrdersList();
+        }
+        window.toggleOrdersDay = toggleOrdersDay;
+        window.openOrdersDayFromInput = openOrdersDayFromInput;
+        function ordersDayLabel(key, todayKey) {
+            const d = parseYmd(key);
+            const y = ymdLocal(new Date(Date.now() - 86400000));
+            const dateTxt = d.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
+            if (key === todayKey) return 'Today · ' + dateTxt;
+            if (key === y) return 'Yesterday · ' + dateTxt;
+            return dateTxt;
+        }
+        function ordersDayHeadHtml(key, count, todayKey, showAll) {
+            const isOpened = key !== todayKey && ordersOpenDays.has(key) && !showAll;
+            const stillOpenOnly = key !== todayKey && !ordersOpenDays.has(key) && !showAll;
+            return `<div class="od-day-head"><span>${ordersDayLabel(key, todayKey)} &middot; ${count} order${count === 1 ? '' : 's'}${stillOpenOnly ? ' &middot; still open' : ''}</span>${isOpened ? `<button type="button" class="odb-hide" onclick="toggleOrdersDay('${key}')">Hide</button>` : ''}</div>`;
+        }
+        function renderOrdersDayBar() {
+            const bar = document.getElementById('orders-day-bar');
+            if (!bar) return;
+            const now = new Date();
+            const counts = {};
+            Object.values(ORDERS).forEach(o => { const k = ordersDayKeyOf(o); counts[k] = (counts[k] || 0) + 1; });
+            const chip = (k, label) => {
+                const open = ordersOpenDays.has(k), busy = ordersDayLoading.has(k);
+                const n = (ordersLoadedDays.has(k) && !busy) ? ` (${counts[k] || 0})` : '';
+                return `<button type="button" class="odb-chip ${open ? 'active' : ''} ${busy ? 'loading' : ''}" onclick="toggleOrdersDay('${k}')">${busy ? 'Loading… ' : ''}${label}${n}</button>`;
+            };
+            const quick = [];
+            let html = `<button type="button" class="odb-chip active" disabled>Today</button>`;
+            for (let i = 1; i <= 6; i++) {
+                const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() - i), k = ymdLocal(d);
+                quick.push(k);
+                html += chip(k, i === 1 ? 'Yesterday' : d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }));
+            }
+            Array.from(ordersOpenDays).filter(k => !quick.includes(k)).sort().reverse().forEach(k => {
+                html += chip(k, parseYmd(k).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }));
+            });
+            const yMax = ymdLocal(new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1));
+            const yMin = ymdLocal(new Date(Date.now() - ORDER_RETENTION_MS));
+            html += `<label class="odb-chip odb-date"><svg class="ui-icon" style="width:13px;height:13px;vertical-align:-2px;margin-right:4px;"><use href="#icon-calendar"></use></svg>Pick date<input type="date" min="${yMin}" max="${yMax}" onchange="openOrdersDayFromInput(this)"></label>`;
+            bar.innerHTML = html;
+        }
 
         // Firestore onSnapshot can fire several times in quick succession (initial
         // load, then a burst of individual doc changes). Rebuilding the entire
@@ -8345,11 +8661,13 @@
         // a guest client isn't (and shouldn't be) allowed to query. ORDERS is
         // already a full, live-synced copy of the orders collection on this
         // side, so this is just an in-memory count, no extra Firestore reads.
+        const HIGH_RISK_AMOUNT_MMK = 500000; // orders of 5 lakh and above are always High Risk
         const RISK_FLAG_LABELS = {
             duplicate_slip: 'Same receipt image used on another order',
             amount_mismatch: "Amount on the receipt doesn't match the order total",
             amount_not_detected: 'Could not read an amount off the receipt',
-            no_transaction_id: 'No transaction ID found on the receipt'
+            no_transaction_id: 'No transaction ID found on the receipt',
+            high_amount: 'Order total is 500,000 MMK or more'
         };
 
         // { receiptHash: count } across ALL orders (not just the currently
@@ -8364,7 +8682,8 @@
         function computeOrderRiskInfo(data, receiptHashCounts) {
             const flags = Array.isArray(data.riskFlags) ? data.riskFlags.slice() : [];
             if (data.receiptHash && receiptHashCounts && (receiptHashCounts[data.receiptHash] || 0) > 1) flags.push('duplicate_slip');
-            const level = (flags.includes('duplicate_slip') || flags.includes('amount_mismatch')) ? 'high'
+            if ((Number(data.price) || 0) >= HIGH_RISK_AMOUNT_MMK && !flags.includes('high_amount')) flags.push('high_amount');
+            const level = (flags.includes('duplicate_slip') || flags.includes('amount_mismatch') || flags.includes('high_amount')) ? 'high'
                 : flags.length ? 'low' : 'none';
             return { level, flags };
         }
@@ -8372,10 +8691,10 @@
         function riskBadgeHtml(riskInfo) {
             if (!riskInfo || riskInfo.level === 'none') return '';
             const badgeClass = riskInfo.level === 'high' ? 'badge-danger' : 'badge-pending';
-            const icon = riskInfo.level === 'high' ? '🔴' : '🟡';
+            const icon = riskInfo.level === 'high' ? '' : '';
             const label = riskInfo.level === 'high' ? 'High Risk' : 'Low Risk';
             const title = riskInfo.flags.map(f => RISK_FLAG_LABELS[f] || f).join(' · ');
-            return `<span class="badge ${badgeClass}" title="${escapeHtml(title)}">${icon} ${label}</span>`;
+            return `<span class="badge ${badgeClass}" title="${escapeHtml(title)}">${label}</span>`;
         }
 
         // Expanded detail block shown inside an order card when it carries
@@ -8390,7 +8709,7 @@
             const bg = riskInfo.level === 'high' ? 'rgba(251,113,133,0.10)' : 'rgba(251,191,36,0.10)';
             const border = riskInfo.level === 'high' ? 'rgba(251,113,133,0.35)' : 'rgba(251,191,36,0.35)';
             return `<div style="margin-top:8px;padding:10px;background:${bg};border:1px solid ${border};border-radius:8px;">
-                <div style="font-size:11px;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.3px;margin-bottom:4px;">⚠️ Fake-slip risk — please double-check this receipt</div>
+                <div style="font-size:11px;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.3px;margin-bottom:4px;">Fake-slip risk — please double-check this receipt</div>
                 <ul style="margin:0;padding-left:18px;font-size:12.5px;color:var(--text-primary);">${rows}</ul>
                 ${amountLine}
             </div>`;
@@ -8400,9 +8719,19 @@
             const searchTerm = (document.getElementById('order-search')?.value || '').trim().toLowerCase();
             const dateFrom = document.getElementById('order-date-from')?.value || '';
             const dateTo = document.getElementById('order-date-to')?.value || '';
+            // Day-by-day view: show today + still-open orders + the earlier days the admin opened.
+            // Search / date filter look through everything already loaded (and read the filter's days).
+            const todayKey = ymdLocal(new Date());
+            const showAllLoaded = !!(searchTerm || dateFrom || dateTo);
+            if (dateFrom || dateTo) ensureOrdersForRange(dateFrom, dateTo);
+            renderOrdersDayBar();
             const allOrders = Object.values(ORDERS).filter(o => {
                 if (!matchesCurrentStore(o)) return false;
                 if (!isWithinDateRange(o.timestamp, dateFrom, dateTo)) return false;
+                if (!showAllLoaded && (o.status === 'Success' || o.status === 'Fail')) {
+                    const dk = ordersDayKeyOf(o);
+                    if (dk !== todayKey && !ordersOpenDays.has(dk)) return false;
+                }
                 if (!searchTerm) return true;
                 return (o.game || '').toLowerCase().includes(searchTerm)
                     || (o.userName || '').toLowerCase().includes(searchTerm)
@@ -8420,26 +8749,33 @@
             const hasFilters = !!(searchTerm || dateFrom || dateTo);
 
             if (allOrders.length === 0) {
-                ordersContainer.innerHTML = `<p class="empty-msg">${hasFilters ? 'No orders match your search/filters.' : 'No orders found.'}</p>`;
+                ordersContainer.innerHTML = `<p class="empty-msg">${ordersRangeBusy ? 'Loading orders…' : hasFilters ? 'No orders match your search/filters.' : 'No orders today.'}</p>`;
                 updateBulkActionBar();
                 return;
             }
             if (visibleOrders.length === 0) {
-                ordersContainer.innerHTML = `<p class="empty-msg">${showCleanedOrders ? 'No cleaned orders.' : 'No active orders — all clean! 🎉'}</p>`;
+                ordersContainer.innerHTML = `<p class="empty-msg">${showCleanedOrders ? 'No cleaned orders.' : 'No active orders — all clean! '}</p>`;
                 updateBulkActionBar();
                 return;
             }
 
+            const nowMs = Date.now();
             const sorted = visibleOrders.slice().sort((a, b) => {
-                const ta = a.timestamp ? a.timestamp.toMillis() : 0;
-                const tb = b.timestamp ? b.timestamp.toMillis() : 0;
+                const ta = a.timestamp ? a.timestamp.toMillis() : nowMs;
+                const tb = b.timestamp ? b.timestamp.toMillis() : nowMs;
                 return tb - ta;
             });
+            const dayCounts = {};
+            sorted.forEach(o => { const k = ordersDayKeyOf(o); dayCounts[k] = (dayCounts[k] || 0) + 1; });
+            let lastDayKey = null;
 
             const receiptHashCounts = buildReceiptHashCounts();
 
             ordersContainer.innerHTML = sorted.map((data) => {
                 const orderId = data.id;
+                let dayHead = '';
+                const dayKey = ordersDayKeyOf(data);
+                if (dayKey !== lastDayKey) { lastDayKey = dayKey; dayHead = ordersDayHeadHtml(dayKey, dayCounts[dayKey], todayKey, showAllLoaded); }
                 const riskInfo = computeOrderRiskInfo(data, receiptHashCounts);
                 const dateStr = data.timestamp ? data.timestamp.toDate().toLocaleString() : 'Just now';
                 const badgeClassByStatus = { Pending: 'badge-pending', Processing: 'badge-processing', Success: 'badge-success', Fail: 'badge-danger' };
@@ -8507,7 +8843,7 @@
                         : '';
                     const cleanBtn = data.adminCleared
                         ? `<button class="btn btn-outline" onclick="restoreOrder('${orderId}')" title="Bring this back into the active list">↺ Restore</button>`
-                        : `<button class="btn btn-outline" onclick="cleanOrder('${orderId}')" title="Hide from this list — stays in the customer's Order History">🧹 Clean</button>`;
+                        : `<button class="btn btn-outline" onclick="cleanOrder('${orderId}')" title="Hide from this list — stays in the customer's Order History">Clean</button>`;
                     actionButtons = `<span style="flex:1;text-align:center;font-size:13px;font-weight: 500;color:var(--text-secondary);">${doneLabel}</span>${recheckBtn}${cleanBtn}`;
                 }
 
@@ -8520,7 +8856,7 @@
                 const selectBox = data.status === 'Pending'
                     ? `<span class="order-select-box" onclick="event.stopPropagation()"><input type="checkbox" onclick="toggleOrderSelect('${orderId}', this.checked)" ${selectedOrderIds.has(orderId) ? 'checked' : ''} title="Select for bulk action"></span>`
                     : '';
-                return `
+                return dayHead + `
                     <div class="admin-card ${isOpen ? 'oc-open' : ''}" id="card-${orderId}" style="border-left:3px solid ${statusColor};">
                         <div class="oc-top" onclick="toggleOrderCard('${orderId}')">
                             ${selectBox}
@@ -8608,7 +8944,7 @@
                                     </div>
                                     ${(data.confirmedBy || data.rejectedBy || data.completedBy) ? `<div class="od-cell span-2">
                                         <div class="od-label">Reviewed By</div>
-                                        <div class="od-value">${data.confirmedBy ? '✅ Confirmed: <b>' + escapeHtml(data.confirmedBy) + '</b>' : ''}${data.rejectedBy ? ' ❌ Rejected: <b>' + escapeHtml(data.rejectedBy) + '</b>' : ''}${data.completedBy ? ' 🏁 Completed: <b>' + escapeHtml(data.completedBy) + '</b>' : ''}</div>
+                                        <div class="od-value">${data.confirmedBy ? 'Confirmed: <b>' + escapeHtml(data.confirmedBy) + '</b>' : ''}${data.rejectedBy ? ' Rejected: <b>' + escapeHtml(data.rejectedBy) + '</b>' : ''}${data.completedBy ? ' Completed: <b>' + escapeHtml(data.completedBy) + '</b>' : ''}</div>
                                     </div>` : ''}
                                     <div class="od-cell span-2">
                                         <div class="od-label">Date</div>
@@ -10105,7 +10441,7 @@
                                 </div>
                                 <p style="color:var(--text-secondary); font-size:12px;">Requested: ${dateStr}</p>
                                 ${t.statusNote ? `<p style="color:var(--text-secondary); font-size:12px;">Note: ${escapeHtml(t.statusNote)}</p>` : ''}
-                                ${(t.confirmedBy || t.rejectedBy) ? `<p style="color:var(--text-secondary); font-size:12px;">👤 ${t.confirmedBy ? 'Confirmed' : 'Rejected'} by <b>${escapeHtml(t.confirmedBy || t.rejectedBy)}</b></p>` : ''}
+                                ${(t.confirmedBy || t.rejectedBy) ? `<p style="color:var(--text-secondary); font-size:12px;">${t.confirmedBy ? 'Confirmed' : 'Rejected'} by <b>${escapeHtml(t.confirmedBy || t.rejectedBy)}</b></p>` : ''}
                                 <div class="od-card-footer" id="topup-footer-${t.id}">
                                     ${actionButtons}
                                 </div>
@@ -10719,7 +11055,7 @@
                 const e = Object.entries(m).sort((a, b) => (b[1].rev - a[1].rev) || (b[1].n - a[1].n)).slice(0, limit);
                 if (!e.length) return '<p class="stat-card-sub-text" style="margin:4px 0 10px;">No orders in this period</p>';
                 const mx = Math.max(1, ...e.map(([, v]) => v.rev || v.n));
-                return '<div style="margin-bottom:10px;">' + e.map(([k, v]) => `<div style="margin:7px 0;"><div style="display:flex;justify-content:space-between;font-size:12px;gap:8px;"><span style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(k)}</span><b style="white-space:nowrap;">${fmt(v.rev)} MMK <span style="font-weight:400;color:var(--text-muted);">· ${v.ok}/${v.n}</span></b></div><div style="height:5px;border-radius:3px;background:var(--fill-soft);margin-top:3px;"><div style="height:100%;width:${Math.max(3, Math.round((v.rev || v.n) / mx * 100))}%;border-radius:3px;background:var(--accent);"></div></div></div>`).join('') + '</div>';
+                return '<div style="margin-bottom:10px;">' + e.map(([k, v]) => `<div style="margin:7px 0;"><div style="display:flex;justify-content:space-between;font-size:12px;gap:8px;"><span style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(k)}</span><b style="white-space:nowrap;">${fmt(v.rev)} MMK <span class="u-muted">· ${v.ok}/${v.n}</span></b></div><div style="height:5px;border-radius:3px;background:var(--fill-soft);margin-top:3px;"><div style="height:100%;width:${Math.max(3, Math.round((v.rev || v.n) / mx * 100))}%;border-radius:3px;background:var(--accent);"></div></div></div>`).join('') + '</div>';
             };
             const lbl = t => `<div class="dash-section-label">${t} · ${OV.label}</div>`;
             const sub = t => `<div class="stat-card-sub-text" style="margin:8px 0 2px;font-weight:600;">${t}</div>`;
@@ -10832,8 +11168,9 @@
             }
             return out;
         }
-        function osRefresh() {
+        async function osRefresh() {
             const body = document.getElementById('os-body'); if (!body) return;
+            if (_osRange === 'weekly') await ensureOrdersDays(7);
             document.querySelectorAll('#os-seg button').forEach(b => b.classList.toggle('active', b.dataset.r === _osRange));
             const rows = osRows();
             if (!rows.length) { _osPages = []; body.innerHTML = '<p class="stat-card-sub-text" style="padding:24px;text-align:center;">No orders in this period</p>'; return; }
@@ -10873,6 +11210,8 @@
         async function loadDashboardStats() {
             resetDashboardStatsToEmpty();
             try {
+                // Dashboard's 7-day chart / comparisons need the last 7 days; the Orders page itself does not.
+                if (document.querySelector('.page-section.active')?.id === 'dashboard') await ensureOrdersDays(7);
                 renderDayProgress();
                 let todaySales = 0, yesterdaySales = 0, pending = 0, processing = 0, completed = 0, fail = 0, today = 0, yesterdayOrders = 0;
                 let todayProfit = 0, yesterdayProfit = 0;
@@ -11191,7 +11530,7 @@
             if (glPage) glPage.classList.toggle('game-edit-on', gameListEditMode);
             const btn = document.getElementById('game-edit-mode-btn');
             if (btn) {
-                btn.innerText = `✏️ Edit Mode: ${gameListEditMode ? 'On' : 'Off'}`;
+                btn.innerText = `Edit Mode: ${gameListEditMode ? 'On' : 'Off'}`;
                 btn.classList.toggle('btn-primary', gameListEditMode);
                 btn.classList.toggle('btn-outline', !gameListEditMode);
             }
@@ -11361,7 +11700,7 @@
             document.getElementById('game-action-sheet-title').innerText = g.name;
             document.getElementById('game-action-sheet-img').src = g.image;
             document.getElementById('game-action-sheet-name').innerText = g.name;
-            document.getElementById('game-action-sheet-server').innerText = g.serverName ? `🌐 ${g.serverName}` : '';
+            document.getElementById('game-action-sheet-server').innerText = g.serverName ? `${g.serverName}` : '';
             document.getElementById('game-action-sheet-overlay').classList.add('show');
         }
         window.openGameActionSheet = openGameActionSheet;
@@ -12679,7 +13018,7 @@
                                     <div class="pkg-select-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></div>
                                 </div>
                                 <span class="pkg-summary-name">${amount || 'Unnamed package'}</span>
-                                <span class="pkg-summary-badge-tag" style="${badge === 'top' || badge === 'hot' ? '' : 'display:none;'}padding:1px 6px;border-radius:8px;font-size:9px;font-weight:700;color:#fff;background:${badge === 'top' ? 'linear-gradient(135deg,#FFC93C,#FF9800)' : 'linear-gradient(135deg,#FF8A65,#FF3D57)'};">⭐${badge === 'top' ? 'TOP' : 'HOT'}</span>
+                                <span class="pkg-summary-badge-tag" style="${badge === 'top' || badge === 'hot' ? '' : 'display:none;'}padding:1px 6px;border-radius:8px;font-size:9px;font-weight:700;color:#fff;background:${badge === 'top' ? 'linear-gradient(135deg,#FFC93C,#FF9800)' : 'linear-gradient(135deg,#FF8A65,#FF3D57)'};">${badge === 'top' ? 'TOP' : 'HOT'}</span>
                             </div>
                             <span class="pkg-summary-dot ${type === 'package' ? 'pkg-dot-package' : ''}" title="${type === 'package' ? 'Package (wide banner)' : 'Currency (grid card)'}"></span>
                         </div>
@@ -12718,13 +13057,13 @@
                                         </button>
                                         <button type="button" class="pkg-picker-chip" data-kind="badge" onclick="openPkgBadgePicker(this)">
                                             <span class="pkg-picker-chip-label">Badge</span>
-                                            <span class="pkg-picker-chip-value"><span class="pkg-picker-chip-text">${badge === 'top' ? '⭐ TOP' : badge === 'hot' ? '⭐ HOT' : 'None'}</span><svg class="ui-icon pkg-picker-chev"><use href="#icon-chevron-down"></use></svg></span>
+                                            <span class="pkg-picker-chip-value"><span class="pkg-picker-chip-text">${badge === 'top' ? 'TOP' : badge === 'hot' ? 'HOT' : 'None'}</span><svg class="ui-icon pkg-picker-chev"><use href="#icon-chevron-down"></use></svg></span>
                                         </button>
                                         <select class="pkg-tab-select" onchange="movePackageToTab(this)" style="display:none;"></select>
                                         <select class="pkg-badge" onchange="updatePkgSummaryBadge(this)" style="display:none;">
                                             <option value="" ${badge !== 'top' && badge !== 'hot' ? 'selected' : ''}>None</option>
-                                            <option value="top" ${badge === 'top' ? 'selected' : ''}>⭐ TOP</option>
-                                            <option value="hot" ${badge === 'hot' ? 'selected' : ''}>⭐ HOT</option>
+                                            <option value="top" ${badge === 'top' ? 'selected' : ''}>TOP</option>
+                                            <option value="hot" ${badge === 'hot' ? 'selected' : ''}>HOT</option>
                                         </select>
                                     </div>
                                     <select class="pkg-type" style="display:none;">
@@ -12746,7 +13085,7 @@
                                 </div>
                                 <div class="pkg-profit-badge" title="Profit margin = (Price − Cost) / Cost">--</div>
                             </div>
-                            <div class="pkg-provider-row" style="display:flex;align-items:center;gap:8px;">
+                            <div class="pkg-provider-row row-center">
                                 <label style="margin:0;font-size:11px;color:var(--text-muted);white-space:nowrap;">Auto-Fulfill</label>
                                 <select class="pkg-provider" onchange="refreshPackageRowProviderVisibility()" style="flex:1;box-sizing:border-box;padding:8px;border:1px solid var(--border-glass);border-radius:8px;font-size:13px;background:var(--bg-subtle-2);color:var(--text-primary);font-family:inherit;">
                                     <option value="manual" ${resolvedProvider === 'manual' ? 'selected' : ''}>Manual (no auto-fulfill)</option>
@@ -12845,7 +13184,7 @@
         }
         window.removePackageImage = removePackageImage;
 
-        // Live-updates the small ⭐TOP/⭐HOT tag shown in the collapsed
+        // Live-updates the small TOP/HOT tag shown in the collapsed
         // package summary row whenever the Badge dropdown changes, so an
         // admin scanning the collapsed list can see which packages are
         // tagged without expanding each one.
@@ -12857,7 +13196,7 @@
             if (val === 'top' || val === 'hot') {
                 tag.style.display = '';
                 tag.style.background = val === 'top' ? 'linear-gradient(135deg,#FFC93C,#FF9800)' : 'linear-gradient(135deg,#FF8A65,#FF3D57)';
-                tag.textContent = `⭐${val === 'top' ? 'TOP' : 'HOT'}`;
+                tag.textContent = `${val === 'top' ? 'TOP' : 'HOT'}`;
             } else {
                 tag.style.display = 'none';
             }
@@ -13034,7 +13373,7 @@
             if (tabTxt) tabTxt.textContent = pkgTabLabel(row.dataset.tab || 'currency');
             const bSel = row.querySelector('.pkg-badge');
             const badgeTxt = row.querySelector('.pkg-picker-chip[data-kind="badge"] .pkg-picker-chip-text');
-            if (badgeTxt && bSel) badgeTxt.textContent = bSel.value === 'top' ? '⭐ TOP' : bSel.value === 'hot' ? '⭐ HOT' : 'None';
+            if (badgeTxt && bSel) badgeTxt.textContent = bSel.value === 'top' ? 'TOP' : bSel.value === 'hot' ? 'HOT' : 'None';
         }
         window.syncPkgPickerLabels = syncPkgPickerLabels;
 
@@ -13917,7 +14256,7 @@
                 // (or vice versa) before touching anything below.
                 const sameNameCount = Object.values(GAMES).filter(og => og.name === g.name).length;
                 const editorServerLabel = g.serverName || (sameNameCount > 1 ? 'Global' : '');
-                document.getElementById('game-editor-title').innerText = editorServerLabel ? `Edit Game — 🌐 ${editorServerLabel}` : 'Edit Game';
+                document.getElementById('game-editor-title').innerText = editorServerLabel ? `Edit Game — ${editorServerLabel}` : 'Edit Game';
                 document.getElementById('edit-game-name').value = g.name;
                 document.getElementById('edit-game-server-name').value = g.serverName || '';
                 document.getElementById('edit-game-category').value = g.category || '';
@@ -14974,7 +15313,7 @@
                 const p = PAYMENT_METHODS[id];
                 return `
                     <div class="admin-card">
-                        <div class="ac-header"><span class="ac-id">${escapeHtml(p.name ?? '')}</span>${p.hot ? ' <span class="badge badge-danger">🔥 Hot</span>' : ''}</div>
+                        <div class="ac-header"><span class="ac-id">${escapeHtml(p.name ?? '')}</span>${p.hot ? ' <span class="badge badge-danger">Hot</span>' : ''}</div>
                         <div class="ac-body" style="display:flex;gap:10px;align-items:center;">
                             ${p.image ? `<div style="width:56px;height:56px;flex-shrink:0;border-radius:8px;overflow:hidden;background:var(--bg-subtle);border:1px solid var(--fill-soft);"><img src="${p.image}" loading="lazy" decoding="async" style="width:100%;height:100%;object-fit:cover;display:block;"></div>` : ''}
                             <div>
@@ -15568,7 +15907,7 @@
                     <div class="admin-card" style="padding:12px;">
                         <div class="ac-header" style="margin-bottom:6px;padding-bottom:6px;cursor:pointer;" onclick="toggleUserOrderCard('${orderId}')">
                             <span class="ac-id">${o.game} (${o.itemAmount})</span>
-                            <div style="display:flex;align-items:center;gap:8px;">
+                            <div class="row-center">
                                 ${riskBadgeHtml(riskInfo)}
                                 <span class="badge ${badgeClass}">${statusBadgeHtml(badgeClass, orderStatusLabel(o.status) + (o.adminCleared ? ' · cleaned' : ''))}</span>
                                 <svg class="ui-icon" id="ud-oc-chevron-${orderId}" style="width:15px;height:15px;color:var(--text-muted);transition:transform 0.2s;transform:rotate(${isOpen ? '180' : '0'}deg);"><use href="#icon-chevron-down"></use></svg>
@@ -15610,7 +15949,7 @@
                                 </div>
                                 ${(o.confirmedBy || o.rejectedBy || o.completedBy) ? `<div class="od-cell span-2">
                                     <div class="od-label">Reviewed By</div>
-                                    <div class="od-value">${o.confirmedBy ? '✅ Confirmed: <b>' + escapeHtml(o.confirmedBy) + '</b>' : ''}${o.rejectedBy ? ' ❌ Rejected: <b>' + escapeHtml(o.rejectedBy) + '</b>' : ''}${o.completedBy ? ' 🏁 Completed: <b>' + escapeHtml(o.completedBy) + '</b>' : ''}</div>
+                                    <div class="od-value">${o.confirmedBy ? 'Confirmed: <b>' + escapeHtml(o.confirmedBy) + '</b>' : ''}${o.rejectedBy ? ' Rejected: <b>' + escapeHtml(o.rejectedBy) + '</b>' : ''}${o.completedBy ? ' Completed: <b>' + escapeHtml(o.completedBy) + '</b>' : ''}</div>
                                 </div>` : ''}
                                 <div class="od-cell span-2">
                                     <div class="od-label">Date</div>
@@ -15793,7 +16132,7 @@
             if (!box) return;
             const rows = _userTxnFilter === 'all' ? _userTxnRows : _userTxnRows.filter(r => r.type === _userTxnFilter);
             if (!rows.length) { box.innerHTML = '<p class="empty-msg">No transactions yet.</p>'; return; }
-            const sign = { in: '+', out: '−', buy: '−' }, glyph = { in: '↓', out: '↑', buy: '🛍' };
+            const sign = { in: '+', out: '−', buy: '−' }, glyph = { in: '↓', out: '↑', buy: '•' };
             box.innerHTML = rows.map(r => `
                 <div class="wtx-row">
                     <div class="wtx-ico ${r.type}">${glyph[r.type]}</div>
@@ -16840,7 +17179,7 @@
                     + names.map(n => `<option value="${escA(n)}"${n.toLowerCase() === cur.toLowerCase() ? ' selected' : ''}>${escA(n)}</option>`).join('');
                 return `<div class="hb-row-wrap" style="display:flex;flex-wrap:wrap;align-items:center;gap:8px;width:100%;">`
                     + `<div class="game-banner-thumb" data-index="${i}" style="flex:0 0 auto;"><img src="${url}" loading="lazy" decoding="async" alt="Banner ${i + 1}"><button type="button" onclick="removeHomeBannerImage(${i})" aria-label="Remove banner">×</button></div>`
-                    + `<button type="button" class="hb-pick-btn${cur ? ' has' : ''}" onclick="openHomeBannerGamePicker(${i})" aria-label="Choose game for banner ${i + 1}"><span class="hb-pick-label">${cur ? (/^(https?:\/\/|tg:\/\/|mailto:|\/)/i.test(cur) ? '🔗 ' : '🎮 ') + escA(cur) : 'No link (tap to set link / game)'}</span><svg class="ui-icon" style="width:14px;height:14px;flex:0 0 auto;"><use href="#icon-chevron-down"></use></svg></button>`
+                    + `<button type="button" class="hb-pick-btn${cur ? ' has' : ''}" onclick="openHomeBannerGamePicker(${i})" aria-label="Choose game for banner ${i + 1}"><span class="hb-pick-label">${cur ? (/^(https?:\/\/|tg:\/\/|mailto:|\/)/i.test(cur) ? '' : '') + escA(cur) : 'No link (tap to set link / game)'}</span><svg class="ui-icon" style="width:14px;height:14px;flex:0 0 auto;"><use href="#icon-chevron-down"></use></svg></button>`
                     + `</div>`;
             }).join('');
         }
@@ -19233,7 +19572,7 @@
                             console.error("G2Bulk /games/servers fetch error:", serversError);
                             pendingG2BulkServerMode = null;
                             pendingG2BulkServerOptions = null;
-                            statusMsg += '\n⚠ Could not fetch server list (' + serversError.message + ') — Server ID stays free-text.';
+                            statusMsg += '\nCould not fetch server list (' + serversError.message + ') — Server ID stays free-text.';
                         }
                     } else {
                         pendingG2BulkServerMode = null;
@@ -19241,7 +19580,7 @@
                     }
                 } catch (fieldsError) {
                     console.error("G2Bulk /games/fields fetch error:", fieldsError);
-                    statusMsg += '\n⚠ Could not check Server ID requirement: ' + fieldsError.message;
+                    statusMsg += '\nCould not check Server ID requirement: ' + fieldsError.message;
                 }
 
                 statusEl.innerText = statusMsg;
@@ -21104,6 +21443,7 @@
             if (alreadyRanToday) { archiveRanDate = todayStr; return; }
 
             if (!(await loadOrdersIfStale(10 * 60 * 1000))) return; // never run on an empty cache
+            await ensureOrdersDays(7); // digest targets orders 6-7 days old
             const cutoffMs = now.getTime() - 6 * 24 * 60 * 60 * 1000; // 6d: must be < ADMIN_ORDER_WINDOW_DAYS so the panel still has them
             const targets = Object.values(ORDERS)
                 .filter(o => o.timestamp && o.timestamp.toMillis() <= cutoffMs && !o.archiveSentAt)
@@ -21242,6 +21582,7 @@
             if (alreadyRanToday) { dailySummaryRanDate = todayStr; return; }
 
             if (!(await loadOrdersIfStale(10 * 60 * 1000))) return; // never send an empty summary
+            await ensureOrdersDays(1); // yesterday's orders are no longer in the default load
             const yesterdayStr = localDateStr(addDaysLocal(now, -1));
             const dayOrders = Object.values(ORDERS).filter(o => o.timestamp && localDateStr(o.timestamp.toDate()) === yesterdayStr);
             await sendDailySummaryToTelegram(yesterdayStr, dayOrders);
