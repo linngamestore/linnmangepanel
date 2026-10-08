@@ -8,16 +8,50 @@
          debugging. Loaded as a plain script (not type="module") so it still
          runs even if the main Firebase module script below fails entirely. -->
     <script>
-        // Debug console (eruda) — OFF by default so its floating gear button
-        // no longer sits on top of the UI. Open ...admin.html#debug (or run
-        // localStorage.setItem('linn_debug','1') once in Eruda/devtools) on a
-        // phone to turn it back on for that device when actually debugging.
-        var ERUDA_DEFAULT_ON = false;
+    // Provider proxy: G2Bulk + Telegram calls go through the Worker (/admin-proxy/*), which adds the
+    // API key / bot token server-side after verifying this admin's ID token.
+    (function () {
+        var WORKER = 'https://linnmanagebot.linngamestore.workers.dev';
+        var nf = window.fetch;
+        var G = /^https:\/\/api\.g2bulk\.com(\/[^#]*)?$/i, T = /^https:\/\/api\.telegram\.org\/bot([^\/]+)\/([A-Za-z]+)(\?[^#]*)?$/;
+        window.fetch = function (input, init) {
+            var url = (typeof input === 'string') ? input : ((input && input.url) || String(input));
+            var g = G.exec(url), t = T.exec(url);
+            if (!g && !t) return nf.apply(window, arguments);
+            return (async function () {
+                var a = window.__adminAuth;
+                if (!a || !a.currentUser) throw new Error('Admin not signed in');
+                var tok = await a.currentUser.getIdToken();
+                init = init || {};
+                var h = new Headers(init.headers || {}), ph = new Headers();
+                ph.set('Authorization', 'Bearer ' + tok);
+                ['Content-Type', 'X-Idempotency-Key', 'Idempotency-Key'].forEach(function (n) { var v = h.get(n); if (v) ph.set(n, v); });
+                var target;
+                if (g) {
+                    var p = g[1] || '/';
+                    target = WORKER + '/admin-proxy/g2bulk' + p;
+                    if (p.indexOf('/v1/getMe') === 0 && h.get('X-API-Key') && !/^\*+$/.test(h.get('X-API-Key'))) ph.set('X-Candidate-Key', h.get('X-API-Key'));
+                } else {
+                    target = WORKER + '/admin-proxy/telegram/' + t[2] + (t[3] || '');
+                    var ct = decodeURIComponent(t[1]); if ((t[2] === 'sendMessage' || t[2] === 'getMe') && /^[0-9]{5,}:[A-Za-z0-9_-]{20,}$/.test(ct)) ph.set('X-Candidate-Token', ct);
+                }
+                return nf(target, { method: init.method || 'GET', headers: ph, body: init.body });
+            })();
+        };
+    })();
+    </script>
+    <script>
+        // Debug console (eruda) - OFF by default. SECURITY: it can no longer be switched on from the
+        // URL (#debug): a crafted link opened by a logged-in admin would load third-party JS into the
+        // admin session. It now needs a deliberate local flag - run
+        // localStorage.setItem('linn_debug','1') once on that device. Version is pinned (was the
+        // floating "eruda@3"), so a new upstream release can never run in the admin panel unreviewed.
         (function () {
             try {
-                if (ERUDA_DEFAULT_ON || location.hash === '#debug' || localStorage.getItem('linn_debug') === '1') {
+                if (localStorage.getItem('linn_debug') === '1') {
                     var s = document.createElement('script');
-                    s.src = 'https://cdn.jsdelivr.net/npm/eruda@3';
+                    s.src = 'https://cdn.jsdelivr.net/npm/eruda@3.0.1/eruda.js';
+                    s.crossOrigin = 'anonymous';
                     s.onload = function () { if (window.eruda) eruda.init(); };
                     document.head.appendChild(s);
                 }
@@ -3686,6 +3720,24 @@
                 </div>
             </div>
 
+            <div class="admin-card" id="settings-card-adminpin" style="margin-top:14px;">
+                <div class="sc-head" onclick="toggleAdminPinSettings()">
+                    <div class="row-center">
+                        <svg class="ui-icon" style="width:18px;height:18px;color:var(--text-secondary);"><use href="#icon-shield"></use></svg>
+                        <span class="sc-title">Admin PIN</span>
+                        <span id="apin-status-badge" style="font-size:11.5px;font-weight:700;padding:2px 9px;border-radius:20px;background:var(--fill-soft);color:var(--text-secondary);">Not set</span>
+                    </div>
+                    <svg class="ui-icon sc-chevron" id="apin-settings-chevron"><use href="#icon-chevron-down"></use></svg>
+                </div>
+                <div id="apin-settings-body" style="display:none;margin-top:12px;">
+                    <p class="note-glass note-ok" style="font-size:12px;color:var(--text-secondary);line-height:1.5;margin-bottom:12px;">Your own 6-digit PIN. It is asked again when you open the panel and your last PIN entry is more than 6 hours old, and it is required in Telegram to Confirm any top up or order of 100,000 MMK or more (type it in your private chat with the bot, never in the group).</p>
+                    <input type="password" id="apin-current" inputmode="numeric" maxlength="6" autocomplete="off" placeholder="Current PIN" style="display:none;width:100%;margin-bottom:8px;text-align:center;letter-spacing:6px;">
+                    <input type="password" id="apin-new" inputmode="numeric" maxlength="6" autocomplete="off" placeholder="New PIN (6 digits)" style="width:100%;margin-bottom:8px;text-align:center;letter-spacing:6px;">
+                    <input type="password" id="apin-confirm" inputmode="numeric" maxlength="6" autocomplete="off" placeholder="Type the new PIN again" style="width:100%;margin-bottom:10px;text-align:center;letter-spacing:6px;">
+                    <button class="btn btn-primary btn-block" id="apin-save-btn" onclick="saveAdminPin()">Save PIN</button>
+                </div>
+            </div>
+
             <div class="admin-card" style="margin-top:14px;" id="admin-accounts-card">
                 <div class="sc-head" onclick="toggleAdminAccounts()">
                     <div class="row-center">
@@ -4134,8 +4186,8 @@
                     <option value="user">Specific User (by ID)</option>
                 </select>
                 <div id="notif-target-user-wrap" style="display:none;">
-                    <label class="u-label">User ID</label>
-                    <input class="field field-full" type="text" id="notif-target-user" placeholder="Enter User ID">
+                    <label class="u-label">User (ID / Telegram ID / @username / Gmail)</label>
+                    <input class="field field-full" type="text" id="notif-target-user" placeholder="User ID, Telegram ID, @username or Gmail">
                 </div>
                 <label class="u-label">Title</label>
                 <input class="field field-full" type="text" id="notif-title" placeholder="Enter Title">
@@ -4143,6 +4195,10 @@
                 <input class="field field-full" type="text" id="notif-intro" placeholder="Enter Short Preview">
                 <label class="u-label">Details</label>
                 <textarea id="notif-details" placeholder="Enter Announcement Details" rows="5" style="width:100%;box-sizing:border-box;padding:10px;border:1px solid var(--border-glass);background:var(--bg-subtle-2);color:var(--text-primary);border-radius:12px;font-size:14px;margin:6px 0 12px;font-family:inherit;resize:vertical;"></textarea>
+                <label style="display:flex;align-items:center;gap:8px;font-size:13px;margin:0 0 12px;cursor:pointer;">
+                    <input type="checkbox" id="notif-telegram" checked style="width:18px;height:18px;">
+                    <span>Also send to Telegram (bot DM)</span>
+                </label>
                 <button class="btn btn-primary" id="send-notif-btn" onclick="sendNotification()">Send to All Users</button>
             </div>
             <h2 class="title-header" style="margin-top:20px;">Sent History</h2>
@@ -4269,7 +4325,8 @@
                 <textarea id="ud-admin-note" placeholder="Enter Note" rows="2" style="width:100%;box-sizing:border-box;padding:10px;border:1px solid var(--border-glass);background:var(--bg-subtle-2);color:var(--text-primary);border-radius:12px;font-size:14px;font-family:inherit;resize:vertical;"></textarea>
                 <button class="btn btn-outline" style="margin-top:8px;padding:7px 14px;font-size:12px;" onclick="saveUserAdminNote()">Save Note</button>
 
-                <div style="display:flex;gap:8px;margin-top:20px;">
+                <button class="btn btn-primary" style="width:100%;margin-top:20px;" onclick="messageCurrentUser()">Send Message (Store + Telegram)</button>
+                <div style="display:flex;gap:8px;margin-top:10px;">
                     <button class="btn btn-outline" id="ud-admin-btn" onclick="toggleStoreAdminCurrentUser()">Set as Admin</button>
                     <button class="btn btn-outline" id="ud-ban-btn" onclick="toggleBanCurrentUser()">Ban User</button>
                     <button class="btn btn-danger" onclick="deleteCurrentUser()">Delete User</button>
@@ -5309,8 +5366,6 @@
             'usage-page': 'group-setting', 'settings': 'group-setting', 'notify-list': 'group-setting', 'ticker-list': 'group-setting'
         };
         function showPage(pageId) {
-            // Admin Broadcast (Notify) removed — send anyone still routed here to Settings.
-            if (pageId === 'notify-list') pageId = 'settings';
             const previousPageId = document.querySelector('.page-section.active')?.id || null;
             document.querySelectorAll('.page-section').forEach(p => p.classList.remove('active'));
             document.querySelectorAll('.nav-item').forEach(m => m.classList.remove('active'));
@@ -5378,7 +5433,6 @@
         // reopening the tab re-subscribes cleanly.
         function unsubscribeTabListeners(prevPageId, nextPageId) {
             if (!prevPageId || prevPageId === nextPageId) return;
-            if (prevPageId === 'notify-list') prevPageId = 'settings';
             // The listener handles (xxxUnsub / xxxListenerAttached) live inside the module script,
             // which this classic script cannot see - bare references here threw ReferenceError and
             // aborted showPage() before subscribeTabListeners() ran. The module exposes
@@ -5429,7 +5483,8 @@
                 { label: 'API', icon: '#icon-plug', group: 'api', dotId: 'api-nav-low-dot' },
                 { label: 'General', icon: '#icon-gear', run: () => showPage('settings') },
                 { label: 'Usage', icon: '#icon-trending-up', run: () => showPage('usage-page') },
-                { label: 'Ticker', icon: '#icon-megaphone', run: () => showPage('ticker-list') }
+                { label: 'Ticker', icon: '#icon-megaphone', run: () => showPage('ticker-list') },
+                { label: 'Notify', icon: '#icon-bell', run: () => showPage('notify-list') }
             ]}
         };
         function renderNavGroupSheet(groupKey, parentKey) {
@@ -6192,6 +6247,33 @@
         //    provider's enabled flag.
         const ADMIN_SYNC_WORKER_URL = 'https://linnmanagebot.linngamestore.workers.dev';
 
+        // Provider settings with SECRETS kept server-side. Same call shape as onSnapshot(ref, next, error)
+        // so the existing loaders keep working; secrets arrive masked ('********') and are never saved back.
+        const _adminSettingsSubs = {};
+        async function adminSettingsCall(provider, action, data) {
+            if (auth.authStateReady) await auth.authStateReady();
+            if (!auth.currentUser) throw new Error('Not signed in');
+            const tok = await auth.currentUser.getIdToken();
+            const res = await fetch(`${ADMIN_SYNC_WORKER_URL}/admin-settings`, {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${tok}`, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ provider, action, data })
+            });
+            const j = await res.json().catch(() => ({}));
+            if (!res.ok || !j.ok) throw new Error(j.error || ('HTTP ' + res.status));
+            return j.data || {};
+        }
+        function adminSettingsGet(provider) { return adminSettingsCall(provider, 'get'); }
+        async function adminSettingsRefresh(provider) {
+            const s = _adminSettingsSubs[provider];
+            try {
+                const d = await adminSettingsCall(provider, 'get');
+                if (s && s.next) s.next({ exists: () => true, data: () => d });
+            } catch (e) { if (s && s.error) s.error(e); else console.error('adminSettings', provider, e); }
+        }
+        function adminSettingsSnapshot(provider, next, error) { _adminSettingsSubs[provider] = { next, error }; adminSettingsRefresh(provider); return function () { delete _adminSettingsSubs[provider]; }; }
+        async function adminSettingsSave(provider, data) { const d = await adminSettingsCall(provider, 'save', data); await adminSettingsRefresh(provider); return d; }
+
         // POST { username } to the Worker instead of reading adminUsernames
         // directly from the browser. Returns { ok, email } only. Network or non-200
         // responses are treated the same as "not found" so callers keep
@@ -6548,6 +6630,7 @@
         window.onSnapshot = onSnapshot;
         window.setDoc = setDoc;
         const auth = getAuth(app);
+        window.__adminAuth = auth; // used by the provider-proxy fetch wrapper (first <script>)
         // Keep the admin signed in across app restarts / closed tabs. This is
         // stored in the browser's IndexedDB, so it only clears if the admin
         // explicitly signs out or clears site data — never just from closing the app.
@@ -6870,7 +6953,7 @@
                 document.getElementById('step-login').style.display = '';
                 btn.disabled = false;
                 btn.innerText = 'Verify';
-                unlockAdminApp();
+                adminPinGateThenUnlock();
             } else {
                 registerFailedAttempt('tfa-login');
                 if (codeInput) { codeInput.value = ''; codeInput.focus(); } // cleared so retry never needs a manual delete
@@ -7336,8 +7419,8 @@
             // Bot username may not be loaded yet (settings listener only starts on the Telegram settings page) - fetch it on demand.
             if (!TELEGRAM_SETTINGS.botUsername) {
                 try {
-                    const bs = await getDoc(doc(db, "settings", "telegramBot"));
-                    if (bs.exists()) TELEGRAM_SETTINGS.botUsername = String(bs.data().botUsername || '').trim().replace(/^@/, '');
+                    const bsd = await adminSettingsGet('telegramBot');
+                    if (bsd) TELEGRAM_SETTINGS.botUsername = String(bsd.botUsername || '').trim().replace(/^@/, '');
                 } catch (e) { console.warn('botUsername fetch failed', e && e.message); }
             }
             document.getElementById('telegram-link-code').textContent = code;
@@ -7785,6 +7868,120 @@
         }
 
         // ---------- Resolve signed-in admin and unlock the panel ----------
+        // ---------- Admin PIN (set in Settings; asked again after 6 h; also required in Telegram for 100,000+ MMK) ----------
+        async function adminPinCall(payload) {
+            const token = await auth.currentUser.getIdToken();
+            const res = await fetch(`${ADMIN_SYNC_WORKER_URL}/admin-pin`, {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            const data = await res.json().catch(() => null);
+            return { status: res.status, data: data || { ok: false, error: 'Worker returned HTTP ' + res.status } };
+        }
+        function adminPinPaintStatus(hasPin) {
+            const badge = document.getElementById('apin-status-badge');
+            if (badge) {
+                badge.textContent = hasPin ? 'Set' : 'Not set';
+                badge.style.background = hasPin ? 'var(--accent-soft)' : 'var(--fill-soft)';
+                badge.style.color = hasPin ? 'var(--accent)' : 'var(--text-secondary)';
+            }
+            const cur = document.getElementById('apin-current');
+            if (cur) cur.style.display = hasPin ? '' : 'none';
+        }
+        async function refreshAdminPinStatus() {
+            try {
+                const r = await adminPinCall({ op: 'status' });
+                if (r.data && r.data.ok) adminPinPaintStatus(!!r.data.hasPin);
+                return r.data;
+            } catch (e) { return null; }
+        }
+        window.toggleAdminPinSettings = function () {
+            const body = document.getElementById('apin-settings-body');
+            if (!body) return;
+            const open = body.style.display === 'none';
+            body.style.display = open ? 'block' : 'none';
+            const chev = document.getElementById('apin-settings-chevron');
+            if (chev) chev.style.transform = open ? 'rotate(180deg)' : '';
+            if (open) refreshAdminPinStatus();
+        };
+        window.saveAdminPin = async function () {
+            const cur = document.getElementById('apin-current');
+            const n1 = document.getElementById('apin-new');
+            const n2 = document.getElementById('apin-confirm');
+            const btn = document.getElementById('apin-save-btn');
+            if (!/^\d{6}$/.test(n1.value)) { window.showToast('PIN must be exactly 6 digits.', 'fail'); return; }
+            if (n1.value !== n2.value) { window.showToast('The two PINs do not match.', 'fail'); return; }
+            const old = btn.innerText; btn.disabled = true; btn.innerText = 'Saving...';
+            try {
+                const r = await adminPinCall({ op: 'set', pin: n1.value, confirmPin: n2.value, currentPin: cur && cur.style.display !== 'none' ? cur.value : undefined });
+                if (!r.data.ok) { window.showToast(r.data.error || 'Could not save PIN.', 'fail'); return; }
+                window.showToast('PIN saved', 'success');
+                if (typeof logAdminActivity === 'function') logAdminActivity('Admin PIN set/changed');
+                cur.value = ''; n1.value = ''; n2.value = '';
+                adminPinPaintStatus(true);
+            } catch (e) {
+                window.showToast('Request failed: ' + (e && e.message || e), 'fail');
+            } finally { btn.disabled = false; btn.innerText = old; }
+        };
+
+        // Called instead of unlockAdminApp() right after sign-in (and after 2FA).
+        // No PIN set -> straight in (set one in Settings). PIN set but last entry > 6 h ago -> ask.
+        // If the Worker can't be reached the gate stays closed with a Retry button.
+        async function adminPinGateThenUnlock() {
+            let st = null, code = 0;
+            try { const r = await adminPinCall({ op: 'status' }); st = r.data; code = r.status; } catch (e) { st = null; }
+            // 401 = this sign-in has no admin claim yet (not a usable admin session anyway) -> don't trap it here.
+            if (code === 401) { unlockAdminApp(); return; }
+            if (st && st.ok && (!st.hasPin || st.fresh)) { adminPinPaintStatus(!!st.hasPin); unlockAdminApp(); return; }
+            showAdminPinOverlay(st && st.ok ? '' : 'Could not reach the server. Check your connection and retry.');
+        }
+        function showAdminPinOverlay(initialMsg) {
+            let ov = document.getElementById('admin-pin-gate');
+            if (!ov) {
+                ov = document.createElement('div');
+                ov.id = 'admin-pin-gate';
+                ov.style.cssText = 'position:fixed;inset:0;z-index:900;display:flex;align-items:center;justify-content:center;padding:24px;background:linear-gradient(160deg,#EEF2FF 0%,#F5F3FF 45%,#FDF2F8 100%);';
+                ov.innerHTML =
+                    '<div style="width:100%;max-width:340px;background:#fff;border:1px solid #E2E4E9;border-radius:20px;padding:24px 20px;box-shadow:0 10px 40px rgba(79,70,229,0.15);text-align:center;color:#1F2430;font-family:inherit;">' +
+                    '<svg class="ui-icon" style="width:34px;height:34px;color:#4F46E5;"><use href="#icon-shield"></use></svg>' +
+                    '<div style="font-size:18px;font-weight:800;margin:8px 0 4px;">Enter your PIN</div>' +
+                    '<div style="font-size:12.5px;color:#5B6072;line-height:1.5;margin-bottom:14px;">Your 6-digit admin PIN is needed again (last entry was more than 6 hours ago).</div>' +
+                    '<input type="password" id="admin-pin-gate-input" inputmode="numeric" maxlength="6" autocomplete="off" placeholder="000000" style="width:100%;box-sizing:border-box;text-align:center;letter-spacing:10px;font-size:22px;padding:12px;border:1px solid #E2E4E9;border-radius:12px;">' +
+                    '<div id="admin-pin-gate-err" style="display:none;color:#DC2626;font-size:12.5px;margin-top:10px;"></div>' +
+                    '<button type="button" id="admin-pin-gate-btn" style="width:100%;margin-top:14px;padding:12px;border:0;border-radius:12px;background:#4F46E5;color:#fff;font-weight:700;font-size:15px;">Verify</button>' +
+                    '<button type="button" id="admin-pin-gate-out" style="width:100%;margin-top:8px;padding:10px;border:0;background:transparent;color:#5B6072;font-size:13px;">Sign out</button>' +
+                    '</div>';
+                document.body.appendChild(ov);
+                document.getElementById('admin-pin-gate-btn').addEventListener('click', verifyAdminPinGate);
+                document.getElementById('admin-pin-gate-input').addEventListener('keydown', (e) => { if (e.key === 'Enter') verifyAdminPinGate(); });
+                document.getElementById('admin-pin-gate-out').addEventListener('click', () => { ov.remove(); signOut(auth); });
+            }
+            ov.style.display = 'flex';
+            const err = document.getElementById('admin-pin-gate-err');
+            if (initialMsg) { err.textContent = initialMsg; err.style.display = 'block'; } else { err.style.display = 'none'; }
+            const inp = document.getElementById('admin-pin-gate-input'); inp.value = ''; inp.focus();
+        }
+        async function verifyAdminPinGate() {
+            const inp = document.getElementById('admin-pin-gate-input');
+            const err = document.getElementById('admin-pin-gate-err');
+            const btn = document.getElementById('admin-pin-gate-btn');
+            if (!/^\d{6}$/.test(inp.value)) { err.textContent = 'Enter the 6-digit PIN.'; err.style.display = 'block'; return; }
+            btn.disabled = true; btn.textContent = 'Verifying...';
+            try {
+                const r = await adminPinCall({ op: 'verify', pin: inp.value });
+                if (r.data && r.data.ok) {
+                    const ov = document.getElementById('admin-pin-gate'); if (ov) ov.remove();
+                    adminPinPaintStatus(true);
+                    unlockAdminApp();
+                    return;
+                }
+                err.textContent = (r.data && r.data.error) || 'Wrong PIN.'; err.style.display = 'block'; inp.value = ''; inp.focus();
+            } catch (e) {
+                err.textContent = 'Could not reach the server. Retry.'; err.style.display = 'block';
+            } finally { btn.disabled = false; btn.textContent = 'Verify'; }
+        }
+
         async function routeAfterAuth(user) {
             // First-admin bootstrap: right after createFirstAdmin() signs this
             // brand-new account in, write its username mapping before lookup.
@@ -7822,14 +8019,14 @@
             // the panel soon after doesn't ask again.
             if (adminDocData && adminDocData.totpEnabled && adminDocData.totpSecret) {
                 if (tfaIsTrusted(currentAdminUsername)) {
-                    unlockAdminApp();
+                    adminPinGateThenUnlock();
                 } else {
                     showTwoFactorLoginStep(adminDocData.totpSecret);
                 }
                 return;
             }
 
-            unlockAdminApp();
+            adminPinGateThenUnlock();
         }
 
         async function tryAutoAdminLogin() {
@@ -9117,7 +9314,7 @@
             // back verbatim in the callback payload, so the Worker can map it
             // straight back to the right slot in this Firestore doc.
             const callbackUrl = G2BULK_SETTINGS.webhookUrl
-                ? `${G2BULK_SETTINGS.webhookUrl}?secret=${encodeURIComponent(G2BULK_SETTINGS.webhookSecret)}`
+                ? `${G2BULK_SETTINGS.webhookUrl}?secret=__WEBHOOK_SECRET__` /* the Worker proxy swaps in the real secret */
                 : undefined;
 
             for (const sub of subOrders) {
@@ -10780,7 +10977,8 @@
                 ['Payment', escapeHtml(t.paymentMethod || 'N/A')],
                 ['Customer', escapeHtml(t.userName || 'Guest')],
                 ['UID', escapeHtml(t.userId || 'N/A')],
-                t.userPhone ? ['Phone', escapeHtml(t.userPhone)] : null
+                t.userPhone ? ['Phone', escapeHtml(t.userPhone)] : null,
+                (!t.receiptUrl && t.source !== 'admin') ? ['Receipt', 'NONE - verify payment before Confirm'] : null
             ].filter(Boolean);
             const labelWidth = Math.max(...rows.map(r => r[0].length));
             const gridLines = rows.map(([label, value], i) => {
@@ -15073,6 +15271,69 @@
         }
         window.onNotifAudienceChange = onNotifAudienceChange;
 
+        // Telegram side of a notification. In-app notification is already saved when this runs,
+        // so this never throws - it just returns a short note appended to the success toast.
+        async function sendNotifToTelegram(audience, telegramId, title, intro, details) {
+            if (!ADMIN_BROADCAST_SECRET) return ' (Telegram skipped: save the Admin Broadcast Secret in Settings first)';
+            let text = '\u{1F4E2} ' + title + '\n\n' + intro + '\n\n' + details;
+            if (text.length > 4000) text = text.slice(0, 3990) + '...';
+            try {
+                if (audience === 'user') {
+                    if (!telegramId) return ' (this user has no Telegram linked, so no Telegram message)';
+                    const r = await fetch(`${AUTH_WORKER_URL}/admin/notify-user`, {
+                        method: 'POST', headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ secret: ADMIN_BROADCAST_SECRET, telegramId, text })
+                    });
+                    const j = await r.json().catch(() => ({}));
+                    return (r.ok && j.ok) ? ' + Telegram sent' : ` (Telegram failed: ${j.error || r.status})`;
+                }
+                const r = await fetch(`${AUTH_WORKER_URL}/admin/broadcast`, {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ secret: ADMIN_BROADCAST_SECRET, text })
+                });
+                const j = await r.json().catch(() => ({}));
+                return (r.ok && j.ok) ? ` + Telegram queued for ${j.recipients} bot users` : ` (Telegram failed: ${j.error || r.status})`;
+            } catch (e) {
+                console.error('Telegram notify error:', e);
+                return ' (Telegram request failed)';
+            }
+        }
+
+        // Accepts a users/{id} doc id, a numeric Telegram ID, @username, or a Gmail address.
+        async function resolveNotifTarget(raw) {
+            const q = String(raw || '').trim();
+            if (!q || q.includes('/')) return null;
+            const one = async (field, val) => {
+                const snap = await getDocs(query(collection(db, "users"), where(field, "==", val)));
+                return snap.docs.length === 1 ? { id: snap.docs[0].id, data: snap.docs[0].data() } : null;
+            };
+            if (!q.startsWith('@') && !q.includes('@')) {
+                for (const c of [...new Set([q, q.toUpperCase()])]) {
+                    const s = await getDoc(doc(db, "users", c));
+                    if (s.exists()) return { id: s.id, data: s.data() };
+                }
+                if (/^[0-9]{3,20}$/.test(q)) { const r = await one('telegramId', q); if (r) return r; }
+            }
+            if (q.includes('@') && !q.startsWith('@')) {
+                return (await one('googleEmail', q)) || (await one('googleEmail', q.toLowerCase()));
+            }
+            const uname = q.replace(/^@/, '');
+            return (await one('telegramUsername', uname)) || (await one('telegramUsername', uname.toLowerCase()));
+        }
+
+        // "Send Message" button on a user's detail page -> opens the Notify form already aimed at them.
+        function messageCurrentUser() {
+            const id = currentUserDetailsId;
+            if (!id) return;
+            showPage('notify-list');
+            const sel = document.getElementById('notif-audience');
+            if (sel) { sel.value = 'user'; onNotifAudienceChange(); }
+            const inp = document.getElementById('notif-target-user');
+            if (inp) inp.value = id;
+            window.scrollTo(0, 0);
+        }
+        window.messageCurrentUser = messageCurrentUser;
+
         async function sendNotification() {
             const titleEl = document.getElementById('notif-title');
             const introEl = document.getElementById('notif-intro');
@@ -15094,22 +15355,28 @@
 
             try {
                 const payload = { title, intro, details, timestamp: serverTimestamp() };
+                let tgTarget = '';
+                let resolvedId = targetUserId;
                 if (audience === 'user') {
-                    // Confirm the ID actually belongs to a user before writing anything,
+                    // Find the user by ID / Telegram ID / @username / Gmail before writing anything,
                     // so a typo doesn't silently vanish into a notification nobody gets.
-                    const userSnap = await getDoc(doc(db, "users", targetUserId));
-                    if (!userSnap.exists()) {
-                        window.showToast('No user found with that ID', 'fail');
+                    const found = await resolveNotifTarget(targetUserId);
+                    if (!found) {
+                        window.showToast('No user found (try User ID, Telegram ID, @username or Gmail)', 'fail');
                         return;
                     }
-                    payload.targetUserId = targetUserId;
+                    resolvedId = found.id;
+                    payload.targetUserId = found.id;
+                    tgTarget = String(found.data.telegramId || '');
                 }
                 await addDoc(collection(db, "notifications"), payload);
+                const tgBox = document.getElementById('notif-telegram');
+                const tgNote = (tgBox && tgBox.checked) ? await sendNotifToTelegram(audience, tgTarget, title, intro, details) : '';
                 titleEl.value = '';
                 introEl.value = '';
                 detailsEl.value = '';
                 targetUserEl.value = '';
-                window.showToast(audience === 'user' ? `Notification sent to ${targetUserId}!` : 'Notification sent to all users!', 'success');
+                window.showToast((audience === 'user' ? `Notification sent to ${resolvedId}!` : 'Notification sent to all users!') + tgNote, 'success');
             } catch (error) {
                 console.error("Send notification error:", error);
                 window.showToast('Failed to send notification.', 'fail');
@@ -17400,7 +17667,7 @@
         function listenG2Bulk() {
             if (g2bulkListenerAttached) return;
             g2bulkListenerAttached = true;
-            onSnapshot(doc(db, "settings", "g2bulk"), (docSnap) => {
+            adminSettingsSnapshot('g2bulk', (docSnap) => {
                 const data = docSnap.exists() ? docSnap.data() : {};
                 document.getElementById('g2bulk-api-key').value = data.apiKey || '';
                 document.getElementById('g2bulk-usd-rate').value = data.usdRate || 4500;
@@ -17449,7 +17716,7 @@
             btn.innerText = 'Saving...';
 
             try {
-                await setDoc(doc(db, "settings", "g2bulk"), { apiKey, usdRate, webhookUrl, webhookSecret, lowBalanceAlert, enabled }, { merge: true });
+                await adminSettingsSave('g2bulk', { apiKey, usdRate, webhookUrl, webhookSecret, lowBalanceAlert, enabled });
                 logAdminActivity('Saved G2Bulk settings', enabled ? 'Enabled' : 'Disabled');
                 // Refresh the public settings/providerFlags mirror so the
                 // Storefront sees the new enabled/disabled state right away.
@@ -18152,7 +18419,7 @@
         function listenTelegramBot() {
             if (telegramListenerAttached) return;
             telegramListenerAttached = true;
-            onSnapshot(doc(db, "settings", "telegramBot"), (docSnap) => {
+            adminSettingsSnapshot('telegramBot', (docSnap) => {
                 const data = docSnap.exists() ? docSnap.data() : {};
                 document.getElementById('tg-bot-token').value = data.botToken || '';
                 document.getElementById('tg-chat-id').value = data.chatId || '';
@@ -18214,7 +18481,7 @@
             btn.disabled = true;
             btn.innerText = 'Saving...';
             try {
-                await setDoc(doc(db, "settings", "telegramBot"), { botToken, chatId, webhookUrl, webhookSecret, botUsername, enabled }, { merge: true });
+                await adminSettingsSave('telegramBot', { botToken, chatId, webhookUrl, webhookSecret, botUsername, enabled });
                 logAdminActivity('Saved Telegram Bot settings', enabled ? 'Enabled' : 'Disabled');
                 window.showToast('Telegram Bot settings saved!', 'success');
                 closeTelegramBotModal();
