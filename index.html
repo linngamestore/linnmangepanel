@@ -4081,6 +4081,25 @@
             </div>
         </div>
 
+        <!-- PHONE PAYMENTS PAGE: money that really arrived on the receiving phone (Worker /admin/payins) -->
+        <div id="payin-list" class="page-section">
+            <h2 class="title-header">
+                <span>Phone Payments</span>
+                <button class="btn btn-outline btn-sm" onclick="loadPayins()"><svg class="ui-icon" style="width:13px;height:13px;"><use href="#icon-refresh"></use></svg> Refresh</button>
+            </h2>
+            <p style="font-size:12.5px;color:var(--text-secondary);margin:-4px 0 12px;">Every money-received notification forwarded from the receiving phone. Waiting = no order or top-up has used it yet. Wave is live; <b>KPay: coming soon</b> (its slips go to Telegram only).</p>
+            <div class="pkg-type-tabs" id="payin-status-tabs" style="margin-bottom:14px;">
+                <button type="button" class="pkg-type-tab active" data-status="Waiting" onclick="switchPayinTab('Waiting')">Waiting</button>
+                <button type="button" class="pkg-type-tab" data-status="Matched" onclick="switchPayinTab('Matched')">Matched</button>
+                <button type="button" class="pkg-type-tab" data-status="All" onclick="switchPayinTab('All')">All</button>
+            </div>
+            <div class="admin-search-wrap">
+                <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                <input type="text" id="payin-search" placeholder="Search name, last 4 digits, Txn ID, amount" autocomplete="off" oninput="renderPayins()">
+            </div>
+            <div id="payin-container"><p class="empty-msg">Loading...</p></div>
+        </div>
+
         <!-- WALLET TOP UP PAGE (Firebase Connected) -->
         <div id="topup-list" class="page-section">
             <h2 class="title-header">
@@ -5361,7 +5380,7 @@
             'dashboard': 'group-dashboard', 'analytics': 'group-dashboard',
             'order-list': 'group-order',
             'g2bulk': 'group-setting', 'jcplays': 'group-setting', 'api-docs': 'group-setting',
-            'payment-list': 'group-wallet', 'topup-list': 'group-wallet',
+            'payment-list': 'group-wallet', 'topup-list': 'group-wallet', 'payin-list': 'group-wallet',
             'user-list': 'group-userlist', 'tier-list': 'group-userlist',
             'usage-page': 'group-setting', 'settings': 'group-setting', 'notify-list': 'group-setting', 'ticker-list': 'group-setting'
         };
@@ -5381,6 +5400,7 @@
             }
             window.scrollTo(0,0);
             if ((pageId === 'dashboard' || pageId === 'order-list') && window.loadDashboardStats) window.loadDashboardStats();
+            if (pageId === 'payin-list' && window.loadPayins) window.loadPayins();
             if (pageId === 'analytics' && window.renderAnalytics) window.renderAnalytics();
             if (pageId === 'usage-page' && window.LinnUsage) window.LinnUsage.render();
             // Cloudflare/Firestore usage no longer auto-loads (saves Worker requests); use the Refresh buttons.
@@ -5463,7 +5483,8 @@
             ]},
             wallet: { title: 'Wallet', items: [
                 { label: 'Payment', icon: '#icon-wallet', run: () => showPage('payment-list') },
-                { label: 'Top Up', icon: '#icon-wallet', run: () => showPage('topup-list') }
+                { label: 'Top Up', icon: '#icon-wallet', run: () => showPage('topup-list') },
+                { label: 'Phone Pay', icon: '#icon-clock', run: () => showPage('payin-list') }
             ]},
             api: { title: 'API', items: [
                 { label: 'G2Bulk', icon: '#icon-g2bulk', run: () => showPage('g2bulk'), dotId: 'g2bulk-nav-low-dot' },
@@ -6263,6 +6284,40 @@
             if (!res.ok || !j.ok) throw new Error(j.error || ('HTTP ' + res.status));
             return j.data || {};
         }
+        // ---- Admin user list via the Worker (POST /admin-users, admin == true checked there) ----
+        // ISO timestamp strings from the Worker are turned back into Firestore-Timestamp-like objects,
+        // so existing code (u.createdAt.toDate(), .toMillis()) keeps working unchanged.
+        const _ISO_TS_RE = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?Z$/;
+        function _reviveTs(v) {
+            if (typeof v === 'string' && _ISO_TS_RE.test(v)) {
+                const ms = Date.parse(v);
+                return { seconds: Math.floor(ms / 1000), nanoseconds: (ms % 1000) * 1e6, toMillis: () => ms, toDate: () => new Date(ms) };
+            }
+            if (Array.isArray(v)) return v.map(_reviveTs);
+            if (v && typeof v === 'object') { const o = {}; for (const k in v) o[k] = _reviveTs(v[k]); return o; }
+            return v;
+        }
+        async function adminWorkerLoadUsers() {
+            if (auth.authStateReady) await auth.authStateReady();
+            if (!auth.currentUser) throw new Error('Not signed in');
+            const out = {};
+            let cursor = '';
+            for (let page = 0; page < 200; page++) {
+                const tok = await auth.currentUser.getIdToken();
+                const res = await fetch(`${ADMIN_SYNC_WORKER_URL}/admin-users`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${tok}`, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ op: 'list', cursor, pageSize: 500 })
+                });
+                const j = await res.json().catch(() => ({}));
+                if (!res.ok || !j.ok) throw new Error(j.error || ('HTTP ' + res.status));
+                (j.users || []).forEach(u => { const { id, ...rest } = u; out[id] = _reviveTs(rest); });
+                if (!j.next) return out;
+                cursor = j.next;
+            }
+            return out;
+        }
+
         function adminSettingsGet(provider) { return adminSettingsCall(provider, 'get'); }
         async function adminSettingsRefresh(provider) {
             const s = _adminSettingsSubs[provider];
@@ -6477,6 +6532,79 @@
             if (chev) chev.style.transform = open ? 'rotate(180deg)' : '';
             attachMaintListener();
         }
+        // ---------- Phone Payments (Worker /admin/payins) ----------
+        let PAYINS = [], payinTab = 'Waiting', payinLoading = false;
+        async function loadPayins(silent) {
+            if (payinLoading || !auth.currentUser) return;
+            payinLoading = true;
+            const box = document.getElementById('payin-container');
+            if (!silent && box && !PAYINS.length) box.innerHTML = '<p class="empty-msg">Loading...</p>';
+            try {
+                const token = await auth.currentUser.getIdToken();
+                const res = await fetch(`${ADMIN_SYNC_WORKER_URL}/admin/payins`, { method: 'POST', headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }, body: '{}' });
+                const data = await res.json().catch(() => null);
+                if (res.status === 404) { if (box) box.innerHTML = '<p class="empty-msg">The /admin/payins route is not deployed on the Worker yet.</p>'; return; }
+                if (res.status === 401) { if (box) box.innerHTML = '<p class="empty-msg">Admin sign-in required to view phone payments (the Worker only accepts a real admin token).</p>'; return; }
+                if (!data || !data.ok) { if (box) box.innerHTML = '<p class="empty-msg">Could not load payments.</p>'; return; }
+                PAYINS = data.items || [];
+                renderPayins();
+            } catch (e) {
+                if (box && !PAYINS.length) box.innerHTML = '<p class="empty-msg">Could not load payments.</p>';
+            } finally { payinLoading = false; }
+        }
+        function switchPayinTab(tab) {
+            payinTab = tab;
+            document.querySelectorAll('#payin-status-tabs .pkg-type-tab').forEach(b => b.classList.toggle('active', b.dataset.status === tab));
+            renderPayins();
+        }
+        function renderPayins() {
+            const box = document.getElementById('payin-container');
+            if (!box) return;
+            const q = (document.getElementById('payin-search')?.value || '').trim().toLowerCase();
+            const list = PAYINS.filter(p => (payinTab === 'All' || p.status === payinTab)
+                && (!q || [p.from, p.phone, p.txnId, String(p.amount), p.date, p.usedBy].join(' ').toLowerCase().includes(q)));
+            if (!list.length) { box.innerHTML = `<p class="empty-msg">${payinTab === 'Waiting' ? 'No waiting payments.' : 'Nothing here.'}</p>`; return; }
+            const cell = (label, value) => value ? `<div class="od-cell"><div class="od-label">${label}</div><div class="od-value">${value}</div></div>` : '';
+            box.innerHTML = list.map(p => {
+                const waiting = p.status === 'Waiting';
+                const who = escapeHtml([p.from, p.phone].filter(Boolean).join(' \u00b7 '));
+                const txn = p.txnId ? `<span class="highlight-id">${escapeHtml(p.txnId)}</span> <button type="button" class="btn btn-outline btn-sm" style="padding:2px 6px;" onclick="navigator.clipboard && navigator.clipboard.writeText('${escapeHtml(p.txnId)}'); window.showToast('Copied', 'success')"><svg class="ui-icon" style="width:12px;height:12px;"><use href="#icon-copy"></use></svg></button>` : '';
+                const date = escapeHtml(p.date || '') + (p.dateSrc === 'phone' && p.date ? ' <span style="color:var(--text-secondary);font-size:11px;">(phone time)</span>' : '');
+                return `<div class="order-card" style="margin-bottom:10px;padding:14px;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px;">
+                        <div style="font-size:18px;font-weight:700;">${Number(p.amount).toLocaleString()} MMK</div>
+                        <span class="badge ${waiting ? 'badge-pending' : 'badge-success'}">${waiting ? 'Waiting' : 'Matched'}</span>
+                    </div>
+                    <div class="od-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:8px 12px;">
+                        ${cell('From', who || '-')}
+                        ${cell('Date', date || '-')}
+                        ${cell('Transaction ID', txn || '-')}
+                        ${cell('Used by', escapeHtml(p.usedBy || ''))}
+                    </div>
+                </div>`;
+            }).join('');
+        }
+        window.loadPayins = loadPayins; window.switchPayinTab = switchPayinTab; window.renderPayins = renderPayins;
+        setInterval(() => { if (!document.hidden && document.getElementById('payin-list')?.classList.contains('active')) loadPayins(true); }, 20000);
+
+        // Block shown inside order / top-up cards once the money was matched to a phone payment.
+        function payinDetailHtml(d) {
+            if (!d || !d.payinStatus) return '';
+            if (d.payinStatus !== 'matched') {
+                const msg = d.payinStatus === 'soon' ? 'KPay auto-check coming soon - verify the slip in the KBZPay app before confirming.' : d.payinStatus === 'ambiguous' ? 'Several same-amount payments arrived - check your wallet app before confirming.' : 'Waiting - payment not seen on the receiving phone yet.';
+                return `<div style="margin-top:8px;padding:10px;background:rgba(251,191,36,0.10);border:1px solid rgba(251,191,36,0.35);border-radius:8px;font-size:12.5px;"><b>Phone check:</b> ${msg}</div>`;
+            }
+            const line = (k, v) => v ? `<p style="margin:2px 0;font-size:12.5px;"><b>${k}:</b> ${v}</p>` : '';
+            return `<div style="margin-top:8px;padding:10px;background:rgba(34,197,94,0.10);border:1px solid rgba(34,197,94,0.35);border-radius:8px;">
+                <div style="font-size:11px;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.3px;margin-bottom:4px;">Payment received on phone</div>
+                ${line('Amount', d.payinAmount ? Number(d.payinAmount).toLocaleString() + ' MMK' : '')}
+                ${line('From', escapeHtml([d.payinFrom, d.payinPhone].filter(Boolean).join(' \u00b7 ')))}
+                ${line('Transaction ID', d.payinTxn ? escapeHtml(d.payinTxn) : '')}
+                ${line('Date', escapeHtml(d.payinDate || '') + (d.payinDateSrc === 'phone' && d.payinDate ? ' <span style="color:var(--text-secondary);font-size:11px;">(phone time)</span>' : ''))}
+            </div>`;
+        }
+        window.payinDetailHtml = payinDetailHtml;
+
         async function maintenanceAction(action) {
             if (!auth.currentUser) { window.showToast('Sign in first', 'fail'); return; }
             const minutes = Number(document.getElementById('maint-minutes').value) || 0;
@@ -9152,6 +9280,7 @@
                                 ${data.location ? `<p><b>Order Location:</b> <a href="https://www.google.com/maps?q=${data.location.lat},${data.location.lng}" target="_blank" style="color:var(--accent);">View on Map</a></p>` : ''}
                                 ${data.receiptUrl ? `<p><b>Receipt:</b> <a href="${escapeHtml(data.receiptUrl)}" target="_blank" style="color:var(--accent);">View Screenshot</a></p><img src="${escapeHtml(data.receiptUrl)}" loading="lazy" decoding="async" style="width:100%;max-height:180px;object-fit:contain;border-radius:8px;background:var(--bg-subtle);margin-top:6px;">` : ''}
                                 ${riskDetailHtml(data, riskInfo)}
+                                ${window.payinDetailHtml ? window.payinDetailHtml(data) : ''}
                                 ${Array.isArray(data.deliveredCodes) && data.deliveredCodes.length ? `<div style="margin-top:8px;padding:10px;background:var(--fill-soft);border-radius:8px;">
                                     <div style="font-size:11px;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.3px;margin-bottom:6px;">Delivered Voucher Code${data.deliveredCodes.length > 1 ? 's' : ''} — copy &amp; send to customer</div>
                                     ${data.deliveredCodes.map(c => `<div class="mono" style="font-size:13px;padding:4px 0;word-break:break-all;">${escapeHtml(String(c))}</div>`).join('')}
@@ -10636,6 +10765,7 @@
                                         <img src="${escapeHtml(t.receiptUrl)}" alt="Receipt" loading="lazy" decoding="async" style="width:100%;height:100%;object-fit:cover;">
                                     </a>` : ''}
                                 </div>
+                                ${window.payinDetailHtml ? window.payinDetailHtml(t) : ''}
                                 <p style="color:var(--text-secondary); font-size:12px;">Requested: ${dateStr}</p>
                                 ${t.statusNote ? `<p style="color:var(--text-secondary); font-size:12px;">Note: ${escapeHtml(t.statusNote)}</p>` : ''}
                                 ${(t.confirmedBy || t.rejectedBy) ? `<p style="color:var(--text-secondary); font-size:12px;">${t.confirmedBy ? 'Confirmed' : 'Rejected'} by <b>${escapeHtml(t.confirmedBy || t.rejectedBy)}</b></p>` : ''}
@@ -16092,9 +16222,15 @@
             if (usersLoadPromise) return usersLoadPromise;
             usersLoadPromise = (async () => {
                 try {
-                    const snap = await getDocs(collection(db, "users"));
-                    const newUsers = {};
-                    snap.forEach(docSnap => { newUsers[docSnap.id] = docSnap.data(); });
+                    // Loaded through the Worker (admin token checked server-side); falls back to a direct read if it is unreachable.
+                    let newUsers;
+                    try { newUsers = await adminWorkerLoadUsers(); }
+                    catch (werr) {
+                        console.warn('Worker user list failed, reading Firestore directly:', werr);
+                        const snap = await getDocs(collection(db, "users"));
+                        newUsers = {};
+                        snap.forEach(docSnap => { newUsers[docSnap.id] = docSnap.data(); });
+                    }
                     USERS = newUsers;
                     usersLoadedAt = Date.now();
                     try {
@@ -16226,6 +16362,7 @@
                             ${o.serverRegion ? `<p><b>Server:</b> <span class="highlight-id">${o.serverRegion}</span></p>` : ''}
                             ${o.receiptUrl ? `<p><b>Receipt:</b> <a href="${escapeHtml(o.receiptUrl)}" target="_blank" style="color:var(--accent);">View Screenshot</a></p><img src="${escapeHtml(o.receiptUrl)}" loading="lazy" decoding="async" style="width:100%;max-height:180px;object-fit:contain;border-radius:8px;background:var(--bg-subtle);margin-top:6px;">` : ''}
                             ${riskDetailHtml(o, riskInfo)}
+                            ${window.payinDetailHtml ? window.payinDetailHtml(o) : ''}
                         </div>
                     </div>
                 `;
