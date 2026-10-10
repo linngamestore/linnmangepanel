@@ -10816,6 +10816,21 @@
             return { creditedAmount, creditedUserId };
         }
 
+        // E-mails the customer (Gmail / e-mail login) the result of a top-up resolved here. Fire-and-forget:
+        // the Worker re-reads the top-up and silently skips accounts with no e-mail or if mail isn't set up.
+        async function emailTopupResultToCustomer(topupId) {
+            try {
+                const token = await auth.currentUser.getIdToken();
+                await fetch(`${ADMIN_SYNC_WORKER_URL}/notify-topup-email`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ topupId })
+                });
+            } catch (error) {
+                console.error('emailTopupResultToCustomer error:', error);
+            }
+        }
+
         function confirmTopup(id, btnElement) {
             window.showActionDialog({
                 type: 'success',
@@ -10836,6 +10851,7 @@
                 logAdminActivity('Confirmed top-up', `${creditedAmount.toLocaleString()} MMK (id: ${id})`);
                 window.showToast(`Wallet credited ${creditedAmount.toLocaleString()} MMK ✓`, 'success');
                 editTelegramWalletTopupMessage(id, 'Completed');
+                emailTopupResultToCustomer(id);
             } catch (error) {
                 console.error("doConfirmTopup error:", error);
                 window.showToast(error.message || "Failed to credit wallet.", 'fail');
@@ -10867,6 +10883,7 @@
                 logAdminActivity('Rejected top-up', `id: ${id}${note ? ' — ' + note : ''}`);
                 window.showToast("Top up rejected.", 'fail');
                 editTelegramWalletTopupMessage(id, 'Rejected');
+                emailTopupResultToCustomer(id);
             } catch (error) {
                 console.error("doRejectTopup error:", error);
                 window.showToast("Failed to update! Check Rules.", 'fail');
