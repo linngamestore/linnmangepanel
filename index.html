@@ -4646,9 +4646,7 @@
                             <svg class="picker-btn-chevron ui-icon"><use href="#icon-chevron-down"></use></svg>
                         </div>
                         <p id="fazercard-import-status" style="font-size:11px;color:var(--text-muted);margin-top:-4px;white-space:pre-wrap;"></p>
-                        <label style="margin-top:10px;">G2Bulk ID-Check Code <span class="u-muted">(optional fallback)</span></label>
-                        <input type="text" id="edit-game-g2bulk-idcheck-code" placeholder="Enter Game Code" style="text-transform:none;">
-                        <p style="font-size:11px;color:var(--text-muted);margin-top:-4px;">FazerCards ID check ခ်လုပ်မရရင် (unsupported or down) ဒီ G2Bulk code ကို အသုံးပြုပြီး player name ကိုပဲ ပြပေးမယ် — order ကတော့ FazerCards ကနေပဲ ဆက်ဆောင်ရွက်ပါမယ်။</p>
+                        <input type="hidden" id="edit-game-g2bulk-idcheck-code" value="">
                     </div>
 
                     <!-- FazerCards Gift Cards: a separate part of FazerCards'
@@ -10117,30 +10115,10 @@
                 }
             }
 
-            // Fallback: same game, checked via G2Bulk's public checkPlayerId
-            // instead - admin set this up (Game editor → G2Bulk ID-Check Code)
-            // specifically for categories FazerCards can't verify, or for
-            // whenever the FazerCards check above didn't come back. This is
-            // informational only - the order still fulfills through
-            // FazerCards regardless of which provider resolved the name.
-            if (!playerName && linkedGame && linkedGame.g2bulkIdCheckCode) {
-                try {
-                    const res = await fetch('https://api.g2bulk.com/v1/games/checkPlayerId', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ game: linkedGame.g2bulkIdCheckCode, user_id: order.playerId, server_id: order.serverId || undefined })
-                    });
-                    const data = await res.json();
-                    if (res.ok && (data.valid === 'valid' || data.valid === true) && data.name) playerName = data.name;
-                } catch (error) {
-                    console.error("G2Bulk fallback checkPlayerId error:", error);
-                }
-            }
-
             if (!playerName) {
                 window.showInfoDialog(
                     'Player ID Verification Failed',
-                    `Could not find an account for this Player ID${order.serverId ? '/Server ID' : ''} via FazerCards${linkedGame && linkedGame.g2bulkIdCheckCode ? ' or the G2Bulk fallback' : ''}. Double-check with the customer before processing this order.`
+                    `Could not find an account for this Player ID${order.serverId ? '/Server ID' : ''} via FazerCards. Double-check with the customer before processing this order.`
                 );
                 if (btnElement) { btnElement.disabled = false; btnElement.innerText = originalText; }
                 return;
@@ -14643,7 +14621,7 @@
                 document.getElementById('voucher-import-status').innerText = '';
                 document.getElementById('edit-game-fazercard-category').value = g.fazercardCategoryId || '';
                 document.getElementById('fazercard-import-status').innerText = '';
-                document.getElementById('edit-game-g2bulk-idcheck-code').value = g.g2bulkIdCheckCode || '';
+                document.getElementById('edit-game-g2bulk-idcheck-code').value = '';   // no longer used - cleared on next save
                 pendingFazerCardFields = Array.isArray(g.fazercardFields) ? g.fazercardFields.slice() : [];
                 pendingFazerCardServerMode = g.fazercardServerMode || null;
                 pendingFazerCardServerOptions = Array.isArray(g.fazercardServerOptions) ? g.fazercardServerOptions.slice() : null;
