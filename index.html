@@ -12086,9 +12086,45 @@
         // re-checks it.
         let gameCostUpdateCounts = {};   // gameId -> pending cost-update count (0 = checked, none pending)
         let gameStockOutCounts = {};     // gameId -> sold-out package count (0 = checked, none out)
+        // --- request savers for the Games-list scan -------------------------------------------------
+        // (a) The same provider response is shared by the Cost scan, the Stock-out scan and every game
+        //     that uses the same code/product (e.g. one MLBB code for many servers): 10 min memo +
+        //     in-flight de-dupe. Before, each linked game cost 2x G2Bulk / 2x JCPlays calls per scan.
+        // (b) Scan results are kept in localStorage for 30 min, so reloading the admin panel does not
+        //     re-scan every game again. Saving a game still clears just that game (invalidateGameCostScan).
+        const _scanMemo = new Map();
+        function scanOnce(key, ttlMs, fn) {
+            const hit = _scanMemo.get(key);
+            if (hit && Date.now() - hit.at < ttlMs) return hit.p;
+            const p = Promise.resolve().then(fn).catch(e => { _scanMemo.delete(key); throw e; });
+            _scanMemo.set(key, { at: Date.now(), p });
+            return p;
+        }
+        const SCAN_MEMO_TTL = 10 * 60 * 1000;
+        function scanG2BulkCatalogue(code) {
+            return scanOnce('g2cat:' + code, SCAN_MEMO_TTL, async () => (await fetch(`https://api.g2bulk.com/v1/games/${encodeURIComponent(code)}/catalogue`)).json());
+        }
+        function scanJcplaysProducts(product) {
+            return scanOnce('jcp:' + product, SCAN_MEMO_TTL, () => jcplaysRequest('productlist', { product }));
+        }
+        function scanFazerOffers(cat) {
+            return scanOnce('fz:' + cat, SCAN_MEMO_TTL, () => fazercardRequest('/topups/offers', { params: { category_id: cat } }));
+        }
+        const GAME_SCAN_CACHE_KEY = 'gameCostScanCache.v1', GAME_SCAN_CACHE_TTL = 30 * 60 * 1000;
+        try {
+            const raw = JSON.parse(localStorage.getItem(GAME_SCAN_CACHE_KEY) || 'null');
+            if (raw && Date.now() - raw.at < GAME_SCAN_CACHE_TTL) { gameCostUpdateCounts = raw.cost || {}; gameStockOutCounts = raw.stock || {}; }
+        } catch (e) { /* ignore */ }
+        function persistGameScan() {
+            try {
+                const prev = JSON.parse(localStorage.getItem(GAME_SCAN_CACHE_KEY) || 'null');
+                const at = (prev && Date.now() - prev.at < GAME_SCAN_CACHE_TTL) ? prev.at : Date.now();
+                localStorage.setItem(GAME_SCAN_CACHE_KEY, JSON.stringify({ at, cost: gameCostUpdateCounts, stock: gameStockOutCounts }));
+            } catch (e) { /* ignore */ }
+        }
         let gameCostScanQueue = [];
         let gameCostScanInFlight = new Set();
-        const GAME_COST_SCAN_CONCURRENCY = 3;
+        const GAME_COST_SCAN_CONCURRENCY = 2;
 
         function updateGameCostBadge(gameId) {
             const el = document.getElementById(`game-cost-badge-${gameId}`);
@@ -12159,6 +12195,7 @@
             delete gameStockOutCounts[gameId];
             updateGameCostBadge(gameId);
             updateGameStockBadge(gameId);
+            persistGameScan();
         }
         window.invalidateGameCostScan = invalidateGameCostScan;
 
@@ -12191,7 +12228,8 @@
                         gameCostScanInFlight.delete(gameId);
                         updateGameCostBadge(gameId);
                         updateGameStockBadge(gameId);
-                        runGameCostScanQueue();
+                        persistGameScan();
+                        setTimeout(runGameCostScanQueue, 250);
                     });
             }
         }
@@ -12213,8 +12251,7 @@
             let changed = 0;
             try {
                 if (g.g2bulkCode) {
-                    const res = await fetch(`https://api.g2bulk.com/v1/games/${encodeURIComponent(g.g2bulkCode)}/catalogue`);
-                    const data = await res.json();
+                    const data = await scanG2BulkCatalogue(g.g2bulkCode);
                     if (data.success) {
                         const liveByName = new Map((data.catalogues || []).map(c => [c.name, Math.round(c.amount * rate)]));
                         packages.forEach(p => {
@@ -12225,7 +12262,7 @@
                     }
                 }
                 if (g.jcplaysProduct && JCPLAYS_SETTINGS.uid && JCPLAYS_SETTINGS.email && JCPLAYS_SETTINGS.mKey) {
-                    const data = await jcplaysRequest('productlist', { product: g.jcplaysProduct });
+                    const data = await scanJcplaysProducts(g.jcplaysProduct);
                     if (data.status === 200) {
                         const liveById = new Map(((data.data && data.data.product) || []).map(r => [String(r.id), Math.round(Number(r.price) * jcplaysRate())]));
                         packages.forEach(p => {
@@ -12253,7 +12290,7 @@
             // FazerCards (its own try, so a failure here can't hide G2Bulk/JCPlays changes counted above)
             if (g.fazercardCategoryId && FAZERCARD_SETTINGS.apiKey && FAZERCARD_SETTINGS.enabled !== false) {
                 try {
-                    const data = await fazercardRequest('/topups/offers', { params: { category_id: g.fazercardCategoryId } });
+                    const data = await scanFazerOffers(g.fazercardCategoryId);
                     const liveByOffer = new Map((data.offers || []).map(o => [String(o.offer_id), Math.round(Number(o.price_usd) * (FAZERCARD_SETTINGS.usdRate || 4500))]));
                     packages.forEach(p => {
                         const key = (p.fazercardOfferId || '').trim();
@@ -12289,8 +12326,7 @@
             let outCount = 0;
             try {
                 if (g.g2bulkCode) {
-                    const res = await fetch(`https://api.g2bulk.com/v1/games/${encodeURIComponent(g.g2bulkCode)}/catalogue`);
-                    const data = await res.json();
+                    const data = await scanG2BulkCatalogue(g.g2bulkCode);
                     if (data.success) {
                         const liveNames = new Set((data.catalogues || []).map(c => c.name));
                         packages.forEach(p => {
@@ -12301,7 +12337,7 @@
                     }
                 }
                 if (g.jcplaysProduct && JCPLAYS_SETTINGS.uid && JCPLAYS_SETTINGS.email && JCPLAYS_SETTINGS.mKey) {
-                    const data = await jcplaysRequest('productlist', { product: g.jcplaysProduct });
+                    const data = await scanJcplaysProducts(g.jcplaysProduct);
                     if (data.status === 200) {
                         const liveIds = new Set(((data.data && data.data.product) || []).map(r => String(r.id)));
                         packages.forEach(p => {
