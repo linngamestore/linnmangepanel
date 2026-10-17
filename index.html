@@ -6366,7 +6366,7 @@
         // directly from the browser. Returns { ok, email } only. Network or non-200
         // responses are treated the same as "not found" so callers keep
         // their existing generic error handling.
-        async function lookupAdminEmailByUsername(username) {
+        async function lookupAdminEmailDetailed(username) {
             try {
                 const res = await fetch(`${ADMIN_SYNC_WORKER_URL}/admin-login-lookup`, {
                     method: 'POST',
@@ -6374,11 +6374,15 @@
                     body: JSON.stringify({ username })
                 });
                 const data = await res.json().catch(() => null);
-                return (data && data.ok && data.email) ? data.email : null;
+                if (res.status >= 500) return { email: null, serverError: true };
+                return { email: (data && data.ok && data.email) ? data.email : null, serverError: false };
             } catch (e) {
                 console.error('admin-login-lookup failed:', e);
-                return null;
+                return { email: null, serverError: true };
             }
+        }
+        async function lookupAdminEmailByUsername(username) {
+            return (await lookupAdminEmailDetailed(username)).email;
         }
 
         // Re-syncs Firebase Auth custom claims (admin/adminRole) from
@@ -7973,7 +7977,16 @@
                 // "adminUsernames/{username}" doc, but only ever returning
                 // the email - never permissions/telegram fields
                 // to the browser).
-                const email = await lookupAdminEmailByUsername(username);
+                const lk = await lookupAdminEmailDetailed(username);
+                const email = lk.email;
+                if (lk.serverError) {
+                    // Network / Worker problem - NOT the user's fault, so it must not count toward the lockout.
+                    errEl.textContent = 'Connection problem. Check your internet and try again.';
+                    errEl.style.display = 'block';
+                    btn.disabled = false;
+                    btn.innerText = 'Sign In';
+                    return;
+                }
                 if (!email) {
                     // Same generic message and same lockout path as a wrong
                     // password below, so a caller can't tell "unknown
@@ -7998,6 +8011,14 @@
                 // username exists, which field was wrong, or any other
                 // Firebase-internal detail to whoever is at the keyboard.
                 console.error('Admin login error:', error);
+                const code = (error && error.code) || '';
+                if (code === 'auth/network-request-failed' || code === 'auth/internal-error') {
+                    errEl.textContent = 'Connection problem. Check your internet and try again.';
+                    errEl.style.display = 'block';
+                    btn.disabled = false;
+                    btn.innerText = 'Sign In';
+                    return;
+                }
                 registerFailedAttempt('login');
                 if (!applyLockoutUI('login', 'login-btn', 'login-error', 'Sign In')) {
                     errEl.textContent = 'Wrong username or password.';
