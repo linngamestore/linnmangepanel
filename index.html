@@ -1230,6 +1230,16 @@
             background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);
             line-height: 1;
         }
+        /* Provider chip (SVG chip-card) in the card's top-right corner: P1 / P2 / P3 tell the auto-fulfilment
+           providers apart at a glance. Manual / Software games get no chip. */
+        .prov-chips { position: absolute; top: 4px; right: 4px; z-index: 2; display: flex; flex-direction: column; align-items: flex-end; gap: 3px; pointer-events: none; }
+        .prov-chip { display: inline-flex; align-items: center; gap: 3px; height: 18px; padding: 0 6px 0 4px; border-radius: 6px; font-size: 10.5px; font-weight: 800; letter-spacing: .2px; line-height: 1; color: #fff;
+            background: var(--pc, #3B82F6); box-shadow: 0 2px 6px -2px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.35); }
+        .prov-chip svg { width: 13px; height: 10px; flex: none; }
+        .prov-chip.p1 { --pc: #2563EB; } .prov-chip.p2 { --pc: #EA580C; } .prov-chip.p3 { --pc: #059669; }
+        .prov-tag { display: inline-block; margin-left: 4px; padding: 1px 5px; border-radius: 5px; font-size: 9.5px; font-weight: 800; color: #fff; background: var(--pc, #3B82F6); vertical-align: middle; }
+        .prov-tag.p1 { --pc: #2563EB; } .prov-tag.p2 { --pc: #EA580C; } .prov-tag.p3 { --pc: #059669; }
+        .pkg-type-tab.active .prov-tag { background: rgba(255,255,255,.3); }
         /* Neat segmented tab bar for the Games list page (Direct / Voucher) -
            was previously only switchable via the sidebar's picker sheet,
            with no visible indicator of which list was showing. */
@@ -1237,7 +1247,12 @@
         .game-list-tab-btn { flex: 1; text-align: center; padding: 8px 10px; border-radius: 10px; border: 1px solid var(--fill-soft); background: var(--surface); font-size: 12.5px; font-weight: 600; color: var(--text-secondary); cursor: pointer; transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease; }
         .game-list-tab-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
         .user-grid-card { background: var(--surface); border-radius: 18px; padding: 16px; border: 1px solid var(--border-glass); box-shadow: var(--shadow-soft), inset 0 1px 0 var(--border-glass); display: flex; flex-direction: column; }
-        .ugc-top { display: flex; justify-content: flex-end; margin-bottom: -6px; }
+        .ugc-top { display: flex; justify-content: space-between; align-items: center; gap: 6px; margin-bottom: -6px; }
+        .pres-chip { display: inline-flex; align-items: center; gap: 5px; font-size: 11.5px; font-weight: 600; color: var(--text-muted); white-space: nowrap; }
+        .pres-chip.on { color: #16A34A; }
+        .pres-dot { width: 8px; height: 8px; border-radius: 50%; background: #9CA3AF; flex-shrink: 0; }
+        .pres-chip.on .pres-dot { background: #22C55E; box-shadow: 0 0 0 3px rgba(34,197,94,.22); }
+        .btn.online-filter-on { background: #16A34A; border-color: #16A34A; color: #fff; }
         .ugc-identity { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
         .ugc-identity h5 { font-size: 15px; font-weight: 600; color: var(--text-strong); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .ugc-identity .ugc-id { font-size: 11.5px; color: var(--text-muted); display: flex; align-items: center; gap: 4px; margin-top: 2px; }
@@ -2723,6 +2738,308 @@
 .hb-or { text-align:center; font-size:11px; color:var(--text-muted); margin:2px 0 8px; }
 .hb-empty { text-align:center; color:var(--text-muted); font-size:13px; padding:14px 0; margin:0; }
 </style>
+
+<style id="mobile-btn-fix">
+.udp-topbar { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 14px; }
+.udp-topbar .udp-back { margin-bottom: 0; min-height: 40px; }
+.udp-update-btn { flex: 0 0 auto; display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 40px; padding: 8px 16px; border: 0; border-radius: 12px;
+    background: var(--accent); color: #fff; font-size: 13.5px; font-weight: 700; cursor: pointer; white-space: nowrap; -webkit-tap-highlight-color: transparent; transition: transform .12s ease, opacity .15s; }
+.udp-update-btn:active { transform: scale(.96); }
+.udp-update-btn.busy, .udp-update-btn:disabled { opacity: .65; pointer-events: none; }
+@media (max-width: 640px) {
+    .btn { min-height: 42px; padding: 10px 14px; font-size: 13.5px; line-height: 1.25; white-space: normal; }
+    .udp-tab { min-height: 40px; padding: 10px 14px; }
+    .udp-tabs { scroll-padding: 0 12px; }
+    #ud-txn-tabs { gap: 8px !important; padding: 2px 14px 8px 2px; scroll-padding: 0 14px; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+    #ud-txn-tabs::-webkit-scrollbar { display: none; }
+    #ud-txn-tabs::after { content: ''; flex: 0 0 6px; }
+    .wtx-chip { min-height: 36px; padding: 7px 14px; font-size: 12.5px; }
+    .badge { white-space: nowrap; }
+}
+
+/* ---- whole-site mobile button pass ---- */
+.od-done-label { flex: 1 0 100%; text-align: center; font-size: 13px; font-weight: 600; color: var(--text-secondary); padding: 2px 0; }
+@media (max-width: 640px) {
+    .od-card-footer, #orders-container .od-card-footer, #topups-container .od-card-footer { display: flex; flex-wrap: wrap; gap: 8px; }
+    .od-card-footer .btn, #orders-container .od-card-footer .btn, #topups-container .od-card-footer .btn { flex: 1 1 calc(50% - 8px); min-width: 112px; min-height: 42px; padding: 9px 10px; font-size: 13px; line-height: 1.2; white-space: normal; }
+    .modal-footer { flex-wrap: wrap; }
+    .modal-footer .btn { flex: 1 1 130px; }
+    .btn-sm, .btn-xs { min-height: 36px; }
+    button, .btn, .udp-tab, .wtx-chip { touch-action: manipulation; }
+    input, select, textarea { font-size: 16px; }
+}
+</style>
+<style id="motion-css">
+/* ================= Admin motion layer =================
+   Every screen except the tab switch (that already has its own fade) gets motion:
+   press feedback, list/card entrance, modal content, dialogs, count-up numbers, badge bump, focus glow.
+   Respects prefers-reduced-motion. All of it is additive - nothing above is changed. */
+@keyframes moIn   { from { opacity: 0; transform: translateY(16px) scale(.97); } to { opacity: 1; transform: none; } }
+@keyframes moFade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes moPop  { 0% { opacity: 0; transform: translateY(14px) scale(.94); } 60% { opacity: 1; transform: translateY(-2px) scale(1.01); } 100% { opacity: 1; transform: none; } }
+@keyframes moBump { 0% { transform: scale(1); } 40% { transform: scale(1.4); } 100% { transform: scale(1); } }
+@keyframes moFlash { 0% { box-shadow: 0 0 0 0 rgba(99,102,241,.55); } 100% { box-shadow: 0 0 0 12px rgba(99,102,241,0); } }
+
+/* cards / rows that appear (class added by the motion script, delay = --mo-i) */
+.mo-in { animation: moIn .48s cubic-bezier(.2,.8,.25,1) backwards; animation-delay: calc(var(--mo-i, 0) * 55ms); }
+
+/* press feedback + smooth hover (low specificity so existing transitions still win) */
+:where(.btn, .picker-btn, .pkg-type-tab, .game-list-tab-btn, .udp-tab, .pkg-tab-btn, .cal2-nav-btn, .header-icon, .nav-item, .pkg-move-btn, .od-card-close, .pkg-card-close, .secret-toggle-btn, .field-lock-btn, .stat-chip, .stat-card, .user-card, .user-grid-card, .game-reorder-card, .game-picker-card, .tx-row, .admin-card) {
+  transition: transform .16s cubic-bezier(.2,.8,.25,1), background-color .2s ease, border-color .2s ease, box-shadow .25s ease, color .2s ease, opacity .2s ease;
+}
+.btn:active, .picker-btn:active, .pkg-type-tab:active, .game-list-tab-btn:active, .udp-tab:active, .pkg-tab-btn:active,
+.cal2-nav-btn:active, .header-icon:active, .nav-item:active, .pkg-move-btn:active, .secret-toggle-btn:active, .field-lock-btn:active { transform: scale(.95); }
+.stat-chip:active, .stat-card:active, .user-card:active, .user-grid-card:active, .game-picker-card:active, .tx-row:active { transform: scale(.985); }
+@media (hover: hover) {
+  .btn:hover:not(:disabled), .picker-btn:hover { transform: translateY(-1px); }
+  .stat-card:hover, .stat-chip:hover, .user-grid-card:hover, .game-picker-card:hover, .chart-card:hover { transform: translateY(-2px); box-shadow: 0 10px 24px -14px rgba(0,0,0,.35); }
+  .btn:active:not(:disabled) { transform: scale(.95); }
+}
+
+/* modals: content settles in one by one after the sheet slides up */
+.modal-overlay.show .modal-box > * { animation: moIn .42s cubic-bezier(.2,.8,.25,1) backwards; }
+.modal-overlay.show .modal-box > :nth-child(1) { animation-delay: .08s; }
+.modal-overlay.show .modal-box > :nth-child(2) { animation-delay: .14s; }
+.modal-overlay.show .modal-box > :nth-child(3) { animation-delay: .20s; }
+.modal-overlay.show .modal-box > :nth-child(4) { animation-delay: .26s; }
+.modal-overlay.show .modal-box > :nth-child(n+5) { animation-delay: .32s; }
+#nav-group-sheet-overlay.show .modal-box > * { animation: none; }   /* has its own row animation */
+
+/* order-details / package cards / dialogs pop open, backdrop fades */
+.od-overlay, .pkg-card-overlay { animation: moFade .22s ease both; }
+.od-card, .pkg-card { animation: moPop .36s cubic-bezier(.2,.8,.25,1) both; }
+.dialog-box { transition: transform .34s cubic-bezier(.2,.9,.3,1.3), opacity .2s ease !important; }
+.dialog-overlay.show .dialog-box { transform: scale(1) !important; }
+.dialog-overlay.show .dialog-box > * { animation: moIn .38s cubic-bezier(.2,.8,.25,1) backwards; }
+.dialog-overlay.show .dialog-box > :nth-child(2) { animation-delay: .06s; }
+.dialog-overlay.show .dialog-box > :nth-child(3) { animation-delay: .12s; }
+.dialog-overlay.show .dialog-box > :nth-child(n+4) { animation-delay: .18s; }
+
+/* inputs: soft focus glow */
+:where(input, select, textarea) { transition: border-color .2s ease, box-shadow .25s ease, background-color .2s ease; }
+input:focus, select:focus, textarea:focus { box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent, #6366f1) 22%, transparent); }
+
+/* numbers that change, badges that update */
+.mo-bump { animation: moBump .45s cubic-bezier(.2,.8,.25,1); display: inline-block; }
+.mo-flash { animation: moFlash .8s ease-out; }
+.stat-card-value, .stat-chip p { font-variant-numeric: tabular-nums; }
+
+/* switches + tab pills glide */
+.toggle-slider, .toggle-slider::before { transition: background-color .25s ease, transform .3s cubic-bezier(.2,.9,.3,1.3) !important; }
+.badge, .cat-badge, .tier-row-badge { transition: background-color .25s ease, color .25s ease, transform .2s ease; }
+
+@media (prefers-reduced-motion: reduce) {
+  .mo-in, .mo-bump, .mo-flash, .od-overlay, .od-card, .pkg-card, .pkg-card-overlay,
+  .modal-overlay.show .modal-box > *, .dialog-overlay.show .dialog-box > * { animation: none !important; }
+  .btn:hover, .stat-card:hover, .stat-chip:hover { transform: none !important; }
+}
+</style>
+<style id="motion2-css">
+/* ================= Admin motion layer 2: motion for the places that had none, each kind with its own movement =================
+   (additive on top of #motion-css; delete this block to remove it) */
+@keyframes moZoom   { 0% { opacity: 0; transform: scale(.78); } 65% { opacity: 1; transform: scale(1.04); } 100% { opacity: 1; transform: none; } }
+@keyframes moSlideL { from { opacity: 0; transform: translate3d(-26px,0,0); } to { opacity: 1; transform: none; } }
+@keyframes moSlideR { from { opacity: 0; transform: translate3d(26px,0,0); } to { opacity: 1; transform: none; } }
+@keyframes moFlip   { from { opacity: 0; transform: perspective(560px) rotateX(-52deg) translateY(10px); } to { opacity: 1; transform: none; } }
+@keyframes moTabPop { 0% { transform: scale(.88); } 55% { transform: scale(1.07); } 100% { transform: scale(1); } }
+@keyframes moShake  { 0%,100% { transform: translateX(0); } 18% { transform: translateX(-7px); } 36% { transform: translateX(6px); } 54% { transform: translateX(-4px); } 72% { transform: translateX(3px); } }
+@keyframes moIconPop { 0% { transform: scale(0) rotate(-40deg); } 70% { transform: scale(1.18) rotate(6deg); } 100% { transform: scale(1) rotate(0); } }
+@keyframes moFloat  { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+@keyframes moBreathe { 0%,100% { opacity: 1; } 50% { opacity: .62; } }
+@keyframes moSpin   { to { transform: rotate(360deg); } }
+@keyframes moBar    { from { transform: scaleX(1); } to { transform: scaleX(0); } }
+@keyframes moIconBounce { 0% { transform: translateY(0) scale(1); } 35% { transform: translateY(-5px) scale(1.18); } 65% { transform: translateY(1px) scale(.95); } 100% { transform: none; } }
+
+/* 1) different entrance per kind of item (the script still removes the class when it finishes) */
+.stat-card.mo-in, .stat-chip.mo-in { animation-name: moZoom; }
+.tx-row.mo-in, .wtx-row.mo-in, .package-row.mo-in, .game-reorder-card.mo-in { animation-name: moSlideL; }
+.tx-row.mo-in:nth-child(even), .wtx-row.mo-in:nth-child(even) { animation-name: moSlideR; }
+.tier-row.mo-in, .switch-row.mo-in, .api-doc-card.mo-in { animation-name: moSlideR; }
+.user-card.mo-in, .user-grid-card.mo-in, .game-picker-card.mo-in, .game-image-tile.mo-in { animation-name: moFlip; transform-origin: 50% 0; }
+
+/* 2) page titles slide in every time a page opens */
+.page-section.active .card-title, .page-section.active .section-title { animation: moSlideL .45s cubic-bezier(.2,.8,.25,1) .04s backwards; }
+
+/* 3) tabs / pills pop when they become the selected one */
+.pkg-type-tab.active, .udp-tab.active, .game-list-tab-btn.active, .pkg-tab-btn.active, .wtx-chip.active { animation: moTabPop .38s cubic-bezier(.2,1.3,.3,1); }
+
+/* 4) top bar: nav icon bounces when selected, header icons tilt on press */
+.nav-item.active .ui-icon { animation: moIconBounce .5s cubic-bezier(.2,.8,.25,1); }
+.nav-item .ui-icon, .header-icon .ui-icon { transition: transform .3s cubic-bezier(.2,1.2,.3,1); }
+.nav-item:active .ui-icon { transform: scale(.82) rotate(-8deg); }
+.header-icon:active .ui-icon { transform: rotate(24deg) scale(1.15); }
+
+/* 5) toast: springs down, icon pops, a thin bar counts down the 3s it stays */
+#toast { transition: transform .5s cubic-bezier(.2,1.25,.3,1), opacity .25s ease !important; overflow: hidden; }
+#toast.show .toast-icon-circle { animation: moIconPop .5s cubic-bezier(.2,.9,.3,1.2) .1s backwards; }
+#toast::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 3px; background: currentColor; opacity: .35; transform-origin: left center; transform: scaleX(0); }
+#toast.show::after { animation: moBar 3s linear forwards; }
+
+/* 6) empty lists fade up, then breathe softly */
+.empty-msg { animation: moIn .5s cubic-bezier(.2,.8,.25,1) backwards, moBreathe 3.2s ease-in-out .6s infinite; }
+
+/* 7) pending / processing badges breathe so they read as "waiting" */
+.badge-pending, .badge-processing { animation: moBreathe 2.4s ease-in-out infinite; }
+
+/* 8) login: fields rise one by one, wrong-password message shakes, logo floats */
+#step-login > *, #step-2fa > *, #step-first-admin-setup > * { animation: moIn .5s cubic-bezier(.2,.8,.25,1) backwards; }
+#step-login > :nth-child(2), #step-2fa > :nth-child(2), #step-first-admin-setup > :nth-child(2) { animation-delay: .06s; }
+#step-login > :nth-child(3), #step-2fa > :nth-child(3), #step-first-admin-setup > :nth-child(3) { animation-delay: .12s; }
+#step-login > :nth-child(4), #step-2fa > :nth-child(4), #step-first-admin-setup > :nth-child(4) { animation-delay: .18s; }
+.login-msg-error { animation: moShake .5s ease; }
+.login-card-left .logo-icon { animation: moFloat 3.6s ease-in-out infinite; }
+
+/* 9) buttons that are busy get a spinner */
+.btn.busy::after, .btn.loading::after, .udp-update-btn.busy::after { content: ""; display: inline-block; width: 14px; height: 14px; margin-left: 8px; border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%; vertical-align: -2px; animation: moSpin .7s linear infinite; }
+
+/* 10) theme change: colours cross-fade instead of snapping */
+html.mo-theme-fade, html.mo-theme-fade *, html.mo-theme-fade *::before, html.mo-theme-fade *::after { transition: background-color .4s ease, color .4s ease, border-color .4s ease, box-shadow .4s ease, fill .4s ease, stroke .4s ease !important; }
+
+@media (prefers-reduced-motion: reduce) {
+  .page-section.active .card-title, .page-section.active .section-title, .pkg-type-tab.active, .udp-tab.active, .game-list-tab-btn.active,
+  .pkg-tab-btn.active, .wtx-chip.active, .nav-item.active .ui-icon, #toast.show .toast-icon-circle, #toast.show::after, .empty-msg,
+  .badge-pending, .badge-processing, #step-login > *, #step-2fa > *, #step-first-admin-setup > *, .login-msg-error,
+  .login-card-left .logo-icon, .btn.busy::after, .btn.loading::after, .udp-update-btn.busy::after { animation: none !important; }
+  html.mo-theme-fade, html.mo-theme-fade * { transition: none !important; }
+}
+</style>
+<style id="ui-upgrade-css">
+/* ================= Admin UI upgrade: layout tuning, settings cleanup, colours, small UX pieces =================
+   Additive. Delete this block (and #ui-upgrade-js + the Panel Preferences card) to remove it. */
+
+/* ---- 1) Maintenance: Reopen / Close get real colours, the one that does not apply right now is dimmed ---- */
+.maint-actions { gap: 10px; }
+.maint-actions .btn { min-height: 46px; border: 0; font-weight: 700; letter-spacing: .01em; color: #fff; }
+.maint-btn-close { background: linear-gradient(135deg,#FB923C,#EF4444); box-shadow: 0 8px 18px -8px rgba(239,68,68,.75); }
+.maint-btn-open  { background: linear-gradient(135deg,#34D399,#16A34A); box-shadow: 0 8px 18px -8px rgba(22,163,74,.75); }
+.maint-btn-close:active, .maint-btn-open:active { filter: brightness(.93); }
+#maint-body:has(.maint-status-box.ok)  .maint-btn-open  { opacity: .42; box-shadow: none; }
+#maint-body:has(.maint-status-box.off) .maint-btn-close { opacity: .42; box-shadow: none; }
+.maint-actions .btn:disabled { opacity: .6; }
+.maint-chips { display: flex; flex-wrap: wrap; gap: 6px; margin: -4px 0 14px; }
+.maint-chip { padding: 6px 11px; border-radius: 99px; border: 1px solid var(--border-glass); background: var(--fill-soft); color: var(--text-secondary); font: inherit; font-size: 11.5px; font-weight: 600; cursor: pointer; transition: transform .15s, background-color .2s, color .2s; -webkit-tap-highlight-color: transparent; }
+.maint-chip:active { transform: scale(.94); background: var(--accent-soft); color: var(--accent); }
+.maint-status-box.ok  { border-color: rgba(34,197,94,.35); }
+.maint-status-box.warn { border-color: rgba(245,158,11,.4); }
+.maint-status-box.off { border-color: rgba(239,68,68,.4); background: linear-gradient(135deg, rgba(239,68,68,.10), rgba(239,68,68,.02)); }
+.maint-status-box.warn .maint-status-ico svg { animation: moSpin 6s linear infinite; }
+.maint-status-box.off .maint-status-ico { animation: moBreathe 2s ease-in-out infinite; }
+.maint-hint { padding: 10px 12px; border-radius: 12px; background: var(--fill-soft); border-left: 3px solid var(--accent); font-size: 11.5px; line-height: 1.7; }
+.maint-lbl { font-size: 11.5px; text-transform: none; letter-spacing: .01em; margin-top: 2px; }
+.maint-field { min-height: 46px; font-size: 14px; border-radius: 14px; }
+select.maint-field { -webkit-appearance: none; appearance: none; padding-right: 36px; background-repeat: no-repeat; background-position: right 12px center; background-size: 16px;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238b93a7' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E"); }
+
+/* ---- 2) Settings page: grouped, searchable, calmer headers ---- */
+.st-toolbar { display: flex; gap: 8px; align-items: center; margin: 0 0 14px; }
+.st-search { flex: 1; min-width: 0; display: flex; align-items: center; gap: 8px; padding: 0 12px; min-height: 44px; border-radius: 14px; border: 1px solid var(--border-glass); background: var(--surface); }
+.st-search:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 20%, transparent); }
+.st-search .ui-icon { width: 17px; height: 17px; flex: none; color: var(--text-muted); }
+.st-search input { flex: 1; min-width: 0; border: 0 !important; outline: 0; background: transparent !important; box-shadow: none !important; padding: 10px 0; font-size: 14px; color: var(--text-primary); }
+.st-collapse { flex: none; min-height: 44px; padding: 0 14px; border-radius: 14px; border: 1px solid var(--border-glass); background: var(--fill-soft); color: var(--text-secondary); font: inherit; font-size: 12.5px; font-weight: 700; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.st-collapse:active { transform: scale(.95); }
+.st-empty { text-align: center; color: var(--text-muted); font-size: 13px; padding: 18px 0; }
+.st-group { display: flex; align-items: center; gap: 10px; margin: 26px 2px 2px; font-size: 11px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; color: var(--text-muted); animation: moSlideL .4s cubic-bezier(.2,.8,.25,1) backwards; }
+.st-group::after { content: ""; flex: 1; height: 1px; background: linear-gradient(90deg, var(--border-glass), transparent); }
+.st-group:first-of-type { margin-top: 6px; }
+.st-group.danger { color: var(--danger); }
+#settings > .admin-card { margin-top: 10px !important; transition: box-shadow .25s ease, border-color .25s ease, transform .16s ease; }
+#settings > .admin-card.st-hit { box-shadow: 0 0 0 2px var(--accent), 0 10px 26px -12px rgba(var(--accent-rgb), .5); }
+#settings .sc-head { min-height: 44px; gap: 12px; -webkit-tap-highlight-color: transparent; }
+#settings .sc-head:active .sc-title { opacity: .7; }
+#settings .sc-title { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; flex: 1; min-width: 0; font-size: 14.5px !important; }
+.sc-ico { flex: none; width: 34px; height: 34px; border-radius: 11px; display: inline-flex; align-items: center; justify-content: center; background: var(--accent-soft); color: var(--accent); }
+.sc-ico .ui-icon { width: 17px; height: 17px; stroke: currentColor; }
+.sc-ico.danger { background: var(--danger-soft); color: var(--danger); }
+#settings .admin-card > [id$="-body"] { animation: scOpen .32s cubic-bezier(.2,.8,.25,1); transform-origin: top; }
+@keyframes scOpen { from { opacity: 0; transform: translateY(-8px) scaleY(.96); } to { opacity: 1; transform: none; } }
+#settings .sc-chevron { transition: transform .3s cubic-bezier(.2,.9,.3,1.2) !important; }
+#settings .admin-card > [id$="-body"] label { font-size: 12px; }
+#settings .admin-card > [id$="-body"] .btn { min-height: 44px; }
+
+/* Panel Preferences card */
+.pp-badge { padding: 2px 8px; border-radius: 99px; font-size: 9.5px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--accent); background: var(--accent-soft); }
+.pp-row { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 12px 2px; border-top: 1px solid var(--border-glass); }
+.pp-row:first-child { border-top: 0; }
+.pp-txt { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.pp-txt b { font-size: 13.5px; font-weight: 600; color: var(--text-primary); }
+.pp-txt small { font-size: 11.5px; line-height: 1.45; color: var(--text-secondary); }
+.pp-switch { position: relative; flex: none; width: 50px; height: 30px; border: 0; border-radius: 99px; background: rgba(128,140,170,.35); cursor: pointer; transition: background-color .25s ease; -webkit-tap-highlight-color: transparent; padding: 0; }
+.pp-switch i { position: absolute; top: 3px; left: 3px; width: 24px; height: 24px; border-radius: 50%; background: #fff; box-shadow: 0 2px 6px rgba(0,0,0,.28); transition: transform .3s cubic-bezier(.2,1.3,.3,1); }
+.pp-switch[aria-checked="true"] { background: var(--accent); }
+.pp-switch[aria-checked="true"] i { transform: translateX(20px); }
+.pp-switch:active i { width: 28px; }
+.pp-switch[aria-checked="true"]:active i { transform: translateX(16px); }
+.pp-foot { display: flex; align-items: center; justify-content: space-between; margin-top: 8px; padding-top: 10px; border-top: 1px solid var(--border-glass); font-size: 11.5px; color: var(--text-muted); }
+.pp-reset { padding: 7px 14px; border-radius: 10px; border: 1px solid var(--border-glass); background: var(--fill-soft); color: var(--text-secondary); font: inherit; font-size: 12px; font-weight: 700; cursor: pointer; }
+
+/* ---- 3) Layout tuning, whole panel ---- */
+.title-header { margin-bottom: 14px; }
+/* the nav bar scrolls sideways: fade the edge that still has more, so it is obvious there is more to swipe to */
+#admin-top-nav { scroll-snap-type: x proximity; scroll-padding: 0 14px; scrollbar-width: none; }
+#admin-top-nav::-webkit-scrollbar { display: none; }
+#admin-top-nav > * { scroll-snap-align: center; }
+@media (max-width: 640px) {
+  #admin-top-nav.more-right { -webkit-mask-image: linear-gradient(90deg,#000 calc(100% - 34px),transparent); mask-image: linear-gradient(90deg,#000 calc(100% - 34px),transparent); }
+  #admin-top-nav.more-left  { -webkit-mask-image: linear-gradient(270deg,#000 calc(100% - 34px),transparent); mask-image: linear-gradient(270deg,#000 calc(100% - 34px),transparent); }
+  #admin-top-nav.more-left.more-right { -webkit-mask-image: linear-gradient(90deg,transparent,#000 30px,#000 calc(100% - 30px),transparent); mask-image: linear-gradient(90deg,transparent,#000 30px,#000 calc(100% - 30px),transparent); }
+}
+/* Games page: Edit Mode button reads as a switch (colour = state) and no longer floats alone */
+#game-edit-mode-btn { display: inline-flex; align-items: center; gap: 8px; min-height: 40px; border-radius: 99px; padding: 8px 16px; font-weight: 700; }
+#game-edit-mode-btn::before { content: ""; width: 9px; height: 9px; border-radius: 50%; background: var(--text-muted); transition: background-color .2s, box-shadow .2s; }
+#game-edit-mode-btn.is-on { background: var(--accent-soft); color: var(--accent); border-color: rgba(var(--accent-rgb), .5); }
+#game-edit-mode-btn.is-on::before { background: var(--accent); box-shadow: 0 0 0 4px rgba(var(--accent-rgb), .22); }
+/* long text never forces sideways scrolling */
+.admin-card, .modal-box, .od-card { overflow-wrap: anywhere; }
+.admin-card img, .modal-box img { max-width: 100%; }
+/* touch targets */
+@media (max-width: 640px) { .header-icon, .pkg-type-tab, .udp-tab, .game-list-tab-btn { min-height: 40px; } }
+
+/* ---- 4) Keyboard focus ring (was missing) ---- */
+:where(button, [role="button"], a, input, select, textarea, summary):focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+input:focus-visible, select:focus-visible, textarea:focus-visible { outline: none; }
+
+/* ---- 5) Back-to-top + offline bar ---- */
+#ux-top-btn { position: fixed; right: 16px; bottom: calc(18px + env(safe-area-inset-bottom, 0px)); z-index: 300; width: 46px; height: 46px; border: 0; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: var(--accent); color: #fff; box-shadow: 0 10px 22px -8px rgba(var(--accent-rgb), .8); cursor: pointer; opacity: 0; transform: translateY(14px) scale(.8); pointer-events: none; transition: opacity .25s ease, transform .35s cubic-bezier(.2,1.3,.3,1); -webkit-tap-highlight-color: transparent; }
+#ux-top-btn.show { opacity: 1; transform: none; pointer-events: auto; }
+#ux-top-btn:active { transform: scale(.9); }
+#ux-top-btn svg { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+#ux-offline { position: fixed; left: 0; right: 0; top: 0; z-index: 2000; padding: calc(env(safe-area-inset-top, 0px) + 8px) 12px 8px; text-align: center; font-size: 12.5px; font-weight: 700; color: #fff; background: #EF4444; transform: translateY(-110%); transition: transform .4s cubic-bezier(.2,1,.3,1), background-color .3s; }
+#ux-offline.show { transform: none; }
+#ux-offline.ok { background: #16A34A; }
+
+/* ---- 6) Preferences applied from the Panel Preferences card ---- */
+html.pref-calm *, html.pref-calm *::before, html.pref-calm *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+html.pref-compact .admin-card { padding: 12px 14px !important; }
+html.pref-compact .stat-card, html.pref-compact .stat-chip { padding-top: 10px !important; padding-bottom: 10px !important; }
+html.pref-compact #settings > .admin-card { margin-top: 8px !important; }
+html.pref-compact .btn { min-height: 38px; }
+@media (prefers-reduced-motion: reduce) { .st-group, #settings .admin-card > [id$="-body"], .maint-status-box.warn .maint-status-ico svg, .maint-status-box.off .maint-status-ico { animation: none !important; } }
+</style>
+<style id="maint-admin-css">
+.maint-pill{margin-left:8px;font-size:10.5px;font-weight:800;letter-spacing:.06em;padding:3px 9px;border-radius:99px}
+.maint-pill.ok{background:rgba(34,197,94,.16);color:#22c55e}.maint-pill.warn{background:rgba(245,158,11,.16);color:#f59e0b}.maint-pill.off{background:rgba(239,68,68,.16);color:#ef4444}
+.maint-status-box{display:flex;align-items:center;gap:12px;padding:12px;border-radius:16px;border:1px solid var(--border-glass,var(--border));background:linear-gradient(135deg,rgba(255,255,255,.10),rgba(255,255,255,.02));-webkit-backdrop-filter:blur(14px) saturate(160%);backdrop-filter:blur(14px) saturate(160%);box-shadow:inset 0 1px 1px rgba(255,255,255,.12);margin-bottom:12px}
+.maint-status-ico{flex:none;width:38px;height:38px;border-radius:12px;display:flex;align-items:center;justify-content:center;background:rgba(34,197,94,.14);color:#22c55e}
+.maint-status-ico .ui-icon{width:20px;height:20px}
+.maint-status-box.warn .maint-status-ico{background:rgba(245,158,11,.16);color:#f59e0b}.maint-status-box.off .maint-status-ico{background:rgba(239,68,68,.16);color:#ef4444}
+.maint-status-txt{display:flex;flex-direction:column;gap:2px;min-width:0;font-size:12px;color:var(--text-secondary)}
+.maint-status-txt b{font-size:13.5px;color:var(--text-primary,inherit)}
+.maint-hint{font-size:11.5px;line-height:1.65;color:var(--text-secondary);margin:0 0 12px}
+.maint-hint code{padding:1px 6px;border-radius:6px;background:var(--bg-subtle-2,rgba(128,128,128,.12));font-size:11px}
+.maint-lbl{display:block;margin:0 0 5px;font-size:12px;font-weight:600;color:var(--text-secondary)}
+.maint-field{width:100%;box-sizing:border-box;padding:10px 12px;margin-bottom:12px;border:1px solid var(--border-glass,var(--border));background:var(--bg-subtle-2,transparent);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);color:var(--text-primary,inherit);border-radius:10px;font:inherit;font-size:13px}
+.maint-actions{display:flex;gap:8px}.maint-actions .btn{flex:1}
+</style>
+<style id="dot-pulse-fix">
+/* Always-on status dots pulsed with an animated box-shadow (repaints every frame, forever).
+   Same look, but the ring is now a transform+opacity layer that runs on the compositor. */
+.live-dot, .pkg-summary-warn-dot, .nav-item-low-balance-dot { animation: none !important; position: relative; }
+.live-dot::after, .pkg-summary-warn-dot::after, .nav-item-low-balance-dot::after { content: ''; position: absolute; inset: 0; border-radius: 50%; pointer-events: none; background: currentColor; opacity: 0; animation: dotRing 2s ease-out infinite; }
+.live-dot { color: #34D399; } .pkg-summary-warn-dot { color: #FF9500; } .nav-item-low-balance-dot { color: #FF3B30; }
+@keyframes dotRing { 0% { transform: scale(1); opacity: .55; } 70%, 100% { transform: scale(3.1); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .live-dot::after, .pkg-summary-warn-dot::after, .nav-item-low-balance-dot::after { animation: none; } }
+</style>
 </head>
 <body>
 
@@ -3023,6 +3340,13 @@
                 </div>
                 <div class="row-split">
                     <div style="min-width:0;">
+                        <span style="font-size:12.5px;font-weight:600;color:var(--text-primary);">Recovery Email</span>
+                        <span id="my-account-email-status" style="font-size:11px;color:var(--text-muted);display:block;overflow:hidden;text-overflow:ellipsis;"></span>
+                    </div>
+                    <span id="my-account-email-action"></span>
+                </div>
+                <div class="row-split">
+                    <div style="min-width:0;">
                         <span style="font-size:12.5px;font-weight:600;color:var(--text-primary);">Order Transfer</span>
                         <span id="my-account-transfer-status" style="font-size:11px;color:var(--text-muted);display:block;"></span>
                     </div>
@@ -3086,6 +3410,32 @@
             </div>
             <div class="modal-footer">
                 <button class="btn btn-danger" id="tfa-disable-confirm-btn" onclick="confirmTwoFactorDisable()">Disable</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recovery email: step 1 = address, step 2 = 6-digit code mailed to it -->
+    <div class="modal-overlay" id="recovery-modal-overlay" onclick="if(event.target===this) closeRecoveryEmailModal()">
+        <div class="modal-box" style="max-width:340px;">
+            <div class="modal-header">
+                <h3>Recovery Email</h3>
+                <div class="modal-close" onclick="closeRecoveryEmailModal()">
+                    <svg class="ui-icon" style="width:18px;height:18px;"><use href="#icon-close"></use></svg>
+                </div>
+            </div>
+            <div class="modal-body">
+                <div id="recovery-step-email">
+                    <p style="font-size:12.5px;color:var(--text-secondary);margin-bottom:12px;">Password reset links will be sent to this address. We'll email you a 6-digit code to confirm it.</p>
+                    <input type="text" id="recovery-email-input" inputmode="email" autocomplete="email" autocapitalize="off" placeholder="you@example.com">
+                </div>
+                <div id="recovery-step-code" style="display:none;">
+                    <p id="recovery-code-hint" style="font-size:12.5px;color:var(--text-secondary);margin-bottom:12px;"></p>
+                    <input type="text" id="recovery-code-input" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="000000" style="text-align:center;font-size:22px;letter-spacing:8px;font-weight:700;">
+                </div>
+                <p id="recovery-error" class="login-msg-error" style="display:none;"></p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary btn-block" id="recovery-confirm-btn" onclick="confirmRecoveryEmail()">Send Code</button>
             </div>
         </div>
     </div>
@@ -3381,7 +3731,24 @@
                 <span>Settings</span>
             </h2>
 
-            <div class="admin-card" id="settings-card-sociallinks" style="margin-top:0;">
+<div class="st-toolbar" id="st-toolbar">
+  <label class="st-search"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"></circle><line x1="20" y1="20" x2="16.2" y2="16.2"></line></svg><input type="search" id="st-search-input" placeholder="Search settings…" autocomplete="off" aria-label="Search settings"></label>
+  <button type="button" class="st-collapse" id="st-collapse-btn" title="Collapse all cards">Collapse all</button>
+</div>
+<p class="st-empty" id="st-empty" hidden>No settings match your search.</p>
+
+<div class="admin-card" id="settings-card-panelprefs" style="margin-top:0;">
+<div class="sc-head" onclick="togglePanelPrefs()">
+<span class="sc-title">Panel Preferences <span class="pp-badge">this device</span></span>
+<svg class="ui-icon sc-chevron" id="panel-prefs-chevron" style="transform:rotate(180deg)"><use href="#icon-chevron-down"></use></svg>
+</div>
+<div id="panel-prefs-body" style="display:block;margin-top:12px;">
+<div class="pp-row"><div class="pp-txt"><b>Animations</b><small>Turn motion off for a faster, calmer panel</small></div><button type="button" class="pp-switch" role="switch" aria-checked="false" data-pref="calm"><i></i></button></div><div class="pp-row"><div class="pp-txt"><b>Compact layout</b><small>Tighter cards and spacing, more on screen</small></div><button type="button" class="pp-switch" role="switch" aria-checked="false" data-pref="compact"><i></i></button></div><div class="pp-row"><div class="pp-txt"><b>Tap feedback</b><small>Short vibration when you press buttons</small></div><button type="button" class="pp-switch" role="switch" aria-checked="false" data-pref="haptic"><i></i></button></div><div class="pp-row"><div class="pp-txt"><b>Back-to-top button</b><small>Floating button after you scroll down</small></div><button type="button" class="pp-switch" role="switch" aria-checked="false" data-pref="totop"><i></i></button></div><div class="pp-row"><div class="pp-txt"><b>Esc closes pop-ups</b><small>Keyboard / hardware-key shortcut</small></div><button type="button" class="pp-switch" role="switch" aria-checked="false" data-pref="esc"><i></i></button></div>
+<div class="pp-foot"><span>Saved on this device only.</span><button type="button" class="pp-reset" id="pp-reset">Reset</button></div>
+</div>
+</div>
+
+            <div class="admin-card" id="settings-card-sociallinks" style="margin-top:14px;">
                 <div class="sc-head" onclick="toggleSocialLinks()">
                     <span class="sc-title">Social Links</span>
                     <svg class="ui-icon sc-chevron" id="social-links-chevron"><use href="#icon-chevron-down"></use></svg>
@@ -3556,23 +3923,29 @@
 
             <div class="admin-card" id="settings-card-maintenance" style="margin-top:14px;">
                 <div class="sc-head" onclick="toggleMaintenanceSettings()">
-                    <span class="sc-title">Maintenance (Kill Switch) <span id="maint-status-pill" style="margin-left:8px;font-size:11px;padding:2px 8px;border-radius:99px;background:rgba(34,197,94,.18);color:#22c55e;">OPEN</span></span>
+                    <span class="sc-title">Maintenance <span id="maint-status-pill" class="maint-pill ok">OPEN</span></span>
                     <svg class="ui-icon sc-chevron" id="maint-chevron"><use href="#icon-chevron-down"></use></svg>
                 </div>
                 <div id="maint-body" style="display:none;margin-top:12px;">
-                    <p class="note-glass note-ok" style="font-size:12px;color:var(--text-secondary);margin:0 0 12px;">Website နှင့် Bot ကို ခေတ္တပိတ်ရန်။ ပိတ်ခင် Store users (in-app + push) နှင့် Bot users အားလုံးကို အသိပေးစာ အလိုအလျောက်ပို့ပါမည်။ ပိတ်နေစဉ် Pending အော်ဒါများ မဆုံးရှုံးပါ၊ ပြန်ဖွင့်ပြီးမှ ဆက်လုပ်ပါမည်။ Telegram မှ: /maintenance in 10 reason · /maintenance on · /maintenance off</p>
-                    <div id="maint-detail" style="font-size:12px;color:var(--text-secondary);margin-bottom:10px;"></div>
-                    <select id="maint-minutes" style="width:100%;padding:10px;border:1px solid var(--border-glass);background:var(--bg-subtle-2);color:var(--text-primary);border-radius:10px;margin-bottom:8px;">
+                    <div class="maint-status-box" id="maint-detail-box">
+                        <div class="maint-status-ico"><svg class="ui-icon"><use href="#icon-gear"></use></svg></div>
+                        <div class="maint-status-txt"><b id="maint-status-title">Store is open</b><span id="maint-detail">Website နှင့် Bot ပုံမှန် အလုပ်လုပ်နေပါတယ်။</span></div>
+                    </div>
+                    <p class="maint-hint">ပိတ်ခင် Store users (in-app + push) နှင့် Bot users အားလုံးကို အသိပေးစာ အလိုအလျောက်ပို့ပါမည်။ ပိတ်နေစဉ် Pending အော်ဒါများ မဆုံးရှုံးပါ၊ ပြန်ဖွင့်ပြီးမှ ဆက်လုပ်ပါမည်။<br>Telegram: <code>/maintenance in 10 reason</code> · <code>/maintenance on</code> · <code>/maintenance off</code></p>
+                    <label class="maint-lbl">ပိတ်မည့်အချိန်</label>
+                    <select id="maint-minutes" class="maint-field">
                         <option value="5">Warn now → close in 5 min</option>
                         <option value="10" selected>Warn now → close in 10 min</option>
                         <option value="15">Warn now → close in 15 min</option>
                         <option value="30">Warn now → close in 30 min</option>
                         <option value="0">Warn + close right now</option>
                     </select>
-                    <input type="text" id="maint-reason-input" maxlength="300" placeholder="Reason (optional) e.g. Fixing provider error" style="width:100%;padding:10px;border:1px solid var(--border-glass);background:var(--bg-subtle-2);color:var(--text-primary);border-radius:10px;margin-bottom:10px;">
-                    <div style="display:flex;gap:8px;">
-                        <button class="btn btn-primary" id="maint-start-btn" style="flex:1;" onclick="maintenanceAction('start')">Notify &amp; Close</button>
-                        <button class="btn" id="maint-stop-btn" style="flex:1;" onclick="maintenanceAction('stop')">Reopen</button>
+                    <label class="maint-lbl">Reason <span class="u-muted">(optional — customers မြင်ရမည်)</span></label>
+                    <input type="text" id="maint-reason-input" class="maint-field" maxlength="300" placeholder="e.g. Fixing provider error">
+                    <div class="maint-chips"><button type="button" class="maint-chip" onclick="var i=document.getElementById('maint-reason-input');i.value=this.textContent;i.dispatchEvent(new Event('input',{bubbles:true}));i.focus()">Fixing provider error</button><button type="button" class="maint-chip" onclick="var i=document.getElementById('maint-reason-input');i.value=this.textContent;i.dispatchEvent(new Event('input',{bubbles:true}));i.focus()">System upgrade</button><button type="button" class="maint-chip" onclick="var i=document.getElementById('maint-reason-input');i.value=this.textContent;i.dispatchEvent(new Event('input',{bubbles:true}));i.focus()">Payment issue</button><button type="button" class="maint-chip" onclick="var i=document.getElementById('maint-reason-input');i.value=this.textContent;i.dispatchEvent(new Event('input',{bubbles:true}));i.focus()">Server maintenance</button></div>
+                    <div class="maint-actions">
+                        <button class="btn maint-btn-close" id="maint-start-btn" onclick="maintenanceAction('start')">Notify &amp; Close</button>
+                        <button class="btn maint-btn-open" id="maint-stop-btn" onclick="maintenanceAction('stop')">Reopen</button>
                     </div>
                 </div>
             </div>
@@ -3950,7 +4323,7 @@
             <div style="display:flex; align-items:center; gap:8px; margin-bottom:14px;">
                 <div class="admin-search-wrap" style="flex:1; margin-bottom:0;">
                     <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                    <input type="text" id="game-search" placeholder="Search Games..." autocomplete="off" oninput="renderAdminGamesList()" onkeydown="if(event.key==='Enter'){ event.preventDefault(); renderAdminGamesList(); }">
+                    <input type="text" id="game-search" placeholder="Search Games..." autocomplete="off" oninput="searchDebounce(renderAdminGamesList)" onkeydown="if(event.key==='Enter'){ event.preventDefault(); renderAdminGamesList(); }">
                 </div>
                 <button type="button" class="search-go-btn" onclick="renderAdminGamesList()" title="Search" aria-label="Search">
                     <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
@@ -4042,7 +4415,7 @@
 
             <div class="admin-search-wrap">
                 <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                <input type="text" id="order-search" placeholder="Search Orders..." autocomplete="off" oninput="renderOrdersList()">
+                <input type="text" id="order-search" placeholder="Search Orders..." autocomplete="off" oninput="searchDebounce(renderOrdersList)">
             </div>
             <div class="date-filter-wrap">
                 <button type="button" class="date-filter-trigger" id="order-date-trigger" onclick="openDateRangeModal('order')" aria-label="Filter by date">
@@ -4111,7 +4484,7 @@
             </div>
             <div class="admin-search-wrap">
                 <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                <input type="text" id="payin-search" placeholder="Search name, last 4 digits, Txn ID, amount" autocomplete="off" oninput="renderPayins()">
+                <input type="text" id="payin-search" placeholder="Search name, last 4 digits, Txn ID, amount" autocomplete="off" oninput="searchDebounce(renderPayins)">
             </div>
             <div id="payin-container"><p class="empty-msg">Loading...</p></div>
         </div>
@@ -4141,7 +4514,7 @@
 
             <div class="admin-search-wrap">
                 <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                <input type="text" id="topup-search" placeholder="Search Top-ups..." autocomplete="off" oninput="renderTopupsList()">
+                <input type="text" id="topup-search" placeholder="Search Top-ups..." autocomplete="off" oninput="searchDebounce(renderTopupsList)">
             </div>
             <div class="date-filter-wrap">
                 <button type="button" class="date-filter-trigger" id="topup-date-trigger" onclick="openDateRangeModal('topup')" aria-label="Filter by date">
@@ -4230,6 +4603,14 @@
                 <input class="field field-full" type="text" id="notif-intro" placeholder="Enter Short Preview">
                 <label class="u-label">Details</label>
                 <textarea id="notif-details" placeholder="Enter Announcement Details" rows="5" style="width:100%;box-sizing:border-box;padding:10px;border:1px solid var(--border-glass);background:var(--bg-subtle-2);color:var(--text-primary);border-radius:12px;font-size:14px;margin:6px 0 12px;font-family:inherit;resize:vertical;"></textarea>
+                <label class="u-label">Image (optional)</label>
+                <input type="file" id="notif-image" accept="image/*" onchange="onNotifImagePick(event)" style="display:none;">
+                <div style="display:flex;gap:8px;margin:0 0 8px;">
+                    <button type="button" class="btn btn-outline" onclick="document.getElementById('notif-image').click()">Choose image</button>
+                    <button type="button" class="btn btn-outline" id="notif-image-clear" style="display:none;" onclick="clearNotifImage()">Remove</button>
+                </div>
+                <img id="notif-image-preview" alt="" style="display:none;max-width:100%;max-height:180px;border-radius:10px;margin:0 0 8px;object-fit:cover;">
+                <div id="notif-image-status" style="display:none;font-size:12px;margin:0 0 12px;"></div>
                 <label style="display:flex;align-items:center;gap:8px;font-size:13px;margin:0 0 12px;cursor:pointer;">
                     <input type="checkbox" id="notif-telegram" checked style="width:18px;height:18px;">
                     <span>Also send to Telegram (bot DM)</span>
@@ -4270,6 +4651,7 @@
             <h2 class="title-header">
                 <span>Manage Users <span id="user-list-count-badge" class="badge badge-success" style="margin-left:6px;vertical-align:middle;" title="Total registered users">0</span></span>
                 <button class="btn btn-primary btn-sm" onclick="fetchUsers()"><svg class="ui-icon" style="width:13px;height:13px;"><use href="#icon-refresh"></use></svg> Refresh</button>
+                <button class="btn btn-outline btn-sm" id="user-online-btn" onclick="toggleUserOnlineOnly()" title="Show only customers online right now">&#9679; Online <span id="user-online-count">0</span></button>
                 <button class="btn btn-outline btn-sm" onclick="exportUsersCSV()"><svg class="ui-icon" style="width:13px;height:13px;"><use href="#icon-download"></use></svg> Export CSV</button>
             </h2>
             <div class="udp-tabs" id="user-list-tabs" style="margin-bottom:10px;">
@@ -4279,7 +4661,7 @@
             </div>
             <div class="admin-search-wrap">
                 <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                <input type="text" id="user-search" placeholder="Search Users..." autocomplete="off" oninput="renderAdminUsersList()">
+                <input type="text" id="user-search" placeholder="Search Users..." autocomplete="off" oninput="searchDebounce(renderAdminUsersList)">
             </div>
             <div id="admin-users-container" class="users-grid">
                 <p class="empty-msg">Loading users...</p>
@@ -4291,9 +4673,12 @@
              User Info / User Registered / Login List / Order List / Top Up List
              / Login Time so each type of record gets its own dedicated view. -->
         <div id="user-detail-page" class="page-section">
-            <div class="udp-back" onclick="closeUserDetails()">
-                <svg class="ui-icon" style="width:16px;height:16px;transform:rotate(180deg);"><use href="#icon-chevron-right"></use></svg>
-                Back to Users
+            <div class="udp-topbar">
+                <div class="udp-back" onclick="closeUserDetails()">
+                    <svg class="ui-icon" style="width:16px;height:16px;transform:rotate(180deg);"><use href="#icon-chevron-right"></use></svg>
+                    Back to Users
+                </div>
+                <button type="button" class="udp-update-btn" id="ud-update-btn" onclick="refreshUserDetails()">↻ Update</button>
             </div>
 
             <div class="udp-profile-card">
@@ -4354,6 +4739,21 @@
                 <h3 class="detail-section-title" style="margin-top:16px;">Identity Verification (KYC)</h3>
                 <div id="ud-kyc-section">
                     <p class="empty-msg" style="margin:0;">No ID submitted yet.</p>
+                </div>
+
+                <h3 class="detail-section-title" style="margin-top:16px;">Security (PIN / Authenticator)</h3>
+                <div id="ud-security-section">
+                    <div class="details-grid">
+                        <div class="details-grid-item"><span>Security Code (PIN)</span><b id="ud-sec-pin">...</b></div>
+                        <div class="details-grid-item"><span>Authenticator</span><b id="ud-sec-totp">...</b></div>
+                        <div class="details-grid-item" style="grid-column:1/-1;"><span>Wrong-try lock</span><b id="ud-sec-lock">...</b></div>
+                    </div>
+                    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;">
+                        <button type="button" class="btn btn-outline" id="ud-sec-btn-pin" onclick="adminResetSecurity('pin')">Reset PIN</button>
+                        <button type="button" class="btn btn-outline" id="ud-sec-btn-totp" onclick="adminResetSecurity('totp')">Reset Authenticator</button>
+                        <button type="button" class="btn btn-danger" id="ud-sec-btn-both" onclick="adminResetSecurity('both')">Reset Both</button>
+                    </div>
+                    <p style="font-size:11.5px;color:var(--text-muted);margin:6px 0 0;">For a customer who forgot the PIN or lost the authenticator. It switches the factor off and clears the lock; the customer then sets a new one in the Store.</p>
                 </div>
 
                 <h3 class="detail-section-title" style="margin-top:16px;">Admin Note</h3>
@@ -4593,8 +4993,8 @@
                         <div id="fulfill-group-direct">
                             <p class="fulfill-group-label">Direct (needs Player ID)</p>
                             <div class="pkg-type-tabs">
-                                <button type="button" class="pkg-type-tab" data-provider="g2bulk" onclick="setFulfillProvider('g2bulk')">G2Bulk</button>
-                                <button type="button" class="pkg-type-tab" data-provider="fazercard" onclick="setFulfillProvider('fazercard')">FazerCards</button>
+                                <button type="button" class="pkg-type-tab" data-provider="g2bulk" onclick="setFulfillProvider('g2bulk')">G2Bulk<span class="prov-tag p1">P1</span></button>
+                                <button type="button" class="pkg-type-tab" data-provider="fazercard" onclick="setFulfillProvider('fazercard')">FazerCards<span class="prov-tag p2">P2</span></button>
                                 <button type="button" class="pkg-type-tab" data-provider="software" onclick="setFulfillProvider('software')">Software</button>
                                 <button type="button" class="pkg-type-tab active" data-provider="manual" onclick="setFulfillProvider('manual')">Manual</button>
                             </div>
@@ -4602,9 +5002,9 @@
                         <div id="fulfill-group-voucher" style="display:none;">
                             <p class="fulfill-group-label">Voucher / Code (no Player ID)</p>
                             <div class="pkg-type-tabs">
-                                <button type="button" class="pkg-type-tab" data-provider="g2bulk_voucher" onclick="setFulfillProvider('g2bulk_voucher')">Vouchers</button>
-                                <button type="button" class="pkg-type-tab" data-provider="jcplays" onclick="setFulfillProvider('jcplays')">JCPlays (Code)</button>
-                                <button type="button" class="pkg-type-tab" data-provider="fazercard_giftcard" onclick="setFulfillProvider('fazercard_giftcard')">Gift Cards (FazerCards)</button>
+                                <button type="button" class="pkg-type-tab" data-provider="g2bulk_voucher" onclick="setFulfillProvider('g2bulk_voucher')">Vouchers<span class="prov-tag p1">P1</span></button>
+                                <button type="button" class="pkg-type-tab" data-provider="jcplays" onclick="setFulfillProvider('jcplays')">JCPlays (Code)<span class="prov-tag p3">P3</span></button>
+                                <button type="button" class="pkg-type-tab" data-provider="fazercard_giftcard" onclick="setFulfillProvider('fazercard_giftcard')">Gift Cards (FazerCards)<span class="prov-tag p2">P2</span></button>
                                 <button type="button" class="pkg-type-tab" data-provider="voucher_manual" onclick="setFulfillProvider('voucher_manual')">Manual</button>
                             </div>
                         </div>
@@ -5107,6 +5507,13 @@
                     <span class="switch-label" style="flex:1;font-weight:400;">Enabled — turn off to fully hide FazerCards (wallet card, game-link picker) everywhere in the app</span>
                     <label class="toggle-switch" style="flex-shrink:0;">
                         <input type="checkbox" id="fazercard-enabled" checked>
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+                <div class="switch-row" style="margin-top:10px;">
+                    <span class="switch-label" style="flex:1;font-weight:400;">P2 Coming Soon — store ရဲ့ P2 tab မှာ "Coming Soon" ပြပြီး FazerCards ဂိမ်းအားလုံးကို ခေတ္တဖျောက်ထားမည် (Save နှိပ်မှ သက်ရောက်)</span>
+                    <label class="toggle-switch" style="flex-shrink:0;">
+                        <input type="checkbox" id="fazercard-coming-soon">
                         <span class="toggle-slider"></span>
                     </label>
                 </div>
@@ -6430,16 +6837,21 @@
             const pill = document.getElementById('maint-status-pill');
             const det = document.getElementById('maint-detail');
             if (!pill) return;
+            const box = document.getElementById('maint-detail-box');
+            const title = document.getElementById('maint-status-title');
             const at = m && m.scheduledAt ? Date.parse(m.scheduledAt) : NaN;
+            const set = (cls, label, t, d) => {
+                pill.className = 'maint-pill ' + cls; pill.textContent = label;
+                if (box) box.className = 'maint-status-box ' + cls;
+                if (title) title.textContent = t;
+                if (det) det.textContent = d;
+            };
             if (m && m.enabled) {
-                pill.textContent = 'CLOSED'; pill.style.background = 'rgba(239,68,68,.18)'; pill.style.color = '#ef4444';
-                if (det) det.textContent = 'Store + bot are closed' + (m.reason ? ' — ' + m.reason : '') + (m.updatedBy ? ' (by ' + m.updatedBy + ')' : '');
+                set('off', 'CLOSED', 'Store + Bot are closed', (m.reason ? m.reason : 'ပိတ်ထားပါတယ်') + (m.updatedBy ? ' · by ' + m.updatedBy : ''));
             } else if (!isNaN(at)) {
-                pill.textContent = 'CLOSING'; pill.style.background = 'rgba(245,158,11,.18)'; pill.style.color = '#f59e0b';
-                if (det) det.textContent = 'Closes at ' + new Date(at).toLocaleTimeString() + (m.reason ? ' — ' + m.reason : '');
+                set('warn', 'CLOSING', 'Closing soon', 'Closes at ' + new Date(at).toLocaleTimeString() + (m.reason ? ' — ' + m.reason : ''));
             } else {
-                pill.textContent = 'OPEN'; pill.style.background = 'rgba(34,197,94,.18)'; pill.style.color = '#22c55e';
-                if (det) det.textContent = '';
+                set('ok', 'OPEN', 'Store is open', 'Website နှင့် Bot ပုံမှန် အလုပ်လုပ်နေပါတယ်။');
             }
         }
         function attachMaintListener() {
@@ -7704,6 +8116,16 @@
                 ? `<button type="button" onclick="unlinkAdminTelegram(currentAdminUsername)" style="background:none;border:none;color:var(--danger);font-size:12px;font-weight:600;cursor:pointer;padding:0;">Unlink</button>`
                 : `<button type="button" onclick="closeMyAccountModal(); openTelegramLinkModal(currentAdminUsername)" style="background:none;border:none;color:var(--accent);font-size:12px;font-weight:600;cursor:pointer;padding:0;">Link Telegram</button>`;
 
+            const emailStatusEl = document.getElementById('my-account-email-status');
+            const emailActionEl = document.getElementById('my-account-email-action');
+            if (emailStatusEl && emailActionEl) {
+                const linkedEmail = String(me.recoveryEmail || '');
+                emailStatusEl.innerText = linkedEmail || 'Not linked — needed for Forgot password';
+                emailActionEl.innerHTML = linkedEmail
+                    ? `<button type="button" onclick="openRecoveryEmailModal()" style="background:none;border:none;color:var(--accent);font-size:12px;font-weight:600;cursor:pointer;padding:0;margin-right:10px;">Change</button><button type="button" onclick="removeRecoveryEmail()" style="background:none;border:none;color:var(--danger);font-size:12px;font-weight:600;cursor:pointer;padding:0;">Remove</button>`
+                    : `<button type="button" onclick="openRecoveryEmailModal()" style="background:none;border:none;color:var(--accent);font-size:12px;font-weight:600;cursor:pointer;padding:0;">Link Email</button>`;
+            }
+
             const trToggle = document.getElementById('my-account-transfer-toggle');
             if (trToggle) {
                 trToggle.checked = me.transferEnabled !== false;
@@ -7720,6 +8142,90 @@
                 : `<button type="button" onclick="openTwoFactorSetupModal()" style="background:none;border:none;color:var(--accent);font-size:12px;font-weight:600;cursor:pointer;padding:0;">Set Up</button>`;
         }
         window.renderMyAccountModal = renderMyAccountModal;
+
+        // ---------- Recovery email (Worker /admin-recovery: code is mailed, then the address is saved) ----------
+        async function recoveryCall(body) {
+            if (auth.authStateReady) await auth.authStateReady();
+            if (!auth.currentUser) throw new Error('Not signed in');
+            const tok = await auth.currentUser.getIdToken();
+            const res = await fetch(`${ADMIN_SYNC_WORKER_URL}/admin-recovery`, {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${tok}`, 'Content-Type': 'application/json' },
+                body: JSON.stringify(body)
+            });
+            const j = await res.json().catch(() => ({}));
+            if (!res.ok || !j.ok) throw new Error(j.error || ('HTTP ' + res.status));
+            return j;
+        }
+        function recoveryShowStep(step) {
+            document.getElementById('recovery-step-email').style.display = step === 'email' ? '' : 'none';
+            document.getElementById('recovery-step-code').style.display = step === 'code' ? '' : 'none';
+            document.getElementById('recovery-error').style.display = 'none';
+            const btn = document.getElementById('recovery-confirm-btn');
+            btn.dataset.step = step;
+            btn.innerText = step === 'email' ? 'Send Code' : 'Verify & Link';
+        }
+        function openRecoveryEmailModal() {
+            document.getElementById('recovery-email-input').value = '';
+            document.getElementById('recovery-code-input').value = '';
+            recoveryShowStep('email');
+            document.getElementById('recovery-modal-overlay').classList.add('show');
+        }
+        window.openRecoveryEmailModal = openRecoveryEmailModal;
+        function closeRecoveryEmailModal() {
+            document.getElementById('recovery-modal-overlay').classList.remove('show');
+        }
+        window.closeRecoveryEmailModal = closeRecoveryEmailModal;
+        async function confirmRecoveryEmail() {
+            const btn = document.getElementById('recovery-confirm-btn');
+            const errEl = document.getElementById('recovery-error');
+            const step = btn.dataset.step || 'email';
+            errEl.style.display = 'none';
+            const label = btn.innerText;
+            btn.disabled = true;
+            try {
+                if (step === 'email') {
+                    const email = document.getElementById('recovery-email-input').value.trim().toLowerCase();
+                    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) throw new Error('Enter a valid email address.');
+                    await recoveryCall({ op: 'send', email });
+                    document.getElementById('recovery-code-hint').innerText = `We sent a 6-digit code to ${email}. It expires in 10 minutes.`;
+                    recoveryShowStep('code');
+                    document.getElementById('recovery-code-input').focus();
+                } else {
+                    const code = document.getElementById('recovery-code-input').value.trim();
+                    if (!/^\d{6}$/.test(code)) throw new Error('Enter the 6-digit code.');
+                    await recoveryCall({ op: 'verify', code });
+                    logAdminActivity('Linked recovery email');
+                    window.showToast('Recovery email linked ✓', 'success');
+                    closeRecoveryEmailModal();
+                }
+            } catch (e) {
+                errEl.textContent = e.message || 'Something went wrong.';
+                errEl.style.display = 'block';
+            } finally {
+                btn.disabled = false;
+                if (btn.innerText === label) btn.innerText = btn.dataset.step === 'email' ? 'Send Code' : 'Verify & Link';
+            }
+        }
+        window.confirmRecoveryEmail = confirmRecoveryEmail;
+        function removeRecoveryEmail() {
+            window.showActionDialog({
+                type: 'delete',
+                title: 'Remove recovery email?',
+                message: 'Forgot password will stop working for your account until you link a new email.',
+                confirmText: 'Remove',
+                onConfirm: async () => {
+                    try {
+                        await recoveryCall({ op: 'remove' });
+                        logAdminActivity('Removed recovery email');
+                        window.showToast('Recovery email removed', 'success');
+                    } catch (e) {
+                        window.showToast('Could not remove: ' + (e.message || 'error'), 'fail');
+                    }
+                }
+            });
+        }
+        window.removeRecoveryEmail = removeRecoveryEmail;
 
         function openMyAccountModal() {
             renderMyAccountModal();
@@ -7934,13 +8440,20 @@
                 return;
             }
             try {
-                const email = await lookupAdminEmailByUsername(username);
-                if (!email) {
-                    window.showToast('No account found for that username.', 'fail');
+                // The Worker mails the reset link to the admin's linked Recovery Email. The answer is
+                // always the same, so this screen never reveals whether a username exists.
+                const res = await fetch(`${ADMIN_SYNC_WORKER_URL}/admin-forgot`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username })
+                });
+                const j = await res.json().catch(() => ({}));
+                if (res.status === 429) {
+                    window.showToast(j.error || 'Too many attempts. Try again in a few minutes.', 'fail');
                     return;
                 }
-                await sendPasswordResetEmail(auth, email);
-                window.showToast('Password reset link sent to your email.', 'success');
+                if (!res.ok || !j.ok) throw new Error(j.error || ('HTTP ' + res.status));
+                window.showToast('If a recovery email is linked to this account, a reset link has been sent.', 'success');
             } catch (error) {
                 console.error('Forgot password error:', error);
                 window.showToast('Could not send reset link. Try again later.', 'fail');
@@ -8060,7 +8573,12 @@
         }
         window.handleAdminLogout = handleAdminLogout;
 
+        const ADMIN_FAST_KEY = 'linn_adm_fast';   // set after the gates were passed; valid < 4h (PIN 6h / 2FA trust 5h)
+        function adminFastOk(uid) {
+            try { const f = JSON.parse(localStorage.getItem(ADMIN_FAST_KEY) || 'null'); return !!(f && f.uid === uid && (Date.now() - f.at) < 4 * 3600 * 1000); } catch (e) { return false; }
+        }
         function unlockAdminApp() {
+            try { if (auth.currentUser) localStorage.setItem(ADMIN_FAST_KEY, JSON.stringify({ uid: auth.currentUser.uid, at: Date.now() })); } catch (e) {}
             document.getElementById('login-screen').classList.add('hidden');
             const bc = document.getElementById('boot-cover'); if (bc) bc.remove();
             if (!adminAppStarted) { adminAppStarted = true; startAdminApp(); }
@@ -8233,9 +8751,13 @@
             const loginBtn = document.getElementById('login-btn');
             if (user) {
                 if (loginBtn) { loginBtn.disabled = false; loginBtn.innerText = 'Sign In'; }
+                // Already verified on this device recently: open the Dashboard immediately instead of waiting on the
+                // username lookup + PIN check. Those checks still run below and put the PIN / 2FA screen on top if needed.
+                if (adminFastOk(user.uid)) unlockAdminApp();
                 routeAfterAuth(user);
             } else {
                 adminAppStarted = false;
+                try { localStorage.removeItem(ADMIN_FAST_KEY); } catch (e) {}
                 resetGateLocked();
                 currentAdminUsername = null;
                 currentAdminIP = null;
@@ -9225,7 +9747,7 @@
                     const cleanBtn = data.adminCleared
                         ? `<button class="btn btn-outline" onclick="restoreOrder('${orderId}')" title="Bring this back into the active list">↺ Restore</button>`
                         : `<button class="btn btn-outline" onclick="cleanOrder('${orderId}')" title="Hide from this list — stays in the customer's Order History">Clean</button>`;
-                    actionButtons = `<span style="flex:1;text-align:center;font-size:13px;font-weight: 500;color:var(--text-secondary);">${doneLabel}</span>${recheckBtn}${cleanBtn}`;
+                    actionButtons = `<span class="od-done-label">${doneLabel}</span>${recheckBtn}${cleanBtn}`;
                 }
 
                 const durationLine = (data.status === 'Success' && data.confirmedAt && data.timestamp)
@@ -9323,6 +9845,7 @@
                                         <div class="od-label">Paid Via</div>
                                         <div class="od-value">${escapeHtml(data.paymentMethod || 'N/A')}</div>
                                     </div>
+                                    ${walletChargeCellHTML(data)}
                                     ${(data.confirmedBy || data.rejectedBy || data.completedBy) ? `<div class="od-cell span-2">
                                         <div class="od-label">Reviewed By</div>
                                         <div class="od-value">${data.confirmedBy ? 'Confirmed: <b>' + escapeHtml(data.confirmedBy) + '</b>' : ''}${data.rejectedBy ? ' Rejected: <b>' + escapeHtml(data.rejectedBy) + '</b>' : ''}${data.completedBy ? ' Completed: <b>' + escapeHtml(data.completedBy) + '</b>' : ''}</div>
@@ -9610,6 +10133,7 @@
                     if (order.status === 'Fail' && order.walletRefunded) return; // already handled
 
                     const eligibleForRefund = order.paidFromWallet === true
+                        && (order.walletFlow !== 2 || order.walletDebited === true)   // never refund money that was not taken
                         && !order.walletRefunded
                         && order.userId
                         && typeof order.price === 'number';
@@ -9760,7 +10284,7 @@
                         if (!freshSnap.exists()) return;
                         const fresh = freshSnap.data();
                         if (fresh.status === 'Success' || fresh.status === 'Fail') return; // resolved elsewhere already
-                        if (order.paidFromWallet === true && refundTotal > 0 && order.userId) {
+                        if (order.paidFromWallet === true && (order.walletFlow !== 2 || order.walletDebited === true) && refundTotal > 0 && order.userId) {
                             tx.set(doc(db, "users", order.userId), { walletBalance: increment(refundTotal) }, { merge: true });
                         }
                         tx.update(orderRef, {
@@ -10822,7 +11346,7 @@
                                       <button class="btn btn-danger" onclick="rejectTopup('${t.id}', this)">Reject</button>`;
                 } else {
                     const doneLabel = t.status === 'Completed' ? 'Wallet Credited' : 'Rejected';
-                    actionButtons = `<span style="flex:1;text-align:center;font-size:13px;font-weight: 500;color:var(--text-secondary);">${doneLabel}</span>`;
+                    actionButtons = `<span class="od-done-label">${doneLabel}</span>`;
                 }
 
                 const isOpen = expandedTopups.has(t.id);
@@ -12068,6 +12592,15 @@
             for (let i = 0; i < key.length; i++) hash = (hash * 31 + key.charCodeAt(i)) >>> 0;
             return SERVER_BADGE_FALLBACK_PALETTE[hash % SERVER_BADGE_FALLBACK_PALETTE.length];
         }
+        // Provider code shown on game cards: change the numbers here if you want a different P1 / P2 / P3 order.
+        const PROVIDER_CODE = { g2bulk: 'P1', g2bulk_voucher: 'P1', fazercard: 'P2', fazercard_giftcard: 'P2', jcplays: 'P3' };
+        const PROV_CHIP_SVG = '<svg viewBox="0 0 26 20" aria-hidden="true"><rect x="1" y="1" width="24" height="18" rx="4" fill="rgba(255,255,255,.22)" stroke="#fff" stroke-width="1.6"/><rect x="5" y="6" width="8" height="7" rx="1.6" fill="#fff"/><path d="M13 9.5h5M13 7.5h3M18 12.5h3" stroke="#fff" stroke-width="1.3" stroke-linecap="round"/></svg>';
+        function providerChipsHTML(codes) {
+            const list = [...new Set(codes.filter(Boolean))].sort();
+            if (!list.length) return '';
+            return '<div class="prov-chips">' + list.map(c => `<span class="prov-chip ${c.toLowerCase()}" title="Provider ${c}">${PROV_CHIP_SVG}${c}</span>`).join('') + '</div>';
+        }
+        window.providerChipsHTML = providerChipsHTML;
         function renderAdminGamesListImpl() {
             const container = document.getElementById('admin-games-container');
             const searchTerm = (document.getElementById('game-search')?.value || '').trim().toLowerCase();
@@ -12101,7 +12634,8 @@
             // region variants (e.g. "Free Fire" as both Global and Malaysia)
             // can show a "how many variants" count badge on their card.
             const nameCounts = {};
-            ids.forEach(id => { const n = GAMES[id].name; nameCounts[n] = (nameCounts[n] || 0) + 1; });
+            const provByName = {};
+            ids.forEach(id => { const n = GAMES[id].name; nameCounts[n] = (nameCounts[n] || 0) + 1; (provByName[n] = provByName[n] || []).push(PROVIDER_CODE[GAMES[id].fulfillProvider]); });
 
             // Outside Edit Mode, collapse every name-group down to just its
             // first (alphabetically-first server/region) entry so the list
@@ -12126,6 +12660,7 @@
                 return `
                     <div class="game-image-tile" id="game-card-${id}" onclick="openGameActionSheet('${id}')">
                         ${countBadge}
+                        ${providerChipsHTML(gameListEditMode ? [PROVIDER_CODE[g.fulfillProvider]] : provByName[g.name])}
                         <img src="${g.image}" loading="lazy" decoding="async" alt="${escapeHtml(g.name)}">
                     </div>
                 `;
@@ -15573,7 +16108,34 @@
 
         // Telegram side of a notification. In-app notification is already saved when this runs,
         // so this never throws - it just returns a short note appended to the success toast.
-        async function sendNotifToTelegram(audience, telegramId, title, intro, details) {
+        // Optional image for a notification: picked here, uploaded to ImgBB (through the imgbb Worker) when
+        // Send is tapped, then the same URL goes to the in-app notification, the FCM push and the Telegram DM.
+        let notifImageFile = null;
+        function onNotifImagePick(e) {
+            const file = e.target.files && e.target.files[0];
+            if (!file) return;
+            if (file.type && !file.type.startsWith('image/')) { window.showToast('Please choose an image file', 'fail'); e.target.value = ''; return; }
+            notifImageFile = file;
+            const prev = document.getElementById('notif-image-preview');
+            if (prev.dataset.url) { try { URL.revokeObjectURL(prev.dataset.url); } catch (_) {} }
+            prev.dataset.url = URL.createObjectURL(file);
+            prev.src = prev.dataset.url;
+            prev.style.display = 'block';
+            document.getElementById('notif-image-clear').style.display = '';
+            document.getElementById('notif-image-status').style.display = 'none';
+        }
+        window.onNotifImagePick = onNotifImagePick;
+        function clearNotifImage() {
+            notifImageFile = null;
+            const inp = document.getElementById('notif-image'); if (inp) inp.value = '';
+            const prev = document.getElementById('notif-image-preview');
+            if (prev) { if (prev.dataset.url) { try { URL.revokeObjectURL(prev.dataset.url); } catch (_) {} prev.dataset.url = ''; } prev.removeAttribute('src'); prev.style.display = 'none'; }
+            const clr = document.getElementById('notif-image-clear'); if (clr) clr.style.display = 'none';
+            const st = document.getElementById('notif-image-status'); if (st) st.style.display = 'none';
+        }
+        window.clearNotifImage = clearNotifImage;
+
+        async function sendNotifToTelegram(audience, telegramId, title, intro, details, imageUrl) {
             if (!ADMIN_BROADCAST_SECRET) return ' (Telegram skipped: save the Admin Broadcast Secret in Settings first)';
             let text = '\u{1F4E2} ' + title + '\n\n' + intro + '\n\n' + details;
             if (text.length > 4000) text = text.slice(0, 3990) + '...';
@@ -15582,14 +16144,14 @@
                     if (!telegramId) return ' (this user has no Telegram linked, so no Telegram message)';
                     const r = await fetch(`${AUTH_WORKER_URL}/admin/notify-user`, {
                         method: 'POST', headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ secret: ADMIN_BROADCAST_SECRET, telegramId, text })
+                        body: JSON.stringify({ secret: ADMIN_BROADCAST_SECRET, telegramId, text, ...(imageUrl ? { imageUrl } : {}) })
                     });
                     const j = await r.json().catch(() => ({}));
                     return (r.ok && j.ok) ? ' + Telegram sent' : ` (Telegram failed: ${j.error || r.status})`;
                 }
                 const r = await fetch(`${AUTH_WORKER_URL}/admin/broadcast`, {
                     method: 'POST', headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ secret: ADMIN_BROADCAST_SECRET, text })
+                    body: JSON.stringify({ secret: ADMIN_BROADCAST_SECRET, text, ...(imageUrl ? { imageUrl } : {}) })
                 });
                 const j = await r.json().catch(() => ({}));
                 return (r.ok && j.ok) ? ` + Telegram queued for ${j.recipients} bot users` : ` (Telegram failed: ${j.error || r.status})`;
@@ -15655,6 +16217,18 @@
 
             try {
                 const payload = { title, intro, details, timestamp: serverTimestamp() };
+                // Upload the image FIRST: if it fails nothing is sent, so a notification meant to carry a picture never goes out without it.
+                let imageUrl = '';
+                if (notifImageFile) {
+                    try {
+                        imageUrl = await uploadImageToImgBB(notifImageFile, 'notif-image-status', { maxDim: 1280, quality: 0.85 });
+                    } catch (upErr) {
+                        console.error('Notification image upload error:', upErr);
+                        window.showToast('Image upload failed - nothing was sent. Try again.', 'fail');
+                        return;
+                    }
+                    payload.imageUrl = imageUrl;
+                }
                 let tgTarget = '';
                 let resolvedId = targetUserId;
                 if (audience === 'user') {
@@ -15671,11 +16245,12 @@
                 }
                 await addDoc(collection(db, "notifications"), payload);
                 const tgBox = document.getElementById('notif-telegram');
-                const tgNote = (tgBox && tgBox.checked) ? await sendNotifToTelegram(audience, tgTarget, title, intro, details) : '';
+                const tgNote = (tgBox && tgBox.checked) ? await sendNotifToTelegram(audience, tgTarget, title, intro, details, imageUrl) : '';
                 titleEl.value = '';
                 introEl.value = '';
                 detailsEl.value = '';
                 targetUserEl.value = '';
+                clearNotifImage();
                 window.showToast((audience === 'user' ? `Notification sent to ${resolvedId}!` : 'Notification sent to all users!') + tgNote, 'success');
             } catch (error) {
                 console.error("Send notification error:", error);
@@ -15708,6 +16283,7 @@
                             </div>
                             <div class="ac-body">
                                 <p style="font-weight:500;">${escapeHtml(data.intro || '')}</p>
+                                ${data.imageUrl ? `<img loading="lazy" src="${escapeHtml(data.imageUrl)}" alt="" style="max-width:100%;max-height:160px;border-radius:10px;margin:4px 0 8px;object-fit:cover;" onerror="this.style.display='none'">` : ''}
                                 <p>${escapeHtml(data.details || data.message || '')}</p>
                                 <p style="color:var(--text-secondary); font-size:12px;">Sent: ${dateStr}</p>
                             </div>
@@ -16241,6 +16817,113 @@
             });
         }
         window.toggleStoreAdminCurrentUser = toggleStoreAdminCurrentUser;
+        // ---------- Presence: Online now / when the customer left ----------
+        // The Store pings users/{id}.lastSeen (+ online) about every 2 min while a customer has it open and once more when
+        // they leave. "Online" = a ping in the last 5 min and not flagged as left. Nothing here reads Firestore per render:
+        // the list is polled once a minute for recently-seen users only (Worker /admin-users op "online").
+        const ONLINE_WINDOW_MS = 5 * 60 * 1000;
+        let userOnlineOnly = false;
+        function lastSeenMs(u) { try { return (u && u.lastSeen && u.lastSeen.toMillis) ? u.lastSeen.toMillis() : 0; } catch (e) { return 0; } }
+        function isUserOnline(u) { const ms = lastSeenMs(u); return !!ms && u.online !== false && (Date.now() - ms) < ONLINE_WINDOW_MS; }
+        function agoText(ms) {
+            const d = Math.max(0, Date.now() - ms), m = Math.floor(d / 60000);
+            if (m < 1) return 'just now';
+            if (m < 60) return m + ' min ago';
+            const h = Math.floor(m / 60);
+            if (h < 24) return h + ' h ago';
+            return Math.floor(h / 24) + ' d ago';
+        }
+        function presenceChipHtml(u) {
+            if (isUserOnline(u)) return '<span class="pres-chip on"><span class="pres-dot"></span>Online</span>';
+            const ms = lastSeenMs(u);
+            return ms ? `<span class="pres-chip" title="${escapeHtml(new Date(ms).toLocaleString())}"><span class="pres-dot"></span>${agoText(ms)}</span>` : '<span class="pres-chip"><span class="pres-dot"></span>Never</span>';
+        }
+        function presenceTextFull(u) {
+            if (isUserOnline(u)) return 'Online now';
+            const ms = lastSeenMs(u);
+            return ms ? `Offline \u00b7 left ${new Date(ms).toLocaleString()} (${agoText(ms)})` : 'N/A';
+        }
+        function updateUserDetailPresence() {
+            if (!currentUserDetailsId) return;
+            const u = USERS[currentUserDetailsId]; const el = document.getElementById('ud-last-seen-h');
+            if (!u || !el) return;
+            el.innerText = presenceTextFull(u);
+            el.style.color = isUserOnline(u) ? '#16A34A' : '';
+        }
+        function toggleUserOnlineOnly() { userOnlineOnly = !userOnlineOnly; userCardNodes.clear(); const c = document.getElementById('admin-users-container'); if (c) c.innerHTML = ''; renderAdminUsersList(); }
+        window.toggleUserOnlineOnly = toggleUserOnlineOnly;
+        async function adminWorkerUsersCall(body) {
+            if (auth.authStateReady) await auth.authStateReady();
+            if (!auth.currentUser) throw new Error('Not signed in');
+            const tok = await auth.currentUser.getIdToken();
+            const res = await fetch(`${ADMIN_SYNC_WORKER_URL}/admin-users`, { method: 'POST', headers: { 'Authorization': `Bearer ${tok}`, 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+            const j = await res.json().catch(() => ({}));
+            if (!res.ok || !j.ok) throw new Error(j.error || ('HTTP ' + res.status));
+            return j;
+        }
+        async function refreshUserPresence() {
+            if (document.hidden || !usersLoadedAt) return;
+            const onList = document.getElementById('user-list')?.classList.contains('active');
+            const onDetail = document.getElementById('user-detail-page')?.classList.contains('active');
+            if (!onList && !onDetail) return;
+            try {
+                const j = await adminWorkerUsersCall({ op: 'online', sinceMin: 15 });
+                (j.users || []).forEach(x => { const { id, ...rest } = x; USERS[id] = { ...(USERS[id] || {}), ..._reviveTs(rest) }; });
+                if (onList) renderAdminUsersList();
+                updateUserDetailPresence();
+            } catch (e) { console.warn('presence refresh failed', e); }
+        }
+        setInterval(refreshUserPresence, 60000);
+        // Debounce for the Search boxes: typing re-filters the list that is ALREADY in memory (no Firestore read, no reload);
+        // waiting 180 ms after the last key stops the list from being rebuilt on every single keystroke.
+        window.searchDebounce = function (fn) { clearTimeout(fn._sdT); fn._sdT = setTimeout(fn, 180); };
+
+        // ---------- Security (PIN / Authenticator): status + admin reset ----------
+        async function adminSecurityCall(userId, op, what) {
+            if (auth.authStateReady) await auth.authStateReady();
+            if (!auth.currentUser) throw new Error('Not signed in');
+            const tok = await auth.currentUser.getIdToken();
+            const res = await fetch(`${ADMIN_SYNC_WORKER_URL}/admin/security`, { method: 'POST', headers: { 'Authorization': `Bearer ${tok}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ op, userId, what }) });
+            const j = await res.json().catch(() => ({}));
+            if (!res.ok || !j.ok) throw new Error(j.error || (res.status === 404 ? 'The /admin/security route is not deployed on the Worker yet.' : 'HTTP ' + res.status));
+            return j;
+        }
+        async function loadUserSecurity(userId) {
+            const set = (id, t) => { const el = document.getElementById(id); if (el) el.innerText = t; };
+            ['ud-sec-pin', 'ud-sec-totp', 'ud-sec-lock'].forEach(id => set(id, '...'));
+            try {
+                const j = await adminSecurityCall(userId, 'status');
+                if (currentUserDetailsId !== userId) return;
+                set('ud-sec-pin', j.pin ? 'ON' : 'OFF');
+                set('ud-sec-totp', j.totp ? 'ON' : 'OFF');
+                set('ud-sec-lock', j.lockedMs > 0 ? 'Locked \u00b7 ' + Math.ceil(j.lockedMs / 60000) + ' min left' : (j.fails > 0 ? j.fails + ' wrong tries' : 'Not locked'));
+                const dis = (id, off) => { const b = document.getElementById(id); if (b) b.disabled = !!off; };
+                dis('ud-sec-btn-pin', !j.pin && !(j.lockedMs > 0)); dis('ud-sec-btn-totp', !j.totp); dis('ud-sec-btn-both', !j.pin && !j.totp && !(j.lockedMs > 0));
+            } catch (e) {
+                set('ud-sec-pin', 'N/A'); set('ud-sec-totp', 'N/A'); set('ud-sec-lock', String(e.message || 'Could not load'));
+            }
+        }
+        function adminResetSecurity(what) {
+            if (!currentUserDetailsId) return;
+            const userId = currentUserDetailsId; const u = USERS[userId] || {};
+            const label = what === 'pin' ? 'Security Code (PIN)' : what === 'totp' ? 'Authenticator' : 'PIN + Authenticator';
+            window.showActionDialog({
+                type: 'warning',
+                title: 'Reset ' + label + '?',
+                message: 'This turns it off and clears the wrong-try lock for ' + (u.name || userId) + '. Only do this after you are sure the person owns the account. They set a new one in the Store afterwards.',
+                confirmText: 'Reset',
+                onConfirm: async () => {
+                    try {
+                        await adminSecurityCall(userId, 'reset', what);
+                        logAdminActivity('Reset ' + label, u.name || userId);
+                        window.showToast(label + ' reset \u2713');
+                        loadUserSecurity(userId);
+                    } catch (e) { console.error('security reset error', e); window.showToast(e.message || 'Reset failed.', 'fail'); }
+                }
+            });
+        }
+        window.adminResetSecurity = adminResetSecurity;
+
         function buildUserCardInnerHtml(id, u, agg) {
             const displayName = (u.name && u.name.trim()) ? u.name.trim() : (u.guestId || id);
             const orderCount = agg.count;
@@ -16248,6 +16931,7 @@
             const tier = tierForSpendAdmin(spend);
             return `
                 <div class="ugc-top">
+                    ${presenceChipHtml(u)}
                     <span class="badge ${u.banned ? 'badge-danger' : 'badge-success'}">${statusBadgeHtml(u.banned ? 'badge-danger' : 'badge-success', u.banned ? 'Banned' : 'Active')}</span>
                     ${u.storeAdmin === true ? '<span class="badge badge-warning" style="margin-left:6px;" title="Sees package cost in the Store">Admin</span>' : ''}
                 </div>
@@ -16289,6 +16973,9 @@
             if (cAdm) cAdm.textContent = adminCount;
             if (userListTab === 'bot') { userCardNodes.clear(); renderBotUsersTab(container, searchTerm); return; }
             if (userListTab === 'admin') ids = ids.filter(id => USERS[id].storeAdmin === true);
+            { const oc = ids.filter(id => isUserOnline(USERS[id])).length; const ce = document.getElementById('user-online-count'); if (ce) ce.textContent = oc;
+              const ob = document.getElementById('user-online-btn'); if (ob) ob.classList.toggle('online-filter-on', userOnlineOnly);
+              if (userOnlineOnly) ids = ids.filter(id => isUserOnline(USERS[id])); }
             if (searchTerm) {
                 ids = ids.filter(id => {
                     const u = USERS[id];
@@ -16555,10 +17242,12 @@
             document.getElementById('ud-phone').innerText = u.phone || 'N/A';
             document.getElementById('ud-telegram-id').innerText = u.telegramId ? String(u.telegramId) : 'N/A';
             document.getElementById('ud-telegram-username').innerText = u.telegramUsername ? '@' + u.telegramUsername : 'N/A';
-            document.getElementById('ud-last-seen-h').innerText = lastSeenStr;
+            updateUserDetailPresence();
             document.getElementById('ud-join-date').innerText = joinDateStr;
             document.getElementById('ud-admin-note').value = u.adminNote || '';
             renderUserKycSection(u);
+            loadUserSecurity(userId);
+            adminWorkerUsersCall({ op: 'get', id: userId }).then(r => { if (r.user && currentUserDetailsId === userId) { const { id: _i, ...rest } = r.user; USERS[userId] = { ...(USERS[userId] || {}), ..._reviveTs(rest) }; updateUserDetailPresence(); const wEl = document.getElementById('ud-wallet-balance-h'); if (wEl) wEl.innerText = fmtMoney(USERS[userId].walletBalance || 0); } }).catch(() => {});
             document.getElementById('ud-wallet-balance-h').innerText = fmtMoney(u.walletBalance || 0);
             document.getElementById('ud-deduct-amount').value = '';
 
@@ -16632,6 +17321,53 @@
             window.scrollTo(0, 0);
         }
 
+        // Exact wallet money trail for an order: what was taken, balance before -> after, and any refund.
+        function walletChargeCellHTML(d) {
+            if (!d || d.paidFromWallet !== true) return '';
+            const fmt = n => Number(n || 0).toLocaleString() + ' MMK';
+            const sub = t => `<div style="font-size:11.5px;color:var(--text-secondary);margin-top:3px;">${t}</div>`;
+            let body;
+            if (d.walletFlow === 2 && d.walletDebited !== true) {
+                body = d.walletDebitFailed ? '<b style="color:#DC2626;">⚠ Debit FAILED — wallet was NOT charged</b>'
+                    : d.status === 'Fail' ? '<b>Not charged</b>'
+                    : '<b style="color:#D97706;">⚠ Not debited yet</b>';
+            } else {
+                const amt = d.walletDebitedAmount != null ? d.walletDebitedAmount : d.price;
+                body = `<b>−${fmt(amt)}</b>`;
+                if (d.walletBalanceBefore != null && d.walletBalanceAfter != null) body += sub(`Balance ${fmt(d.walletBalanceBefore)} → ${fmt(d.walletBalanceAfter)}`);
+            }
+            if (d.walletRefunded === true) body += sub(`Refunded +${fmt(d.walletRefundedAmount != null ? d.walletRefundedAmount : (d.walletDebitedAmount != null ? d.walletDebitedAmount : d.price))}`);
+            return `<div class="od-cell span-2"><div class="od-label">Wallet Charged</div><div class="od-value">${body}</div></div>`;
+        }
+        window.walletChargeCellHTML = walletChargeCellHTML;
+
+        // "Update" button at the top of User Details: re-reads this user (fresh wallet balance) and the orders,
+        // then redraws the page, staying on the same tab and scroll position.
+        async function refreshUserDetails() {
+            const id = currentUserDetailsId;
+            if (!id) return;
+            const btn = document.getElementById('ud-update-btn');
+            const act = document.querySelector('.udp-tab.active');
+            const tab = (act && act.dataset.tab) || 'info';
+            const y = window.scrollY;
+            if (btn) { btn.disabled = true; btn.classList.add('busy'); btn.innerText = 'Updating…'; }
+            try {
+                try {
+                    const r = await adminWorkerUsersCall({ op: 'get', id });
+                    if (r && r.user) { const { id: _i, ...rest } = r.user; USERS[id] = { ...(USERS[id] || {}), ..._reviveTs(rest) }; }
+                } catch (e) { console.warn('User refresh failed:', e); }
+                try { if (window.loadOrdersIfStale) await window.loadOrdersIfStale(0); } catch (e) { console.warn('Orders refresh failed:', e); }
+                if (currentUserDetailsId !== id) return;
+                openUserDetails(id);
+                switchUserDetailTab(tab);
+                window.scrollTo(0, y);
+                if (window.showToast) window.showToast('Updated ✓');
+            } finally {
+                if (btn) { btn.disabled = false; btn.classList.remove('busy'); btn.innerText = '↻ Update'; }
+            }
+        }
+        window.refreshUserDetails = refreshUserDetails;
+
         // Switches the tab within the open User Details page (User Info /
         // User Registered / Login List / Order List / Top Up List / Login Time).
         function switchUserDetailTab(tab) {
@@ -16655,7 +17391,7 @@
             try {
                 const [topSnap, ordSnap, adjSnap] = await Promise.all([
                     getDocs(query(collection(db, 'walletTopups'), where('userId', '==', userId))),
-                    getDocs(query(collection(db, 'orders'), where('userId', '==', userId), where('paidFromWallet', '==', true))),
+                    getDocs(query(collection(db, 'orders'), where('userId', '==', userId))),
                     getDocs(query(collection(db, 'walletAdjustments'), where('userId', '==', userId)))
                 ]);
                 if (currentUserDetailsId !== userId) return; // admin moved on while loading
@@ -16668,12 +17404,19 @@
                 });
                 ordSnap.forEach(d => {
                     const o = d.data();
+                    if (!(o.paidFromWallet === true || o.paymentMethod === 'Wallet Balance')) return;   // not a wallet payment
                     const label = `${o.game || 'Order'}${o.itemAmount ? ' · ' + o.itemAmount : ''}`;
                     if (o.walletFlow !== 2 || o.walletDebited === true) {
-                        rows.push({ type: 'buy', amount: Number(o.price) || 0, title: label, sub: o.status || 'Pending', at: ms(o.timestamp) });
+                        const paid = o.walletDebitedAmount != null ? Number(o.walletDebitedAmount) : (Number(o.price) || 0);
+                        const bal = (o.walletBalanceBefore != null && o.walletBalanceAfter != null) ? ` • Balance ${Number(o.walletBalanceBefore).toLocaleString()} → ${Number(o.walletBalanceAfter).toLocaleString()}` : '';
+                        rows.push({ type: 'buy', amount: paid, title: label, sub: (o.status || 'Pending') + bal, at: ms(o.timestamp) });
+                    } else if (o.status === 'Success' || o.status === 'Processing') {
+                        // Wallet order that went through but the Worker never marked the wallet as debited:
+                        // show it instead of hiding it, so the missing debit is visible.
+                        rows.push({ type: 'buy', amount: Number(o.price) || 0, title: label, sub: (o.status || '') + ' • ⚠ Wallet NOT debited', at: ms(o.timestamp) });
                     }
                     if (o.walletRefunded === true) {
-                        rows.push({ type: 'in', amount: Number(o.price) || 0, title: 'Refund', sub: label, at: ms(o.refundedAt) || ms(o.timestamp) });
+                        rows.push({ type: 'in', amount: o.walletRefundedAmount != null ? Number(o.walletRefundedAmount) : (o.walletDebitedAmount != null ? Number(o.walletDebitedAmount) : (Number(o.price) || 0)), title: 'Refund', sub: label, at: ms(o.refundedAt) || ms(o.timestamp) });
                     }
                 });
                 adjSnap.forEach(d => {
@@ -18086,6 +18829,8 @@
                 document.getElementById('fazercard-webhook-enabled').checked = !!data.webhookEnabled;
                 const fazercardEnabled = data.enabled !== false;
                 document.getElementById('fazercard-enabled').checked = fazercardEnabled;
+                const csEl = document.getElementById('fazercard-coming-soon');
+                if (csEl) csEl.checked = data.comingSoon === true;
                 FAZERCARD_SETTINGS = {
                     apiKey: data.apiKey || '',
                     proxyUrl: (data.proxyUrl || 'https://fazercards-provider.linngamestore.workers.dev').trim(),
@@ -18105,6 +18850,7 @@
             const lowBalanceAlert = Number(document.getElementById('fazercard-low-balance-alert').value) || 0;
             const usdRate = Number(document.getElementById('fazercard-usd-rate').value) || 0;
             const enabled = document.getElementById('fazercard-enabled').checked;
+            const comingSoon = !!(document.getElementById('fazercard-coming-soon') || {}).checked;
             const btn = document.getElementById('save-fazercard-btn');
             const originalText = btn.innerText;
 
@@ -18117,8 +18863,8 @@
             btn.innerText = 'Saving...';
 
             try {
-                await setDoc(doc(db, "settings", "fazercard"), { apiKey, proxyUrl, lowBalanceAlert, usdRate, enabled }, { merge: true });
-                logAdminActivity('Saved FazerCards settings', enabled ? 'Enabled' : 'Disabled');
+                await setDoc(doc(db, "settings", "fazercard"), { apiKey, proxyUrl, lowBalanceAlert, usdRate, enabled, comingSoon }, { merge: true });
+                logAdminActivity('Saved FazerCards settings', (enabled ? 'Enabled' : 'Disabled') + (comingSoon ? ' · P2 Coming Soon ON' : ''));
                 callAdminSyncClaims();
                 window.showToast('FazerCards key saved!', 'success');
                 closeFazerCardModal();
@@ -22437,6 +23183,266 @@
     if(low==='r'&&active('order-list')){e.preventDefault();call('fetchOrders');return;}
     if(k==='?'){e.preventDefault();toggleHelp();}
   });
+})();
+</script>
+<script id="motion-js">
+/* Admin motion layer (see #motion-css). Adds entrance animation to cards / rows as they are rendered,
+   counts numbers up when they change, bumps badges. Never touches the tab switch. */
+(function () {
+  if (window.__moInit) return; window.__moInit = true;
+  var reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (reduce) return;
+
+  var ENTER = '.admin-card, .stat-card, .stat-chip, .user-card, .user-grid-card, .tx-row, .wtx-row, .package-row, .game-reorder-card, .game-picker-card, .tier-row, .chart-card, .api-doc-card, .game-image-tile, .switch-row, ' +
+    '#orders-container > *, #topups-container > *, #payin-container > *, #admin-games-container > *, #admin-users-container > *, #admin-payment-container > *, #notif-history-container > *, #ticker-list-container > *, #tier-limits-container > *, ' +
+    '#ud-orders-container > *, #ud-txn-container > *, #ud-topups-container > *, #ud-loginlist-container > *, #g2bulk-tx-list > *, #admin-accounts-list > *, #blocked-telegram-list > *, #price-schedule-list > *, #cost-schedule-list > *, #g2bulk-result-grid > *, #fazercard-result-grid > *, #fazercard-deliveries-list > *';
+  var COUNT = '.stat-card-value, .stat-chip p';
+  var BADGE = '.nav-item-count-badge, .user-list-count-badge, .ogt-count, .game-variant-count-badge';
+
+  var seen = new Set();            // signature of every item already shown: a re-render of the same data does not replay the animation
+  function sig(el) { var h = 5381, s = (el.className || '') + '|' + (el.textContent || '').slice(0, 400) + '|' + (el.id || ''); for (var i = 0; i < s.length; i++) h = ((h << 5) + h + s.charCodeAt(i)) | 0; return (el.parentNode && el.parentNode.id || '') + ':' + h; }
+  function visible(el) { return !!(el.offsetWidth || el.offsetHeight || el.getClientRects().length); }
+
+  var pending = [], raf = 0;
+  function schedule() { if (!raf) raf = requestAnimationFrame(flush); }
+
+  function flush() {
+    raf = 0;
+    var recs = pending; pending = [];
+    var batch = [];
+    recs.forEach(function (r) {
+      if (r.type === 'childList') {
+        r.addedNodes.forEach(function (n) {
+          if (n.nodeType !== 1) return;
+          if (n.matches && n.matches(ENTER)) batch.push(n);
+          if (n.querySelectorAll && !(n.matches && n.matches('.modal-overlay, .dialog-overlay'))) n.querySelectorAll(ENTER).forEach(function (c) { batch.push(c); });
+        });
+        var t = r.target && r.target.nodeType === 1 ? r.target : (r.target && r.target.parentElement);
+        counted(t);
+      } else if (r.type === 'characterData') {
+        counted(r.target.parentElement);
+      }
+    });
+    if (!batch.length) return;
+    if (batch.length > 160) return;        // huge re-render: no animation, keeps the page fast
+    var i = 0;
+    var uniq = new Set(batch);
+    uniq.forEach(function (el) {
+      if (el.classList.contains('mo-in') || !el.isConnected) return;
+      if (el.closest('.modal-overlay, .dialog-overlay, #nav-group-sheet-overlay, #toast, .od-overlay, .pkg-card-overlay')) return;
+      if (!visible(el)) return;            // hidden tabs: the tab fade already covers them
+      var k = sig(el);
+      if (seen.has(k)) return;
+      if (seen.size > 3000) seen.clear();
+      seen.add(k);
+      el.style.setProperty('--mo-i', Math.min(i++, 9));
+      el.classList.add('mo-in');
+      el.addEventListener('animationend', function done(e) { if (!/^mo(In|Zoom|SlideL|SlideR|Flip)$/.test(e.animationName)) return; el.classList.remove('mo-in'); el.style.removeProperty('--mo-i'); el.removeEventListener('animationend', done); });
+    });
+  }
+
+  /* ---------- numbers: count up / down to the new value; badges bump ---------- */
+  var busy = new WeakSet();
+  function counted(el) {
+    if (!el || !el.closest) return;
+    var b = el.closest(BADGE);
+    if (b && !b.__moTxt) { b.__moTxt = b.textContent; }
+    else if (b && b.__moTxt !== b.textContent) { b.__moTxt = b.textContent; b.classList.remove('mo-bump'); void b.offsetWidth; b.classList.add('mo-bump'); }
+    var c = el.closest(COUNT);
+    if (!c || busy.has(c)) return;
+    var txt = c.textContent, m = txt.match(/\d[\d,]*(?:\.\d+)?/);
+    if (!m) { c.__moVal = null; return; }
+    var to = parseFloat(m[0].replace(/,/g, ''));
+    var from = c.__moVal;
+    c.__moVal = to;
+    if (from == null || from === to || !visible(c)) return;
+    var dec = (m[0].split('.')[1] || '').length, comma = m[0].indexOf(',') > -1;
+    var pre = txt.slice(0, m.index), post = txt.slice(m.index + m[0].length);
+    var t0 = performance.now(), dur = Math.min(900, 350 + Math.abs(to - from) / Math.max(Math.abs(to), 1) * 600);
+    busy.add(c);
+    (function step(now) {
+      var p = Math.min(1, (now - t0) / dur), e = 1 - Math.pow(1 - p, 3), v = from + (to - from) * e;
+      var s = p === 1 ? m[0] : (dec ? v.toFixed(dec) : String(Math.round(v)));
+      if (p < 1 && comma) s = s.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+      c.textContent = pre + s + post;
+      if (p < 1) requestAnimationFrame(step); else { busy.delete(c); c.classList.remove('mo-flash'); void c.offsetWidth; c.classList.add('mo-flash'); }
+    })(t0);
+  }
+
+  var mo = new MutationObserver(function (list) {
+    for (var i = 0; i < list.length; i++) { var r = list[i]; if (r.target && r.target.closest && r.target.closest && busy.has(r.target.closest(COUNT) || {})) continue; pending.push(r); }
+    schedule();
+  });
+  function start() { mo.observe(document.body, { childList: true, subtree: true, characterData: true }); }
+  if (document.body) start(); else document.addEventListener('DOMContentLoaded', start);
+})();
+</script>
+<script id="motion2-js">
+(function () {
+  if (window.__mo2Init) return; window.__mo2Init = true;
+  if (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  var root = document.documentElement, t = 0, first = true;
+  new MutationObserver(function () {
+    if (first) { first = false; }
+    root.classList.add('mo-theme-fade'); clearTimeout(t);
+    t = setTimeout(function () { root.classList.remove('mo-theme-fade'); }, 480);
+  }).observe(root, { attributes: true, attributeFilter: ['data-theme'] });
+})();
+</script>
+<script id="ui-upgrade-js">
+(function () {
+  if (window.__uxInit) return; window.__uxInit = true;
+  var root = document.documentElement, KEY = 'linn-admin-prefs';
+  var DEF = { calm: false, compact: false, haptic: false, totop: true, esc: true };
+  var prefs = Object.assign({}, DEF);
+  try { Object.assign(prefs, JSON.parse(localStorage.getItem(KEY) || '{}')); } catch (e) {}
+  function save() { try { localStorage.setItem(KEY, JSON.stringify(prefs)); } catch (e) {} }
+  function apply() {
+    root.classList.toggle('pref-calm', !!prefs.calm);
+    root.classList.toggle('pref-compact', !!prefs.compact);
+    document.querySelectorAll('.pp-switch').forEach(function (b) { b.setAttribute('aria-checked', prefs[b.dataset.pref] ? 'true' : 'false'); });
+    if (topBtn && !prefs.totop) topBtn.classList.remove('show');
+  }
+  var $ = function (id) { return document.getElementById(id); };
+
+  /* ---------- Panel Preferences card ---------- */
+  window.togglePanelPrefs = function () {
+    var b = $('panel-prefs-body'), c = $('panel-prefs-chevron'); if (!b) return;
+    var open = b.style.display === 'none'; b.style.display = open ? 'block' : 'none'; if (c) c.style.transform = open ? 'rotate(180deg)' : '';
+  };
+  document.addEventListener('click', function (e) {
+    var sw = e.target.closest && e.target.closest('.pp-switch');
+    if (sw) { prefs[sw.dataset.pref] = !prefs[sw.dataset.pref]; save(); apply(); buzz(12); return; }
+    if (e.target.closest && e.target.closest('#pp-reset')) { prefs = Object.assign({}, DEF); save(); apply(); if (window.showToast) window.showToast('Preferences reset', 'success'); }
+  });
+
+  /* ---------- tap feedback ---------- */
+  function buzz(ms) { if (prefs.haptic && navigator.vibrate) { try { navigator.vibrate(ms || 8); } catch (e) {} } }
+  document.addEventListener('click', function (e) {
+    if (prefs.haptic && e.target.closest && e.target.closest('.btn, .nav-item, .pkg-type-tab, .udp-tab, .game-list-tab-btn, .header-icon')) buzz(8);
+  }, true);
+
+  /* ---------- Settings: icons, groups, search, collapse all ---------- */
+  var ICONS = { sociallinks: 'send', homebanner: 'camera', branding: 'palette', panelprefs: 'gear', maintenance: 'gear', orderrouting: 'refresh', adminbroadcastsecret: 'key',
+    push: 'bell', walletcleanup: 'trash', costmigrate: 'shield', autoprice: 'trending-up', 'autoprice-sell': 'tag', adminlogin: 'lock', '2fa': 'shield', adminpin: 'key', accounts: 'users', danger: 'warning' };
+  function sym(name) { return '<svg class="ui-icon"><use href="#icon-' + name + '"></use></svg>'; }
+  function cardKey(card) {
+    if (card.id === 'admin-accounts-card') return 'accounts';
+    if (card.id && card.id.indexOf('settings-card-') === 0) return card.id.slice(14);
+    var t = (card.querySelector('.sc-title') || {}).textContent || '';
+    if (/push notif/i.test(t)) return 'push';
+    return /border:\s*1px solid rgba\(250,\s*62/.test(card.getAttribute('style') || '') ? 'danger' : '';
+  }
+  function setupSettings() {
+    var st = $('settings'); if (!st || st.__uxDone) return; st.__uxDone = true;
+    try {
+      var cards = Array.prototype.slice.call(st.querySelectorAll(':scope > .admin-card'));
+      var byKey = {}; cards.forEach(function (c) { var k = cardKey(c); if (k) byKey[k] = c; c.__k = k; });
+      cards.forEach(function (c) {
+        var head = c.querySelector(':scope > .sc-head, :scope > div > .sc-head'), title = head && head.querySelector('.sc-title');
+        if (!head || !title || head.querySelector('.sc-ico')) return;
+        var ic = ICONS[c.__k] || 'gear';
+        var span = document.createElement('span'); span.className = 'sc-ico' + (c.__k === 'danger' ? ' danger' : ''); span.innerHTML = sym(ic);
+        head.insertBefore(span, head.firstChild);
+      });
+      var GROUPS = [
+        ['General', ['panelprefs', 'sociallinks', 'homebanner', 'branding']],
+        ['Operations', ['maintenance', 'orderrouting', 'push', 'autoprice', 'autoprice-sell', 'walletcleanup', 'costmigrate']],
+        ['Security', ['adminlogin', '2fa', 'adminpin', 'adminbroadcastsecret', 'accounts']],
+        ['Danger zone', ['danger']]
+      ];
+      var anchor = $('st-empty') || st.querySelector('.st-toolbar');
+      var ref = anchor ? anchor.nextSibling : st.firstChild;
+      GROUPS.forEach(function (g) {
+        var present = g[1].filter(function (k) { return byKey[k]; });
+        if (!present.length) return;
+        var lab = document.createElement('div'); lab.className = 'st-group' + (g[0] === 'Danger zone' ? ' danger' : ''); lab.textContent = g[0]; lab.setAttribute('role', 'heading'); lab.setAttribute('aria-level', '3');
+        st.insertBefore(lab, ref);
+        present.forEach(function (k) { st.insertBefore(byKey[k], ref); });
+      });
+      // anything unknown stays where it was, after the groups
+    } catch (e) { console.warn('settings layout:', e); }
+
+    var input = $('st-search-input'), empty = $('st-empty');
+    if (input) input.addEventListener('input', function () {
+      var q = input.value.trim().toLowerCase(), hits = 0;
+      st.querySelectorAll(':scope > .admin-card').forEach(function (c) {
+        var t = ((c.querySelector('.sc-title') || {}).textContent || '').toLowerCase();
+        var match = !q || t.indexOf(q) > -1;
+        c.style.display = match ? '' : 'none'; if (match) hits++;
+        c.classList.toggle('st-hit', !!q && match);
+      });
+      st.querySelectorAll('.st-group').forEach(function (g) {
+        var n = g.nextElementSibling, any = false;
+        while (n && !n.classList.contains('st-group')) { if (n.classList.contains('admin-card') && n.style.display !== 'none') any = true; n = n.nextElementSibling; }
+        g.style.display = any ? '' : 'none';
+      });
+      if (empty) empty.hidden = hits > 0;
+    });
+    var col = $('st-collapse-btn');
+    if (col) col.addEventListener('click', function () {
+      st.querySelectorAll(':scope > .admin-card').forEach(function (c) {
+        var body = c.querySelector(':scope > [id$="-body"]'), head = c.querySelector('.sc-head');
+        if (body && head && body.style.display !== 'none' && body.id !== 'panel-prefs-body') head.click();
+      });
+      var b = $('panel-prefs-body'); if (b && b.style.display !== 'none') window.togglePanelPrefs();
+    });
+  }
+
+  /* ---------- Games: Edit Mode button colour follows its state ---------- */
+  function syncEdit() { var b = $('game-edit-mode-btn'); if (b) b.classList.toggle('is-on', /On\s*$/i.test(b.textContent)); }
+
+  /* ---------- top nav: edge fade + keep the active tab in view ---------- */
+  function navHints() {
+    var n = $('admin-top-nav'); if (!n) return;
+    function upd() { n.classList.toggle('more-right', n.scrollLeft + n.clientWidth < n.scrollWidth - 4); n.classList.toggle('more-left', n.scrollLeft > 4); }
+    n.addEventListener('scroll', upd, { passive: true }); window.addEventListener('resize', upd); upd();
+    new MutationObserver(function () {
+      var a = n.querySelector('.nav-item.active'); if (a && a.scrollIntoView) { try { a.scrollIntoView({ inline: 'center', block: 'nearest', behavior: prefs.calm ? 'auto' : 'smooth' }); } catch (e) {} }
+      upd();
+    }).observe(n, { attributes: true, attributeFilter: ['class'], subtree: true });
+  }
+
+  /* ---------- back to top ---------- */
+  var topBtn = document.createElement('button');
+  topBtn.id = 'ux-top-btn'; topBtn.type = 'button'; topBtn.setAttribute('aria-label', 'Back to top');
+  topBtn.innerHTML = '<svg viewBox="0 0 24 24"><polyline points="18 15 12 9 6 15"></polyline></svg>';
+  topBtn.addEventListener('click', function () { window.scrollTo({ top: 0, behavior: prefs.calm ? 'auto' : 'smooth' }); buzz(10); });
+  var ticking = false;
+  window.addEventListener('scroll', function () {
+    if (ticking) return; ticking = true;
+    requestAnimationFrame(function () { ticking = false; topBtn.classList.toggle('show', prefs.totop && window.scrollY > 700); });
+  }, { passive: true });
+
+  /* ---------- offline / back online ---------- */
+  var off = document.createElement('div'); off.id = 'ux-offline'; off.setAttribute('role', 'status'); off.setAttribute('aria-live', 'polite');
+  var offTimer = 0;
+  function net(onl) {
+    clearTimeout(offTimer);
+    off.className = onl ? 'ok show' : 'show';
+    off.textContent = onl ? 'Back online' : 'You are offline — changes will not be saved';
+    if (onl) offTimer = setTimeout(function () { off.classList.remove('show'); }, 1800);
+  }
+  window.addEventListener('offline', function () { net(false); });
+  window.addEventListener('online', function () { net(true); });
+
+  /* ---------- Esc closes the top-most pop-up ---------- */
+  document.addEventListener('keydown', function (e) {
+    if (e.key !== 'Escape' || !prefs.esc) return;
+    var ov = document.querySelectorAll('.dialog-overlay.show, .modal-overlay.show, .od-overlay, .pkg-card-overlay');
+    var top = ov[ov.length - 1]; if (!top) return;
+    if (top.classList.contains('dialog-overlay') && window.closeActionDialog) { window.closeActionDialog(); return; }
+    var x = top.querySelector('.modal-close, .od-card-close, .pkg-card-close, [data-close], button[aria-label="Close"]');
+    if (x) x.click();
+  });
+
+  function boot() {
+    document.body.appendChild(topBtn); document.body.appendChild(off);
+    apply(); setupSettings(); navHints(); syncEdit();
+    var eb = $('game-edit-mode-btn'); if (eb) new MutationObserver(syncEdit).observe(eb, { childList: true, characterData: true, subtree: true });
+    if (!navigator.onLine) net(false);
+  }
+  if (document.readyState !== 'loading') boot(); else document.addEventListener('DOMContentLoaded', boot);
 })();
 </script>
 </body>
