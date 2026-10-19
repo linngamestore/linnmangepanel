@@ -1,6 +1,137 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<script id="lg-btn-js">
+(function () {
+  'use strict';
+  if (window.LinnBtn) return;
+  /* ---------- which elements get the spinner ---------- */
+  var SKIP = '[data-no-busy],.pkg-type-tab,.udp-tab,.wtx-chip,.pay-type-tab,.game-list-tab-btn,.pkg-tab-btn,.wseg-btn,.nav-item,.header-icon,' +
+    '.guide-card-close,.od-card-close,.pkg-card-close,.pp-switch,.secret-toggle-btn,.pw-toggle-btn,.cal2-nav-btn,.resync-pct-btn,.odb-chip,.maint-chip,' +
+    '.pkg-type-opt,.pkg-picker-chip,.pkg-move-btn,.drw-clear,.st-collapse,.date-filter-trigger,#detail-confirm-btn,' +
+    'button:not(.btn)[class*="close"],button:not(.btn)[class*="-tab"],button:not(.btn)[class*="-chip"]';
+  var BTN = 'button,[role="button"],a.btn:not([href]),.btn';
+  var SHOW_AFTER = 150;   // ms - quick actions never flash a spinner
+  var MAX_BUSY = 30000;   // ms - never leave a button locked forever
+
+  function eligible(el) {
+    if (!el || el.nodeType !== 1) return false;
+    if (el.tagName === 'A' && el.getAttribute('href')) return false;
+    if (el.tagName === 'INPUT') return false;
+    try { return el.matches(BTN) && !el.matches(SKIP); } catch (e) { return false; }
+  }
+
+  /* ---------- busy state ---------- */
+  function mark(btn, p) {
+    btn.__lgn = (btn.__lgn || 0) + 1;
+    var shown = false, done = false;
+    var t1 = setTimeout(function () {
+      if (done) return;
+      shown = true;
+      try { btn.style.setProperty('--lg-spin', getComputedStyle(btn).color); } catch (e) {}
+      btn.classList.add('lg-busy');
+      if (!String(btn.textContent || '').trim()) btn.classList.add('lg-busy-ov');
+      btn.setAttribute('aria-busy', 'true');
+    }, SHOW_AFTER);
+    var t2 = setTimeout(end, MAX_BUSY);
+    function end() {
+      if (done) return; done = true;
+      clearTimeout(t1); clearTimeout(t2);
+      btn.__lgn = Math.max(0, (btn.__lgn || 1) - 1);
+      if (!btn.__lgn) { btn.classList.remove('lg-busy', 'lg-busy-ov'); btn.removeAttribute('aria-busy'); }
+    }
+    p.then(end, end);
+  }
+  function busyThenable(btn, r) {
+    var list = [];
+    if (r && typeof r.then === 'function') list.push(r);
+    else if (Array.isArray(r)) r.forEach(function (x) { if (x && typeof x.then === 'function') list.push(x); });
+    if (!list.length || !eligible(btn)) return;
+    mark(btn, list.length === 1 ? Promise.resolve(list[0]) : Promise.allSettled(list));
+  }
+  window.LinnBtn = {
+    /* manual use: LinnBtn.run(button, async () => { ... }) */
+    run: function (btn, fn) { var p = Promise.resolve().then(fn); if (btn) busyThenable(btn, p); return p; },
+    busy: busyThenable
+  };
+
+  /* ---------- addEventListener('click', async fn) ---------- */
+  var nativeAdd = EventTarget.prototype.addEventListener, nativeRem = EventTarget.prototype.removeEventListener, WM = new WeakMap();
+  EventTarget.prototype.addEventListener = function (type, fn, opts) {
+    if (type === 'click' && typeof fn === 'function' && this && this.nodeType === 1) {
+      var w = WM.get(fn);
+      if (!w) {
+        w = function (e) {
+          var self = this;
+          if (self.__lgn > 0 && eligible(self)) { e.preventDefault(); return; }   // already running: ignore double tap
+          var r = fn.apply(self, arguments);
+          if (r && typeof r.then === 'function') {
+            var b = eligible(self) ? self : (e && e.target && e.target.closest ? e.target.closest(BTN) : null);
+            if (b && self.contains(b)) busyThenable(b, r);
+          }
+          return r;
+        };
+        WM.set(fn, w);
+      }
+      return nativeAdd.call(this, type, w, opts);
+    }
+    return nativeAdd.apply(this, arguments);
+  };
+  EventTarget.prototype.removeEventListener = function (type, fn, opts) {
+    if (type === 'click' && typeof fn === 'function' && WM.has(fn)) return nativeRem.call(this, type, WM.get(fn), opts);
+    return nativeRem.apply(this, arguments);
+  };
+
+  /* ---------- inline onclick="asyncFn()" ---------- */
+  function splitTop(code) {
+    var parts = [], cur = '', q = '', depth = 0, i, c;
+    for (i = 0; i < code.length; i++) {
+      c = code[i];
+      if (q) { cur += c; if (c === '\\') { cur += code[++i] || ''; } else if (c === q) q = ''; continue; }
+      if (c === '"' || c === "'" || c === '`') { q = c; cur += c; continue; }
+      if (c === '(' || c === '[' || c === '{') depth++;
+      if (c === ')' || c === ']' || c === '}') depth--;
+      if (c === ';' && depth === 0) { if (cur.trim()) parts.push(cur); cur = ''; continue; }
+      cur += c;
+    }
+    if (cur.trim()) parts.push(cur);
+    return parts;
+  }
+  function wrapInline(el) {
+    var code = el.getAttribute && el.getAttribute('onclick');
+    if (!code || el.__lgc === code) return;
+    el.__lgc = code;
+    if (!eligible(el) || /\breturn\b|\bawait\b/.test(code)) return;
+    var parts = splitTop(code), fn;
+    if (!parts.length) return;
+    try { fn = new Function('event', 'with(document){with(this.form||{}){with(this){return [' + parts.join(',\n') + '\n]}}}'); }
+    catch (e) { return; }   // not a plain call list - leave the native handler alone
+    el.onclick = function (e) {
+      if (el.__lgn > 0) { if (e && e.preventDefault) e.preventDefault(); return false; }
+      var r = fn.call(el, e);
+      busyThenable(el, r);
+    };
+  }
+  function scan(root) {
+    if (!root || root.nodeType !== 1) return;
+    if (root.hasAttribute('onclick')) wrapInline(root);
+    var l = root.querySelectorAll('[onclick]');
+    for (var i = 0; i < l.length; i++) wrapInline(l[i]);
+  }
+  function start() {
+    scan(document.documentElement);
+    new MutationObserver(function (ms) {
+      for (var i = 0; i < ms.length; i++) {
+        var m = ms[i];
+        if (m.type === 'attributes') wrapInline(m.target);
+        else for (var j = 0; j < m.addedNodes.length; j++) scan(m.addedNodes[j]);
+      }
+    }).observe(document.documentElement, { childList: true, subtree: true, attributes: true, attributeFilter: ['onclick'] });
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start); else start();
+})();
+
+</script>
     <meta charset="UTF-8">
     <!-- Mobile in-page console (Eruda). Kept permanently so future errors can
          be diagnosed straight from the phone (tap the floating button in the
@@ -1107,7 +1238,7 @@
         .pkg-type-tab { flex: 1; padding: 9px 4px; border: none; background: transparent; border-radius: 10px; font-size: 13px; font-weight: 600; color: var(--text-secondary); cursor: pointer; transition: 0.15s; }
         .pkg-type-tab.active { background: var(--surface); color: var(--accent); box-shadow: var(--shadow-soft); }
         .fulfill-group-label { font-size: 10.5px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.4px; margin: 0 0 5px 2px; }
-        .btn { padding: 9px 12px; border-radius: 8px; font-weight: 500; font-size: 13.5px; cursor: pointer; border: 1px solid transparent; text-align: center; flex: 1; transition: transform 0.12s ease, filter 0.15s ease, background 0.15s ease; }
+        .btn { padding: 7px 11px; border-radius: 8px; font-weight: 500; font-size: 12.5px; cursor: pointer; border: 1px solid transparent; text-align: center; flex: 1; transition: transform 0.12s ease, filter 0.15s ease, background 0.15s ease; }
         .btn svg { flex-shrink: 0; }
         /* Multi-button toolbar rows (e.g. Package editor actions): size each
            button to its own text instead of stretching to an equal share of
@@ -1131,6 +1262,10 @@
         .pkg-autoprice-box { margin: 12px 0 8px; padding: 12px; border: 1px solid var(--border-glass); border-radius: 12px; background: var(--bg-subtle-2); }
         .pkg-recommend-chip { display: inline-block; margin-left: 6px; padding: 1px 7px; border-radius: 999px; font-size: 10px; font-weight: 700; color: var(--accent); background: var(--accent-soft); vertical-align: middle; }
         .btn:active { transform: scale(0.97); }
+        /* one-line buttons: never break the label, wrap the whole button instead */
+        #ud-sec-btn-pin, #ud-sec-btn-totp, #ud-sec-btn-both, #ud-admin-btn, #ud-ban-btn, #cal-apply-btn,
+        #save-fazercard-webhook-btn, #delete-fazercard-webhook-btn, #check-fazercard-webhook-status-btn,
+        #regen-fazercard-secret-btn, #view-fazercard-deliveries-btn { white-space: nowrap; }
         .btn-primary { background-color: var(--accent); background-image: linear-gradient(180deg, rgba(255,255,255,0.25), rgba(255,255,255,0)); color: white; box-shadow: 0 6px 16px -6px rgba(var(--accent-rgb),0.65), inset 0 1px 0 rgba(255,255,255,0.35); }
         .btn-primary:active { filter: brightness(0.94); }
         .btn-danger { background-color: var(--danger); background-image: linear-gradient(180deg, rgba(255,255,255,0.25), rgba(255,255,255,0)); color: white; box-shadow: 0 6px 16px -6px rgba(250,62,62,0.55), inset 0 1px 0 rgba(255,255,255,0.35); }
@@ -2370,6 +2505,23 @@
             box-shadow: inset 0 1px 0 rgba(255,255,255,0.25);
             transition: background .2s ease, color .2s ease, box-shadow .2s ease, transform .15s ease;
         }
+        .pkg-type-tab { display: inline-flex; align-items: center; justify-content: center; gap: 4px; flex-shrink: 0; }
+        .pkg-type-tab .prov-tag { margin-left: 0; flex: none; line-height: 1.3; }
+        /* ---- Provider badges (P1 / P2 / P3): tinted pill + colour dot, same look on cards and tabs ---- */
+        .prov-chip.p1, .prov-tag.p1 { --pcr: 37,99,235; }
+        .prov-chip.p2, .prov-tag.p2 { --pcr: 234,88,12; }
+        .prov-chip.p3, .prov-tag.p3 { --pcr: 5,150,105; }
+        .prov-chip { height: 18px; padding: 0 7px 0 6px; gap: 4px; border-radius: 999px; font-size: 10px; font-weight: 700; letter-spacing: .4px;
+            color: #fff; background: rgba(15,23,42,.62); border: 1px solid rgba(255,255,255,.22);
+            -webkit-backdrop-filter: blur(8px) saturate(160%); backdrop-filter: blur(8px) saturate(160%);
+            box-shadow: 0 2px 8px -3px rgba(0,0,0,.55); }
+        .prov-chip svg { display: none; }
+        .prov-chip::before { content: ""; width: 6px; height: 6px; border-radius: 50%; flex: none; background: rgb(var(--pcr)); box-shadow: 0 0 0 2px rgba(var(--pcr), .35); }
+        .prov-tag { display: inline-flex; align-items: center; gap: 4px; margin-left: 5px; padding: 1px 7px 1px 5px; border-radius: 999px; font-size: 9.5px; font-weight: 700; letter-spacing: .4px; line-height: 1.4;
+            color: rgb(var(--pcr)); background: rgba(var(--pcr), .12); border: 1px solid rgba(var(--pcr), .34); }
+        .prov-tag::before { content: ""; width: 5px; height: 5px; border-radius: 50%; flex: none; background: rgb(var(--pcr)); }
+        .pkg-type-tab.active .prov-tag { color: #fff; background: rgba(255,255,255,.22); border-color: rgba(255,255,255,.5); }
+        .pkg-type-tab.active .prov-tag::before { background: #fff; }
         .pkg-type-tab:active, .udp-tab:active, .game-list-tab-btn:active { transform: scale(0.96); }
         .pkg-type-tab.active, .udp-tab.active, .game-list-tab-btn.active {
             color: #fff; border-color: rgba(255,255,255,0.38);
@@ -2742,13 +2894,13 @@
 <style id="mobile-btn-fix">
 .udp-topbar { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 14px; }
 .udp-topbar .udp-back { margin-bottom: 0; min-height: 40px; }
-.udp-update-btn { flex: 0 0 auto; display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 40px; padding: 8px 16px; border: 0; border-radius: 12px;
-    background: var(--accent); color: #fff; font-size: 13.5px; font-weight: 700; cursor: pointer; white-space: nowrap; -webkit-tap-highlight-color: transparent; transition: transform .12s ease, opacity .15s; }
+.udp-update-btn { flex: 0 0 auto; display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 34px; padding: 6px 13px; border: 0; border-radius: 12px;
+    background: var(--accent); color: #fff; font-size: 12.5px; font-weight: 700; cursor: pointer; white-space: nowrap; -webkit-tap-highlight-color: transparent; transition: transform .12s ease, opacity .15s; }
 .udp-update-btn:active { transform: scale(.96); }
 .udp-update-btn.busy, .udp-update-btn:disabled { opacity: .65; pointer-events: none; }
 @media (max-width: 640px) {
-    .btn { min-height: 42px; padding: 10px 14px; font-size: 13.5px; line-height: 1.25; white-space: normal; }
-    .udp-tab { min-height: 40px; padding: 10px 14px; }
+    .btn { min-height: 34px; padding: 7px 12px; font-size: 12.5px; line-height: 1.25; white-space: normal; }
+    .udp-tab { min-height: 34px; padding: 7px 12px; }
     .udp-tabs { scroll-padding: 0 12px; }
     #ud-txn-tabs { gap: 8px !important; padding: 2px 14px 8px 2px; scroll-padding: 0 14px; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
     #ud-txn-tabs::-webkit-scrollbar { display: none; }
@@ -3039,6 +3191,58 @@ html.pref-compact .btn { min-height: 38px; }
 .live-dot { color: #34D399; } .pkg-summary-warn-dot { color: #FF9500; } .nav-item-low-balance-dot { color: #FF3B30; }
 @keyframes dotRing { 0% { transform: scale(1); opacity: .55; } 70%, 100% { transform: scale(3.1); opacity: 0; } }
 @media (prefers-reduced-motion: reduce) { .live-dot::after, .pkg-summary-warn-dot::after, .nav-item-low-balance-dot::after { animation: none; } }
+</style>
+<style id="lg-btn-css">
+/* ===== LINN unified buttons + loading spinner (shared by Admin panel and Store) ===== */
+@keyframes lgSpin { to { transform: rotate(360deg); } }
+
+/* one geometry for every .btn: same height, radius, weight, centred content, icons aligned */
+.btn, .udp-update-btn {
+  box-sizing: border-box !important;
+  display: inline-flex; align-items: center !important; justify-content: center !important; gap: 8px;
+  min-height: 44px !important; padding-top: 10px; padding-bottom: 10px;
+  border-radius: 14px !important; font-weight: 600 !important; font-size: 14.5px; line-height: 1.25 !important;
+  text-align: center; white-space: normal !important; overflow: visible !important; text-overflow: clip !important;
+  position: relative; cursor: pointer; -webkit-tap-highlight-color: transparent; user-select: none; -webkit-user-select: none;
+}
+.btn > svg, .btn > .ui-icon, .btn > img { flex: 0 0 auto; width: 18px; height: 18px; }
+.btn-md { min-height: 40px !important; font-size: 13.5px !important; }
+.btn-sm { min-height: 36px !important; font-size: 13px !important; border-radius: 12px !important; }
+.btn-xs { min-height: 30px !important; font-size: 12px !important; border-radius: 10px !important; padding-top: 4px !important; padding-bottom: 4px !important; }
+.btn:disabled, .btn[disabled], .udp-update-btn:disabled { opacity: .5 !important; cursor: not-allowed !important; filter: saturate(.6); }
+.btn:focus-visible, button:focus-visible { outline: 2px solid var(--accent, #6366f1); outline-offset: 2px; }
+.btn-primary, .btn-danger { border-color: transparent !important; }
+
+/* ---- spinner: shown while a button's action is running (also the old .busy / .loading classes) ---- */
+.lg-busy, .btn.busy, .btn.loading, .udp-update-btn.busy { pointer-events: none !important; cursor: progress !important; }
+.lg-busy:not(:disabled), .btn.busy, .btn.loading { opacity: .9; }
+.lg-busy::before, .btn.busy::before, .btn.loading::before, .udp-update-btn.busy::before {
+  content: ""; flex: 0 0 auto; box-sizing: border-box; width: 16px; height: 16px; margin-right: 8px; border-radius: 50%;
+  border: 2.5px solid currentColor; border-right-color: transparent; animation: lgSpin .7s linear infinite;
+}
+.btn.busy::after, .btn.loading::after, .udp-update-btn.busy::after { display: none !important; content: none !important; }
+/* icon-only buttons: the spinner replaces the icon */
+.lg-busy.lg-busy-ov { color: transparent !important; }
+.lg-busy.lg-busy-ov > * { opacity: 0; }
+.lg-busy.lg-busy-ov::before { position: absolute; left: 50%; top: 50%; margin: -8px 0 0 -8px; color: var(--lg-spin, #888); border-color: var(--lg-spin, #888); border-right-color: transparent; }
+@media (prefers-reduced-motion: reduce) { .lg-busy::before, .btn.busy::before, .btn.loading::before { animation-duration: 1.6s !important; } }
+</style>
+
+<style id="btn-align-v2">
+/* ---- Uniform button rows (v2) ----
+   Any row that holds 2+ buttons side by side: labels stay on ONE line, every button has the same height, and when the
+   screen is too narrow the whole button drops to the next line (chip-style) instead of its label breaking in two. */
+:is(div, footer, section, span):has(> .btn + .btn):not(.modal-footer):not(.od-card-footer):not(.cal2-actions) {
+    flex-wrap: wrap; align-items: stretch; row-gap: 8px;
+}
+:is(div, footer, section, span):has(> .btn + .btn):not(.modal-footer):not(.od-card-footer):not(.cal2-actions) > .btn {
+    flex: 0 1 auto !important; white-space: nowrap !important; min-height: 42px !important; min-width: 0; max-width: 100%;
+    overflow: hidden !important; text-overflow: ellipsis !important;
+}
+/* single buttons / tab chips that used to break onto two lines */
+.cal2-actions .btn, #add-admin-btn, .st-collapse, .udp-update-btn { white-space: nowrap !important; }
+.cal2-actions .btn { min-height: 42px; }
+.pkg-type-tab, .udp-tab, .wtx-chip { white-space: nowrap; }
 </style>
 </head>
 <body>
@@ -3821,6 +4025,11 @@ html.pref-compact .btn { min-height: 38px; }
                         </div>
                         <div class="row-end">
                             <span id="social-supportTelegram-remove" style="font-size:11px;color:var(--danger);cursor:pointer;display:none;" onclick="removeSocialImage('supportTelegram')">Remove image</span>
+                        </div>
+
+                        <label class="u-label">Developer Telegram Username <span class="u-muted">(Store Profile → Contact Developer)</span></label>
+                        <div class="row-center row-mt">
+                            <input class="field field-grow" type="text" id="social-developerTelegram" placeholder="Enter Developer Telegram Username">
                         </div>
                     </div>
 
@@ -4761,7 +4970,7 @@ html.pref-compact .btn { min-height: 38px; }
                 <button class="btn btn-outline" style="margin-top:8px;padding:7px 14px;font-size:12px;" onclick="saveUserAdminNote()">Save Note</button>
 
                 <button class="btn btn-primary" style="width:100%;margin-top:20px;" onclick="messageCurrentUser()">Send Message (Store + Telegram)</button>
-                <div style="display:flex;gap:8px;margin-top:10px;">
+                <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;">
                     <button class="btn btn-outline" id="ud-admin-btn" onclick="toggleStoreAdminCurrentUser()">Set as Admin</button>
                     <button class="btn btn-outline" id="ud-ban-btn" onclick="toggleBanCurrentUser()">Ban User</button>
                     <button class="btn btn-danger" onclick="deleteCurrentUser()">Delete User</button>
@@ -4993,8 +5202,8 @@ html.pref-compact .btn { min-height: 38px; }
                         <div id="fulfill-group-direct">
                             <p class="fulfill-group-label">Direct (needs Player ID)</p>
                             <div class="pkg-type-tabs">
-                                <button type="button" class="pkg-type-tab" data-provider="g2bulk" onclick="setFulfillProvider('g2bulk')">G2Bulk<span class="prov-tag p1">P1</span></button>
-                                <button type="button" class="pkg-type-tab" data-provider="fazercard" onclick="setFulfillProvider('fazercard')">FazerCards<span class="prov-tag p2">P2</span></button>
+                                <button type="button" class="pkg-type-tab" data-provider="g2bulk" onclick="setFulfillProvider('g2bulk')">P1</button>
+                                <button type="button" class="pkg-type-tab" data-provider="fazercard" onclick="setFulfillProvider('fazercard')">P2</button>
                                 <button type="button" class="pkg-type-tab" data-provider="software" onclick="setFulfillProvider('software')">Software</button>
                                 <button type="button" class="pkg-type-tab active" data-provider="manual" onclick="setFulfillProvider('manual')">Manual</button>
                             </div>
@@ -5003,8 +5212,8 @@ html.pref-compact .btn { min-height: 38px; }
                             <p class="fulfill-group-label">Voucher / Code (no Player ID)</p>
                             <div class="pkg-type-tabs">
                                 <button type="button" class="pkg-type-tab" data-provider="g2bulk_voucher" onclick="setFulfillProvider('g2bulk_voucher')">Vouchers<span class="prov-tag p1">P1</span></button>
-                                <button type="button" class="pkg-type-tab" data-provider="jcplays" onclick="setFulfillProvider('jcplays')">JCPlays (Code)<span class="prov-tag p3">P3</span></button>
-                                <button type="button" class="pkg-type-tab" data-provider="fazercard_giftcard" onclick="setFulfillProvider('fazercard_giftcard')">Gift Cards (FazerCards)<span class="prov-tag p2">P2</span></button>
+                                <button type="button" class="pkg-type-tab" data-provider="jcplays" onclick="setFulfillProvider('jcplays')">Code<span class="prov-tag p3">P3</span></button>
+                                <button type="button" class="pkg-type-tab" data-provider="fazercard_giftcard" onclick="setFulfillProvider('fazercard_giftcard')">Gift Cards<span class="prov-tag p2">P2</span></button>
                                 <button type="button" class="pkg-type-tab" data-provider="voucher_manual" onclick="setFulfillProvider('voucher_manual')">Manual</button>
                             </div>
                         </div>
@@ -5534,7 +5743,7 @@ html.pref-compact .btn { min-height: 38px; }
                         <span class="toggle-slider"></span>
                     </label>
                 </div>
-                <div style="display:flex;gap:8px;margin-top:8px;">
+                <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;">
                     <button type="button" class="btn btn-outline btn-md" id="save-fazercard-webhook-btn" onclick="saveFazerCardWebhook()">Save Webhook</button>
                     <button type="button" class="btn btn-outline btn-md" id="delete-fazercard-webhook-btn" onclick="deleteFazerCardWebhook()">Remove Webhook</button>
                     <button type="button" class="btn btn-outline btn-md" id="check-fazercard-webhook-status-btn" onclick="loadFazerCardWebhookStatus()">Check Live Status</button>
@@ -5548,7 +5757,7 @@ html.pref-compact .btn { min-height: 38px; }
                     <button type="button" class="secret-toggle-btn" tabindex="-1" aria-label="Show" onclick="toggleSecretVisibility('fazercard-webhook-secret', this)"><svg class="ui-icon"><use href="#icon-eye"></use></svg></button>
                 </div>
                 <p style="font-size:11.5px;color:var(--text-muted);margin-top:-6px;">Regenerating invalidates the old secret immediately — deliveries signed with it stop verifying.</p>
-                <div style="display:flex;gap:8px;margin-top:8px;">
+                <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;">
                     <button type="button" class="btn btn-outline btn-md" id="regen-fazercard-secret-btn" onclick="regenerateFazerCardWebhookSecret()">Regenerate Secret</button>
                     <button type="button" class="btn btn-outline btn-md" id="view-fazercard-deliveries-btn" onclick="loadFazerCardWebhookDeliveries()">View Recent Deliveries</button>
                 </div>
@@ -11446,6 +11655,7 @@ html.pref-compact .btn { min-height: 38px; }
                     throw new Error(`Already ${data.status}.`);
                 }
                 const amount = Number(data.amount || 0);
+                if (!Number.isFinite(amount) || amount <= 0) throw new Error('Top up amount is invalid.');
                 const userId = data.userId;
                 if (!userId) throw new Error('Top up request has no UID.');
                 const userRef = doc(db, "users", userId);
@@ -11521,9 +11731,14 @@ html.pref-compact .btn { min-height: 38px; }
         async function doRejectTopup(id, btnElement, note) {
             if (btnElement) { btnElement.innerText = "Updating..."; btnElement.disabled = true; }
             try {
-                await updateDoc(doc(db, "walletTopups", id), {
-                    status: "Rejected",
-                    ...(note ? { statusNote: note } : {})
+                // Guard: a request that was already credited/rejected (e.g. by another admin) must not flip status.
+                const rjRef = doc(db, "walletTopups", id);
+                await runTransaction(db, async (tx) => {
+                    const sn = await tx.get(rjRef);
+                    if (!sn.exists()) throw new Error('Top up request not found.');
+                    const st = sn.data().status;
+                    if (st === 'Completed' || st === 'Rejected') throw new Error(`Already ${st}.`);
+                    tx.update(rjRef, { status: "Rejected", ...(note ? { statusNote: note } : {}) });
                 });
                 logAdminActivity('Rejected top-up', `id: ${id}${note ? ' — ' + note : ''}`);
                 window.showToast("Top up rejected.", 'fail');
@@ -11531,7 +11746,7 @@ html.pref-compact .btn { min-height: 38px; }
                 emailTopupResultToCustomer(id);
             } catch (error) {
                 console.error("doRejectTopup error:", error);
-                window.showToast("Failed to update! Check Rules.", 'fail');
+                window.showToast((error && /^Already |not found/.test(error.message)) ? error.message : "Failed to update! Check Rules.", 'fail');
                 if (btnElement) { btnElement.innerText = "Reject"; btnElement.disabled = false; }
             }
         }
@@ -18086,6 +18301,7 @@ html.pref-compact .btn { min-height: 38px; }
                 document.getElementById('social-tiktok').value = data.tiktok || '';
                 document.getElementById('social-supportMessenger').value = data.supportMessenger || '';
                 document.getElementById('social-supportTelegram').value = data.supportTelegram || '';
+                document.getElementById('social-developerTelegram').value = data.developerTelegram || '';
                 ['facebook', 'telegram', 'tiktok', 'supportMessenger', 'supportTelegram'].forEach(platform => {
                     // Don't clobber an image the admin just picked but hasn't saved yet.
                     if (editingSocialImageFiles[platform]) return;
@@ -18147,6 +18363,7 @@ html.pref-compact .btn { min-height: 38px; }
             const tiktok = document.getElementById('social-tiktok').value.trim();
             const supportMessenger = normalizeSupportUsername(document.getElementById('social-supportMessenger').value, 'supportMessenger');
             const supportTelegram = normalizeSupportUsername(document.getElementById('social-supportTelegram').value, 'supportTelegram');
+            const developerTelegram = normalizeSupportUsername(document.getElementById('social-developerTelegram').value, 'supportTelegram');
 
             const btn = document.getElementById('save-social-btn');
             const originalText = btn.innerText;
@@ -18154,7 +18371,7 @@ html.pref-compact .btn { min-height: 38px; }
             btn.innerText = 'Saving...';
 
             try {
-                const data = { facebook, telegram, tiktok, supportMessenger, supportTelegram };
+                const data = { facebook, telegram, tiktok, supportMessenger, supportTelegram, developerTelegram };
                 for (const platform of ['facebook', 'telegram', 'tiktok', 'supportMessenger', 'supportTelegram']) {
                     if (editingSocialImageFiles[platform]) {
                         data[`${platform}Image`] = await uploadImageToImgBB(editingSocialImageFiles[platform], 'social-upload-status');
@@ -18166,6 +18383,7 @@ html.pref-compact .btn { min-height: 38px; }
                 await setDoc(doc(db, "settings", "social"), data, { merge: true });
                 document.getElementById('social-supportMessenger').value = supportMessenger;
                 document.getElementById('social-supportTelegram').value = supportTelegram;
+                document.getElementById('social-developerTelegram').value = developerTelegram;
                 editingSocialImageFiles = { facebook: null, telegram: null, tiktok: null, supportMessenger: null, supportTelegram: null };
                 removedSocialImages = { facebook: false, telegram: false, tiktok: false, supportMessenger: false, supportTelegram: false };
                 logAdminActivity('Saved social links');
