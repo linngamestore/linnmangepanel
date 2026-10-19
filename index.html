@@ -3147,7 +3147,7 @@ select.maint-field { -webkit-appearance: none; appearance: none; padding-right: 
 /* ---- 3) Layout tuning, whole panel ---- */
 .title-header { margin-bottom: 14px; }
 /* the nav bar scrolls sideways: fade the edge that still has more, so it is obvious there is more to swipe to */
-#admin-top-nav { scroll-snap-type: none; scroll-padding: 0 14px; scrollbar-width: none; touch-action: pan-x; overscroll-behavior-x: contain; -webkit-overflow-scrolling: touch; cursor: grab; scroll-behavior: auto; }
+#admin-top-nav { scroll-snap-type: none; scroll-padding: 0 14px; scrollbar-width: none; touch-action: pan-x pan-y; overscroll-behavior-x: contain; -webkit-overflow-scrolling: touch; cursor: grab; scroll-behavior: auto; }
 #admin-top-nav.is-dragging { cursor: grabbing; }
 #admin-top-nav.is-dragging .nav-item { pointer-events: none; }
 #admin-top-nav .nav-item { -webkit-user-drag: none; user-select: none; -webkit-user-select: none; }
@@ -3159,11 +3159,7 @@ select.maint-field { -webkit-appearance: none; appearance: none; padding-right: 
 .top-nav-wrap .nav-arrow:active { transform: translateY(-50%) scale(.92); }
 #admin-top-nav::-webkit-scrollbar { display: none; }
 #admin-top-nav > * { scroll-snap-align: center; }
-@media (max-width: 640px) {
-  #admin-top-nav.more-right { -webkit-mask-image: linear-gradient(90deg,#000 calc(100% - 34px),transparent); mask-image: linear-gradient(90deg,#000 calc(100% - 34px),transparent); }
-  #admin-top-nav.more-left  { -webkit-mask-image: linear-gradient(270deg,#000 calc(100% - 34px),transparent); mask-image: linear-gradient(270deg,#000 calc(100% - 34px),transparent); }
-  #admin-top-nav.more-left.more-right { -webkit-mask-image: linear-gradient(90deg,transparent,#000 30px,#000 calc(100% - 30px),transparent); mask-image: linear-gradient(90deg,transparent,#000 30px,#000 calc(100% - 30px),transparent); }
-}
+#admin-top-nav.is-scrollable { padding-left: 14px !important; padding-right: 14px !important; -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 14px, #000 calc(100% - 14px), transparent 100%); mask-image: linear-gradient(90deg, transparent 0, #000 14px, #000 calc(100% - 14px), transparent 100%); }
 
 /* ---- Quick Jump (Ctrl/Cmd+K, "/", or the search icon in the header) ---- */
 #qj-overlay { position: fixed; inset: 0; z-index: 100000; display: none; align-items: flex-start; justify-content: center; padding: max(env(safe-area-inset-top),14px) 12px 12px; background: rgba(6,10,22,.58); }
@@ -7163,7 +7159,7 @@ html.pref-compact .btn { min-height: 38px; }
             const a = ADMIN_ACCOUNTS.find(x => x.username === sel.value);
             hint.textContent = !sel.value ? 'Main Admin မရွေးရသေးရင် Order တွေ shared Telegram chat ကိုပဲ သွားပါမယ်။'
                 : (!a || !a.telegramChatId) ? 'ဒီ admin Telegram မချိတ်ရသေးလို့ Order တွေ shared chat ကိုပဲ ဆက်သွားပါမယ်။'
-                : (a.transferEnabled === false ? 'ℹ️ Main Admin က Transfer ပိတ်ထားတယ် — Order အားလုံး Main Admin ဆီပဲသွားမယ်၊ Transfer ခလုတ်မပေါ်ဘူး။' : 'Order အသစ်အားလုံး ဒီ admin ဆီကို သွားပါမယ်။');
+                : (a.transferEnabled === false ? 'Main Admin က Transfer ပိတ်ထားတယ် — Order အားလုံး Main Admin ဆီပဲသွားမယ်၊ Transfer ခလုတ်မပေါ်ဘူး။' : 'Order အသစ်အားလုံး ဒီ admin ဆီကို သွားပါမယ်။');
         }
         async function toggleOrderRoutingSettings() {
             const body = document.getElementById('order-routing-body');
@@ -11961,7 +11957,7 @@ html.pref-compact .btn { min-height: 38px; }
                 ...(u.googleEmail ? [`Email:  ${u.googleEmail}`] : []),
                 `Amount:  ${amount.toLocaleString()} MMK`,
                 `Wallet:  ${balance.toLocaleString()} → ${(balance + amount).toLocaleString()} MMK`,
-                ...(amount >= 500000 ? ['', '⚠️ ပမာဏ အလွန်များပါသည် - ဂဏန်းကို ထပ်စစ်ပါ။'] : []),
+                ...(amount >= 500000 ? ['', 'ပမာဏ အလွန်များပါသည် - ဂဏန်းကို ထပ်စစ်ပါ။'] : []),
                 '',
                 'User ID နဲ့ ပမာဏ မှန်ကန်မှ Confirm နှိပ်ပါ။ နှိပ်လိုက်ရင် wallet ထဲ ချက်ချင်း ထည့်ပေးပါမယ်။'
             ];
@@ -17624,9 +17620,9 @@ html.pref-compact .btn { min-height: 38px; }
             const sub = t => `<div style="font-size:11.5px;color:var(--text-secondary);margin-top:3px;">${t}</div>`;
             let body;
             if (d.walletFlow === 2 && d.walletDebited !== true) {
-                body = d.walletDebitFailed ? '<b style="color:#DC2626;">⚠ Debit FAILED — wallet was NOT charged</b>'
+                body = d.walletDebitFailed ? '<b style="color:#DC2626;"><svg class="ui-icon" style="width:14px;height:14px;vertical-align:-2px;margin-right:4px;"><use href="#icon-warning"></use></svg>Debit FAILED — wallet was NOT charged</b>'
                     : d.status === 'Fail' ? '<b>Not charged</b>'
-                    : '<b style="color:#D97706;">⚠ Not debited yet</b>';
+                    : '<b style="color:#D97706;"><svg class="ui-icon" style="width:14px;height:14px;vertical-align:-2px;margin-right:4px;"><use href="#icon-warning"></use></svg>Not debited yet</b>';
             } else {
                 const amt = d.walletDebitedAmount != null ? d.walletDebitedAmount : d.price;
                 body = `<b>−${fmt(amt)}</b>`;
@@ -17709,7 +17705,7 @@ html.pref-compact .btn { min-height: 38px; }
                     } else if (o.status === 'Success' || o.status === 'Processing') {
                         // Wallet order that went through but the Worker never marked the wallet as debited:
                         // show it instead of hiding it, so the missing debit is visible.
-                        rows.push({ type: 'buy', amount: Number(o.price) || 0, title: label, sub: (o.status || '') + ' • ⚠ Wallet NOT debited', at: ms(o.timestamp) });
+                        rows.push({ type: 'buy', amount: Number(o.price) || 0, title: label, sub: (o.status || '') + ' • Wallet NOT debited', at: ms(o.timestamp) });
                     }
                     if (o.walletRefunded === true) {
                         rows.push({ type: 'in', amount: o.walletRefundedAmount != null ? Number(o.walletRefundedAmount) : (o.walletDebitedAmount != null ? Number(o.walletDebitedAmount) : (Number(o.price) || 0)), title: 'Refund', sub: label, at: ms(o.refundedAt) || ms(o.timestamp) });
@@ -21190,8 +21186,8 @@ html.pref-compact .btn { min-height: 38px; }
                                 pendingG2BulkServerMode = null;
                                 pendingG2BulkServerOptions = null;
                                 statusMsg += serversRes.ok
-                                    ? '\nℹ This game has no fixed server list — Server ID stays free-text.'
-                                    : `\nℹ No server dropdown for this game (${serversRes.status}${serversData.detail && serversData.detail.message ? ': ' + serversData.detail.message : ''}) — Server ID stays free-text.`;
+                                    ? '\nThis game has no fixed server list — Server ID stays free-text.'
+                                    : `\nNo server dropdown for this game (${serversRes.status}${serversData.detail && serversData.detail.message ? ': ' + serversData.detail.message : ''}) — Server ID stays free-text.`;
                             }
                         } catch (serversError) {
                             console.error("G2Bulk /games/servers fetch error:", serversError);
@@ -21334,7 +21330,7 @@ html.pref-compact .btn { min-height: 38px; }
                     + (fazerNeedsServerIdField ? '\n✓ "Requires Server ID" auto-enabled for this game.' : '\n✓ "Requires Server ID" auto-disabled — this game doesn\'t need it.')
                     + (pendingFazerCardServerMode === 'select'
                         ? `\n✓ Server dropdown detected (${pendingFazerCardServerOptions.length} options).`
-                        : (fazerNeedsServerIdField ? '\nℹ No fixed server list found for this field — Server ID stays free-text (check console log for the raw field shape).' : ''));
+                        : (fazerNeedsServerIdField ? '\nNo fixed server list found for this field — Server ID stays free-text (check console log for the raw field shape).' : ''));
                 sortPackageRows();
                 window.showToast('FazerCards catalogue imported ✓', 'success');
             } catch (error) {
@@ -23741,7 +23737,7 @@ a, button, [role="button"], .nav-item, .header-icon, .btn, .picker-btn, label { 
     var wrap = n.closest('.top-nav-wrap');
     function upd() {
       var r = n.scrollLeft + n.clientWidth < n.scrollWidth - 4, l = n.scrollLeft > 4;
-      n.classList.toggle('more-right', r); n.classList.toggle('more-left', l);
+      n.classList.toggle('is-scrollable', n.scrollWidth > n.clientWidth + 4);
       if (wrap) { wrap.classList.toggle('has-right', r); wrap.classList.toggle('has-left', l); }
     }
     n.addEventListener('scroll', upd, { passive: true }); window.addEventListener('resize', upd); upd();
@@ -23780,11 +23776,24 @@ a, button, [role="button"], .nav-item, .header-icon, .btn, .picker-btn, label { 
       if (Math.abs(e.deltaY) > Math.abs(e.deltaX) && n.scrollWidth > n.clientWidth) { n.scrollLeft += e.deltaY; e.preventDefault(); }
     }, { passive: false });
 
-    new MutationObserver(function () {
-      if (down && moved) return;
-      var a = n.querySelector('.nav-item.active'); if (a && a.scrollIntoView) { try { a.scrollIntoView({ inline: 'center', block: 'nearest', behavior: prefs.calm ? 'auto' : 'smooth' }); } catch (e) {} }
+    /* touch drag bookkeeping - the bar must never be re-centred under the finger */
+    var lastActive = n.querySelector('.nav-item.active'), touchMoved = false, tx = 0, tT = 0;
+    n.addEventListener('touchstart', function (e) { touchMoved = false; clearTimeout(tT); if (e.touches[0]) tx = e.touches[0].clientX; }, { passive: true });
+    n.addEventListener('touchmove', function (e) { if (e.touches[0] && Math.abs(e.touches[0].clientX - tx) > 6) touchMoved = true; }, { passive: true });
+    function touchDone() { clearTimeout(tT); tT = setTimeout(function () { touchMoved = false; }, 150); }
+    n.addEventListener('touchend', touchDone, { passive: true });
+    n.addEventListener('touchcancel', touchDone, { passive: true });
+    /* centre the active tab only when the ACTIVE tab itself changed (not on dot / badge / scroll-state class changes) */
+    function centerActive() {
+      var a = n.querySelector('.nav-item.active');
+      if (!a || a === lastActive) return;
+      lastActive = a;
+      if (touchMoved || (down && moved)) return;
+      var left = Math.max(0, a.offsetLeft - (n.clientWidth - a.offsetWidth) / 2);
+      try { n.scrollTo({ left: left, behavior: prefs.calm ? 'auto' : 'smooth' }); } catch (e) { n.scrollLeft = left; }
       upd();
-    }).observe(n, { attributes: true, attributeFilter: ['class'], subtree: true });
+    }
+    new MutationObserver(centerActive).observe(n, { attributes: true, attributeFilter: ['class'], subtree: true });
   }
 
   /* ---------- back to top ---------- */
@@ -23907,5 +23916,41 @@ a, button, [role="button"], .nav-item, .header-icon, .btn, .picker-btn, label { 
   if (document.readyState !== 'loading') boot(); else document.addEventListener('DOMContentLoaded', boot);
 })();
 </script>
+
+<style id="lg-polish">
+/* ===== Notification toast: liquid glass, sits lower ===== */
+html body #toast {
+  top: calc(env(safe-area-inset-top, 0px) + 122px) !important;
+  left: 16px !important; right: 16px !important; max-width: 440px;
+  padding: 11px 14px 11px 12px !important; gap: 11px !important;
+  border-radius: 22px !important; overflow: hidden;
+  font-size: 13.5px; font-weight: 600; letter-spacing: .1px;
+  border: 1px solid rgba(255,255,255,.55) !important;
+  background: rgba(255,255,255,.62) !important;
+  background: color-mix(in srgb, currentColor 9%, rgba(255,255,255,.58)) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(200%) brightness(1.05) !important;
+  backdrop-filter: blur(24px) saturate(200%) brightness(1.05) !important;
+  box-shadow: inset 0 1.5px 0 rgba(255,255,255,.85), inset 0 -1px 0 rgba(255,255,255,.18), inset 0 0 22px rgba(255,255,255,.22), 0 16px 38px -12px rgba(15,23,42,.38), 0 2px 8px rgba(15,23,42,.08) !important;
+  opacity: 0; pointer-events: none;
+  transform: translateY(calc(-100% - 200px)) scale(.96) !important;
+  transition: transform .5s cubic-bezier(.2,1.2,.3,1), opacity .25s ease !important;
+}
+html body #toast.show { opacity: 1; pointer-events: auto; transform: none !important; }
+html[data-theme="dark"] body #toast {
+  border-color: rgba(255,255,255,.20) !important;
+  background: rgba(24,28,40,.50) !important;
+  background: color-mix(in srgb, currentColor 11%, rgba(20,24,36,.50)) !important;
+  box-shadow: inset 0 1.5px 0 rgba(255,255,255,.28), inset 0 -1px 0 rgba(255,255,255,.05), inset 0 0 22px rgba(255,255,255,.05), 0 18px 40px -12px rgba(0,0,0,.6) !important;
+}
+html body #toast::before {
+  content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+  background: radial-gradient(120% 140% at 8% -30%, rgba(255,255,255,.65), rgba(255,255,255,0) 55%), linear-gradient(115deg, rgba(255,255,255,.22), rgba(255,255,255,0) 40%);
+  opacity: .8;
+}
+html[data-theme="dark"] body #toast::before { opacity: .22; }
+html body #toast > * { position: relative; }
+html body #toast .toast-icon-circle { width: 26px; height: 26px; box-shadow: inset 0 1.5px 0 rgba(255,255,255,.55), 0 4px 10px -3px rgba(0,0,0,.35); }
+html body #toast .toast-icon-circle svg { width: 14px; height: 14px; stroke-width: 2.6; }
+</style>
 </body>
 </html>
