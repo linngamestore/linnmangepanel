@@ -133,6 +133,25 @@
 
 </script>
     <meta charset="UTF-8">
+    <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+    <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js">
+    <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js">
+    <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js">
+    <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.8.0/firebase-messaging.js">
+    <style id="boot-splash-css">
+    #boot-cover { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; text-align: center; font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; color: #4b5563; }
+    #boot-cover .bc-logo { width: 64px; height: 64px; border-radius: 20px; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg,#6366f1,#8b5cf6); box-shadow: 0 14px 30px -12px rgba(99,102,241,.7); animation: bcPulse 1.6s ease-in-out infinite; }
+    #boot-cover .bc-logo svg { width: 32px; height: 32px; stroke: #fff; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    #boot-cover .bc-bar { width: 120px; height: 4px; border-radius: 4px; background: rgba(99,102,241,.18); overflow: hidden; }
+    #boot-cover .bc-bar i { display: block; width: 40%; height: 100%; border-radius: 4px; background: #6366f1; animation: bcSlide 1.1s ease-in-out infinite; }
+    #boot-cover .bc-txt { font-size: 13px; font-weight: 600; letter-spacing: .2px; }
+    #boot-cover .bc-slow { display: none; flex-direction: column; align-items: center; gap: 10px; font-size: 12.5px; max-width: 260px; }
+    #boot-cover.is-slow .bc-slow { display: flex; }
+    #boot-cover .bc-slow button { border: 0; border-radius: 12px; padding: 10px 20px; background: #6366f1; color: #fff; font: inherit; font-weight: 700; cursor: pointer; }
+    @keyframes bcPulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.06); } }
+    @keyframes bcSlide { 0% { transform: translateX(-110%); } 100% { transform: translateX(300%); } }
+    @media (prefers-reduced-motion: reduce) { #boot-cover .bc-logo, #boot-cover .bc-bar i { animation: none; } }
+    </style>
     <!-- Mobile in-page console (Eruda). Kept permanently so future errors can
          be diagnosed straight from the phone (tap the floating button in the
          corner → Console / Network tabs) without needing a computer + USB
@@ -3128,7 +3147,16 @@ select.maint-field { -webkit-appearance: none; appearance: none; padding-right: 
 /* ---- 3) Layout tuning, whole panel ---- */
 .title-header { margin-bottom: 14px; }
 /* the nav bar scrolls sideways: fade the edge that still has more, so it is obvious there is more to swipe to */
-#admin-top-nav { scroll-snap-type: x proximity; scroll-padding: 0 14px; scrollbar-width: none; }
+#admin-top-nav { scroll-snap-type: none; scroll-padding: 0 14px; scrollbar-width: none; touch-action: pan-x; overscroll-behavior-x: contain; -webkit-overflow-scrolling: touch; cursor: grab; scroll-behavior: auto; }
+#admin-top-nav.is-dragging { cursor: grabbing; }
+#admin-top-nav.is-dragging .nav-item { pointer-events: none; }
+#admin-top-nav .nav-item { -webkit-user-drag: none; user-select: none; -webkit-user-select: none; }
+.top-nav-wrap { position: sticky; }
+.top-nav-wrap .nav-arrow { position: absolute; top: 50%; transform: translateY(-50%); z-index: 3; width: 30px; height: 30px; border-radius: 50%; border: 1px solid var(--border-glass); background: var(--surface); color: var(--text-secondary); display: none; align-items: center; justify-content: center; cursor: pointer; pointer-events: auto; box-shadow: 0 6px 16px -8px rgba(0,0,0,.4); padding: 0; }
+.top-nav-wrap .nav-arrow svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+.top-nav-wrap .nav-arrow.left { left: 4px; } .top-nav-wrap .nav-arrow.right { right: 4px; }
+@media (hover: hover) and (pointer: fine) { .top-nav-wrap.has-left .nav-arrow.left, .top-nav-wrap.has-right .nav-arrow.right { display: flex; } }
+.top-nav-wrap .nav-arrow:active { transform: translateY(-50%) scale(.92); }
 #admin-top-nav::-webkit-scrollbar { display: none; }
 #admin-top-nav > * { scroll-snap-align: center; }
 @media (max-width: 640px) {
@@ -3136,6 +3164,24 @@ select.maint-field { -webkit-appearance: none; appearance: none; padding-right: 
   #admin-top-nav.more-left  { -webkit-mask-image: linear-gradient(270deg,#000 calc(100% - 34px),transparent); mask-image: linear-gradient(270deg,#000 calc(100% - 34px),transparent); }
   #admin-top-nav.more-left.more-right { -webkit-mask-image: linear-gradient(90deg,transparent,#000 30px,#000 calc(100% - 30px),transparent); mask-image: linear-gradient(90deg,transparent,#000 30px,#000 calc(100% - 30px),transparent); }
 }
+
+/* ---- Quick Jump (Ctrl/Cmd+K, "/", or the search icon in the header) ---- */
+#qj-overlay { position: fixed; inset: 0; z-index: 100000; display: none; align-items: flex-start; justify-content: center; padding: max(env(safe-area-inset-top),14px) 12px 12px; background: rgba(6,10,22,.58); }
+#qj-overlay.show { display: flex; }
+#qj-box { width: 100%; max-width: 460px; margin-top: 8vh; background: var(--surface); border: 1px solid var(--border-glass); border-radius: 18px; box-shadow: 0 24px 60px -20px rgba(0,0,0,.55); overflow: hidden; animation: qjIn .22s cubic-bezier(.2,.9,.25,1); }
+@keyframes qjIn { from { opacity: 0; transform: translateY(-8px) scale(.98); } to { opacity: 1; transform: none; } }
+html.pref-calm #qj-box { animation: none; }
+#qj-input { width: 100%; box-sizing: border-box; border: 0; border-bottom: 1px solid var(--border-glass); background: transparent; color: var(--text-primary, inherit); font: inherit; font-size: 16px; padding: 16px 18px; outline: none; }
+#qj-list { max-height: min(56vh, 420px); overflow-y: auto; padding: 8px; overscroll-behavior: contain; }
+.qj-sec { font-size: 11px; font-weight: 700; letter-spacing: .4px; text-transform: uppercase; color: var(--text-muted); padding: 8px 10px 4px; }
+.qj-item { display: flex; align-items: center; gap: 12px; width: 100%; padding: 11px 12px; border: 0; border-radius: 12px; background: transparent; color: inherit; font: inherit; font-size: 14px; font-weight: 600; text-align: left; cursor: pointer; }
+.qj-item .ui-icon { width: 18px; height: 18px; flex-shrink: 0; }
+.qj-item small { margin-left: auto; font-size: 11px; font-weight: 600; color: var(--text-muted); }
+.qj-item.sel, .qj-item:hover { background: var(--accent-soft); color: var(--accent); }
+.qj-item.sel .ui-icon, .qj-item:hover .ui-icon { stroke: var(--accent); }
+#qj-empty { padding: 22px 14px; text-align: center; color: var(--text-muted); font-size: 13px; }
+#qj-foot { display: flex; gap: 14px; padding: 8px 16px; border-top: 1px solid var(--border-glass); font-size: 11px; color: var(--text-muted); }
+@media (hover: none) { #qj-foot { display: none; } }
 /* Games page: Edit Mode button reads as a switch (colour = state) and no longer floats alone */
 #game-edit-mode-btn { display: inline-flex; align-items: center; gap: 8px; min-height: 40px; border-radius: 99px; padding: 8px 16px; font-weight: 700; }
 #game-edit-mode-btn::before { content: ""; width: 9px; height: 9px; border-radius: 50%; background: var(--text-muted); transition: background-color .2s, box-shadow .2s; }
@@ -3250,7 +3296,22 @@ html.pref-compact .btn { min-height: 38px; }
     <!-- Login gate: nothing in the admin panel loads until Firebase confirms a signed-in admin. -->
     <!-- Boot cover: hides the panel shell until Firebase answers. Removed by unlockAdminApp() (signed in)
          or by the signed-out branch (login form shown). If Firebase never answers it stays, so nothing leaks. -->
-    <div id="boot-cover" style="position:fixed;inset:0;z-index:499;background:linear-gradient(160deg,#EEF2FF 0%,#F5F3FF 45%,#FDF2F8 100%);"></div>
+    <div id="boot-cover" style="position:fixed;inset:0;z-index:499;background:linear-gradient(160deg,#EEF2FF 0%,#F5F3FF 45%,#FDF2F8 100%);">
+        <div class="bc-logo"><svg viewBox="0 0 24 24"><path d="M12 5v14M8.5 8.2c0-1.2 1.1-2.2 2.9-2.2h1.6c1.7 0 2.9.9 2.9 2.3 0 3.2-7.4 1.6-7.4 5.2 0 1.4 1.3 2.5 3.1 2.5h1.5c1.8 0 3-.9 3-2.3"></path></svg></div>
+        <div class="bc-bar"><i></i></div>
+        <div class="bc-txt" id="bc-txt">Loading admin panel…</div>
+        <div class="bc-slow"><span>Taking longer than usual. Check your connection, then reload.</span><button type="button" onclick="location.reload()">Reload</button></div>
+    </div>
+    <script>
+    /* If Firebase is slow or blocked, say so instead of leaving a blank screen. */
+    (function () {
+      var c = document.getElementById('boot-cover');
+      function slow(msg) { var b = document.getElementById('boot-cover'); if (!b) return; b.classList.add('is-slow'); var t = document.getElementById('bc-txt'); if (t && msg) t.textContent = msg; }
+      setTimeout(function () { slow('Still loading…'); }, 7000);
+      window.addEventListener('error', function (e) { if (e && e.target && e.target.tagName === 'SCRIPT') slow('Could not load a required file'); }, true);
+      window.addEventListener('unhandledrejection', function (e) { var m = String((e && e.reason && e.reason.message) || ''); if (/Failed to fetch dynamically|module|import/i.test(m)) slow('Could not load a required file'); });
+    })();
+    </script>
     <div id="login-screen" class="hidden">
         <!-- Static gradient-mesh backdrop (decorative only, no motion) -->
         <div class="login-mesh" aria-hidden="true"></div>
@@ -3435,6 +3496,7 @@ html.pref-compact .btn { min-height: 38px; }
                 <span class="conn-dot conn-connecting" id="conn-dot"></span>
                 <span class="conn-label" id="conn-label">Connecting</span>
             </div>
+            <div class="header-icon" id="quick-jump-btn" title="Quick jump (Ctrl+K)" role="button" aria-label="Quick jump" style="flex-shrink:0;"><svg class="ui-icon" style="width:20px;" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.5" y2="16.5"></line></svg></div>
             <div class="header-icon" id="theme-toggle-btn" title="Theme" role="button" aria-label="Change theme" onclick="openThemeSheet()" style="flex-shrink:0;">
                 <svg class="ui-icon" style="width:20px;"><use href="#icon-palette"></use></svg>
             </div>
@@ -14762,7 +14824,26 @@ html.pref-compact .btn { min-height: 38px; }
 
         // Removes a package row (called from the × button) and refreshes order numbers.
         function removePackageRow(el) {
-            el.closest('.package-row').remove();
+            const row = el.closest('.package-row');
+            if (!row || row.__rm) return;
+            row.__rm = true;
+            const calm = document.documentElement.classList.contains('pref-calm') ||
+                (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+            if (calm || !row.parentNode) { row.remove(); pkgAfterRemove(); return; }
+            // slide out + fade, then collapse the space it leaves so the cards below glide up
+            const gap = parseFloat(getComputedStyle(row.parentNode).rowGap) || 0;
+            row.style.height = row.offsetHeight + 'px';
+            row.style.pointerEvents = 'none';
+            void row.offsetHeight;
+            row.classList.add('pkg-removing');
+            row.style.height = '0px';
+            row.style.marginBottom = (-gap) + 'px';
+            let done = false;
+            const fin = () => { if (done) return; done = true; row.remove(); pkgAfterRemove(); };
+            row.addEventListener('transitionend', (e) => { if (e.target === row && e.propertyName === 'height') fin(); });
+            setTimeout(fin, 420);
+        }
+        function pkgAfterRemove() {
             renumberPackageRows();
             // Deleting a row changes that tab's package count (and can empty
             // it out entirely), so the tab bar has to redraw right away —
@@ -23507,6 +23588,50 @@ html.pref-compact .btn { min-height: 38px; }
   }).observe(root, { attributes: true, attributeFilter: ['data-theme'] });
 })();
 </script>
+<style id="ux-v3-css">
+/* ===== UX v3: smoothness, delete motion, unified buttons ===== */
+
+/* -- price-list card delete: slide out, fade, collapse -- */
+.package-row.pkg-removing {
+  opacity: 0; transform: translateX(56px) scale(.95) !important; min-height: 0 !important; border-width: 0 !important; box-shadow: none !important;
+  transition: opacity .22s ease, transform .3s cubic-bezier(.4,0,.2,1), height .3s cubic-bezier(.4,0,.2,1) .06s, margin .3s cubic-bezier(.4,0,.2,1) .06s !important;
+  will-change: transform, opacity, height;
+}
+/* new cards rise in instead of the heavy 3D flip */
+@keyframes moRise { from { opacity: 0; transform: translate3d(0,10px,0); } to { opacity: 1; transform: none; } }
+.user-card.mo-in, .user-grid-card.mo-in, .game-picker-card.mo-in, .game-image-tile.mo-in { animation-name: moRise !important; }
+
+/* -- less jank on long lists -- */
+#edit-packages-list { scroll-snap-type: none !important; scroll-behavior: auto !important; }
+.package-row { scroll-snap-align: none !important; }
+.tx-row, .wtx-row, .user-card, .tier-row { content-visibility: auto; contain-intrinsic-size: auto 76px; }
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; scroll-padding-top: 130px; }
+body { -webkit-font-smoothing: antialiased; text-rendering: optimizeSpeed; }
+img { content-visibility: auto; }
+a, button, [role="button"], .nav-item, .header-icon, .btn, .picker-btn, label { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+.nav-item, .header-icon, .btn, .package-row, .admin-card { backface-visibility: hidden; }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; } }
+
+/* -- buttons: one size scale, aligned in every row -- */
+.btn { --btn-h: 42px; min-height: var(--btn-h) !important; padding: 8px 16px; font-size: 14px !important; font-weight: 600 !important; letter-spacing: 0; line-height: 1.2 !important; border-radius: 12px !important; }
+.btn-md { --btn-h: 40px; } .btn-sm { --btn-h: 36px; padding: 6px 12px !important; font-size: 13px !important; } .btn-xs { --btn-h: 30px; padding: 4px 10px !important; font-size: 12px !important; }
+.btn > svg, .btn > .ui-icon { width: 17px !important; height: 17px !important; }
+.modal-footer, .od-card-footer, .pkg-bulk-bar-actions, .cal2-actions { display: flex; align-items: stretch; gap: 8px; }
+.modal-footer .btn, .od-card-footer .btn, .pkg-bulk-bar-actions .btn { flex: 1 1 0 !important; min-width: 0; padding-left: 10px; padding-right: 10px; }
+.pkg-bulk-bar-actions .btn { min-height: 38px !important; font-size: 13px !important; padding: 6px 12px !important; }
+.row-center { align-items: center; }
+.header-icon { width: 40px; height: 40px; min-width: 40px; display: inline-flex; align-items: center; justify-content: center; border-radius: 12px; box-sizing: border-box; }
+.admin-card :is(.btn, .udp-update-btn) { vertical-align: middle; }
+.udp-update-btn { min-height: 38px !important; border-radius: 12px !important; font-size: 13px !important; }
+@media (max-width: 480px) {
+  .modal-footer { flex-wrap: nowrap; }
+  .modal-footer .btn { font-size: 13.5px !important; }
+}
+/* press feedback + visible keyboard focus */
+.btn:active:not(:disabled) { transform: scale(.97); transition-duration: .08s; }
+:focus-visible { outline: 2px solid var(--accent, #6366f1); outline-offset: 2px; }
+:focus:not(:focus-visible) { outline: none; }
+</style>
 <script id="ui-upgrade-js">
 (function () {
   if (window.__uxInit) return; window.__uxInit = true;
@@ -23613,9 +23738,50 @@ html.pref-compact .btn { min-height: 38px; }
   /* ---------- top nav: edge fade + keep the active tab in view ---------- */
   function navHints() {
     var n = $('admin-top-nav'); if (!n) return;
-    function upd() { n.classList.toggle('more-right', n.scrollLeft + n.clientWidth < n.scrollWidth - 4); n.classList.toggle('more-left', n.scrollLeft > 4); }
+    var wrap = n.closest('.top-nav-wrap');
+    function upd() {
+      var r = n.scrollLeft + n.clientWidth < n.scrollWidth - 4, l = n.scrollLeft > 4;
+      n.classList.toggle('more-right', r); n.classList.toggle('more-left', l);
+      if (wrap) { wrap.classList.toggle('has-right', r); wrap.classList.toggle('has-left', l); }
+    }
     n.addEventListener('scroll', upd, { passive: true }); window.addEventListener('resize', upd); upd();
+
+    /* arrow buttons (desktop) */
+    if (wrap) ['left', 'right'].forEach(function (d) {
+      var b = document.createElement('button'); b.type = 'button'; b.className = 'nav-arrow ' + d; b.setAttribute('data-no-busy', ''); b.setAttribute('aria-label', 'Scroll ' + d);
+      b.innerHTML = '<svg viewBox="0 0 24 24"><polyline points="' + (d === 'left' ? '15 6 9 12 15 18' : '9 6 15 12 9 18') + '"></polyline></svg>';
+      b.addEventListener('click', function () { n.scrollBy({ left: (d === 'left' ? -1 : 1) * Math.max(120, n.clientWidth * 0.6), behavior: prefs.calm ? 'auto' : 'smooth' }); });
+      wrap.appendChild(b);
+    });
+
+    /* mouse / pen drag-to-scroll (touch already pans natively via touch-action: pan-x) */
+    var down = false, moved = false, sx = 0, sl = 0, pid = null;
+    n.addEventListener('pointerdown', function (e) {
+      if (e.pointerType === 'touch' || e.button > 0) return;
+      down = true; moved = false; sx = e.clientX; sl = n.scrollLeft; pid = e.pointerId;
+    });
+    window.addEventListener('pointermove', function (e) {
+      if (!down || e.pointerId !== pid) return;
+      var dx = e.clientX - sx;
+      if (!moved && Math.abs(dx) > 5) { moved = true; n.classList.add('is-dragging'); try { n.setPointerCapture(pid); } catch (_) {} }
+      if (moved) { n.scrollLeft = sl - dx; e.preventDefault(); }
+    }, { passive: false });
+    function end(e) {
+      if (!down || (e && e.pointerId !== pid)) return;
+      down = false;
+      if (moved) { try { n.releasePointerCapture(pid); } catch (_) {} setTimeout(function () { n.classList.remove('is-dragging'); }, 0); }
+    }
+    window.addEventListener('pointerup', end); window.addEventListener('pointercancel', end);
+    /* a drag must not count as a tap on a tab */
+    n.addEventListener('click', function (e) { if (moved) { e.stopPropagation(); e.preventDefault(); moved = false; } }, true);
+    n.addEventListener('dragstart', function (e) { e.preventDefault(); });
+    /* mouse wheel scrolls the bar sideways */
+    n.addEventListener('wheel', function (e) {
+      if (Math.abs(e.deltaY) > Math.abs(e.deltaX) && n.scrollWidth > n.clientWidth) { n.scrollLeft += e.deltaY; e.preventDefault(); }
+    }, { passive: false });
+
     new MutationObserver(function () {
+      if (down && moved) return;
       var a = n.querySelector('.nav-item.active'); if (a && a.scrollIntoView) { try { a.scrollIntoView({ inline: 'center', block: 'nearest', behavior: prefs.calm ? 'auto' : 'smooth' }); } catch (e) {} }
       upd();
     }).observe(n, { attributes: true, attributeFilter: ['class'], subtree: true });
@@ -23654,9 +23820,87 @@ html.pref-compact .btn { min-height: 38px; }
     if (x) x.click();
   });
 
+
+  /* ---------- Quick Jump palette ---------- */
+  var QJ_PAGES = [
+    ['Dashboard','trending-up','Dashboard',function(){showPage('dashboard')}],
+    ['API Balance','bar-chart','Dashboard',function(){showPage('analytics')}],
+    ['Orders','cart','Orders',function(){showPage('order-list')}],
+    ['Game: Direct','gamepad-line','Game',function(){showGameListTab('direct')}],
+    ['Game: Voucher','gift','Game',function(){showGameListTab('voucher')}],
+    ['Game: Software','grid','Game',function(){showGameListTab('software')}],
+    ['Payment','wallet','Wallet',function(){showPage('payment-list')}],
+    ['Top Up','wallet','Wallet',function(){showPage('topup-list')}],
+    ['Phone Pay','clock','Wallet',function(){showPage('payin-list')}],
+    ['Userlist','users','Users',function(){showPage('user-list')}],
+    ['Tiers','trophy','Users',function(){showPage('tier-list')}],
+    ['G2Bulk','g2bulk','API',function(){showPage('g2bulk')}],
+    ['JCPlays','key','API',function(){showPage('jcplays')}],
+    ['API Keys','plug','API',function(){showPage('api-docs')}],
+    ['Settings','gear','Setting',function(){showPage('settings')}],
+    ['Usage','trending-up','Setting',function(){showPage('usage-page')}],
+    ['Ticker','megaphone','Setting',function(){showPage('ticker-list')}],
+    ['Notify','bell','Setting',function(){showPage('notify-list')}]
+  ];
+  var QJ_KEY = 'linn-admin-recent', qjSel = 0, qjRows = [];
+  var qj = document.createElement('div'); qj.id = 'qj-overlay';
+  qj.innerHTML = '<div id="qj-box" role="dialog" aria-label="Quick jump"><input id="qj-input" type="text" placeholder="Jump to a page…" autocomplete="off" autocapitalize="off" spellcheck="false"><div id="qj-list"></div><div id="qj-foot"><span>↑↓ move</span><span>Enter open</span><span>Esc close</span></div></div>';
+  function qjRecent() { try { return JSON.parse(localStorage.getItem(QJ_KEY) || '[]'); } catch (e) { return []; } }
+  function qjRender() {
+    var q = $('qj-input').value.trim().toLowerCase(), list = $('qj-list'), html = '', rec = qjRecent();
+    var rows = QJ_PAGES.map(function (p, i) { return { i: i, p: p, r: rec.indexOf(p[0]) }; });
+    if (q) rows = rows.filter(function (x) { return (x.p[0] + ' ' + x.p[2]).toLowerCase().indexOf(q) > -1; });
+    else rows.sort(function (a, b) { return (a.r < 0 ? 99 : a.r) - (b.r < 0 ? 99 : b.r) || a.i - b.i; });
+    qjRows = rows; qjSel = 0;
+    if (!rows.length) { list.innerHTML = '<div id="qj-empty">No matching page</div>'; return; }
+    rows.forEach(function (x, k) {
+      if (!q && k === 0 && x.r > -1) html += '<div class="qj-sec">Recent</div>';
+      if (!q && x.r < 0 && (k === 0 || rows[k - 1].r > -1)) html += '<div class="qj-sec">All pages</div>';
+      html += '<button type="button" class="qj-item" data-k="' + k + '" data-no-busy>' + sym(x.p[1]) + '<span>' + x.p[0] + '</span><small>' + x.p[2] + '</small></button>';
+    });
+    list.innerHTML = html; qjMark();
+  }
+  function qjMark() {
+    var items = qj.querySelectorAll('.qj-item');
+    items.forEach(function (el, k) { el.classList.toggle('sel', k === qjSel); });
+    if (items[qjSel]) items[qjSel].scrollIntoView({ block: 'nearest' });
+  }
+  function qjOpen() { if (document.querySelector('.login-box:not([hidden])') && !window.showPage) return; qj.classList.add('show'); var i = $('qj-input'); i.value = ''; qjRender(); setTimeout(function () { i.focus(); }, 30); }
+  function qjClose() { qj.classList.remove('show'); }
+  function qjGo(k) {
+    var x = qjRows[k]; if (!x) return;
+    var rec = qjRecent().filter(function (n) { return n !== x.p[0]; }); rec.unshift(x.p[0]);
+    try { localStorage.setItem(QJ_KEY, JSON.stringify(rec.slice(0, 4))); } catch (e) {}
+    qjClose(); buzz(10);
+    try { x.p[3](); window.scrollTo({ top: 0 }); } catch (e) { console.warn('quick jump:', e); }
+  }
+  qj.addEventListener('click', function (e) {
+    if (e.target === qj) return qjClose();
+    var it = e.target.closest && e.target.closest('.qj-item'); if (it) qjGo(+it.dataset.k);
+  });
+  qj.addEventListener('input', function (e) { if (e.target.id === 'qj-input') qjRender(); });
+  qj.addEventListener('keydown', function (e) {
+    if (e.key === 'ArrowDown') { qjSel = Math.min(qjRows.length - 1, qjSel + 1); qjMark(); e.preventDefault(); }
+    else if (e.key === 'ArrowUp') { qjSel = Math.max(0, qjSel - 1); qjMark(); e.preventDefault(); }
+    else if (e.key === 'Enter') { qjGo(qjSel); e.preventDefault(); }
+    else if (e.key === 'Escape') { qjClose(); e.stopPropagation(); }
+  });
+  document.addEventListener('keydown', function (e) {
+    var t = e.target, typing = t && (/^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName) || t.isContentEditable);
+    if ((e.key === 'k' || e.key === 'K') && (e.ctrlKey || e.metaKey)) { e.preventDefault(); qj.classList.contains('show') ? qjClose() : qjOpen(); }
+    else if (e.key === '/' && !typing && !e.ctrlKey && !e.metaKey && !qj.classList.contains('show')) { e.preventDefault(); qjOpen(); }
+  });
+  document.addEventListener('click', function (e) { if (e.target.closest && e.target.closest('#quick-jump-btn')) qjOpen(); });
+
+
+  /* ---------- images: lazy + async decode so lists scroll without hitches ---------- */
+  function tuneImg(i) { if (i.tagName !== 'IMG' || i.__t) return; i.__t = 1; if (!i.hasAttribute('loading') && !i.closest('header, .header, .login-box')) i.loading = 'lazy'; if (!i.hasAttribute('decoding')) i.decoding = 'async'; }
+  function tuneImgs(root) { if (!root || root.nodeType !== 1) return; tuneImg(root); var l = root.querySelectorAll ? root.querySelectorAll('img') : []; for (var k = 0; k < l.length; k++) tuneImg(l[k]); }
+  new MutationObserver(function (ms) { ms.forEach(function (m) { for (var j = 0; j < m.addedNodes.length; j++) tuneImgs(m.addedNodes[j]); }); }).observe(document.documentElement, { childList: true, subtree: true });
+
   function boot() {
-    document.body.appendChild(topBtn); document.body.appendChild(off);
-    apply(); setupSettings(); navHints(); syncEdit();
+    document.body.appendChild(topBtn); document.body.appendChild(off); document.body.appendChild(qj);
+    apply(); setupSettings(); navHints(); syncEdit(); tuneImgs(document.body);
     var eb = $('game-edit-mode-btn'); if (eb) new MutationObserver(syncEdit).observe(eb, { childList: true, characterData: true, subtree: true });
     if (!navigator.onLine) net(false);
   }
