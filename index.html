@@ -1398,6 +1398,9 @@
            was previously only switchable via the sidebar's picker sheet,
            with no visible indicator of which list was showing. */
         .game-list-tabs { display: flex; gap: 8px; margin-bottom: 14px; }
+        .game-list-subtabs { margin-top: -6px; }
+        .game-list-subtabs .game-list-tab-btn { padding: 6px 10px; font-size: 12px; }
+        .game-sub-count { display: inline-block; min-width: 16px; margin-left: 4px; padding: 0 5px; border-radius: 999px; font-size: 10.5px; line-height: 16px; background: rgba(127,127,127,.18); }
         .game-list-tab-btn { flex: 1; text-align: center; padding: 8px 10px; border-radius: 10px; border: 1px solid var(--fill-soft); background: var(--surface); font-size: 12.5px; font-weight: 600; color: var(--text-secondary); cursor: pointer; transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease; }
         .game-list-tab-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
         .user-grid-card { background: var(--surface); border-radius: 18px; padding: 16px; border: 1px solid var(--border-glass); box-shadow: var(--shadow-soft), inset 0 1px 0 var(--border-glass); display: flex; flex-direction: column; }
@@ -3286,6 +3289,152 @@ html.pref-compact .btn { min-height: 38px; }
 .cal2-actions .btn { min-height: 42px; }
 .pkg-type-tab, .udp-tab, .wtx-chip { white-space: nowrap; }
 </style>
+<style id="pcbg-admin-css">
+/* ===== PRICE-CARD BACKGROUND TEMPLATES (shared by store + admin preview) =====
+   Each template defines --pcbg-l (light mode) and --pcbg-d (dark mode) as full
+   `background` shorthand values. Custom colour / image modes set the same two
+   variables inline, so one rule below paints every mode. */
+[data-pcbg="violet-shards"]{
+ --pcbg-l:linear-gradient(115deg,transparent 0 38%,rgba(255,255,255,.34) 38% 39%,transparent 39%) 0 0/100% 100%,linear-gradient(62deg,transparent 0 58%,rgba(255,255,255,.22) 58% 78%,transparent 78%) 0 0/100% 100%,linear-gradient(135deg,#B58CFF 0%,#8B5CF6 45%,#6D3FD8 100%);
+ --pcbg-d:linear-gradient(115deg,transparent 0 38%,rgba(214,176,255,.30) 38% 39%,transparent 39%) 0 0/100% 100%,linear-gradient(62deg,transparent 0 58%,rgba(167,120,255,.20) 58% 78%,transparent 78%) 0 0/100% 100%,radial-gradient(70% 60% at 50% 45%,#4B2A8F 0%,#2A1457 70%,#190A38 100%)}
+[data-pcbg="aurora"]{
+ --pcbg-l:radial-gradient(60% 55% at 15% 20%,rgba(94,234,212,.75),transparent 70%),radial-gradient(55% 55% at 85% 25%,rgba(244,114,182,.65),transparent 70%),radial-gradient(70% 60% at 50% 100%,rgba(129,140,248,.8),transparent 70%),linear-gradient(160deg,#E0F2FE,#EDE9FE);
+ --pcbg-d:radial-gradient(60% 55% at 15% 20%,rgba(20,184,166,.55),transparent 70%),radial-gradient(55% 55% at 85% 25%,rgba(217,70,239,.45),transparent 70%),radial-gradient(70% 60% at 50% 100%,rgba(79,70,229,.65),transparent 70%),linear-gradient(160deg,#0B1226,#140B2E)}
+[data-pcbg="royal-gold"]{
+ --pcbg-l:conic-gradient(from 210deg at 50% 50%,rgba(255,255,255,.55),rgba(255,255,255,0) 20%,rgba(255,255,255,.4) 45%,rgba(255,255,255,0) 70%,rgba(255,255,255,.5)),linear-gradient(145deg,#FFE9A3,#F5C451 50%,#D9962B);
+ --pcbg-d:radial-gradient(60% 55% at 50% 40%,rgba(245,196,81,.38),transparent 72%),conic-gradient(from 210deg at 50% 50%,rgba(255,215,120,.16),transparent 25%,rgba(255,215,120,.12) 55%,transparent 80%),linear-gradient(160deg,#241A08,#0C0904)}
+[data-pcbg="ocean-glass"]{
+ --pcbg-l:radial-gradient(circle at 22% 78%,rgba(255,255,255,.55) 0 9%,transparent 9.5%),radial-gradient(circle at 80% 24%,rgba(255,255,255,.42) 0 14%,transparent 14.5%),linear-gradient(150deg,#7DD3FC,#38BDF8 50%,#2563EB);
+ --pcbg-d:radial-gradient(circle at 22% 78%,rgba(125,211,252,.20) 0 9%,transparent 9.5%),radial-gradient(circle at 80% 24%,rgba(56,189,248,.18) 0 14%,transparent 14.5%),linear-gradient(150deg,#0C2A4D,#0A1F3D 55%,#06122B)}
+[data-pcbg="sunset-blaze"]{
+ --pcbg-l:radial-gradient(80% 60% at 50% 105%,rgba(255,255,255,.55),transparent 65%),linear-gradient(165deg,#FFD38A 0%,#FF8F6B 45%,#E8559C 100%);
+ --pcbg-d:radial-gradient(80% 60% at 50% 105%,rgba(255,140,90,.38),transparent 65%),linear-gradient(165deg,#4A1B3D 0%,#2E1038 55%,#150A28 100%)}
+[data-pcbg="emerald-prism"]{
+ --pcbg-l:linear-gradient(120deg,transparent 0 30%,rgba(255,255,255,.30) 30% 31%,transparent 31%),linear-gradient(60deg,transparent 0 55%,rgba(255,255,255,.20) 55% 80%,transparent 80%),linear-gradient(145deg,#86EFAC,#34D399 50%,#059669);
+ --pcbg-d:linear-gradient(120deg,transparent 0 30%,rgba(110,231,183,.26) 30% 31%,transparent 31%),linear-gradient(60deg,transparent 0 55%,rgba(52,211,153,.14) 55% 80%,transparent 80%),radial-gradient(70% 60% at 50% 45%,#0B5F4A,#06382C 70%,#031E18)}
+[data-pcbg="crimson-flame"]{
+ --pcbg-l:radial-gradient(65% 55% at 50% 110%,rgba(255,220,150,.75),transparent 70%),linear-gradient(160deg,#FCA5A5,#F87171 45%,#DC2626);
+ --pcbg-d:radial-gradient(65% 55% at 50% 110%,rgba(255,110,60,.55),transparent 70%),linear-gradient(160deg,#4A0D14,#2A0710 60%,#12040A)}
+[data-pcbg="cyber-grid"]{
+ --pcbg-l:repeating-linear-gradient(0deg,rgba(59,91,255,.16) 0 1px,transparent 1px 14px),repeating-linear-gradient(90deg,rgba(59,91,255,.16) 0 1px,transparent 1px 14px),radial-gradient(70% 60% at 50% 40%,#FFFFFF,#C7D2FE 80%);
+ --pcbg-d:repeating-linear-gradient(0deg,rgba(34,211,238,.20) 0 1px,transparent 1px 14px),repeating-linear-gradient(90deg,rgba(34,211,238,.20) 0 1px,transparent 1px 14px),radial-gradient(70% 60% at 50% 40%,#12224D,#070C22 80%)}
+[data-pcbg="rose-quartz"]{
+ --pcbg-l:radial-gradient(55% 50% at 25% 25%,rgba(255,255,255,.7),transparent 70%),linear-gradient(150deg,#FBCFE8,#F9A8D4 50%,#C4B5FD);
+ --pcbg-d:radial-gradient(55% 50% at 25% 25%,rgba(244,114,182,.28),transparent 70%),linear-gradient(150deg,#3B1140,#2A0F3F 55%,#170A2C)}
+[data-pcbg="frost-ice"]{
+ --pcbg-l:linear-gradient(125deg,transparent 0 40%,rgba(255,255,255,.7) 40% 42%,transparent 42%),radial-gradient(70% 60% at 50% 0%,#FFFFFF,transparent 75%),linear-gradient(170deg,#E0F2FE,#BAE6FD 60%,#93C5FD);
+ --pcbg-d:linear-gradient(125deg,transparent 0 40%,rgba(186,230,253,.22) 40% 42%,transparent 42%),radial-gradient(70% 60% at 50% 0%,rgba(125,211,252,.22),transparent 75%),linear-gradient(170deg,#18304F,#0F2038 60%,#0A1528)}
+[data-pcbg="midnight-stars"]{
+ --pcbg-l:radial-gradient(circle,#fff 0 1.2px,transparent 1.6px) 0 0/22px 22px,radial-gradient(circle,rgba(255,255,255,.7) 0 1px,transparent 1.4px) 11px 11px/22px 22px,linear-gradient(165deg,#A5B4FC,#818CF8 55%,#6366F1);
+ --pcbg-d:radial-gradient(circle,#fff 0 1.2px,transparent 1.6px) 0 0/22px 22px,radial-gradient(circle,rgba(199,210,254,.6) 0 1px,transparent 1.4px) 11px 11px/22px 22px,radial-gradient(80% 70% at 50% 30%,#1E1B4B,#0B0A26 80%)}
+[data-pcbg="candy-pop"]{
+ --pcbg-l:conic-gradient(from 160deg at 50% 50%,#FDE68A,#FDA4AF,#C4B5FD,#93C5FD,#6EE7B7,#FDE68A);
+ --pcbg-d:radial-gradient(circle at 50% 50%,rgba(10,8,30,.55),rgba(10,8,30,.0) 70%),conic-gradient(from 160deg at 50% 50%,#7C5A10,#8A2742,#4B3A9A,#1E4E8C,#0C6B4C,#7C5A10)}
+[data-pcbg="carbon-neon"]{
+ --pcbg-l:radial-gradient(60% 50% at 50% 50%,rgba(99,102,241,.35),transparent 75%),repeating-linear-gradient(45deg,rgba(0,0,0,.10) 0 2px,transparent 2px 6px),repeating-linear-gradient(-45deg,rgba(0,0,0,.10) 0 2px,transparent 2px 6px),linear-gradient(160deg,#CBD5E1,#94A3B8);
+ --pcbg-d:radial-gradient(60% 50% at 50% 50%,rgba(99,102,241,.45),transparent 75%),repeating-linear-gradient(45deg,rgba(255,255,255,.04) 0 2px,transparent 2px 6px),repeating-linear-gradient(-45deg,rgba(255,255,255,.04) 0 2px,transparent 2px 6px),linear-gradient(160deg,#16181F,#0A0B10)}
+[data-pcbg="platinum"]{
+ --pcbg-l:linear-gradient(115deg,rgba(255,255,255,0) 30%,rgba(255,255,255,.85) 45%,rgba(255,255,255,0) 60%),linear-gradient(160deg,#F1F5F9,#CBD5E1 55%,#94A3B8);
+ --pcbg-d:linear-gradient(115deg,rgba(255,255,255,0) 30%,rgba(255,255,255,.16) 45%,rgba(255,255,255,0) 60%),linear-gradient(160deg,#3A4150,#232833 55%,#12151C)}
+[data-pcbg="dot-halftone"]{
+ --pcbg-l:radial-gradient(circle,rgba(255,255,255,.55) 0 2px,transparent 2.4px) 0 0/12px 12px,linear-gradient(150deg,#FDBA74,#FB7185 60%,#A78BFA);
+ --pcbg-d:radial-gradient(circle,rgba(255,255,255,.14) 0 2px,transparent 2.4px) 0 0/12px 12px,linear-gradient(150deg,#4A2A12,#47142B 60%,#241442)}
+
+[data-pcbg="neon-synthwave"]{
+ --pcbg-l:repeating-linear-gradient(90deg,rgba(236,72,153,.22) 0 1px,transparent 1px 16px) 0 100%/100% 45% no-repeat,radial-gradient(circle at 50% 62%,#FDE047 0 17%,#FB7185 18% 30%,transparent 31%),linear-gradient(180deg,#C4B5FD,#F9A8D4);
+ --pcbg-d:repeating-linear-gradient(90deg,rgba(34,211,238,.35) 0 1px,transparent 1px 16px) 0 100%/100% 45% no-repeat,radial-gradient(circle at 50% 62%,#FDE047 0 17%,#F43F5E 18% 30%,transparent 31%),linear-gradient(180deg,#1A0B3B,#3B0F52)}
+[data-pcbg="galaxy-nebula"]{
+ --pcbg-l:radial-gradient(circle,#fff 0 1px,transparent 1.5px) 0 0/26px 26px,radial-gradient(50% 45% at 30% 30%,rgba(244,114,182,.7),transparent 70%),radial-gradient(55% 50% at 75% 70%,rgba(96,165,250,.8),transparent 70%),linear-gradient(160deg,#C7D2FE,#DDD6FE)}
+[data-pcbg="galaxy-nebula"]{
+ --pcbg-d:radial-gradient(circle,#fff 0 1px,transparent 1.5px) 0 0/26px 26px,radial-gradient(50% 45% at 30% 30%,rgba(219,39,119,.55),transparent 70%),radial-gradient(55% 50% at 75% 70%,rgba(37,99,235,.6),transparent 70%),linear-gradient(160deg,#0A0820,#150B33)}
+[data-pcbg="lava-magma"]{
+ --pcbg-l:radial-gradient(55% 40% at 30% 100%,rgba(255,255,255,.7),transparent 70%),radial-gradient(45% 35% at 80% 95%,rgba(254,240,138,.9),transparent 70%),linear-gradient(170deg,#FDBA74,#F97316 55%,#DC2626);
+ --pcbg-d:radial-gradient(55% 40% at 30% 100%,rgba(251,146,60,.8),transparent 70%),radial-gradient(45% 35% at 80% 95%,rgba(253,224,71,.65),transparent 70%),linear-gradient(170deg,#2A0E08,#1A0806 60%,#0A0403)}
+[data-pcbg="jade-dragon"]{
+ --pcbg-l:linear-gradient(135deg,transparent 0 48%,rgba(250,204,21,.55) 48% 50%,transparent 50%),radial-gradient(70% 60% at 50% 40%,rgba(255,255,255,.45),transparent 75%),linear-gradient(150deg,#6EE7B7,#10B981 55%,#047857);
+ --pcbg-d:linear-gradient(135deg,transparent 0 48%,rgba(250,204,21,.45) 48% 50%,transparent 50%),radial-gradient(70% 60% at 50% 40%,rgba(52,211,153,.25),transparent 75%),linear-gradient(150deg,#06372C,#042A21 55%,#021611)}
+[data-pcbg="sapphire-crystal"]{
+ --pcbg-l:linear-gradient(60deg,transparent 0 50%,rgba(255,255,255,.35) 50% 70%,transparent 70%),linear-gradient(120deg,transparent 0 25%,rgba(255,255,255,.28) 25% 26%,transparent 26%),linear-gradient(150deg,#93C5FD,#3B82F6 55%,#1D4ED8);
+ --pcbg-d:linear-gradient(60deg,transparent 0 50%,rgba(147,197,253,.16) 50% 70%,transparent 70%),linear-gradient(120deg,transparent 0 25%,rgba(147,197,253,.28) 25% 26%,transparent 26%),radial-gradient(70% 60% at 50% 45%,#12307A,#0A1B4A 70%,#050E2A)}
+[data-pcbg="amethyst-glow"]{
+ --pcbg-l:radial-gradient(60% 55% at 50% 45%,rgba(255,255,255,.65),transparent 70%),linear-gradient(150deg,#E9D5FF,#C084FC 55%,#9333EA);
+ --pcbg-d:radial-gradient(60% 55% at 50% 45%,rgba(192,132,252,.45),transparent 70%),linear-gradient(150deg,#2E1065,#1E0A47 55%,#0F0524)}
+[data-pcbg="mint-fresh"]{
+ --pcbg-l:radial-gradient(circle at 20% 80%,rgba(255,255,255,.7) 0 10%,transparent 10.5%),radial-gradient(circle at 85% 20%,rgba(255,255,255,.55) 0 7%,transparent 7.5%),linear-gradient(160deg,#CCFBF1,#99F6E4 55%,#5EEAD4);
+ --pcbg-d:radial-gradient(circle at 20% 80%,rgba(94,234,212,.18) 0 10%,transparent 10.5%),radial-gradient(circle at 85% 20%,rgba(94,234,212,.14) 0 7%,transparent 7.5%),linear-gradient(160deg,#0F3B3A,#0A2C2E 55%,#061A1E)}
+[data-pcbg="peach-cream"]{
+ --pcbg-l:radial-gradient(70% 55% at 30% 20%,rgba(255,255,255,.8),transparent 70%),linear-gradient(160deg,#FFEDD5,#FED7AA 55%,#FDBA74);
+ --pcbg-d:radial-gradient(70% 55% at 30% 20%,rgba(253,186,116,.22),transparent 70%),linear-gradient(160deg,#3B2414,#2A180D 55%,#170C06)}
+[data-pcbg="obsidian-gold"]{
+ --pcbg-l:repeating-linear-gradient(135deg,rgba(161,98,7,.20) 0 1px,transparent 1px 12px),radial-gradient(60% 50% at 50% 50%,rgba(255,255,255,.6),transparent 75%),linear-gradient(160deg,#E7E5E4,#D6D3D1);
+ --pcbg-d:repeating-linear-gradient(135deg,rgba(234,179,8,.22) 0 1px,transparent 1px 12px),radial-gradient(60% 50% at 50% 50%,rgba(234,179,8,.16),transparent 75%),linear-gradient(160deg,#141210,#080706)}
+[data-pcbg="holo-chrome"]{
+ --pcbg-l:linear-gradient(115deg,#FBCFE8 0%,#C7D2FE 25%,#A7F3D0 50%,#FDE68A 75%,#FBCFE8 100%),linear-gradient(0deg,rgba(255,255,255,.4),rgba(255,255,255,.4));
+ --pcbg-d:linear-gradient(115deg,#5B2A5F 0%,#2F3A7A 25%,#1F6B58 50%,#7A5E1F 75%,#5B2A5F 100%)}
+[data-pcbg="cherry-blossom"]{
+ --pcbg-l:radial-gradient(circle at 18% 22%,rgba(255,255,255,.85) 0 5%,transparent 5.5%),radial-gradient(circle at 78% 65%,rgba(255,255,255,.7) 0 7%,transparent 7.5%),radial-gradient(circle at 60% 15%,rgba(255,255,255,.6) 0 4%,transparent 4.5%),linear-gradient(160deg,#FFE4E6,#FDA4AF 60%,#FB7185);
+ --pcbg-d:radial-gradient(circle at 18% 22%,rgba(253,164,175,.35) 0 5%,transparent 5.5%),radial-gradient(circle at 78% 65%,rgba(253,164,175,.28) 0 7%,transparent 7.5%),radial-gradient(circle at 60% 15%,rgba(253,164,175,.25) 0 4%,transparent 4.5%),linear-gradient(160deg,#3F1224,#2B0C1A 60%,#16060E)}
+/* ===== SHARED RENDERING (storefront list + admin preview) =====
+   --pcbg is the active mode's background; tuned by --pcbg-bri / --pcbg-sat / --pcbg-hue.
+   Layers inside each .pc-img-wrap:  ::before = background,  .pcfx = sparkle + glossy frame,  ::after = shine sweep. */
+#detail-package-list[data-pcbg]{--pcbg:var(--pcbg-l);--pcbg-boost:-.12}
+html[data-theme="dark"] #detail-package-list[data-pcbg]{--pcbg:var(--pcbg-d);--pcbg-boost:.15}
+.pcbg-pv-card.l[data-pcbg]{--pcbg:var(--pcbg-l);--pcbg-boost:-.12}
+.pcbg-pv-card.d[data-pcbg]{--pcbg:var(--pcbg-d);--pcbg-boost:.15}
+.pcfx{display:none}
+#detail-package-list[data-pcbg] .pc-img-wrap,.pcbg-pv-card[data-pcbg] .pc-img-wrap{position:relative;isolation:isolate;overflow:hidden;background:none}
+#detail-package-list[data-pcbg] .pc-img-wrap::before,.pcbg-pv-card[data-pcbg] .pc-img-wrap::before{content:"";position:absolute;inset:0;z-index:-1;border-radius:inherit;background:var(--pcbg);filter:saturate(var(--pcbg-sat,1.3)) brightness(calc(var(--pcbg-bri,1.2) + var(--pcbg-boost,0))) hue-rotate(calc(var(--pcbg-hue,0deg) * var(--i,0)));pointer-events:none}
+#detail-package-list[data-pcbg] .pc-img,.pcbg-pv-card[data-pcbg] .pc-img{filter:drop-shadow(0 6px 9px rgba(0,0,0,.35));object-fit:contain}
+#detail-package-list[data-pcbg][data-pcfx~="shine"] .pc-img-wrap::after,.pcbg-pv-card[data-pcbg][data-pcfx~="shine"] .pc-img-wrap::after{content:"";position:absolute;inset:0;z-index:2;pointer-events:none;background:linear-gradient(105deg,transparent 30%,rgba(255,255,255,.65) 50%,transparent 70%);transform:translateX(-130%);animation:pcShine 3.8s ease-in-out infinite;animation-delay:calc(var(--i,0) * .3s)}
+#detail-package-list[data-pcbg][data-pcfx~="sparkle"] .pcfx,.pcbg-pv-card[data-pcbg][data-pcfx~="sparkle"] .pcfx{display:block;position:absolute;inset:0;z-index:2;pointer-events:none;border-radius:inherit}
+#detail-package-list[data-pcbg][data-pcfx~="frame"] .pcfx,.pcbg-pv-card[data-pcbg][data-pcfx~="frame"] .pcfx{display:block;position:absolute;inset:0;z-index:2;pointer-events:none;border-radius:inherit;box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.6),inset 0 14px 22px -12px rgba(255,255,255,.65),inset 0 -12px 20px -14px rgba(0,0,0,.35)}
+#detail-package-list[data-pcbg][data-pcfx~="sparkle"] .pcfx::before,.pcbg-pv-card[data-pcbg][data-pcfx~="sparkle"] .pcfx::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 18% 24%,#fff 0 1.4px,rgba(255,255,255,.35) 2.4px,transparent 4px),radial-gradient(circle at 78% 18%,#fff 0 1.8px,rgba(255,255,255,.35) 3px,transparent 5px),radial-gradient(circle at 62% 74%,#fff 0 1.3px,rgba(255,255,255,.35) 2.4px,transparent 4px),radial-gradient(circle at 12% 80%,#fff 0 1.7px,rgba(255,255,255,.35) 2.8px,transparent 4.6px);animation:pcTwinkle 2.6s ease-in-out infinite;animation-delay:calc(var(--i,0) * .2s)}
+#detail-package-list[data-pcbg][data-pcfx~="sparkle"] .pcfx::after,.pcbg-pv-card[data-pcbg][data-pcfx~="sparkle"] .pcfx::after{content:"";position:absolute;inset:0;background:radial-gradient(circle at 40% 12%,#fff 0 1.6px,rgba(255,255,255,.35) 2.8px,transparent 4.6px),radial-gradient(circle at 90% 58%,#fff 0 1.3px,rgba(255,255,255,.35) 2.4px,transparent 4px),radial-gradient(circle at 30% 60%,#fff 0 1.5px,rgba(255,255,255,.3) 2.6px,transparent 4.2px),radial-gradient(circle at 70% 92%,#fff 0 1.7px,rgba(255,255,255,.35) 2.8px,transparent 4.6px);animation:pcTwinkle 2.6s ease-in-out -1.3s infinite;animation-delay:calc(var(--i,0) * .2s - 1.3s)}
+#detail-package-list[data-pcbg][data-pcfx~="glow"] .pc-img,.pcbg-pv-card[data-pcbg][data-pcfx~="glow"] .pc-img{animation:pcGlow 2.8s ease-in-out infinite}
+#detail-package-list[data-pcbg][data-pcfx~="float"] .pc-img,.pcbg-pv-card[data-pcbg][data-pcfx~="float"] .pc-img{animation:pcFloat 3.4s ease-in-out infinite}
+#detail-package-list[data-pcbg][data-pcfx~="float"][data-pcfx~="glow"] .pc-img,.pcbg-pv-card[data-pcbg][data-pcfx~="float"][data-pcfx~="glow"] .pc-img{animation:pcFloat 3.4s ease-in-out infinite,pcGlow 2.8s ease-in-out infinite}
+#detail-package-list[data-pcbg][data-pcfx~="drift"] .pc-img-wrap::before,.pcbg-pv-card[data-pcbg][data-pcfx~="drift"] .pc-img-wrap::before{inset:-12%;animation:pcDrift 9s ease-in-out infinite alternate;animation-delay:calc(var(--i,0) * -.7s)}
+@keyframes pcShine{0%,55%{transform:translateX(-130%)}100%{transform:translateX(130%)}}
+@keyframes pcTwinkle{0%,100%{opacity:.15;transform:scale(.92)}50%{opacity:1;transform:scale(1.04)}}
+@keyframes pcGlow{0%,100%{filter:drop-shadow(0 6px 9px rgba(0,0,0,.35)) drop-shadow(0 0 4px rgba(255,255,255,.25))}50%{filter:drop-shadow(0 6px 9px rgba(0,0,0,.3)) drop-shadow(0 0 16px rgba(255,255,255,.95))}}
+@keyframes pcFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-5%)}}
+@keyframes pcDrift{0%{transform:translate(-5%,-4%) rotate(0deg)}100%{transform:translate(5%,4%) rotate(4deg)}}
+@media (prefers-reduced-motion:reduce){[data-pcbg] *,[data-pcbg] *::before,[data-pcbg] *::after{animation:none!important}}
+html.perf-low [data-pcbg] *,html.perf-low [data-pcbg] *::before,html.perf-low [data-pcbg] *::after{animation:none!important}
+
+.pcbg-modes{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;background:var(--fill-soft);padding:4px;border-radius:12px;margin-bottom:12px}
+.pcbg-mode-btn{border:none;background:transparent;color:var(--text-secondary);font-size:12.5px;font-weight:600;padding:8px 4px;border-radius:9px;cursor:pointer;white-space:nowrap}
+.pcbg-mode-btn.active{background:var(--accent);color:#fff;box-shadow:0 4px 10px -6px rgba(var(--accent-rgb),.8)}
+.pcbg-pane{display:none}.pcbg-pane.active{display:block}
+.pcbg-tpl-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+@media(min-width:640px){.pcbg-tpl-grid{grid-template-columns:repeat(5,1fr)}}
+.pcbg-sw{position:relative;border:2px solid transparent;border-radius:12px;padding:0;background:none;cursor:pointer;text-align:center;overflow:hidden}
+.pcbg-sw .pcbg-sw-art{display:grid;grid-template-columns:1fr 1fr;height:58px;border-radius:10px;overflow:hidden}
+.pcbg-sw .pcbg-sw-art i{display:block}
+.pcbg-sw .pcbg-sw-art .l{background:var(--pcbg-l)}.pcbg-sw .pcbg-sw-art .d{background:var(--pcbg-d)}
+.pcbg-sw span.pcbg-sw-name{display:block;font-size:10.5px;font-weight:600;color:var(--text-secondary);padding:4px 2px 2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pcbg-sw.selected{border-color:var(--accent);box-shadow:0 0 0 3px rgba(var(--accent-rgb),.25)}
+.pcbg-sw.selected span.pcbg-sw-name{color:var(--accent)}
+.pcbg-color-row{display:grid;grid-template-columns:70px 1fr 1fr;align-items:center;gap:8px;margin-bottom:10px}
+.pcbg-color-row label.pcbg-lbl{font-size:12.5px;font-weight:600;color:var(--text-secondary)}
+.pcbg-color-row input[type=color]{width:100%;height:38px;border:1px solid var(--border-glass);border-radius:10px;padding:2px;background:var(--bg-subtle-2);cursor:pointer}
+.pcbg-preview{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+.pcbg-pv-cap{font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--text-muted);margin-bottom:4px}
+.pcbg-pv-card{border-radius:16px;padding:6px 6px 8px;border:1.5px solid rgba(128,128,128,.25)}
+.pcbg-pv-card.l{background:#fff}.pcbg-pv-card.d{background:#141A2B}
+.pcbg-pv-img{aspect-ratio:1/1;border-radius:12px;display:flex;align-items:center;justify-content:center;background-color:rgba(128,128,128,.15)}
+.pcbg-pv-img svg{width:58%;height:58%}
+.pcbg-pv-lbl{font-size:11.5px;text-align:center;padding:6px 0 3px;color:#334}.pcbg-pv-card.d .pcbg-pv-lbl{color:#cbd5e1}
+.pcbg-pv-price{margin-top:2px;text-align:center;background:#1877F2;color:#fff;border-radius:10px;padding:4px;font-size:12px;font-weight:600}
+
+
+.pcbg-sec-cap{font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--text-muted);margin:16px 0 6px}
+.pcbg-fx-row{display:flex;flex-wrap:wrap;gap:6px}
+.pcbg-chip{border:1px solid var(--border-glass);background:var(--bg-subtle-2);color:var(--text-secondary);font-size:12px;font-weight:600;padding:7px 12px;border-radius:999px;cursor:pointer;white-space:nowrap}
+.pcbg-chip.active{background:var(--accent);border-color:var(--accent);color:#fff;box-shadow:0 4px 10px -6px rgba(var(--accent-rgb),.8)}
+.pcbg-slider{margin-top:8px}.pcbg-slider label{font-size:12.5px;color:var(--text-secondary);display:flex;justify-content:space-between}
+.pcbg-slider input{width:100%}
+</style>
 </head>
 <body>
 
@@ -4188,6 +4337,94 @@ html.pref-compact .btn { min-height: 38px; }
                 </div>
             </div>
 
+            <div class="admin-card" id="settings-card-pcbg" style="margin-top:14px;">
+                <div class="sc-head" onclick="togglePcbgSettings()">
+                    <span class="sc-title">Price Card Background</span>
+                    <svg class="ui-icon sc-chevron" id="pcbg-chevron"><use href="#icon-chevron-down"></use></svg>
+                </div>
+                <div id="pcbg-body" style="display:none;margin-top:12px;">
+                    <p class="note-glass note-ok" style="font-size:11.5px;color:var(--text-secondary);margin:0 0 10px;">Background-removed price images ကို ဒီ background ပေါ်မှာ ထည့်ပြမယ်။ Light / Dark mode နှစ်ခုအတွက် သီးသန့်ရွေးလို့ရတယ်။ Game တစ်ခုချင်းကို Game Editor ထဲက "Price Card Background" နဲ့ override လုပ်နိုင်တယ်။</p>
+                    <div class="pcbg-modes" id="pcbg-modes">
+                        <button type="button" class="pcbg-mode-btn" data-mode="off" onclick="setPcbgMode('off')">Off</button>
+                        <button type="button" class="pcbg-mode-btn" data-mode="template" onclick="setPcbgMode('template')">Template</button>
+                        <button type="button" class="pcbg-mode-btn" data-mode="color" onclick="setPcbgMode('color')">Colour</button>
+                        <button type="button" class="pcbg-mode-btn" data-mode="image" onclick="setPcbgMode('image')">Image</button>
+                    </div>
+
+                    <div class="pcbg-pane" id="pcbg-pane-template">
+                        <div class="pcbg-tpl-grid" id="pcbg-tpl-grid"></div>
+                        <p style="font-size:11px;color:var(--text-muted);margin:8px 0 0;">တစ်ခုချင်း swatch မှာ ဘယ်ဘက်ခြမ်း = Light mode၊ ညာဘက်ခြမ်း = Dark mode</p>
+                    </div>
+
+                    <div class="pcbg-pane" id="pcbg-pane-color">
+                        <div class="pcbg-color-row"><label class="pcbg-lbl">Light</label><input type="color" id="pcbg-light1" value="#EEF2FF" oninput="pcbgColorChanged()"><input type="color" id="pcbg-light2" value="#C7D2FE" oninput="pcbgColorChanged()"></div>
+                        <div class="pcbg-color-row"><label class="pcbg-lbl">Dark</label><input type="color" id="pcbg-dark1" value="#1E1B4B" oninput="pcbgColorChanged()"><input type="color" id="pcbg-dark2" value="#0B0A26" oninput="pcbgColorChanged()"></div>
+                        <label style="font-size:12.5px;color:var(--text-secondary);display:flex;justify-content:space-between;"><span>Gradient angle</span><span id="pcbg-angle-val">145°</span></label>
+                        <input type="range" id="pcbg-angle" min="0" max="360" value="145" style="width:100%;" oninput="pcbgColorChanged()">
+                        <p style="font-size:11px;color:var(--text-muted);margin:6px 0 0;">အရောင်တူနှစ်ခုထည့်ရင် solid colour၊ မတူရင် gradient ဖြစ်မယ်။</p>
+                    </div>
+
+                    <div class="pcbg-pane" id="pcbg-pane-image">
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                            <div>
+                                <label style="font-size:13px;font-weight:500;color:var(--text-secondary);">Background (Light Mode)</label>
+                                <div style="margin:6px 0 4px;">
+                                    <label class="img-update-box" id="pcbg-img-l-box" for="pcbg-file-l">
+                                        <div class="img-update-icon"><svg class="ui-icon"><use href="#icon-camera"></use></svg></div>
+                                        <span class="img-update-label">Image Update</span>
+                                        <img id="pcbg-img-l-preview" src="" alt="Preview" loading="lazy" decoding="async" style="display:none;">
+                                    </label>
+                                    <input type="file" id="pcbg-file-l" class="img-update-input" accept="image/*" onchange="pcbgPickImage('l', event)">
+                                    <button class="btn" id="pcbg-rm-l" style="margin-top:8px;width:100%;background:var(--fill-soft);color:var(--text-secondary);display:none;" onclick="pcbgRemoveImage('l')">Remove</button>
+                                </div>
+                            </div>
+                            <div>
+                                <label style="font-size:13px;font-weight:500;color:var(--text-secondary);">Background (Dark Mode)</label>
+                                <div style="margin:6px 0 4px;">
+                                    <label class="img-update-box" id="pcbg-img-d-box" for="pcbg-file-d">
+                                        <div class="img-update-icon"><svg class="ui-icon"><use href="#icon-camera"></use></svg></div>
+                                        <span class="img-update-label">Image Update</span>
+                                        <img id="pcbg-img-d-preview" src="" alt="Preview" loading="lazy" decoding="async" style="display:none;">
+                                    </label>
+                                    <input type="file" id="pcbg-file-d" class="img-update-input" accept="image/*" onchange="pcbgPickImage('d', event)">
+                                    <button class="btn" id="pcbg-rm-d" style="margin-top:8px;width:100%;background:var(--fill-soft);color:var(--text-secondary);display:none;" onclick="pcbgRemoveImage('d')">Remove</button>
+                                </div>
+                            </div>
+                        </div>
+                        <p style="font-size:11px;color:var(--text-muted);margin:6px 0 0;">တစ်ခုတည်းပဲထည့်ရင် Light/Dark နှစ်မျိုးလုံးမှာ အဲဒီပုံကိုသုံးမယ်။ ပုံကို card ရဲ့ ပုံနေရာ (လေးထောင့်ကွက်) ကို ဖြည့်ပြီး ဖြတ်ပြမယ်။ ပုံအလယ်မှာ အရေးကြီးတာတွေ မထားပါနဲ့။</p>
+                        <p id="pcbg-upload-status" style="font-size:12px;color:var(--text-secondary);display:none;"></p>
+                    </div>
+
+                    <div class="pcbg-sec-cap">Presets</div>
+                    <div class="pcbg-fx-row">
+                        <button type="button" class="pcbg-chip" onclick="pcbgPreset('clean')">Clean</button>
+                        <button type="button" class="pcbg-chip" onclick="pcbgPreset('premium')">Premium</button>
+                        <button type="button" class="pcbg-chip" onclick="pcbgPreset('magic')">Magic</button>
+                        <button type="button" class="pcbg-chip" onclick="pcbgPreset('max')">Max Bling</button>
+                    </div>
+                    <div class="pcbg-sec-cap">Effects (လက်နေတဲ့ animation)</div>
+                    <div class="pcbg-fx-row" id="pcbg-fx-row">
+                        <button type="button" class="pcbg-chip" data-fx="shine" onclick="pcbgToggleFx('shine')">Shine sweep</button>
+                        <button type="button" class="pcbg-chip" data-fx="sparkle" onclick="pcbgToggleFx('sparkle')">Sparkle</button>
+                        <button type="button" class="pcbg-chip" data-fx="glow" onclick="pcbgToggleFx('glow')">Glow pulse</button>
+                        <button type="button" class="pcbg-chip" data-fx="float" onclick="pcbgToggleFx('float')">Float</button>
+                        <button type="button" class="pcbg-chip" data-fx="drift" onclick="pcbgToggleFx('drift')">Drift</button>
+                        <button type="button" class="pcbg-chip" data-fx="frame" onclick="pcbgToggleFx('frame')">Glossy frame</button>
+                    </div>
+                    <div class="pcbg-sec-cap">Colour tuning</div>
+                    <div class="pcbg-slider"><label><span>Brightness</span><span id="pcbg-bri-val">120%</span></label><input type="range" id="pcbg-bri" min="70" max="180" value="120" oninput="pcbgSlider()"></div>
+                    <div class="pcbg-slider"><label><span>Vibrance (အရောင်စွဲ)</span><span id="pcbg-sat-val">130%</span></label><input type="range" id="pcbg-sat" min="40" max="220" value="130" oninput="pcbgSlider()"></div>
+                    <div class="pcbg-slider"><label><span>Rainbow shift (card တစ်ခုချင်း အရောင်ပြောင်း)</span><span id="pcbg-hue-val">0°</span></label><input type="range" id="pcbg-hue" min="0" max="40" value="0" oninput="pcbgSlider()"></div>
+                    <p style="font-size:11px;color:var(--text-muted);margin:6px 0 0;">Animation တွေကို စက်အားနည်းတဲ့ဖုန်း / Reduce-motion ဖွင့်ထားတဲ့သူတွေမှာ အလိုအလျောက် ပိတ်ပေးပါတယ်။</p>
+
+                    <div class="pcbg-preview" id="pcbg-preview">
+                        <div><div class="pcbg-pv-cap">Light preview</div><div class="pcbg-pv-card l" id="pcbg-pv-l"><div class="pcbg-pv-img pc-img-wrap"><svg class="pc-img" viewBox="0 0 64 64" aria-hidden="true"><polygon points="32,6 54,24 32,58 10,24" fill="#38BDF8"/><polygon points="32,6 54,24 32,24" fill="#7DD3FC"/><polygon points="32,6 10,24 32,24" fill="#0EA5E9"/><polygon points="10,24 54,24 32,58" fill="#0284C7" fill-opacity=".85"/></svg><span class="pcfx"></span></div><div class="pcbg-pv-lbl">86 Diamonds</div><div class="pcbg-pv-price">5,200 MMK</div></div></div>
+                        <div><div class="pcbg-pv-cap">Dark preview</div><div class="pcbg-pv-card d" id="pcbg-pv-d"><div class="pcbg-pv-img pc-img-wrap"><svg class="pc-img" viewBox="0 0 64 64" aria-hidden="true"><polygon points="32,6 54,24 32,58 10,24" fill="#38BDF8"/><polygon points="32,6 54,24 32,24" fill="#7DD3FC"/><polygon points="32,6 10,24 32,24" fill="#0EA5E9"/><polygon points="10,24 54,24 32,58" fill="#0284C7" fill-opacity=".85"/></svg><span class="pcfx"></span></div><div class="pcbg-pv-lbl">86 Diamonds</div><div class="pcbg-pv-price">5,200 MMK</div></div></div>
+                    </div>
+                    <button class="btn btn-primary" id="save-pcbg-btn" style="margin-top:12px;width:100%;" onclick="savePcbg()">Save Price Card Background</button>
+                </div>
+            </div>
+
             <div class="admin-card" id="settings-card-maintenance" style="margin-top:14px;">
                 <div class="sc-head" onclick="toggleMaintenanceSettings()">
                     <span class="sc-title">Maintenance <span id="maint-status-pill" class="maint-pill ok">OPEN</span></span>
@@ -4579,6 +4816,7 @@ html.pref-compact .btn { min-height: 38px; }
                 <button type="button" class="game-list-tab-btn" id="game-list-tab-voucher" onclick="showGameListTab('voucher')">Gift Card & Vouchers</button>
                 <button type="button" class="game-list-tab-btn" id="game-list-tab-software" onclick="showGameListTab('software')">Software</button>
             </div>
+            <div class="game-list-tabs game-list-subtabs" id="game-list-subtabs"></div>
             <div class="pkg-actions-row" style="margin:-8px 0 14px;">
                 <button class="btn btn-outline game-edit-only" onclick="window.refreshGames && window.refreshGames()"><svg class="ui-icon ic-i" viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-refresh"></use></svg> Refresh</button>
                 <button class="btn btn-outline game-edit-only" onclick="openGameReorder()"><svg class="ui-icon ic-i" viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-sort"></use></svg> Reorder</button>
@@ -4878,10 +5116,22 @@ html.pref-compact .btn { min-height: 38px; }
                 </div>
                 <img id="notif-image-preview" alt="" style="display:none;max-width:100%;max-height:180px;border-radius:10px;margin:0 0 8px;object-fit:cover;">
                 <div id="notif-image-status" style="display:none;font-size:12px;margin:0 0 12px;"></div>
-                <label style="display:flex;align-items:center;gap:8px;font-size:13px;margin:0 0 12px;cursor:pointer;">
-                    <input type="checkbox" id="notif-telegram" checked style="width:18px;height:18px;">
-                    <span>Also send to Telegram (bot DM)</span>
-                </label>
+                <label class="u-label">Send via</label>
+                <div class="notif-ch" id="notif-channel" role="radiogroup" aria-label="Send via">
+                    <label class="notif-ch-opt"><input type="radio" name="notif-channel" value="both" checked><span><b>Website + Bot</b><small>နှစ်ခုလုံး</small></span></label>
+                    <label class="notif-ch-opt"><input type="radio" name="notif-channel" value="web"><span><b>Website only</b><small>Store ထဲပဲ</small></span></label>
+                    <label class="notif-ch-opt"><input type="radio" name="notif-channel" value="bot"><span><b>Bot only</b><small>Telegram ပဲ</small></span></label>
+                </div>
+                <style>
+                .notif-ch{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:6px 0 14px}
+                .notif-ch-opt{position:relative;cursor:pointer;display:block}
+                .notif-ch-opt input{position:absolute;opacity:0;pointer-events:none}
+                .notif-ch-opt span{display:flex;flex-direction:column;align-items:center;gap:2px;padding:10px 6px;border-radius:14px;border:1px solid var(--border-glass);background:var(--bg-subtle-2);text-align:center;transition:background .15s,border-color .15s,transform .12s}
+                .notif-ch-opt b{font-size:12.5px;font-weight:600;color:var(--text-primary)}
+                .notif-ch-opt small{font-size:10.5px;color:var(--text-muted)}
+                .notif-ch-opt input:checked+span{border-color:#2f6bff;background:rgba(47,107,255,.12);box-shadow:0 0 0 1px #2f6bff inset}
+                .notif-ch-opt:active span{transform:scale(.97)}
+                </style>
                 <button class="btn btn-primary" id="send-notif-btn" onclick="sendNotification()">Send to All Users</button>
             </div>
             <h2 class="title-header" style="margin-top:20px;">Sent History</h2>
@@ -5172,6 +5422,9 @@ html.pref-compact .btn { min-height: 38px; }
                     <textarea id="edit-game-disabled-reason" rows="2" placeholder="e.g. MLBB top-ups are delayed by the provider. Please order again later." style="width:100%;padding:10px;border-radius:12px;border:1px solid var(--border-glass);background:var(--bg-subtle-2);color:var(--text-primary);font-size:14px;font-family:inherit;resize:vertical;box-sizing:border-box;"></textarea>
                 </div>
 
+                                <label style="margin-top:12px;">Price Card Background</label>
+                <select id="edit-game-pcbg" class="field field-full"><option value="">Store default</option><option value="off">No background</option><option value="violet-shards">Violet Shards</option><option value="aurora">Aurora</option><option value="royal-gold">Royal Gold</option><option value="ocean-glass">Ocean Glass</option><option value="sunset-blaze">Sunset Blaze</option><option value="emerald-prism">Emerald Prism</option><option value="crimson-flame">Crimson Flame</option><option value="cyber-grid">Cyber Grid</option><option value="rose-quartz">Rose Quartz</option><option value="frost-ice">Frost Ice</option><option value="midnight-stars">Midnight Stars</option><option value="candy-pop">Candy Pop</option><option value="carbon-neon">Carbon Neon</option><option value="platinum">Platinum</option><option value="dot-halftone">Dot Halftone</option><option value="neon-synthwave">Neon Synthwave</option><option value="galaxy-nebula">Galaxy Nebula</option><option value="lava-magma">Lava Magma</option><option value="jade-dragon">Jade Dragon</option><option value="sapphire-crystal">Sapphire Crystal</option><option value="amethyst-glow">Amethyst Glow</option><option value="mint-fresh">Mint Fresh</option><option value="peach-cream">Peach Cream</option><option value="obsidian-gold">Obsidian Gold</option><option value="holo-chrome">Holo Chrome</option><option value="cherry-blossom">Cherry Blossom</option></select>
+                <p style="font-size:11px;color:var(--text-muted);margin:4px 0 12px;">Store default = Settings ထဲက Price Card Background ကို သုံးမယ်။</p>
                 <div class="switch-row">
                     <div>
                         <span class="switch-label">Mark as Popular</span>
@@ -12781,6 +13034,58 @@ html.pref-compact .btn { min-height: 38px; }
         }
         window.gameListTabFor = gameListTabFor;
 
+        // Provider sub-tabs: inside Direct / Gift Card tabs every provider has its own list, so P1 and P2 games are never mixed.
+        let gameListSub = 'p1';
+        const GAME_SUBS = {
+            direct:  [['p1', 'P1'], ['p2', 'P2'], ['other', 'Manual']],
+            voucher: [['p1', 'P1'], ['p2', 'P2'], ['p3', 'P3'], ['other', 'Manual']],
+            software: []
+        };
+        const GAME_SUB_DEFAULT_PROVIDER = {
+            direct:  { p1: 'g2bulk', p2: 'fazercard', other: 'manual' },
+            voucher: { p1: 'g2bulk_voucher', p2: 'fazercard_giftcard', p3: 'jcplays', other: 'voucher_manual' }
+        };
+        function gameListSubFor(g) {
+            const p = g.fulfillProvider;
+            if (p === 'g2bulk' || p === 'g2bulk_voucher') return 'p1';
+            if (p === 'fazercard' || p === 'fazercard_giftcard') return 'p2';
+            if (p === 'jcplays') return 'p3';
+            return 'other';
+        }
+        function gameInCurrentList(g) {
+            if (gameListTabFor(g) !== gameListTab) return false;
+            return gameListTab === 'software' || gameListSubFor(g) === gameListSub;
+        }
+        function defaultProviderForCurrentList() {
+            if (gameListTab === 'software') return 'software';
+            const m = GAME_SUB_DEFAULT_PROVIDER[gameListTab] || GAME_SUB_DEFAULT_PROVIDER.direct;
+            return m[gameListSub] || (gameListTab === 'voucher' ? 'voucher_manual' : 'manual');
+        }
+        function renderGameSubTabs() {
+            const el = document.getElementById('game-list-subtabs');
+            if (!el) return;
+            const subs = GAME_SUBS[gameListTab] || [];
+            if (!subs.some(s => s[0] === gameListSub)) gameListSub = subs.length ? subs[0][0] : 'p1';
+            el.style.display = subs.length ? '' : 'none';
+            const counts = {};
+            Object.values(GAMES || {}).forEach(g => { if (gameListTabFor(g) === gameListTab) { const k = gameListSubFor(g); counts[k] = (counts[k] || 0) + new Set([g.name]).size; } });
+            el.innerHTML = subs.map(s => `<button type="button" class="game-list-tab-btn${s[0] === gameListSub ? ' active' : ''}" onclick="setGameListSub('${s[0]}')">${s[1]}${counts[s[0]] ? ` <span class="game-sub-count">${counts[s[0]]}</span>` : ''}</button>`).join('');
+        }
+        function setGameListSub(sub) {
+            gameListSub = sub;
+            renderGameSubTabs();
+            renderAdminGamesList();
+        }
+        window.setGameListSub = setGameListSub;
+        // After an import, jump to the list the new games landed in.
+        function focusGameListForProvider(provider) {
+            const probe = { fulfillProvider: provider };
+            gameListTab = gameListTabFor(probe);
+            gameListSub = gameListSubFor(probe);
+            if (document.getElementById('game-list')?.classList.contains('active')) showGameListTab(gameListTab);
+        }
+        window.focusGameListForProvider = focusGameListForProvider;
+
         // When off (default), the games list collapses every server/region
         // variant of the same game name down to a single representative
         // card, so the list reads as one card per game instead of one card
@@ -12812,6 +13117,7 @@ html.pref-compact .btn { min-height: 38px; }
             document.getElementById('game-list-tab-direct')?.classList.toggle('active', tab === 'direct');
             document.getElementById('game-list-tab-voucher')?.classList.toggle('active', tab === 'voucher');
             document.getElementById('game-list-tab-software')?.classList.toggle('active', tab === 'software');
+            renderGameSubTabs();
             window.scrollTo(0, 0);
             renderAdminGamesList();
         }
@@ -12836,7 +13142,7 @@ html.pref-compact .btn { min-height: 38px; }
         // the same game (e.g. "Free Fire" as both Global and Malaysia) each
         // keep their own line since they're separate entries in the list.
         function copyAllGameNames() {
-            const ids = Object.keys(GAMES).filter(id => gameListTabFor(GAMES[id]) === gameListTab).sort((a, b) => {
+            const ids = Object.keys(GAMES).filter(id => gameInCurrentList(GAMES[id])).sort((a, b) => {
                 const ga = GAMES[a], gb = GAMES[b];
                 return ga.name.localeCompare(gb.name) || (ga.serverName || '').localeCompare(gb.serverName || '');
             });
@@ -12899,6 +13205,7 @@ html.pref-compact .btn { min-height: 38px; }
         }
         window.providerChipsHTML = providerChipsHTML;
         function renderAdminGamesListImpl() {
+            try { renderGameSubTabs(); } catch (_) {}
             const container = document.getElementById('admin-games-container');
             const searchTerm = (document.getElementById('game-search')?.value || '').trim().toLowerCase();
             // Sort by the order they were added (oldest/first-added on top,
@@ -12908,7 +13215,7 @@ html.pref-compact .btn { min-height: 38px; }
             // and finally to name for the rare doc with neither.
             const ids = Object.keys(GAMES).filter(id => {
                 const g = GAMES[id];
-                if (gameListTabFor(g) !== gameListTab) return false;
+                if (!gameInCurrentList(g)) return false;
                 if (!searchTerm) return true;
                 return (g.name || '').toLowerCase().includes(searchTerm) || (g.serverName || '').toLowerCase().includes(searchTerm);
             }).sort((a, b) => {
@@ -12924,7 +13231,7 @@ html.pref-compact .btn { min-height: 38px; }
             if (ids.length === 0) {
                 container.innerHTML = searchTerm
                     ? '<p class="empty-msg">No games match your search.</p>'
-                    : `<p class="empty-msg">No ${gameListTab === 'voucher' ? 'Gift Card & Voucher' : gameListTab === 'software' ? 'Software' : 'Direct'} games yet. Tap + Add to create one.</p>`;
+                    : `<p class="empty-msg">No ${gameListTab === 'software' ? 'Software' : (gameListTab === 'voucher' ? 'Gift Card & Voucher' : 'Direct') + ' ' + ((GAME_SUBS[gameListTab] || []).find(s => s[0] === gameListSub) || ['', ''])[1]} games yet. Tap + Add to create one.</p>`;
                 return;
             }
             // Count how many entries share each game name, so multi-server/
@@ -15606,6 +15913,7 @@ html.pref-compact .btn { min-height: 38px; }
                 document.getElementById('edit-game-app-ios-scheme').value = g.appIosScheme || '';
                 document.getElementById('edit-game-app-ios-store-url').value = g.appIosStoreUrl || '';
                 document.getElementById('edit-game-popular').checked = !!g.popular;
+                document.getElementById('edit-game-pcbg').value = g.priceCardBg || '';
                 document.getElementById('edit-game-autoprice').checked = g.autoPriceSync === true; // missing on older games = OFF (Cost only)
                 document.getElementById('edit-game-autocost').checked = g.autoPriceUpdate !== false;
                 document.getElementById('edit-game-margin').value = (typeof g.priceMarginPct === 'number') ? g.priceMarginPct : '';
@@ -15686,6 +15994,7 @@ html.pref-compact .btn { min-height: 38px; }
                 document.getElementById('edit-game-app-ios-scheme').value = '';
                 document.getElementById('edit-game-app-ios-store-url').value = '';
                 document.getElementById('edit-game-popular').checked = false;
+                document.getElementById('edit-game-pcbg').value = '';
                 document.getElementById('edit-game-autoprice').checked = false;
                 document.getElementById('edit-game-autocost').checked = true;
                 document.getElementById('edit-game-margin').value = '';
@@ -15714,7 +16023,7 @@ html.pref-compact .btn { min-height: 38px; }
                 pendingG2BulkServerMode = null;
                 pendingG2BulkServerOptions = null;
                 onFazerCardGiftCardCategoryChange();
-                setFulfillProvider(gameListTab === 'voucher' ? 'g2bulk_voucher' : gameListTab === 'software' ? 'software' : 'manual');
+                setFulfillProvider(defaultProviderForCurrentList());
                 preview.src = '';
                 preview.style.display = 'none';
                 updateBox.classList.remove('has-image');
@@ -16063,7 +16372,7 @@ html.pref-compact .btn { min-height: 38px; }
                 // currently sit in them - without this, a tab created but left empty (or
                 // emptied out later) would vanish on reload since nothing else in the
                 // saved data would reference it.
-                const data = { name, serverName: serverName || '', image: imageUrl, banner: bannerUrl || imageUrl, bannerImages: existingBanners.length ? existingBanners : [imageUrl], packages, packageTabs: customPkgTabs.slice(), packageTabLabels: { package: builtinPkgTabLabels.package, currency: builtinPkgTabLabels.currency }, g2bulkCode: g2bulkCode || '', jcplaysProduct: jcplaysProduct || '', g2bulkVoucherCategory: g2bulkVoucherCategory || '', fazercardCategoryId: fazercardCategoryId || '', fazercardFields: fazercardCategoryId ? pendingFazerCardFields.slice() : [], fazercardServerMode: pendingFazerCardServerMode || '', fazercardServerOptions: pendingFazerCardServerOptions || [], g2bulkIdCheckCode: fazercardCategoryId ? (g2bulkIdCheckCode || '') : '', fazercardGiftCategoryId: fazercardGiftCategoryId || '', g2bulkServerMode: pendingG2BulkServerMode || '', g2bulkServerOptions: pendingG2BulkServerOptions || [], fulfillProvider: currentFulfillProvider, category: category || '', description: description || '', descriptionBase: descriptionBase || '', disabled: gameDisabled, disabledReason: gameDisabledReason, redeemLink: redeemLink || '', appAndroidPackage: appAndroidPackage || '', appAndroidScheme: appAndroidScheme || '', appAndroidStoreUrl: appAndroidStoreUrl || '', appIosScheme: appIosScheme || '', appIosStoreUrl: appIosStoreUrl || '', popular, autoPriceUpdate, autoPriceSync, priceMarginPct, playerIdRequired, serverIdRequired, charNameRequired };
+                const data = { name, priceCardBg: (document.getElementById('edit-game-pcbg') ? document.getElementById('edit-game-pcbg').value : ''), serverName: serverName || '', image: imageUrl, banner: bannerUrl || imageUrl, bannerImages: existingBanners.length ? existingBanners : [imageUrl], packages, packageTabs: customPkgTabs.slice(), packageTabLabels: { package: builtinPkgTabLabels.package, currency: builtinPkgTabLabels.currency }, g2bulkCode: g2bulkCode || '', jcplaysProduct: jcplaysProduct || '', g2bulkVoucherCategory: g2bulkVoucherCategory || '', fazercardCategoryId: fazercardCategoryId || '', fazercardFields: fazercardCategoryId ? pendingFazerCardFields.slice() : [], fazercardServerMode: pendingFazerCardServerMode || '', fazercardServerOptions: pendingFazerCardServerOptions || [], g2bulkIdCheckCode: fazercardCategoryId ? (g2bulkIdCheckCode || '') : '', fazercardGiftCategoryId: fazercardGiftCategoryId || '', g2bulkServerMode: pendingG2BulkServerMode || '', g2bulkServerOptions: pendingG2BulkServerOptions || [], fulfillProvider: currentFulfillProvider, category: category || '', description: description || '', descriptionBase: descriptionBase || '', disabled: gameDisabled, disabledReason: gameDisabledReason, redeemLink: redeemLink || '', appAndroidPackage: appAndroidPackage || '', appAndroidScheme: appAndroidScheme || '', appAndroidStoreUrl: appAndroidStoreUrl || '', appIosScheme: appIosScheme || '', appIosStoreUrl: appIosStoreUrl || '', popular, autoPriceUpdate, autoPriceSync, priceMarginPct, playerIdRequired, serverIdRequired, charNameRequired };
 
                 if (gameId) {
                     await updateDoc(doc(db, "games", gameId), data);
@@ -16616,15 +16925,20 @@ html.pref-compact .btn { min-height: 38px; }
                     payload.targetUserId = found.id;
                     tgTarget = String(found.data.telegramId || '');
                 }
-                await addDoc(collection(db, "notifications"), payload);
-                const tgBox = document.getElementById('notif-telegram');
-                const tgNote = (tgBox && tgBox.checked) ? await sendNotifToTelegram(audience, tgTarget, title, intro, details, imageUrl) : '';
+                const chEl = document.querySelector('input[name="notif-channel"]:checked');
+                const channel = chEl ? chEl.value : 'both';
+                if (channel === 'bot' && audience === 'user' && !tgTarget) {
+                    window.showToast('This user has no Telegram linked - Bot only cannot reach them', 'fail');
+                    return;
+                }
+                if (channel !== 'bot') await addDoc(collection(db, "notifications"), payload);
+                const tgNote = (channel !== 'web') ? await sendNotifToTelegram(audience, tgTarget, title, intro, details, imageUrl) : '';
                 titleEl.value = '';
                 introEl.value = '';
                 detailsEl.value = '';
                 targetUserEl.value = '';
                 clearNotifImage();
-                window.showToast((audience === 'user' ? `Notification sent to ${resolvedId}!` : 'Notification sent to all users!') + tgNote, 'success');
+                window.showToast((channel === 'bot' ? (audience === 'user' ? `Bot message to ${resolvedId}` : 'Bot message to all bot users') : (audience === 'user' ? `Notification sent to ${resolvedId}!` : 'Notification sent to all users!')) + tgNote, 'success');
             } catch (error) {
                 console.error("Send notification error:", error);
                 window.showToast('Failed to send notification.', 'fail');
@@ -18724,12 +19038,160 @@ html.pref-compact .btn { min-height: 38px; }
         }
         window.previewLogoDarkImage = previewLogoDarkImage;
 
+
+        // ---------- Price Card Background (settings/branding.priceCard) ----------
+        const PCBG_LIST = [['violet-shards','Violet Shards'],['aurora','Aurora'],['royal-gold','Royal Gold'],['ocean-glass','Ocean Glass'],['sunset-blaze','Sunset Blaze'],['emerald-prism','Emerald Prism'],['crimson-flame','Crimson Flame'],['cyber-grid','Cyber Grid'],['rose-quartz','Rose Quartz'],['frost-ice','Frost Ice'],['midnight-stars','Midnight Stars'],['candy-pop','Candy Pop'],['carbon-neon','Carbon Neon'],['platinum','Platinum'],['dot-halftone','Dot Halftone'],['neon-synthwave','Neon Synthwave'],['galaxy-nebula','Galaxy Nebula'],['lava-magma','Lava Magma'],['jade-dragon','Jade Dragon'],['sapphire-crystal','Sapphire Crystal'],['amethyst-glow','Amethyst Glow'],['mint-fresh','Mint Fresh'],['peach-cream','Peach Cream'],['obsidian-gold','Obsidian Gold'],['holo-chrome','Holo Chrome'],['cherry-blossom','Cherry Blossom']];
+        const pcbg = { mode: 'off', template: 'violet-shards', imageLight: '', imageDark: '', fileL: null, fileD: null, objL: '', objD: '', fx: new Set(), bri: 120, sat: 130, hue: 0 };
+        const PCBG_PRESETS = { clean: { fx: [], bri: 115, sat: 120, hue: 0 }, premium: { fx: ['shine', 'frame'], bri: 120, sat: 130, hue: 0 }, magic: { fx: ['sparkle', 'glow', 'drift'], bri: 125, sat: 140, hue: 0 }, max: { fx: ['shine', 'sparkle', 'glow', 'float', 'drift', 'frame'], bri: 135, sat: 160, hue: 12 } };
+        function pcbgToggleFx(id) { if (pcbg.fx.has(id)) pcbg.fx.delete(id); else pcbg.fx.add(id); renderPcbgUi(); }
+        window.pcbgToggleFx = pcbgToggleFx;
+        function pcbgSlider() { pcbg.bri = Number(document.getElementById('pcbg-bri').value); pcbg.sat = Number(document.getElementById('pcbg-sat').value); pcbg.hue = Number(document.getElementById('pcbg-hue').value); renderPcbgUi(); }
+        window.pcbgSlider = pcbgSlider;
+        function pcbgPreset(name) { const p = PCBG_PRESETS[name]; if (!p) return; pcbg.fx = new Set(p.fx); pcbg.bri = p.bri; pcbg.sat = p.sat; pcbg.hue = p.hue; ['bri', 'sat', 'hue'].forEach(k => { document.getElementById('pcbg-' + k).value = pcbg[k]; }); renderPcbgUi(); }
+        window.pcbgPreset = pcbgPreset;
+        function togglePcbgSettings() {
+            const body = document.getElementById('pcbg-body');
+            const chevron = document.getElementById('pcbg-chevron');
+            const isOpen = body.style.display === 'block';
+            body.style.display = isOpen ? 'none' : 'block';
+            chevron.style.transform = isOpen ? 'rotate(0deg)' : 'rotate(180deg)';
+            if (!isOpen) renderPcbgUi();
+        }
+        window.togglePcbgSettings = togglePcbgSettings;
+        function pcbgSafeUrl(u) { return String(u || '').replace(/["'()\\\s]/g, c => '%' + c.charCodeAt(0).toString(16)); }
+        function setPcbgMode(m) { pcbg.mode = m; renderPcbgUi(); }
+        window.setPcbgMode = setPcbgMode;
+        function pcbgPick(id) { pcbg.template = id; renderPcbgUi(); }
+        window.pcbgPick = pcbgPick;
+        function pcbgColorChanged() { renderPcbgUi(); }
+        window.pcbgColorChanged = pcbgColorChanged;
+        function pcbgPickImage(side, e) {
+            const f = e.target.files[0];
+            if (!f) return;
+            if (side === 'l') { pcbg.fileL = f; if (pcbg.objL) URL.revokeObjectURL(pcbg.objL); pcbg.objL = URL.createObjectURL(f); }
+            else { pcbg.fileD = f; if (pcbg.objD) URL.revokeObjectURL(pcbg.objD); pcbg.objD = URL.createObjectURL(f); }
+            renderPcbgUi();
+        }
+        window.pcbgPickImage = pcbgPickImage;
+        function pcbgRemoveImage(side) {
+            if (side === 'l') { pcbg.fileL = null; pcbg.objL = ''; pcbg.imageLight = ''; document.getElementById('pcbg-file-l').value = ''; }
+            else { pcbg.fileD = null; pcbg.objD = ''; pcbg.imageDark = ''; document.getElementById('pcbg-file-d').value = ''; }
+            renderPcbgUi();
+        }
+        window.pcbgRemoveImage = pcbgRemoveImage;
+        function pcbgVars() {
+            const g = (id) => document.getElementById(id).value;
+            if (pcbg.mode === 'template') return { tpl: pcbg.template, l: '', d: '' };
+            if (pcbg.mode === 'color') {
+                const a = g('pcbg-angle');
+                return { tpl: 'custom', l: `linear-gradient(${a}deg, ${g('pcbg-light1')}, ${g('pcbg-light2')})`, d: `linear-gradient(${a}deg, ${g('pcbg-dark1')}, ${g('pcbg-dark2')})` };
+            }
+            if (pcbg.mode === 'image') {
+                const il = pcbg.objL || pcbg.imageLight || pcbg.objD || pcbg.imageDark;
+                const id = pcbg.objD || pcbg.imageDark || pcbg.objL || pcbg.imageLight;
+                if (!il) return { tpl: '', l: '', d: '' };
+                return { tpl: 'custom', l: `url("${pcbgSafeUrl(il)}") center/cover no-repeat`, d: `url("${pcbgSafeUrl(id)}") center/cover no-repeat` };
+            }
+            return { tpl: '', l: '', d: '' };
+        }
+        function renderPcbgUi() {
+            const grid = document.getElementById('pcbg-tpl-grid');
+            if (!grid) return;
+            if (!grid.childElementCount) {
+                grid.innerHTML = PCBG_LIST.map(([id, name]) => `<button type="button" class="pcbg-sw" data-pcbg="${id}" data-id="${id}" onclick="pcbgPick('${id}')"><span class="pcbg-sw-art"><i class="l"></i><i class="d"></i></span><span class="pcbg-sw-name">${name}</span></button>`).join('');
+            }
+            grid.querySelectorAll('.pcbg-sw').forEach(b => b.classList.toggle('selected', b.dataset.id === pcbg.template));
+            document.querySelectorAll('#pcbg-modes .pcbg-mode-btn').forEach(b => b.classList.toggle('active', b.dataset.mode === pcbg.mode));
+            ['template', 'color', 'image'].forEach(m => document.getElementById('pcbg-pane-' + m).classList.toggle('active', pcbg.mode === m));
+            document.getElementById('pcbg-angle-val').textContent = document.getElementById('pcbg-angle').value + '°';
+            ['l', 'd'].forEach(side => {
+                const src = side === 'l' ? (pcbg.objL || pcbg.imageLight) : (pcbg.objD || pcbg.imageDark);
+                const img = document.getElementById('pcbg-img-' + side + '-preview');
+                img.src = src || '';
+                img.style.display = src ? 'block' : 'none';
+                document.getElementById('pcbg-img-' + side + '-box').classList.toggle('has-image', !!src);
+                document.getElementById('pcbg-rm-' + side).style.display = src ? '' : 'none';
+            });
+            document.querySelectorAll('#pcbg-fx-row .pcbg-chip').forEach(b => b.classList.toggle('active', pcbg.fx.has(b.dataset.fx)));
+            document.getElementById('pcbg-bri-val').textContent = pcbg.bri + '%';
+            document.getElementById('pcbg-sat-val').textContent = pcbg.sat + '%';
+            document.getElementById('pcbg-hue-val').textContent = pcbg.hue + '°';
+            const v = pcbgVars();
+            ['l', 'd'].forEach(side => {
+                const el = document.getElementById('pcbg-pv-' + side);
+                if (v.tpl) el.setAttribute('data-pcbg', v.tpl); else el.removeAttribute('data-pcbg');
+                el.style.removeProperty('--pcbg-l'); el.style.removeProperty('--pcbg-d');
+                if (v.l) { el.style.setProperty('--pcbg-l', v.l); el.style.setProperty('--pcbg-d', v.d); }
+                if (v.tpl && pcbg.fx.size) el.setAttribute('data-pcfx', Array.from(pcbg.fx).join(' ')); else el.removeAttribute('data-pcfx');
+                el.style.setProperty('--pcbg-bri', pcbg.bri / 100);
+                el.style.setProperty('--pcbg-sat', pcbg.sat / 100);
+                el.style.setProperty('--pcbg-hue', pcbg.hue + 'deg');
+            });
+        }
+        function loadPcbgFromSettings(data) {
+            const c = (data && data.priceCard) || {};
+            pcbg.mode = ['off', 'template', 'color', 'image'].includes(c.mode) ? c.mode : 'off';
+            if (PCBG_LIST.some(t => t[0] === c.template)) pcbg.template = c.template;
+            pcbg.imageLight = c.imageLight || '';
+            pcbg.imageDark = c.imageDark || '';
+            const set = (id, val, fb) => { const el = document.getElementById(id); if (el) el.value = /^#[0-9a-fA-F]{6}$/.test(val || '') ? val : fb; };
+            set('pcbg-light1', c.light1, '#EEF2FF'); set('pcbg-light2', c.light2, '#C7D2FE');
+            set('pcbg-dark1', c.dark1, '#1E1B4B'); set('pcbg-dark2', c.dark2, '#0B0A26');
+            const ang = document.getElementById('pcbg-angle'); if (ang) ang.value = Number(c.angle) || 145;
+            pcbg.fx = new Set(Array.isArray(c.effects) ? c.effects.filter(x => ['shine','sparkle','glow','float','drift','frame'].includes(x)) : []);
+            pcbg.bri = Number(c.bri) || 120; pcbg.sat = Number(c.sat) || 130; pcbg.hue = Number(c.hue) || 0;
+            ['bri', 'sat', 'hue'].forEach(k => { const el = document.getElementById('pcbg-' + k); if (el) el.value = pcbg[k]; });
+            if (!pcbg.fileL) pcbg.objL = ''; if (!pcbg.fileD) pcbg.objD = '';
+            if (document.getElementById('pcbg-body') && document.getElementById('pcbg-body').style.display === 'block') renderPcbgUi();
+        }
+        async function savePcbg() {
+            const btn = document.getElementById('save-pcbg-btn');
+            const originalText = btn.innerText;
+            btn.disabled = true;
+            btn.innerText = 'Saving...';
+            try {
+                let imageLight = pcbg.imageLight, imageDark = pcbg.imageDark;
+                if (pcbg.mode === 'image') {
+                    if (pcbg.fileL) imageLight = await uploadImageToImgBB(pcbg.fileL, 'pcbg-upload-status', { maxDim: 900, quality: 0.85 });
+                    if (pcbg.fileD) imageDark = await uploadImageToImgBB(pcbg.fileD, 'pcbg-upload-status', { maxDim: 900, quality: 0.85 });
+                    if (!imageLight && !imageDark) { window.showToast('Background image တစ်ပုံ အနည်းဆုံးရွေးပါ။', 'fail'); return; }
+                }
+                const g = (id) => document.getElementById(id).value;
+                const cfg = {
+                    mode: pcbg.mode,
+                    template: pcbg.template,
+                    light1: g('pcbg-light1'), light2: g('pcbg-light2'),
+                    dark1: g('pcbg-dark1'), dark2: g('pcbg-dark2'),
+                    angle: Number(g('pcbg-angle')) || 145,
+                    imageLight: imageLight || deleteField(),
+                    imageDark: imageDark || deleteField(),
+                    effects: Array.from(pcbg.fx),
+                    bri: pcbg.bri, sat: pcbg.sat, hue: pcbg.hue
+                };
+                await setDoc(doc(db, "settings", "branding"), { priceCard: cfg }, { merge: true });
+                logAdminActivity('Updated price card background', pcbg.mode);
+                window.showToast('Price card background saved!', 'success');
+                pcbg.imageLight = imageLight || ''; pcbg.imageDark = imageDark || '';
+                pcbg.fileL = null; pcbg.fileD = null; pcbg.objL = ''; pcbg.objD = '';
+                document.getElementById('pcbg-file-l').value = ''; document.getElementById('pcbg-file-d').value = '';
+                renderPcbgUi();
+            } catch (error) {
+                console.error('Save price card background error:', error);
+                window.showToast(error.message || 'Failed to save.', 'fail');
+            } finally {
+                btn.disabled = false;
+                btn.innerText = originalText;
+            }
+        }
+        window.savePcbg = savePcbg;
+
         function listenBranding() {
             if (brandingListenerAttached) return;
             brandingListenerAttached = true;
             onSnapshot(doc(db, "settings", "branding"), (docSnap) => {
                 const data = docSnap.exists() ? docSnap.data() : {};
                 renderHeaderLogo(data);
+                loadPcbgFromSettings(data);
                 if (data.logoUrl) {
                     const preview = document.getElementById('edit-logo-preview');
                     preview.src = data.logoUrl;
@@ -21673,7 +22135,7 @@ html.pref-compact .btn { min-height: 38px; }
             pickerBulkSelected = new Set();
             togglePickerBulkMode();
             closeGamePicker();
-            if (added > 0) closeGameEditor();
+            if (added > 0) { closeGameEditor(); try { focusGameListForProvider(kind); } catch (_) {} }
         }
         window.runPickerBulkImport = runPickerBulkImport;
 
@@ -22972,7 +23434,7 @@ html.pref-compact .btn { min-height: 38px; }
         function addServerGameGroupsForCurrentTab() {
             const seen = new Map(); // game name -> one representative doc for its basics
             Object.values(GAMES || {}).forEach(g => {
-                if (gameListTabFor(g) !== gameListTab) return;
+                if (!gameInCurrentList(g)) return;
                 if (!seen.has(g.name)) seen.set(g.name, g);
             });
             return Array.from(seen.values()).sort((a, b) => (a.name || '').localeCompare(b.name || ''));
@@ -23047,7 +23509,7 @@ html.pref-compact .btn { min-height: 38px; }
             // openGameEditor() already defaults the provider from gameListTab,
             // but set it explicitly here too so this stays correct even if
             // that default logic changes later.
-            setFulfillProvider(gameListTab === 'voucher' ? 'g2bulk_voucher' : gameListTab === 'software' ? 'software' : 'manual');
+            setFulfillProvider(defaultProviderForCurrentList());
             document.getElementById('edit-game-name').value = base.name || '';
             // Same soft-lock as the FazerCards region split: this flow only
             // works if Game Name matches the base game exactly, so lock it
@@ -23066,6 +23528,7 @@ html.pref-compact .btn { min-height: 38px; }
             document.getElementById('edit-game-app-ios-scheme').value = base.appIosScheme || '';
             document.getElementById('edit-game-app-ios-store-url').value = base.appIosStoreUrl || '';
             document.getElementById('edit-game-popular').checked = !!base.popular;
+            document.getElementById('edit-game-pcbg').value = base.priceCardBg || '';
             document.getElementById('edit-game-autoprice').checked = base.autoPriceUpdate !== false;
             document.getElementById('edit-game-autocost').checked = base.autoPriceUpdate !== false;
             document.getElementById('edit-game-margin').value = (typeof base.priceMarginPct === 'number') ? base.priceMarginPct : '';
