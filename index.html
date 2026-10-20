@@ -5425,6 +5425,50 @@ html.perf-low [data-pcbg] *,html.perf-low [data-pcbg] *::before,html.perf-low [d
                                 <label style="margin-top:12px;">Price Card Background</label>
                 <select id="edit-game-pcbg" class="field field-full"><option value="">Store default</option><option value="off">No background</option><option value="violet-shards">Violet Shards</option><option value="aurora">Aurora</option><option value="royal-gold">Royal Gold</option><option value="ocean-glass">Ocean Glass</option><option value="sunset-blaze">Sunset Blaze</option><option value="emerald-prism">Emerald Prism</option><option value="crimson-flame">Crimson Flame</option><option value="cyber-grid">Cyber Grid</option><option value="rose-quartz">Rose Quartz</option><option value="frost-ice">Frost Ice</option><option value="midnight-stars">Midnight Stars</option><option value="candy-pop">Candy Pop</option><option value="carbon-neon">Carbon Neon</option><option value="platinum">Platinum</option><option value="dot-halftone">Dot Halftone</option><option value="neon-synthwave">Neon Synthwave</option><option value="galaxy-nebula">Galaxy Nebula</option><option value="lava-magma">Lava Magma</option><option value="jade-dragon">Jade Dragon</option><option value="sapphire-crystal">Sapphire Crystal</option><option value="amethyst-glow">Amethyst Glow</option><option value="mint-fresh">Mint Fresh</option><option value="peach-cream">Peach Cream</option><option value="obsidian-gold">Obsidian Gold</option><option value="holo-chrome">Holo Chrome</option><option value="cherry-blossom">Cherry Blossom</option></select>
                 <p style="font-size:11px;color:var(--text-muted);margin:4px 0 12px;">Store default = Settings ထဲက Price Card Background ကို သုံးမယ်။</p>
+                <div id="game-fx-box" style="margin:0 0 14px;padding:12px;border-radius:14px;border:1px solid var(--border-glass);background:var(--bg-subtle-2);">
+                    <label style="margin:0 0 6px;display:block;font-weight:600;">Price Card Effects (ဒီ game အတွက်သီးသန့်)</label>
+                    <select id="edit-game-pcfx-mode" class="field field-full" onchange="document.getElementById('edit-game-pcfx-list').style.display=this.value==='custom'?'flex':'none'">
+                        <option value="">Store default</option><option value="off">No effects</option><option value="custom">Choose effects…</option>
+                    </select>
+                    <div id="edit-game-pcfx-list" style="display:none;flex-wrap:wrap;gap:8px 14px;margin:10px 0 2px;font-size:13px;">
+                        <label style="display:flex;align-items:center;gap:5px;margin:0;"><input type="checkbox" value="shine"> Shine</label>
+                        <label style="display:flex;align-items:center;gap:5px;margin:0;"><input type="checkbox" value="sparkle"> Sparkle</label>
+                        <label style="display:flex;align-items:center;gap:5px;margin:0;"><input type="checkbox" value="glow"> Glow</label>
+                        <label style="display:flex;align-items:center;gap:5px;margin:0;"><input type="checkbox" value="float"> Float</label>
+                        <label style="display:flex;align-items:center;gap:5px;margin:0;"><input type="checkbox" value="drift"> Drift</label>
+                        <label style="display:flex;align-items:center;gap:5px;margin:0;"><input type="checkbox" value="frame"> Frame</label>
+                    </div>
+                    <p style="font-size:11px;color:var(--text-muted);margin:4px 0 10px;">Effects တွေက Background ရှိမှ ပေါ်ပါမယ် (Background = No background မဖြစ်ရ)။</p>
+                    <label style="margin:0 0 6px;display:block;">Select လုပ်တဲ့ကတ် Glow</label>
+                    <select id="edit-game-pcsel" class="field field-full">
+                        <option value="">Store default (Glow)</option><option value="off">Off</option><option value="glow">Glow</option><option value="pulse">Pulse (တဖျပ်ဖျပ်)</option><option value="ring">Ring</option><option value="rainbow">Rainbow (လည်နေတဲ့ အရောင်စုံ)</option>
+                    </select>
+                    <label style="margin:10px 0 6px;display:block;">TOP / HOT ကတ် ပိုလက်စေခြင်း</label>
+                    <select id="edit-game-pctag" class="field field-full">
+                        <option value="">Store default (On)</option><option value="on">On</option><option value="off">Off</option>
+                    </select>
+                </div>
+                <script>
+                window.__gfxLoad = function (g) {
+                    g = g || {};
+                    var m = document.getElementById('edit-game-pcfx-mode'), l = document.getElementById('edit-game-pcfx-list');
+                    if (!m) return;
+                    var fx = g.priceCardFx;
+                    m.value = fx === 'off' ? 'off' : (Array.isArray(fx) ? 'custom' : '');
+                    l.style.display = m.value === 'custom' ? 'flex' : 'none';
+                    l.querySelectorAll('input').forEach(function (c) { c.checked = Array.isArray(fx) && fx.indexOf(c.value) > -1; });
+                    document.getElementById('edit-game-pcsel').value = g.priceCardSel || '';
+                    document.getElementById('edit-game-pctag').value = g.priceCardTag || '';
+                };
+                window.__gfxRead = function () {
+                    var m = document.getElementById('edit-game-pcfx-mode');
+                    if (!m) return { fx: null, sel: '', tag: '' };
+                    var fx = null;
+                    if (m.value === 'off') fx = 'off';
+                    else if (m.value === 'custom') fx = [].slice.call(document.querySelectorAll('#edit-game-pcfx-list input:checked')).map(function (c) { return c.value; });
+                    return { fx: fx, sel: document.getElementById('edit-game-pcsel').value || '', tag: document.getElementById('edit-game-pctag').value || '' };
+                };
+                </script>
                 <div class="switch-row">
                     <div>
                         <span class="switch-label">Mark as Popular</span>
@@ -7210,14 +7254,60 @@ html.perf-low [data-pcbg] *,html.perf-low [data-pcbg] *::before,html.perf-low [d
         // silently does nothing if they never linked Telegram. Never
         // throws: a failed push must never block or fail the order-status
         // write it's reporting on.
+        // The secret normally arrives through the live listener; if an action happens before it has loaded
+        // (or the listener was never attached) read it once straight from Firestore instead of silently skipping the DM.
+        async function getAdminNotifySecret() {
+            if (ADMIN_BROADCAST_SECRET) return ADMIN_BROADCAST_SECRET;
+            try {
+                const s = await getDoc(doc(db, "settings", "adminBroadcast"));
+                ADMIN_BROADCAST_SECRET = (s.exists() && s.data().secret) || '';
+            } catch (e) { console.error('getAdminNotifySecret failed:', e); }
+            return ADMIN_BROADCAST_SECRET;
+        }
+        window.getAdminNotifySecret = getAdminNotifySecret;
+
+        // DM the customer in Telegram when the ADMIN PANEL confirms / rejects a wallet top-up (POST /notify-topup-status).
+        // Before this existed only the in-bot Confirm/Reject buttons told the customer - the panel buttons never did.
+        async function notifyTopupResultToTelegram(topupId, status, hint) {
+            try {
+                const secret = await getAdminNotifySecret();
+                if (!secret) { console.warn('notifyTopupResultToTelegram: Admin Broadcast Secret is not set (Settings)'); return false; }
+                let t = hint && hint.userId ? hint : null;
+                if (!t) { const s = await getDoc(doc(db, "walletTopups", topupId)); t = s.exists() ? s.data() : null; }
+                if (!t) return false;
+                let telegramId = t.telegramId || '';
+                if (!telegramId && t.userId) {
+                    const u = await getDoc(doc(db, "users", t.userId));
+                    telegramId = u.exists() ? (u.data().telegramId || '') : '';
+                }
+                if (!telegramId) return false; // customer never linked Telegram - nothing to push to
+                const r = await fetch(`${AUTH_WORKER_URL}/notify-topup-status`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ secret, telegramId: String(telegramId), status, amount: Number(t.amount || 0), topupId: topupId || '' })
+                });
+                if (!r.ok) {
+                    console.error('notify-topup-status failed:', r.status, await r.text().catch(() => ''));
+                    window.showToast('Telegram DM မပို့နိုင်ပါ (' + r.status + ')', 'fail');
+                    return false;
+                }
+                return true;
+            } catch (error) {
+                console.error('notifyTopupResultToTelegram error:', error);
+                window.showToast('Telegram DM မပို့နိုင်ပါ (network/CORS)', 'fail');
+                return false;
+            }
+        }
+        window.notifyTopupResultToTelegram = notifyTopupResultToTelegram;
+
         async function notifyOrderStatusChange(orderId, order, status, note) {
             try {
                 if (!order || !order.userId || !status) return;
-                if (!ADMIN_BROADCAST_SECRET) return; // secret not loaded/set yet - nothing to authorize with
+                if (!(await getAdminNotifySecret())) { console.warn('notifyOrderStatusChange: Admin Broadcast Secret is not set (Settings)'); return; }
                 const userSnap = await getDoc(doc(db, "users", order.userId));
                 const telegramId = userSnap.exists() ? userSnap.data().telegramId : null;
                 if (!telegramId) return; // never linked Telegram - nothing to push to
-                await fetch(`${AUTH_WORKER_URL}/notify-order-status`, {
+                const __nr = await fetch(`${AUTH_WORKER_URL}/notify-order-status`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -7239,6 +7329,7 @@ html.perf-low [data-pcbg] *,html.perf-low [data-pcbg] *::before,html.perf-low [d
                         packageName: order.itemAmount || ''
                     })
                 });
+                if (!__nr.ok) console.error('notify-order-status failed:', __nr.status, await __nr.text().catch(() => ''));
             } catch (error) {
                 console.error('notifyOrderStatusChange error:', error);
             }
@@ -12042,6 +12133,7 @@ html.perf-low [data-pcbg] *,html.perf-low [data-pcbg] *::before,html.perf-low [d
                 window.showToast(`Wallet credited ${creditedAmount.toLocaleString()} MMK`, 'success');
                 editTelegramWalletTopupMessage(id, 'Completed');
                 emailTopupResultToCustomer(id);
+                notifyTopupResultToTelegram(id, 'Completed');
             } catch (error) {
                 console.error("doConfirmTopup error:", error);
                 window.showToast(error.message || "Failed to credit wallet.", 'fail');
@@ -12079,6 +12171,7 @@ html.perf-low [data-pcbg] *,html.perf-low [data-pcbg] *::before,html.perf-low [d
                 window.showToast("Top up rejected.", 'fail');
                 editTelegramWalletTopupMessage(id, 'Rejected');
                 emailTopupResultToCustomer(id);
+                notifyTopupResultToTelegram(id, 'Rejected');
             } catch (error) {
                 console.error("doRejectTopup error:", error);
                 window.showToast((error && /^Already |not found/.test(error.message)) ? error.message : "Failed to update! Check Rules.", 'fail');
@@ -12258,12 +12351,13 @@ html.perf-low [data-pcbg] *,html.perf-low [data-pcbg] *::before,html.perf-low [d
             try {
                 const userRef = doc(db, "users", uid);
                 let userName = uid;
+                const manualTopupRef = doc(collection(db, "walletTopups"));
                 await runTransaction(db, async (tx) => {
                     const snap = await tx.get(userRef);
                     if (!snap.exists()) throw new Error('NOT_REGISTERED');
                     userName = snap.data().name || snap.data().googleEmail || uid;
                     tx.set(userRef, { walletBalance: increment(amount) }, { merge: true });
-                    tx.set(doc(collection(db, "walletTopups")), {
+                    tx.set(manualTopupRef, {
                         amount,
                         paymentMethod: 'Admin Top Up',
                         status: 'Completed',
@@ -12275,6 +12369,7 @@ html.perf-low [data-pcbg] *,html.perf-low [data-pcbg] *::before,html.perf-low [d
                     });
                 });
                 logAdminActivity('Manual top-up', `${amount.toLocaleString()} MMK to ${userName} (${uid})`);
+                notifyTopupResultToTelegram(manualTopupRef.id, 'Completed', { userId: uid, amount });
                 window.showToast(`Credited ${amount.toLocaleString()} MMK to ${uid}`, 'success');
                 document.getElementById('manual-topup-uid').value = '';
                 document.getElementById('manual-topup-amount').value = '';
@@ -15914,6 +16009,7 @@ html.perf-low [data-pcbg] *,html.perf-low [data-pcbg] *::before,html.perf-low [d
                 document.getElementById('edit-game-app-ios-store-url').value = g.appIosStoreUrl || '';
                 document.getElementById('edit-game-popular').checked = !!g.popular;
                 document.getElementById('edit-game-pcbg').value = g.priceCardBg || '';
+                if (window.__gfxLoad) window.__gfxLoad(g);
                 document.getElementById('edit-game-autoprice').checked = g.autoPriceSync === true; // missing on older games = OFF (Cost only)
                 document.getElementById('edit-game-autocost').checked = g.autoPriceUpdate !== false;
                 document.getElementById('edit-game-margin').value = (typeof g.priceMarginPct === 'number') ? g.priceMarginPct : '';
@@ -15995,6 +16091,7 @@ html.perf-low [data-pcbg] *,html.perf-low [data-pcbg] *::before,html.perf-low [d
                 document.getElementById('edit-game-app-ios-store-url').value = '';
                 document.getElementById('edit-game-popular').checked = false;
                 document.getElementById('edit-game-pcbg').value = '';
+                if (window.__gfxLoad) window.__gfxLoad({});
                 document.getElementById('edit-game-autoprice').checked = false;
                 document.getElementById('edit-game-autocost').checked = true;
                 document.getElementById('edit-game-margin').value = '';
@@ -16372,7 +16469,8 @@ html.perf-low [data-pcbg] *,html.perf-low [data-pcbg] *::before,html.perf-low [d
                 // currently sit in them - without this, a tab created but left empty (or
                 // emptied out later) would vanish on reload since nothing else in the
                 // saved data would reference it.
-                const data = { name, priceCardBg: (document.getElementById('edit-game-pcbg') ? document.getElementById('edit-game-pcbg').value : ''), serverName: serverName || '', image: imageUrl, banner: bannerUrl || imageUrl, bannerImages: existingBanners.length ? existingBanners : [imageUrl], packages, packageTabs: customPkgTabs.slice(), packageTabLabels: { package: builtinPkgTabLabels.package, currency: builtinPkgTabLabels.currency }, g2bulkCode: g2bulkCode || '', jcplaysProduct: jcplaysProduct || '', g2bulkVoucherCategory: g2bulkVoucherCategory || '', fazercardCategoryId: fazercardCategoryId || '', fazercardFields: fazercardCategoryId ? pendingFazerCardFields.slice() : [], fazercardServerMode: pendingFazerCardServerMode || '', fazercardServerOptions: pendingFazerCardServerOptions || [], g2bulkIdCheckCode: fazercardCategoryId ? (g2bulkIdCheckCode || '') : '', fazercardGiftCategoryId: fazercardGiftCategoryId || '', g2bulkServerMode: pendingG2BulkServerMode || '', g2bulkServerOptions: pendingG2BulkServerOptions || [], fulfillProvider: currentFulfillProvider, category: category || '', description: description || '', descriptionBase: descriptionBase || '', disabled: gameDisabled, disabledReason: gameDisabledReason, redeemLink: redeemLink || '', appAndroidPackage: appAndroidPackage || '', appAndroidScheme: appAndroidScheme || '', appAndroidStoreUrl: appAndroidStoreUrl || '', appIosScheme: appIosScheme || '', appIosStoreUrl: appIosStoreUrl || '', popular, autoPriceUpdate, autoPriceSync, priceMarginPct, playerIdRequired, serverIdRequired, charNameRequired };
+                const __gfx = window.__gfxRead ? window.__gfxRead() : { fx: null, sel: '', tag: '' };
+                const data = { name, priceCardBg: (document.getElementById('edit-game-pcbg') ? document.getElementById('edit-game-pcbg').value : ''), priceCardFx: __gfx.fx, priceCardSel: __gfx.sel, priceCardTag: __gfx.tag, serverName: serverName || '', image: imageUrl, banner: bannerUrl || imageUrl, bannerImages: existingBanners.length ? existingBanners : [imageUrl], packages, packageTabs: customPkgTabs.slice(), packageTabLabels: { package: builtinPkgTabLabels.package, currency: builtinPkgTabLabels.currency }, g2bulkCode: g2bulkCode || '', jcplaysProduct: jcplaysProduct || '', g2bulkVoucherCategory: g2bulkVoucherCategory || '', fazercardCategoryId: fazercardCategoryId || '', fazercardFields: fazercardCategoryId ? pendingFazerCardFields.slice() : [], fazercardServerMode: pendingFazerCardServerMode || '', fazercardServerOptions: pendingFazerCardServerOptions || [], g2bulkIdCheckCode: fazercardCategoryId ? (g2bulkIdCheckCode || '') : '', fazercardGiftCategoryId: fazercardGiftCategoryId || '', g2bulkServerMode: pendingG2BulkServerMode || '', g2bulkServerOptions: pendingG2BulkServerOptions || [], fulfillProvider: currentFulfillProvider, category: category || '', description: description || '', descriptionBase: descriptionBase || '', disabled: gameDisabled, disabledReason: gameDisabledReason, redeemLink: redeemLink || '', appAndroidPackage: appAndroidPackage || '', appAndroidScheme: appAndroidScheme || '', appAndroidStoreUrl: appAndroidStoreUrl || '', appIosScheme: appIosScheme || '', appIosStoreUrl: appIosStoreUrl || '', popular, autoPriceUpdate, autoPriceSync, priceMarginPct, playerIdRequired, serverIdRequired, charNameRequired };
 
                 if (gameId) {
                     await updateDoc(doc(db, "games", gameId), data);
@@ -23529,6 +23627,7 @@ html.perf-low [data-pcbg] *,html.perf-low [data-pcbg] *::before,html.perf-low [d
             document.getElementById('edit-game-app-ios-store-url').value = base.appIosStoreUrl || '';
             document.getElementById('edit-game-popular').checked = !!base.popular;
             document.getElementById('edit-game-pcbg').value = base.priceCardBg || '';
+            if (window.__gfxLoad) window.__gfxLoad(base);
             document.getElementById('edit-game-autoprice').checked = base.autoPriceUpdate !== false;
             document.getElementById('edit-game-autocost').checked = base.autoPriceUpdate !== false;
             document.getElementById('edit-game-margin').value = (typeof base.priceMarginPct === 'number') ? base.priceMarginPct : '';
@@ -23915,6 +24014,9 @@ html.perf-low [data-pcbg] *,html.perf-low [data-pcbg] *::before,html.perf-low [d
         // doesn't keep quietly burning CPU/network every 25s. Catch up once
         // immediately on returning instead of waiting for the next tick.
         
+        // Bridge for the add-on scripts below (module-scoped data is otherwise invisible to them)
+        try { window.__lg = { get ORDERS() { return ORDERS; }, get WALLET_TOPUPS() { return WALLET_TOPUPS; }, get PAYINS() { return PAYINS; }, doConfirmTopup, doRejectTopup }; } catch (e) { console.warn('bridge', e); }
+        try { Object.defineProperties(window.__lg, { userTxnRows: { get() { return _userTxnRows; } }, userTxnFilter: { get() { return _userTxnFilter; } }, userId: { get() { return currentUserDetailsId; } } }); } catch (e) { console.warn('bridge2', e); }
     </script>
 
 
@@ -24555,5 +24657,740 @@ button > svg.ic-i:only-child { margin-right: 0; }
 .ge-preview small { color: var(--text-muted); }
 .ge-apply-now { width: 100%; margin-top: 12px; justify-content: center; height: 44px; border-radius: 13px; font-size: 13px; font-weight: 600; }
 </style>
+<style id="lg-upgrade-v2">
+/* ===== UI polish ===== */
+html body { font-family: "Inter","Noto Sans Myanmar","Padauk","Myanmar Text",system-ui,-apple-system,"Segoe UI",sans-serif; -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
+html { scroll-behavior: smooth; scroll-padding-top: 76px; }
+:focus-visible { outline: 2px solid var(--accent, #4F46E5); outline-offset: 2px; border-radius: 8px; }
+.stat-card, .order-stat-card, .chart-card { transition: transform .18s ease, box-shadow .18s ease; }
+.stat-card:active, .order-stat-card:active { transform: scale(.985); }
+.stat-card-value, .order-stat-card .val, .pulse-v { font-variant-numeric: tabular-nums; letter-spacing: -.3px; }
+.page-section.active { animation: lgFade .22s ease-out; }
+@keyframes lgFade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+.lg-skel { color: transparent !important; border-radius: 8px; min-width: 64px; display: inline-block; background: linear-gradient(90deg, rgba(128,140,160,.14) 25%, rgba(128,140,160,.28) 50%, rgba(128,140,160,.14) 75%); background-size: 200% 100%; animation: lgShim 1.2s linear infinite; }
+@keyframes lgShim { to { background-position: -200% 0; } }
+
+/* ===== Dashboard: Live pulse ===== */
+.pulse-card { margin: 4px 0 16px; padding: 14px; border-radius: 20px; border: 1px solid var(--border-glass, rgba(128,140,160,.25)); background: var(--bg-subtle-2, rgba(128,140,160,.06)); }
+.pulse-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; font-size: 14px; font-weight: 700; }
+.pulse-head small { font-weight: 500; color: var(--text-muted); font-size: 11.5px; }
+.pulse-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.pulse-tile { padding: 11px 12px; border-radius: 14px; background: var(--bg-subtle, rgba(128,140,160,.08)); cursor: pointer; border: 1px solid transparent; transition: border-color .15s; }
+.pulse-tile:active { border-color: var(--accent); }
+.pulse-k { font-size: 11.5px; color: var(--text-muted); font-weight: 600; }
+.pulse-v { font-size: 20px; font-weight: 700; margin-top: 3px; line-height: 1.15; word-break: break-word; }
+.pulse-s { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+.pulse-tile.warn { border-color: rgba(234,88,12,.55); background: rgba(251,146,60,.12); }
+.pulse-tile.warn .pulse-v { color: #EA580C; }
+.pulse-tile.good .pulse-v { color: #16A34A; }
+.pulse-bar { height: 6px; border-radius: 99px; background: rgba(128,140,160,.2); margin-top: 7px; overflow: hidden; }
+.pulse-bar i { display: block; height: 100%; border-radius: inherit; background: #16A34A; transition: width .5s ease; }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; scroll-behavior: auto !important; } }
+</style>
+<script id="lg-upgrade-v2-js">
+(function () {
+  'use strict';
+  if (window.__lgUp2) return; window.__lgUp2 = 1;
+  var $ = function (s, r) { return (r || document).querySelector(s); };
+  var fmt = function (n) { return Math.round(n).toLocaleString('en-US'); };
+
+  /* ---------- Speed: don't run background polling in hidden tabs ---------- */
+  var nativeSI = window.setInterval;
+  window.setInterval = function (fn, ms) {
+    if (typeof fn === 'function' && ms >= 5000) {
+      var a = Array.prototype.slice.call(arguments, 2);
+      return nativeSI.call(window, function () { if (!document.hidden) fn.apply(this, a); }, ms);
+    }
+    return nativeSI.apply(window, arguments);
+  };
+  /* refresh stale orders when the admin returns to the app */
+  document.addEventListener('visibilitychange', function () {
+    if (!document.hidden && typeof loadOrdersIfStale === 'function') { try { loadOrdersIfStale(60000); } catch (e) {} }
+  });
+
+  /* ---------- Skeleton shimmer for "..." placeholders ---------- */
+  var SK = '.stat-card-value,.order-stat-card .val,.pulse-v';
+  function skel(root) {
+    (root || document).querySelectorAll(SK).forEach(function (el) {
+      var loading = el.textContent.trim() === '...';
+      if (loading !== el.classList.contains('lg-skel')) el.classList.toggle('lg-skel', loading);
+    });
+  }
+  var skTimer;
+  function watch(id) {
+    var r = document.getElementById(id); if (!r) return;
+    new MutationObserver(function () { clearTimeout(skTimer); skTimer = setTimeout(skel, 60); })
+      .observe(r, { childList: true, characterData: true, subtree: true });
+  }
+
+  /* ---------- Dashboard: live pulse from loaded orders ---------- */
+  var card;
+  function ts(o) { try { return o.timestamp.toDate().getTime(); } catch (e) { return 0; } }
+  function tile(k, v, s, cls, go, extra) {
+    return '<div class="pulse-tile ' + (cls || '') + '"' + (go ? ' onclick="showPage(\'' + go + '\')"' : '') + '><div class="pulse-k">' + k + '</div><div class="pulse-v">' + v + '</div><div class="pulse-s">' + s + '</div>' + (extra || '') + '</div>';
+  }
+  function pulse() {
+    if (!card || !window.__lg) return;
+    var os = Object.values(window.__lg.ORDERS), now = Date.now(), day = new Date().toDateString();
+    var pend = os.filter(function (o) { return o.status === 'Pending'; });
+    var proc = os.filter(function (o) { return o.status === 'Processing'; });
+    var oldest = pend.reduce(function (m, o) { var t = ts(o); return t && t < m ? t : m; }, now);
+    var wait = pend.length ? Math.max(0, Math.round((now - oldest) / 60000)) : 0;
+    var td = os.filter(function (o) { var t = ts(o); return t && new Date(t).toDateString() === day; });
+    var ok = td.filter(function (o) { return o.status === 'Success'; });
+    var fail = td.filter(function (o) { return o.status === 'Fail'; }).length;
+    var rate = ok.length + fail ? Math.round(ok.length * 100 / (ok.length + fail)) : null;
+    var avg = ok.length ? ok.reduce(function (s, o) { return s + (Number(o.price) || 0); }, 0) / ok.length : 0;
+    var cnt = {}; td.forEach(function (o) { var g = (o.game || '').trim() || 'Unknown'; cnt[g] = (cnt[g] || 0) + 1; });
+    var top = Object.keys(cnt).sort(function (a, b) { return cnt[b] - cnt[a]; })[0];
+    var waitTxt = wait >= 60 ? Math.floor(wait / 60) + 'h ' + (wait % 60) + 'm' : wait + ' min';
+    card.querySelector('.pulse-grid').innerHTML =
+      tile('Waiting for you', pend.length, pend.length ? 'Oldest waiting ' + waitTxt : 'No new orders', pend.length && wait >= 15 ? 'warn' : '', 'order-list') +
+      tile('In progress', proc.length, 'Being fulfilled', '', 'order-list') +
+      tile('Success rate today', rate === null ? '-' : rate + '%', ok.length + ' done, ' + fail + ' failed', rate !== null && rate >= 90 ? 'good' : (rate !== null && rate < 70 ? 'warn' : ''), '', rate === null ? '' : '<div class="pulse-bar"><i style="width:' + rate + '%"></i></div>') +
+      tile('Top game today', top ? top : '-', top ? cnt[top] + ' orders · avg ' + fmt(avg) + ' MMK' : 'No orders yet', '', '');
+    var t = card.querySelector('.pulse-head small'); if (t) t.textContent = 'Updated ' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  }
+  function mountPulse() {
+    var g = $('#dashboard .stat-grid'); if (!g || $('.pulse-card')) return;
+    card = document.createElement('div'); card.className = 'pulse-card';
+    card.innerHTML = '<div class="pulse-head"><span>Live pulse</span><small></small></div><div class="pulse-grid"></div>';
+    g.insertAdjacentElement('afterend', card);
+    pulse(); nativeSI.call(window, function () { if (!document.hidden) pulse(); }, 30000);
+    if (typeof window.fetchOrders === 'function') {
+      var f = window.fetchOrders;
+      window.fetchOrders = function () { var r = f.apply(this, arguments); if (r && r.then) r.then(function () { setTimeout(pulse, 50); }, function () {}); return r; };
+    }
+  }
+
+  /* ---------- Orders: alert when a new order arrives ---------- */
+  var last = 0, baseTitle = document.title, ac;
+  function beep() {
+    if (localStorage.getItem('lg_beep') === '0') return;
+    try {
+      ac = ac || new (window.AudioContext || window.webkitAudioContext)();
+      var o = ac.createOscillator(), g = ac.createGain();
+      o.type = 'sine'; o.frequency.value = 880; g.gain.value = 0.05;
+      o.connect(g); g.connect(ac.destination); o.start(); o.stop(ac.currentTime + 0.18);
+    } catch (e) {}
+  }
+  function watchBadge() {
+    var b = document.getElementById('orders-nav-count-badge'); if (!b) return;
+    new MutationObserver(function () {
+      var n = parseInt(b.textContent, 10) || 0;
+      document.title = n ? '(' + n + ') ' + baseTitle : baseTitle;
+      if (n > last) { beep(); try { navigator.vibrate && navigator.vibrate([80, 60, 80]); } catch (e) {} }
+      last = n;
+    }).observe(b, { childList: true, characterData: true, subtree: true });
+  }
+
+  function boot() { mountPulse(); skel(); watch('dashboard'); watch('order-list'); watchBadge(); }
+  if (document.readyState !== 'loading') boot(); else document.addEventListener('DOMContentLoaded', boot);
+})();
+</script>
+
+<style id="lg-wallet-v3">
+.wl-strip { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 0 0 14px; }
+.wl-tile { padding: 12px; border-radius: 16px; background: var(--bg-subtle-2, rgba(128,140,160,.08)); border: 1px solid var(--border-glass, rgba(128,140,160,.25)); }
+.wl-tile.warn { border-color: rgba(234,88,12,.55); background: rgba(251,146,60,.12); }
+.wl-k { font-size: 11.5px; font-weight: 600; color: var(--text-muted); }
+.wl-v { font-size: 19px; font-weight: 700; margin-top: 3px; font-variant-numeric: tabular-nums; letter-spacing: -.3px; }
+.wl-s { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+.wl-chips { display: flex; gap: 7px; flex-wrap: wrap; grid-column: 1 / -1; }
+.wl-chip { padding: 8px 13px; border-radius: 999px; border: 1px solid var(--border-glass, rgba(128,140,160,.3)); background: var(--bg-subtle); color: var(--text-secondary); font-size: 12.5px; font-weight: 600; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.wl-chip:active { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); }
+.wl-tag { display: inline-block; margin: 6px 6px 0 0; padding: 3px 9px; border-radius: 999px; font-size: 11px; font-weight: 700; background: var(--bg-subtle); color: var(--text-secondary); }
+.wl-tag.late { background: rgba(251,146,60,.18); color: #EA580C; }
+.wl-tag.dup { background: rgba(239,68,68,.15); color: #DC2626; }
+</style>
+<script id="lg-wallet-v3-js">
+(function () {
+  'use strict';
+  if (window.__lgWl3) return; window.__lgWl3 = 1;
+  var $ = function (s) { return document.querySelector(s); };
+  var fmt = function (n) { return Math.round(n).toLocaleString('en-US'); };
+  function ms(t) { try { return t.timestamp.toMillis(); } catch (e) { return 0; } }
+  function waitTxt(m) { return m >= 60 ? Math.floor(m / 60) + 'h ' + (m % 60) + 'm' : m + ' min'; }
+
+  /* ----- summary strip ----- */
+  var strip;
+  function summary() {
+    if (!strip || !window.__lg) return;
+    var all = Object.values(window.__lg.WALLET_TOPUPS), now = Date.now(), day = new Date().toDateString();
+    var open = all.filter(function (t) { return t.status === 'Pending' || t.status === 'Processing'; });
+    var amt = open.reduce(function (s, t) { return s + (Number(t.amount) || 0); }, 0);
+    var oldest = open.reduce(function (m, t) { var x = ms(t); return x && x < m ? x : m; }, now);
+    var wait = open.length ? Math.round((now - oldest) / 60000) : 0;
+    var today = all.filter(function (t) { return ms(t) && new Date(ms(t)).toDateString() === day; });
+    var cred = today.filter(function (t) { return t.status === 'Completed'; });
+    var credAmt = cred.reduce(function (s, t) { return s + (Number(t.amount) || 0); }, 0);
+    var rej = today.filter(function (t) { return t.status === 'Rejected'; }).length;
+    var PI = window.__lg && window.__lg.PAYINS; var pw = (PI && PI.length) ? PI.filter(function (p) { return p.status === 'Waiting'; }) : null;
+    var t4 = pw ? '<div class="wl-tile ' + (pw.length ? 'warn' : '') + '"><div class="wl-k">Unclaimed phone payments</div><div class="wl-v">' + pw.length + '</div><div class="wl-s">' + fmt(pw.reduce(function (s, p) { return s + (Number(p.amount) || 0); }, 0)) + ' MMK received</div></div>'
+      : '<div class="wl-tile"><div class="wl-k">Rejected today</div><div class="wl-v">' + rej + '</div><div class="wl-s">top-ups</div></div>';
+    strip.querySelector('.wl-grid').innerHTML =
+      '<div class="wl-tile ' + (open.length && wait >= 15 ? 'warn' : '') + '"><div class="wl-k">Waiting for review</div><div class="wl-v">' + open.length + '</div><div class="wl-s">' + (open.length ? fmt(amt) + ' MMK · oldest ' + waitTxt(wait) : 'All clear') + '</div></div>' +
+      '<div class="wl-tile"><div class="wl-k">Credited today</div><div class="wl-v">' + fmt(credAmt) + '</div><div class="wl-s">' + cred.length + ' top-ups · ' + rej + ' rejected</div></div>' + t4;
+  }
+
+  /* ----- per-card tags: wait time + possible duplicate ----- */
+  function decorate() {
+    var c = document.getElementById('topups-container');
+    if (!c || !window.__lg) return;
+    var WT = window.__lg.WALLET_TOPUPS, now = Date.now(), all = Object.values(WT);
+    c.querySelectorAll('.admin-card[id^="topup-card-"]').forEach(function (card) {
+      var t = WT[card.id.replace('topup-card-', '')]; if (!t) return;
+      var host = card.querySelector('.oc-info'); if (!host || host.querySelector('.wl-tag')) return;
+      var h = '';
+      if (t.status === 'Pending' || t.status === 'Processing') {
+        var m = Math.max(0, Math.round((now - ms(t)) / 60000));
+        if (ms(t)) h += '<span class="wl-tag ' + (m >= 15 ? 'late' : '') + '">Waiting ' + waitTxt(m) + '</span>';
+        var dup = all.some(function (o) { return o.id !== t.id && o.userId === t.userId && Number(o.amount) === Number(t.amount) && o.status !== 'Rejected' && Math.abs(ms(o) - ms(t)) < 600000; });
+        if (dup) h += '<span class="wl-tag dup">Same amount sent twice in 10 min</span>';
+      }
+      if (h) host.insertAdjacentHTML('beforeend', '<div>' + h + '</div>');
+    });
+  }
+
+  /* ----- quick amounts for manual top-up ----- */
+  function chips() {
+    var grid = $('.quick-topup-grid'), inp = document.getElementById('manual-topup-amount');
+    if (!grid || !inp || $('.wl-chips')) return;
+    var box = document.createElement('div'); box.className = 'wl-chips';
+    [5000, 10000, 20000, 50000, 100000].forEach(function (v) {
+      var b = document.createElement('button'); b.type = 'button'; b.className = 'wl-chip'; b.setAttribute('data-no-busy', '');
+      b.textContent = fmt(v);
+      b.onclick = function () { inp.value = v; inp.dispatchEvent(new Event('input', { bubbles: true })); };
+      box.appendChild(b);
+    });
+    inp.insertAdjacentElement('afterend', box);
+  }
+
+  /* ----- safety: confirm large manual top-ups ----- */
+  var LIMIT = 200000;
+  if (typeof submitManualTopup === 'function') {
+    var orig = submitManualTopup;
+    window.submitManualTopup = function (btn) {
+      var a = Number((document.getElementById('manual-topup-amount') || {}).value), u = ((document.getElementById('manual-topup-uid') || {}).value || '').trim();
+      if (a >= LIMIT && !window.confirm('Add ' + fmt(a) + ' MMK to ' + u + '?')) return;
+      return orig.apply(this, arguments);
+    };
+  }
+
+  function boot() {
+    var page = document.getElementById('topup-list'), c = document.getElementById('topups-container');
+    if (!page || !c) return;
+    var h = page.querySelector('.title-header');
+    strip = document.createElement('div'); strip.className = 'wl-strip-wrap';
+    strip.innerHTML = '<div class="wl-strip wl-grid"></div>';
+    h.insertAdjacentElement('afterend', strip);
+    chips(); summary(); decorate();
+    new MutationObserver(function () { summary(); decorate(); }).observe(c, { childList: true });
+    setInterval(function () { summary(); c.querySelectorAll('.wl-tag').forEach(function (x) { x.parentNode.remove(); }); decorate(); }, 60000);
+  }
+  if (document.readyState !== 'loading') boot(); else document.addEventListener('DOMContentLoaded', boot);
+})();
+</script>
+
+<style id="lg-bulk-v4">
+.wl-ck { display: none; align-items: center; padding: 0 10px 0 2px; flex-shrink: 0; }
+body.wl-select .wl-ck { display: flex; }
+.wl-ck input { width: 22px; height: 22px; accent-color: var(--accent, #4F46E5); }
+#wl-bulkbar { position: fixed; left: 10px; right: 10px; bottom: calc(10px + env(safe-area-inset-bottom, 0px)); z-index: 60; display: none; align-items: center; gap: 8px; padding: 10px 12px; border-radius: 20px; border: 1px solid var(--border-glass, rgba(128,140,160,.3)); background: color-mix(in srgb, var(--bg, #fff) 88%, transparent); -webkit-backdrop-filter: blur(18px) saturate(160%); backdrop-filter: blur(18px) saturate(160%); box-shadow: 0 14px 34px -14px rgba(15,23,42,.45); }
+body.wl-select #wl-bulkbar.on { display: flex; }
+#wl-bulkbar .wl-info { flex: 1; min-width: 0; font-size: 12.5px; font-weight: 600; line-height: 1.3; }
+#wl-bulkbar .wl-info small { display: block; font-weight: 500; color: var(--text-muted); }
+#wl-bulkbar .btn { height: 42px; border-radius: 13px; font-weight: 700; padding: 0 14px; }
+body.wl-select #topups-container { padding-bottom: 84px; }
+</style>
+<script id="lg-bulk-v4-js">
+(function () {
+  'use strict';
+  if (window.__lgBulk4) return; window.__lgBulk4 = 1;
+  var MAXN = 25, sel = new Set(), busy = false, bar, selBtn;
+  var fmt = function (n) { return Math.round(n).toLocaleString('en-US'); };
+  var L = function () { return window.__lg; };
+  function ms(t) { try { return t.timestamp.toMillis(); } catch (e) { return 0; } }
+  function open(t) { return t && (t.status === 'Pending' || t.status === 'Processing'); }
+  function dupIds(ids) {
+    var all = Object.values(L().WALLET_TOPUPS), n = 0;
+    ids.forEach(function (id) {
+      var t = L().WALLET_TOPUPS[id]; if (!t) return;
+      if (all.some(function (o) { return o.id !== t.id && o.userId === t.userId && Number(o.amount) === Number(t.amount) && o.status !== 'Rejected' && Math.abs(ms(o) - ms(t)) < 600000; })) n++;
+    });
+    return n;
+  }
+  function chosen() { var T = L().WALLET_TOPUPS; return Array.from(sel).filter(function (id) { return open(T[id]); }); }
+
+  function refreshBar() {
+    if (!bar || !L()) return;
+    var ids = chosen(), T = L().WALLET_TOPUPS;
+    var total = ids.reduce(function (s, id) { return s + (Number(T[id].amount) || 0); }, 0);
+    bar.classList.toggle('on', true);
+    bar.querySelector('.wl-info').innerHTML = ids.length ? ids.length + ' selected<small>' + fmt(total) + ' MMK</small>' : 'Tap cards to select<small>Max ' + MAXN + ' at a time</small>';
+    bar.querySelectorAll('[data-act]').forEach(function (b) { b.disabled = busy || !ids.length; });
+  }
+
+  function mark() {
+    var c = document.getElementById('topups-container'); if (!c || !L()) return;
+    var T = L().WALLET_TOPUPS;
+    Array.from(sel).forEach(function (id) { if (!open(T[id])) sel.delete(id); });
+    c.querySelectorAll('.admin-card[id^="topup-card-"]').forEach(function (card) {
+      var id = card.id.replace('topup-card-', ''), top = card.querySelector('.oc-top');
+      if (!top || !open(T[id]) || top.querySelector('.wl-ck')) return;
+      var l = document.createElement('label'); l.className = 'wl-ck';
+      l.innerHTML = '<input type="checkbox" aria-label="Select top-up">';
+      var cb = l.firstChild; cb.checked = sel.has(id);
+      l.addEventListener('click', function (e) { e.stopPropagation(); });
+      cb.addEventListener('change', function () {
+        if (cb.checked && sel.size >= MAXN) { cb.checked = false; window.showToast('Select up to ' + MAXN + ' at a time.', 'fail'); return; }
+        cb.checked ? sel.add(id) : sel.delete(id); refreshBar();
+      });
+      top.insertBefore(l, top.firstChild);
+    });
+    refreshBar();
+  }
+
+  /* run one action over the selection, one by one, with a single summary toast */
+  async function run(kind, note) {
+    var ids = chosen(), T = L().WALLET_TOPUPS, ok = 0, fails = [], realToast = window.showToast;
+    busy = true; refreshBar();
+    window.showToast = function (msg, type) { if (type === 'success' || (kind === 'reject' && /rejected/i.test(msg))) ok++; else fails.push(msg); };
+    try {
+      for (var i = 0; i < ids.length; i++) {
+        var b = bar.querySelector('[data-act="' + kind + '"]'); if (b) b.textContent = (i + 1) + ' / ' + ids.length + '...';
+        if (!open(T[ids[i]])) { fails.push('Skipped: status changed'); continue; }
+        try { kind === 'confirm' ? await L().doConfirmTopup(ids[i], null, note) : await L().doRejectTopup(ids[i], null, note); }
+        catch (e) { fails.push(e && e.message || 'Failed'); }
+      }
+    } finally { window.showToast = realToast; busy = false; sel.clear(); }
+    bar.querySelector('[data-act="confirm"]').textContent = 'Confirm';
+    bar.querySelector('[data-act="reject"]').textContent = 'Reject';
+    window.showToast((kind === 'confirm' ? 'Credited ' : 'Rejected ') + ok + ' of ' + ids.length + (fails.length ? ' - ' + fails.length + ' failed, check the list' : ''), fails.length ? 'fail' : 'success');
+    document.querySelectorAll('#topups-container .wl-ck input').forEach(function (c) { c.checked = false; });
+    refreshBar();
+  }
+  function ask(kind) {
+    var ids = chosen(); if (!ids.length || busy) return;
+    var T = L().WALLET_TOPUPS, total = ids.reduce(function (s, id) { return s + (Number(T[id].amount) || 0); }, 0), d = dupIds(ids);
+    var warn = d ? ' ' + d + ' of them look like possible duplicates.' : '';
+    window.showActionDialog(kind === 'confirm' ? {
+      type: 'success', title: 'Credit ' + ids.length + ' top-ups?',
+      message: fmt(total) + ' MMK will be credited to the customers\' wallets, one by one.' + warn,
+      confirmText: 'Confirm & credit all', showNote: true, notePlaceholder: 'Note (optional)', onConfirm: function (n) { return run('confirm', n); }
+    } : {
+      type: 'warning', title: 'Reject ' + ids.length + ' top-ups?',
+      message: 'Nothing will be credited. Customers will see these requests as rejected.',
+      confirmText: 'Reject all', showNote: true, notePlaceholder: 'Reason (optional)', onConfirm: function (n) { return run('reject', n); }
+    });
+  }
+
+  function boot() {
+    var page = document.getElementById('topup-list'), c = document.getElementById('topups-container');
+    if (!page || !c) return;
+    selBtn = document.createElement('button'); selBtn.type = 'button'; selBtn.className = 'btn btn-outline btn-sm'; selBtn.setAttribute('data-no-busy', ''); selBtn.textContent = 'Select';
+    var h = page.querySelector('.title-header'); h.appendChild(selBtn);
+    h.style.cssText += ';display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;';
+    bar = document.createElement('div'); bar.id = 'wl-bulkbar';
+    bar.innerHTML = '<div class="wl-info"></div><button type="button" class="btn btn-danger" data-act="reject">Reject</button><button type="button" class="btn btn-primary" data-act="confirm">Confirm</button>';
+    document.body.appendChild(bar);
+    bar.querySelectorAll('[data-act]').forEach(function (b) { b.setAttribute('data-no-busy', ''); b.addEventListener('click', function () { ask(b.getAttribute('data-act')); }); });
+    selBtn.addEventListener('click', function () {
+      var on = document.body.classList.toggle('wl-select'); selBtn.textContent = on ? 'Done' : 'Select';
+      if (!on) { sel.clear(); c.querySelectorAll('.wl-ck input').forEach(function (x) { x.checked = false; }); } else mark();
+    });
+    new MutationObserver(function () { setTimeout(mark, 0); }).observe(c, { childList: true });
+    /* leave select mode when navigating away from Top Ups */
+    new MutationObserver(function () { if (!page.classList.contains('active') && document.body.classList.contains('wl-select')) selBtn.click(); }).observe(page, { attributes: true, attributeFilter: ['class'] });
+    mark();
+  }
+  if (document.readyState !== 'loading') boot(); else document.addEventListener('DOMContentLoaded', boot);
+})();
+</script>
+
+<style id="lg-userwallet-v5">
+.wl-day { display: flex; justify-content: space-between; align-items: baseline; margin: 14px 2px 6px; font-size: 12px; font-weight: 700; color: var(--text-muted); }
+.wl-day b { font-variant-numeric: tabular-nums; color: var(--text-secondary); }
+.wl-day.first { margin-top: 4px; }
+#wl-ut-sum .wl-strip, #wl-ut-top .wl-strip { margin-bottom: 10px; }
+.wl-actions { display: flex; gap: 8px; margin: 0 0 12px; flex-wrap: wrap; }
+.wl-actions .btn { flex: 1; min-width: 130px; height: 42px; border-radius: 13px; font-weight: 700; }
+.wl-flag { margin: 0 0 10px; padding: 10px 12px; border-radius: 13px; font-size: 12.5px; font-weight: 600; background: rgba(239,68,68,.12); color: #DC2626; }
+</style>
+<script id="lg-userwallet-v5-js">
+(function () {
+  'use strict';
+  if (window.__lgUw5) return; window.__lgUw5 = 1;
+  var $ = function (s) { return document.querySelector(s); };
+  var fmt = function (n) { return Math.round(n).toLocaleString('en-US'); };
+  var sgn = { in: 1, out: -1, buy: -1 };
+  var tobs, tbox, sum;
+
+  /* ---------- Transactions tab ---------- */
+  function dayLabel(ms) {
+    var d = new Date(ms), t = new Date(), y = new Date(Date.now() - 864e5);
+    if (d.toDateString() === t.toDateString()) return 'Today';
+    if (d.toDateString() === y.toDateString()) return 'Yesterday';
+    return d.toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' });
+  }
+  function csv() {
+    var L = window.__lg, rows = L && L.userTxnRows || []; if (!rows.length) { window.showToast('No transactions to export.', 'fail'); return; }
+    var q = function (v) { return '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"'; };
+    var out = ['Date,Type,Title,Detail,Amount (MMK)'].concat(rows.map(function (r) {
+      return [q(r.at ? new Date(r.at).toLocaleString() : ''), r.type, q(r.title), q(r.sub), sgn[r.type] * r.amount].join(',');
+    })).join('\n');
+    var a = document.createElement('a'); a.href = URL.createObjectURL(new Blob(['\ufeff' + out], { type: 'text/csv' }));
+    a.download = 'wallet-' + (L.userId || 'user') + '.csv'; document.body.appendChild(a); a.click();
+    setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 500);
+  }
+  function topUpUser() {
+    var id = window.__lg && window.__lg.userId; if (!id) return;
+    window.showPage('topup-list');
+    setTimeout(function () { var u = document.getElementById('manual-topup-uid'), a = document.getElementById('manual-topup-amount'); if (u) { u.value = id; u.dispatchEvent(new Event('input', { bubbles: true })); } if (a) a.focus(); }, 150);
+  }
+  function txns() {
+    var L = window.__lg; if (!L || !tbox) return;
+    var all = L.userTxnRows || [], f = L.userTxnFilter || 'all';
+    var rows = f === 'all' ? all : all.filter(function (r) { return r.type === f; });
+    var s = { in: 0, out: 0, buy: 0 }; all.forEach(function (r) { s[r.type] += r.amount; });
+    var bad = all.filter(function (r) { return /Wallet NOT debited/.test(r.sub || ''); }).length;
+    sum.querySelector('.wl-grid').innerHTML =
+      '<div class="wl-tile"><div class="wl-k">Money in</div><div class="wl-v" style="color:#16A34A">+' + fmt(s.in) + '</div><div class="wl-s">top-ups and refunds</div></div>' +
+      '<div class="wl-tile"><div class="wl-k">Spent on orders</div><div class="wl-v">' + fmt(s.buy) + '</div><div class="wl-s">' + fmt(s.out) + ' deducted by admin</div></div>';
+    sum.querySelector('.wl-flag').style.display = bad ? '' : 'none';
+    sum.querySelector('.wl-flag').textContent = bad + ' order' + (bad > 1 ? 's' : '') + ' went through without a wallet debit. Check the rows marked "Wallet NOT debited".';
+    var els = tbox.querySelectorAll('.wtx-row');
+    if (!rows.length || els.length !== rows.length) return;
+    tobs.disconnect();
+    tbox.querySelectorAll('.wl-day').forEach(function (n) { n.remove(); });
+    var cur = '', net = 0, head = null;
+    rows.forEach(function (r, i) {
+      var k = r.at ? dayLabel(r.at) : 'Unknown date';
+      if (k !== cur) { cur = k; net = 0; head = document.createElement('div'); head.className = 'wl-day' + (i ? '' : ' first'); head.innerHTML = '<span>' + k + '</span><b></b>'; els[i].parentNode.insertBefore(head, els[i]); }
+      net += sgn[r.type] * r.amount; head.lastChild.textContent = (net > 0 ? '+' : net < 0 ? '-' : '') + fmt(Math.abs(net));
+    });
+    tobs.observe(tbox, { childList: true });
+  }
+
+  /* ---------- Top Up List tab ---------- */
+  var tpBox, tpBar, tpFilter = 'all', tpObs;
+  function cls(card) {
+    var b = (card.querySelector('.badge') || {}).textContent || '';
+    b = b.toLowerCase();
+    return /complete|success|approv/.test(b) ? 'done' : /reject|fail/.test(b) ? 'rej' : 'open';
+  }
+  function topups() {
+    if (!tpBox) return;
+    var cards = tpBox.querySelectorAll('.admin-card'), n = { done: 0, rej: 0, open: 0 }, amt = 0;
+    cards.forEach(function (c) {
+      var k = cls(c); n[k]++;
+      if (k === 'done') amt += Number(((c.querySelector('.ac-id') || {}).textContent || '').replace(/[^\d]/g, '')) || 0;
+      c.style.display = (tpFilter === 'all' || tpFilter === k) ? '' : 'none';
+    });
+    tpBar.style.display = cards.length ? '' : 'none';
+    tpBar.querySelector('.wl-grid').innerHTML =
+      '<div class="wl-tile"><div class="wl-k">Credited in total</div><div class="wl-v">' + fmt(amt) + '</div><div class="wl-s">' + n.done + ' completed top-ups</div></div>' +
+      '<div class="wl-tile ' + (n.open ? 'warn' : '') + '"><div class="wl-k">Still open</div><div class="wl-v">' + n.open + '</div><div class="wl-s">' + n.rej + ' rejected</div></div>';
+  }
+
+  function boot() {
+    tbox = document.getElementById('ud-txn-container'); tpBox = document.getElementById('ud-topups-container');
+    var tabs = document.getElementById('ud-txn-tabs');
+    if (tbox && tabs) {
+      sum = document.createElement('div'); sum.id = 'wl-ut-sum';
+      sum.innerHTML = '<div class="wl-strip wl-grid"></div><div class="wl-flag" style="display:none"></div><div class="wl-actions"><button type="button" class="btn btn-primary" data-no-busy id="wl-topup-user">Top up this user</button><button type="button" class="btn btn-outline" data-no-busy id="wl-csv">Export CSV</button></div>';
+      tabs.insertAdjacentElement('beforebegin', sum);
+      sum.querySelector('#wl-csv').addEventListener('click', csv);
+      sum.querySelector('#wl-topup-user').addEventListener('click', topUpUser);
+      tobs = new MutationObserver(function () { setTimeout(txns, 0); }); tobs.observe(tbox, { childList: true });
+    }
+    if (tpBox) {
+      tpBar = document.createElement('div'); tpBar.id = 'wl-ut-top'; tpBar.style.display = 'none';
+      tpBar.innerHTML = '<div class="wl-strip wl-grid"></div><div class="wl-chips" style="margin-bottom:10px"></div>';
+      [['all', 'All'], ['done', 'Completed'], ['open', 'Open'], ['rej', 'Rejected']].forEach(function (p) {
+        var b = document.createElement('button'); b.type = 'button'; b.className = 'wl-chip'; b.setAttribute('data-no-busy', ''); b.textContent = p[1];
+        b.addEventListener('click', function () { tpFilter = p[0]; tpBar.querySelectorAll('.wl-chip').forEach(function (x) { x.style.background = x === b ? 'var(--accent-soft)' : ''; }); topups(); });
+        tpBar.lastChild.appendChild(b);
+      });
+      tpBox.insertAdjacentElement('beforebegin', tpBar);
+      tpObs = new MutationObserver(function () { setTimeout(topups, 0); }); tpObs.observe(tpBox, { childList: true });
+    }
+  }
+  if (document.readyState !== 'loading') boot(); else document.addEventListener('DOMContentLoaded', boot);
+})();
+</script>
+
+<style id="lg-orders-v6">
+#wl-ostat { margin: 0 0 12px; }
+#wl-ostat .wl-chip { display: inline-flex; align-items: center; gap: 6px; }
+#wl-ostat .wl-chip b { font-size: 11px; font-weight: 700; padding: 1px 7px; border-radius: 99px; background: rgba(128,140,160,.2); font-variant-numeric: tabular-nums; }
+#wl-ostat .wl-chip.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+#wl-ostat .wl-chip.on b { background: rgba(255,255,255,.25); }
+#wl-ostat .wl-chip.late-chip b { background: rgba(251,146,60,.25); color: #EA580C; }
+#wl-ostat .wl-chip.late-chip.on b { color: #fff; background: rgba(255,255,255,.25); }
+</style>
+<script id="lg-orders-v6-js">
+(function () {
+  'use strict';
+  if (window.__lgOrd6) return; window.__lgOrd6 = 1;
+  var LATE = 20; /* minutes before an open order counts as late */
+  var FILTERS = [['all', 'All'], ['Pending', 'Pending'], ['Processing', 'Processing'], ['late', 'Late'], ['Success', 'Success'], ['Fail', 'Failed']];
+  var cur = 'all', box, bar;
+  function mins(o) { try { return Math.max(0, Math.round((Date.now() - o.timestamp.toMillis()) / 60000)); } catch (e) { return null; } }
+  function open(o) { return o && (o.status === 'Pending' || o.status === 'Processing'); }
+  function late(o) { var m = open(o) ? mins(o) : null; return m !== null && m >= LATE; }
+  function wt(m) { return m >= 60 ? Math.floor(m / 60) + 'h ' + (m % 60) + 'm' : m + ' min'; }
+  function match(o, f) { return f === 'all' || (f === 'late' ? late(o) : o.status === f); }
+
+  function apply() {
+    if (!box || !window.__lg) return;
+    var O = window.__lg.ORDERS, kids = Array.prototype.slice.call(box.children), cnt = {}, head = null, headShown = false;
+    FILTERS.forEach(function (f) { cnt[f[0]] = 0; });
+    kids.forEach(function (el) {
+      if (el.classList.contains('od-day-head')) {
+        if (head) head.style.display = headShown || cur === 'all' ? '' : 'none';
+        head = el; headShown = false; return;
+      }
+      if (!/^card-/.test(el.id)) return;
+      var o = O[el.id.slice(5)]; if (!o) return;
+      FILTERS.forEach(function (f) { if (match(o, f[0])) cnt[f[0]]++; });
+      var show = match(o, cur); el.style.display = show ? '' : 'none'; if (show) headShown = true;
+      var info = el.querySelector('.oc-info');
+      if (info && !info.querySelector('.wl-tag') && open(o)) {
+        var m = mins(o);
+        if (m !== null) info.insertAdjacentHTML('beforeend', '<div><span class="wl-tag' + (m >= LATE ? ' late' : '') + '">Open ' + wt(m) + '</span></div>');
+      }
+    });
+    if (head) head.style.display = headShown || cur === 'all' ? '' : 'none';
+    bar.style.display = kids.some(function (k) { return /^card-/.test(k.id); }) ? '' : 'none';
+    bar.querySelectorAll('.wl-chip').forEach(function (b) {
+      var f = b.getAttribute('data-f'); b.classList.toggle('on', f === cur);
+      b.querySelector('b').textContent = cnt[f];
+    });
+    if (cur !== 'all' && !cnt[cur]) cur = 'all';
+  }
+
+  function boot() {
+    var page = document.getElementById('order-list'); box = document.getElementById('orders-container');
+    var anchor = document.getElementById('order-bulk-bar'); if (!page || !box || !anchor) return;
+    bar = document.createElement('div'); bar.id = 'wl-ostat'; bar.className = 'wl-chips'; bar.style.display = 'none';
+    FILTERS.forEach(function (f) {
+      var b = document.createElement('button'); b.type = 'button'; b.className = 'wl-chip' + (f[0] === 'late' ? ' late-chip' : ''); b.setAttribute('data-f', f[0]); b.setAttribute('data-no-busy', '');
+      b.innerHTML = f[1] + ' <b>0</b>';
+      b.addEventListener('click', function () { cur = f[0]; apply(); });
+      bar.appendChild(b);
+    });
+    anchor.insertAdjacentElement('beforebegin', bar);
+    new MutationObserver(function () { setTimeout(apply, 0); }).observe(box, { childList: true });
+    setInterval(function () { box.querySelectorAll('.wl-tag').forEach(function (t) { t.parentNode.remove(); }); apply(); }, 60000);
+    apply();
+  }
+  if (document.readyState !== 'loading') boot(); else document.addEventListener('DOMContentLoaded', boot);
+})();
+</script>
+
+<style id="lg-analytics-v7">
+.an-card { margin: 0 0 14px; padding: 14px; border-radius: 20px; border: 1px solid var(--border-glass, rgba(128,140,160,.25)); background: var(--bg-subtle-2, rgba(128,140,160,.06)); }
+.an-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; margin-bottom: 4px; font-size: 14px; font-weight: 700; }
+.an-head small { font-size: 11.5px; font-weight: 500; color: var(--text-muted); text-align: right; }
+.an-insight { font-size: 12.5px; color: var(--text-secondary); margin: 2px 0 10px; line-height: 1.45; }
+.an-svg { width: 100%; height: auto; display: block; overflow: visible; }
+.an-svg text { font-size: 9px; fill: var(--text-muted); font-family: inherit; }
+.an-svg .bar { fill: var(--accent, #4F46E5); opacity: .32; }
+.an-svg .bar.pk { opacity: 1; }
+.an-svg .bar.mid { opacity: .6; }
+.an-row { display: flex; align-items: center; gap: 10px; padding: 9px 0; cursor: pointer; }
+.an-row + .an-row { border-top: 1px solid var(--border-glass, rgba(128,140,160,.2)); }
+.an-rank { width: 24px; height: 24px; border-radius: 8px; display: grid; place-items: center; font-size: 12px; font-weight: 700; background: var(--accent-soft, rgba(79,70,229,.12)); color: var(--accent); flex-shrink: 0; }
+.an-who { flex: 1; min-width: 0; }
+.an-who b { display: block; font-size: 13.5px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.an-who small { font-size: 11.5px; color: var(--text-muted); }
+.an-amt { font-size: 13.5px; font-weight: 700; font-variant-numeric: tabular-nums; }
+</style>
+<script id="lg-analytics-v7-js">
+(function () {
+  'use strict';
+  if (window.__lgAn7) return; window.__lgAn7 = 1;
+  var hostH, hostC, timer;
+  var fmt = function (n) { return Math.round(n).toLocaleString('en-US'); };
+  var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
+  function ms(o) { try { return o.timestamp.toMillis(); } catch (e) { return 0; } }
+  function h12(h) { return (h % 12 || 12) + (h < 12 ? ' AM' : ' PM'); }
+  function dshort(t) { return new Date(t).toLocaleDateString([], { month: 'short', day: 'numeric' }); }
+
+  function render() {
+    if (!hostH || !window.__lg) return;
+    var os = Object.values(window.__lg.ORDERS).filter(function (o) { return ms(o); });
+    if (!os.length) {
+      hostH.innerHTML = hostC.innerHTML = '';
+      hostH.style.display = hostC.style.display = 'none'; return;
+    }
+    hostH.style.display = hostC.style.display = '';
+    var lo = Infinity, hi = 0, hrs = new Array(24).fill(0);
+    os.forEach(function (o) { var t = ms(o); lo = Math.min(lo, t); hi = Math.max(hi, t); hrs[new Date(t).getHours()]++; });
+    var span = (new Date(lo).toDateString() === new Date(hi).toDateString()) ? dshort(lo) : dshort(lo) + ' - ' + dshort(hi);
+    var max = Math.max.apply(null, hrs), pk = hrs.indexOf(max);
+    /* best 2-hour window */
+    var bw = 0, bs = 0; for (var h = 0; h < 24; h++) { var w = hrs[h] + hrs[(h + 1) % 24]; if (w > bw) { bw = w; bs = h; } }
+    var svg = '<svg class="an-svg" viewBox="0 0 300 96" role="img" aria-label="Orders by hour of day">';
+    hrs.forEach(function (v, i) {
+      var bh = max ? Math.max(v ? 3 : 1, Math.round(v / max * 70)) : 1;
+      svg += '<rect class="bar' + (i === pk ? ' pk' : v >= max * .7 ? ' mid' : '') + '" x="' + (i * 12.5 + 1) + '" y="' + (76 - bh) + '" width="10" height="' + bh + '" rx="3"><title>' + h12(i) + ': ' + v + ' orders</title></rect>';
+    });
+    [0, 6, 12, 18, 23].forEach(function (i) { svg += '<text x="' + (i * 12.5 + 6) + '" y="90" text-anchor="middle">' + h12(i) + '</text>'; });
+    svg += '</svg>';
+    hostH.innerHTML = '<div class="an-head"><span>Busiest hours</span><small>' + os.length + ' orders · ' + esc(span) + '</small></div>' +
+      '<div class="an-insight">Most orders come in around <b>' + h12(bs) + ' - ' + h12((bs + 2) % 24) + '</b> (' + Math.round(bw * 100 / os.length) + '% of orders). Be online then.</div>' + svg;
+
+    /* top customers by successful spend */
+    var m = {};
+    os.forEach(function (o) {
+      if (o.status !== 'Success') return;
+      var k = o.userId || o.userPhone || o.userName; if (!k) return;
+      var c = m[k] || (m[k] = { id: o.userId, name: o.userName || o.userPhone || 'Guest', n: 0, sum: 0 });
+      c.n++; c.sum += Number(o.price) || 0;
+    });
+    var top = Object.keys(m).map(function (k) { return m[k]; }).sort(function (a, b) { return b.sum - a.sum; }).slice(0, 5);
+    hostC.innerHTML = '<div class="an-head"><span>Top customers</span><small>Successful orders · ' + esc(span) + '</small></div>' +
+      (top.length ? top.map(function (c, i) {
+        return '<div class="an-row" data-uid="' + esc(c.id || '') + '"><span class="an-rank">' + (i + 1) + '</span><div class="an-who"><b>' + esc(c.name) + '</b><small>' + c.n + ' order' + (c.n > 1 ? 's' : '') + '</small></div><span class="an-amt">' + fmt(c.sum) + ' MMK</span></div>';
+      }).join('') : '<div class="an-insight">No successful orders in the loaded range yet.</div>');
+  }
+  function later() { clearTimeout(timer); timer = setTimeout(render, 150); }
+
+  function boot() {
+    var anchor = document.getElementById('ov-detail'); if (!anchor) return;
+    hostH = document.createElement('div'); hostH.className = 'an-card';
+    hostC = document.createElement('div'); hostC.className = 'an-card';
+    anchor.insertAdjacentElement('beforebegin', hostC); anchor.insertAdjacentElement('beforebegin', hostH);
+    hostC.addEventListener('click', function (e) {
+      var r = e.target.closest('.an-row'), id = r && r.getAttribute('data-uid');
+      if (id && typeof window.openUserDetails === 'function') window.openUserDetails(id);
+    });
+    var t = document.getElementById('stat-today');
+    if (t) new MutationObserver(later).observe(t, { childList: true, characterData: true, subtree: true });
+    var fo = window.fetchOrders;
+    setInterval(function () { if (!document.hidden) render(); }, 60000);
+    render();
+  }
+  if (document.readyState !== 'loading') boot(); else document.addEventListener('DOMContentLoaded', boot);
+})();
+</script>
+
+<style id="lg-ux-v8">
+/* ===== type + spacing rhythm ===== */
+html body .title-header { font-size: 22px; letter-spacing: -.02em; }
+html body .stat-card-value { font-size: clamp(21px, 6.2vw, 27px); font-weight: 750; line-height: 1.1; }
+html body .stat-card-label { font-size: 12px; font-weight: 600; color: var(--text-secondary); }
+html { overscroll-behavior-y: contain; }
+/* ===== touch targets, press feedback, focus ===== */
+html body .btn:not(.btn-sm) { min-height: 40px; }
+html body .btn:active, html body .nav-item:active, html body .admin-card .oc-top:active { transform: scale(.975); }
+html body input:focus, html body textarea:focus, html body select:focus { border-color: var(--accent) !important; box-shadow: 0 0 0 4px var(--accent-soft) !important; outline: none; }
+@media (max-width: 820px) {
+  html body input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=file]):not([type=hidden]), html body select, html body textarea { font-size: 16px; }
+}
+/* ===== empty states ===== */
+html body .empty-msg { animation: none; margin: 8px 0; padding: 30px 18px; border: 1.5px dashed var(--border-dashed, rgba(128,140,160,.35)); border-radius: 20px; background: var(--bg-subtle); color: var(--text-secondary); font-size: 13.5px; line-height: 1.55; }
+/* ===== smart header ===== */
+.top-nav-wrap, #admin-top-nav { transition: transform .28s cubic-bezier(.3,.8,.3,1), box-shadow .2s; }
+html body .top-nav-wrap.lg-hide { transform: translateY(-110%); }
+body.lg-scrolled .top-nav-wrap { box-shadow: 0 12px 26px -18px rgba(15,23,42,.5); }
+/* ===== pull to refresh ===== */
+#lg-ptr { position: fixed; left: 50%; top: calc(env(safe-area-inset-top, 0px) + 8px); z-index: 80; transform: translate(-50%, -80px); opacity: 0; display: flex; align-items: center; gap: 8px; padding: 9px 16px; border-radius: 999px; font-size: 12.5px; font-weight: 700; color: var(--text-strong, #111); background: var(--surface-strong, #fff); border: 1px solid var(--border-glass); box-shadow: 0 10px 28px -10px rgba(15,23,42,.45); -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px); pointer-events: none; }
+#lg-ptr i { width: 14px; height: 14px; border-radius: 50%; border: 2px solid var(--accent); border-top-color: transparent; transition: transform .15s; }
+#lg-ptr.spin i { animation: lgSpin .7s linear infinite; }
+@keyframes lgSpin { to { transform: rotate(360deg); } }
+</style>
+<script id="lg-ux-v8-js">
+(function () {
+  'use strict';
+  if (window.__lgUx8) return; window.__lgUx8 = 1;
+  var reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var nav = document.querySelector('.top-nav-wrap') || document.getElementById('admin-top-nav');
+
+  /* ----- smart header + scrolled shadow ----- */
+  var lastY = 0, tick = false;
+  window.addEventListener('scroll', function () {
+    if (tick) return; tick = true;
+    requestAnimationFrame(function () {
+      var y = window.scrollY || 0, sheet = document.getElementById('nav-group-sheet-overlay');
+      document.body.classList.toggle('lg-scrolled', y > 8);
+      if (nav) {
+        if (y > 140 && y > lastY + 6 && !(sheet && sheet.classList.contains('show'))) nav.classList.add('lg-hide');
+        else if (y < lastY - 6 || y <= 140) nav.classList.remove('lg-hide');
+      }
+      lastY = y; tick = false;
+    });
+  }, { passive: true });
+
+  /* ----- light haptics ----- */
+  document.addEventListener('click', function (e) {
+    if (reduce || !navigator.vibrate) return;
+    if (e.target.closest && e.target.closest('.btn,.nav-item,.wl-chip,.pkg-type-tab,.udp-tab')) { try { navigator.vibrate(6); } catch (x) {} }
+  }, true);
+
+  /* ----- pull to refresh (Overview + Orders) ----- */
+  var ptr = document.createElement('div'); ptr.id = 'lg-ptr'; ptr.innerHTML = '<i></i><span></span>'; document.body.appendChild(ptr);
+  var label = ptr.querySelector('span'), sy = 0, sx = 0, pull = 0, tracking = false, busy = false, TH = 72;
+  function pageId() { var a = document.querySelector('.page-section.active'); return a && a.id; }
+  function ok() { var p = pageId(); return (p === 'dashboard' || p === 'order-list') && getComputedStyle(document.body).overflow !== 'hidden'; }
+  function paint(d) {
+    ptr.style.opacity = d > 8 ? 1 : 0;
+    ptr.style.transform = 'translate(-50%,' + (Math.min(d, 110) - 70) + 'px)';
+    ptr.querySelector('i').style.transform = 'rotate(' + d * 3 + 'deg)';
+    label.textContent = d >= TH ? 'Release to refresh' : 'Pull to refresh';
+  }
+  document.addEventListener('touchstart', function (e) {
+    if (busy || e.touches.length !== 1 || (window.scrollY || 0) > 0 || !ok() || e.target.closest('input,textarea,select,#admin-top-nav,.date-filter-wrap')) { tracking = false; return; }
+    sy = e.touches[0].clientY; sx = e.touches[0].clientX; pull = 0; tracking = true;
+  }, { passive: true });
+  document.addEventListener('touchmove', function (e) {
+    if (!tracking) return;
+    var dy = e.touches[0].clientY - sy, dx = e.touches[0].clientX - sx;
+    if (dy <= 0 || Math.abs(dx) > dy) { if (pull) { pull = 0; paint(0); } return; }
+    if ((window.scrollY || 0) > 0) { tracking = false; paint(0); return; }
+    pull = dy * 0.55; paint(pull); if (e.cancelable) e.preventDefault();
+  }, { passive: false });
+  document.addEventListener('touchend', function () {
+    if (!tracking) return; tracking = false;
+    if (pull < TH) { paint(0); return; }
+    busy = true; ptr.classList.add('spin'); label.textContent = 'Refreshing...'; ptr.style.opacity = 1; ptr.style.transform = 'translate(-50%, 6px)';
+    var jobs = [];
+    try { if (typeof window.fetchOrders === 'function') jobs.push(window.fetchOrders()); } catch (e) {}
+    try { if (pageId() === 'dashboard' && typeof window.refreshOverviewMoney === 'function') jobs.push(window.refreshOverviewMoney(true)); } catch (e) {}
+    Promise.allSettled(jobs).then(function () {
+      ptr.classList.remove('spin'); label.textContent = 'Updated';
+      setTimeout(function () { paint(0); busy = false; }, 500);
+    });
+  });
+
+  /* ----- Android/browser back button moves between pages ----- */
+  var cur = null, popping = false;
+  function active() { var a = document.querySelector('.page-section.active'); return a && a.id; }
+  function onPage() {
+    var id = active(); if (!id || id === cur) return; cur = id;
+    if (!popping) history.pushState({ lgp: id }, '');
+  }
+  function bootNav() {
+    cur = active(); if (!cur) return;
+    history.replaceState({ lgp: cur }, '');
+    var pages = document.querySelectorAll('.page-section');
+    var mo = new MutationObserver(function () { setTimeout(onPage, 0); });
+    pages.forEach(function (p) { mo.observe(p, { attributes: true, attributeFilter: ['class'] }); });
+    window.addEventListener('popstate', function (e) {
+      var sheet = document.getElementById('nav-group-sheet-overlay');
+      if (sheet && sheet.classList.contains('show')) { sheet.classList.remove('show'); history.pushState({ lgp: cur }, ''); return; }
+      var id = (e.state && e.state.lgp) || 'dashboard';
+      if (id === 'game-editor-page' || id === 'user-detail-page' || id === cur) return;
+      popping = true;
+      try { window.showPage(id); } catch (x) {}
+      setTimeout(function () { popping = false; cur = active() || id; }, 60);
+    });
+  }
+  if (document.readyState !== 'loading') bootNav(); else document.addEventListener('DOMContentLoaded', bootNav);
+})();
+</script>
+
 </body>
 </html>
