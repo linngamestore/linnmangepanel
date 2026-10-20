@@ -3888,7 +3888,7 @@ html.pref-compact .btn { min-height: 38px; }
             <div class="dash-section-label" style="display:flex;align-items:center;justify-content:space-between;">
                 <span>Request Usage · Today</span>
                 <div style="display:flex;gap:6px;">
-                    <button class="btn btn-outline btn-xs" onclick="window.LinnUsage && window.LinnUsage.update && window.LinnUsage.update(); var b=this; var t=b.textContent; b.textContent='✓ Updated'; setTimeout(function(){ b.textContent=t; }, 900);">↻ Update</button>
+                    <button class="btn btn-outline btn-xs" onclick="window.LinnUsage && window.LinnUsage.update && window.LinnUsage.update(); var b=this; var t=b.innerHTML; b.textContent='Updated'; setTimeout(function(){ b.innerHTML=t; }, 900);"><svg class="ui-icon ic-i" viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-refresh"></use></svg> Update</button>
                     <button class="btn btn-outline btn-xs" onclick="window.LinnUsage && window.LinnUsage.reset()">Reset</button>
                 </div>
             </div>
@@ -4580,8 +4580,8 @@ html.pref-compact .btn { min-height: 38px; }
                 <button type="button" class="game-list-tab-btn" id="game-list-tab-software" onclick="showGameListTab('software')">Software</button>
             </div>
             <div class="pkg-actions-row" style="margin:-8px 0 14px;">
-                <button class="btn btn-outline game-edit-only" onclick="window.refreshGames && window.refreshGames()">↻ Refresh</button>
-                <button class="btn btn-outline game-edit-only" onclick="openGameReorder()">↕ Reorder</button>
+                <button class="btn btn-outline game-edit-only" onclick="window.refreshGames && window.refreshGames()"><svg class="ui-icon ic-i" viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-refresh"></use></svg> Refresh</button>
+                <button class="btn btn-outline game-edit-only" onclick="openGameReorder()"><svg class="ui-icon ic-i" viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-sort"></use></svg> Reorder</button>
                 <button class="btn btn-outline game-edit-only" onclick="openAddServerPicker()">+ Add Server</button>
                 <button class="btn btn-outline game-edit-only" onclick="copyAllGameNames()">Copy Names</button>
                 <button type="button" class="btn btn-outline" id="game-edit-mode-btn" onclick="toggleGameListEditMode()">Edit Mode: Off</button>
@@ -4722,8 +4722,8 @@ html.pref-compact .btn { min-height: 38px; }
                     </label>
                 </div>
                 <div class="obb-actions">
-                    <button class="btn btn-primary" onclick="bulkConfirmSelected()">✓ Confirm</button>
-                    <button class="btn btn-danger" onclick="bulkRejectSelected()">✕ Reject</button>
+                    <button class="btn btn-primary" onclick="bulkConfirmSelected()"><svg class="ui-icon ic-i" viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-check"></use></svg> Confirm</button>
+                    <button class="btn btn-danger" onclick="bulkRejectSelected()"><svg class="ui-icon ic-i" viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-close"></use></svg> Reject</button>
                     <button class="btn btn-outline" onclick="clearOrderSelection()">Clear</button>
                 </div>
             </div>
@@ -4945,7 +4945,7 @@ html.pref-compact .btn { min-height: 38px; }
                     <svg class="ui-icon" style="width:16px;height:16px;transform:rotate(180deg);"><use href="#icon-chevron-right"></use></svg>
                     Back to Users
                 </div>
-                <button type="button" class="udp-update-btn" id="ud-update-btn" onclick="refreshUserDetails()">↻ Update</button>
+                <button type="button" class="udp-update-btn" id="ud-update-btn" onclick="refreshUserDetails()"><svg class="ui-icon ic-i" viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-refresh"></use></svg> Update</button>
             </div>
 
             <div class="udp-profile-card">
@@ -5069,7 +5069,7 @@ html.pref-compact .btn { min-height: 38px; }
                     <button type="button" class="wtx-chip" data-f="in" onclick="setUserTxnFilter('in')">Deposits</button>
                     <button type="button" class="wtx-chip" data-f="out" onclick="setUserTxnFilter('out')">Withdrawals</button>
                     <button type="button" class="wtx-chip" data-f="buy" onclick="setUserTxnFilter('buy')">Purchases</button>
-                    <button type="button" class="wtx-chip" onclick="refreshUserTxnsIfOpen()">↻ Refresh</button>
+                    <button type="button" class="wtx-chip" onclick="refreshUserTxnsIfOpen()"><svg class="ui-icon ic-i" viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-refresh"></use></svg> Refresh</button>
                 </div>
                 <div id="ud-txn-container"><p class="empty-msg">No transactions yet.</p></div>
             </div>
@@ -5111,6 +5111,7 @@ html.pref-compact .btn { min-height: 38px; }
         <div class="modal-body">
                 <input type="hidden" id="edit-game-id">
 
+                <div class="ge-sec"><span class="ge-sec-dot"></span><b>Basic info</b><small>အမည် · အမျိုးအစား · ဖော်ပြချက်</small></div>
                 <div class="field-lock-row">
                     <label>Game Name</label>
                     <button type="button" class="field-lock-btn" id="edit-game-name-unlock-btn" onclick="unlockGameNameField()">
@@ -5156,6 +5157,7 @@ html.pref-compact .btn { min-height: 38px; }
                     <input type="text" id="edit-game-app-ios-store-url" placeholder="Enter App Store URL">
                 </div>
 
+                <div class="ge-sec"><span class="ge-sec-dot"></span><b>Status &amp; visibility</b><small>ဖွင့်/ပိတ် · Popular · ID လိုအပ်ချက်</small></div>
                 <div class="switch-row">
                     <div>
                         <span class="switch-label">Disable this game (delay / maintenance)</span>
@@ -5214,6 +5216,7 @@ html.pref-compact .btn { min-height: 38px; }
                     </label>
                 </div>
 
+                <div class="ge-sec"><span class="ge-sec-dot"></span><b>Images</b><small>Game icon · Banner</small></div>
                 <div style="display:flex;gap:10px;align-items:flex-start;">
                     <div style="flex:0 0 calc((100% - 10px) * 0.36);min-width:0;">
                         <label>Game Image <span class="u-muted">(1:1)</span></label>
@@ -5244,6 +5247,7 @@ html.pref-compact .btn { min-height: 38px; }
                     </div>
                 </div>
 
+                <div class="ge-sec"><span class="ge-sec-dot"></span><b>Fulfillment</b><small>Provider ချိတ်ဆက်မှု</small></div>
                 <div style="margin:4px 0 2px;padding:12px;background:var(--fill-soft);border-radius:12px;border:1px solid var(--fill-soft);">
                     <p style="font-size:11px;font-weight: 600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.3px;margin-bottom:8px;">Auto-Fulfillment (optional)</p>
 
@@ -5369,7 +5373,7 @@ html.pref-compact .btn { min-height: 38px; }
                     </div>
                 </div>
 
-                <label>Top-up Packages</label>
+                <div class="ge-sec"><span class="ge-sec-dot"></span><b>Packages</b><small>Cost · Price · Image</small></div>
                 <div class="pkg-tab-bar" id="pkg-tab-bar"></div>
                 <!-- Bulk bar (image upload + Price % for selected cards) — appears once one or more package rows are
                      selected (long-press a row's summary to start, tap more to add) -->
@@ -5419,16 +5423,36 @@ html.pref-compact .btn { min-height: 38px; }
                 <!-- Per-game Auto Update Price switch (separate from Cost). Cost is ALWAYS auto-updated on the Cost Update
                      Schedule. ON = on the Price Update Schedule (Settings) this game's Price is also re-set to Cost + Margin %.
                      OFF (default) = Price is never touched automatically. -->
-                <div class="pkg-autoprice-box">
-                    <div class="switch-row" style="padding:0;">
-                        <div>
-                            <span class="switch-label">Auto Update Price</span>
-                            <p class="switch-hint" id="edit-game-autoprice-hint">ပိတ်ထားတယ် — ဒီဂိမ်းရဲ့ Cost ပဲ auto update ဖြစ်မယ်၊ Price ကို မထိပါ။</p>
+                <div class="ge-sec"><span class="ge-sec-dot"></span><b>Auto Cost &amp; Price</b><small>ဒီဂိမ်းတစ်ခုချင်းစီအတွက်</small></div>
+                <div class="ge-auto-card">
+                    <div class="ge-auto-row">
+                        <span class="ge-auto-ico c1"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-refresh"></use></svg></span>
+                        <div class="ge-auto-txt"><span class="switch-label">Cost Auto Update</span><p class="switch-hint" id="edit-game-autocost-hint"></p></div>
+                        <label class="toggle-switch"><input type="checkbox" id="edit-game-autocost" onchange="onGameAutoCostToggle()"><span class="toggle-slider"></span></label>
+                    </div>
+                    <div class="ge-auto-row">
+                        <span class="ge-auto-ico c2"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-sort"></use></svg></span>
+                        <div class="ge-auto-txt"><span class="switch-label">Price Auto Update</span><p class="switch-hint" id="edit-game-autoprice-hint"></p></div>
+                        <label class="toggle-switch"><input type="checkbox" id="edit-game-autoprice" onchange="onGameAutoPriceToggle()"><span class="toggle-slider"></span></label>
+                    </div>
+                    <div class="ge-margin" id="ge-margin-wrap">
+                        <div class="ge-margin-top"><span>Price တိုးမယ့် % <small>(Cost အပေါ်)</small></span><span class="ge-margin-src" id="ge-margin-src"></span></div>
+                        <div class="ge-stepper">
+                            <button type="button" class="ge-step-btn" onclick="geMarginStep(-0.25)" aria-label="Decrease">&minus;</button>
+                            <input type="number" id="edit-game-margin" inputmode="decimal" step="0.25" min="0" max="500" placeholder="Global" oninput="geMarginChanged()">
+                            <span class="ge-pct">%</span>
+                            <button type="button" class="ge-step-btn" onclick="geMarginStep(0.25)" aria-label="Increase">+</button>
                         </div>
-                        <label class="toggle-switch">
-                            <input type="checkbox" id="edit-game-autoprice" onchange="onGameAutoPriceToggle()">
-                            <span class="toggle-slider"></span>
-                        </label>
+                        <div class="ge-chips" id="ge-margin-chips">
+                            <button type="button" class="ge-chip" data-v="" onclick="geMarginSet('')">Global</button>
+                            <button type="button" class="ge-chip" data-v="1" onclick="geMarginSet(1)">1%</button>
+                            <button type="button" class="ge-chip" data-v="2" onclick="geMarginSet(2)">2%</button>
+                            <button type="button" class="ge-chip" data-v="3" onclick="geMarginSet(3)">3%</button>
+                            <button type="button" class="ge-chip" data-v="5" onclick="geMarginSet(5)">5%</button>
+                            <button type="button" class="ge-chip" data-v="10" onclick="geMarginSet(10)">10%</button>
+                        </div>
+                        <div class="ge-preview" id="ge-margin-preview"></div>
+                        <button type="button" class="btn btn-outline ge-apply-now" onclick="geApplyMarginNow()"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-check"></use></svg> ဒီ % နဲ့ Price အားလုံး အခုပဲချိန်မယ်</button>
                     </div>
                 </div>
                 <button class="btn btn-primary" id="pkg-apply-all-cost-btn" onclick="applyAllCostUpdates()" style="display:none;width:100%;justify-content:center;gap:6px;background:#FF9500;"><svg class="ui-icon" style="width:14px;height:14px;stroke:#fff;"><use href="#icon-refresh"></use></svg> <span id="pkg-apply-all-cost-label">Update All Costs</span></button>
@@ -6343,7 +6367,7 @@ html.pref-compact .btn { min-height: 38px; }
             toast.style.borderColor = s.border;
             toast.style.color = s.textColor;
             toast.style.background = s.bg;
-            document.getElementById('toast-msg').innerText = message;
+            document.getElementById('toast-msg').innerText = String(message).replace(/\s*[✓✔]/g,'').replace(/[ \t]{2,}/g,' ').trim();
             toast.classList.add('show');
             clearTimeout(toast._hideTimer);
             toast._hideTimer = setTimeout(() => { dismissToast(); }, 3000);
@@ -7197,7 +7221,7 @@ html.pref-compact .btn { min-height: 38px; }
                     updatedAt: serverTimestamp()
                 }, { merge: true });
                 document.getElementById('order-routing-minutes').value = minutes;
-                window.showToast('Order routing saved ✓');
+                window.showToast('Order routing saved');
             } catch (e) {
                 console.error('orderRouting save error:', e);
                 window.showToast('Save failed: ' + (e.message || e), 'fail');
@@ -7207,7 +7231,7 @@ html.pref-compact .btn { min-height: 38px; }
         async function toggleMyTransfer(on) {
             try {
                 await setDoc(doc(db, "adminUsernames", currentAdminUsername), { transferEnabled: !!on }, { merge: true });
-                window.showToast(on ? 'Transfer ON ✓' : 'Transfer OFF ✓', 'success');
+                window.showToast(on ? 'Transfer ON' : 'Transfer OFF', 'success');
             } catch (e) {
                 console.error('transfer toggle error:', e);
                 window.showToast('Could not change Transfer switch.', 'fail');
@@ -7234,7 +7258,7 @@ html.pref-compact .btn { min-height: 38px; }
         async function unblockTelegram(chatId) {
             try {
                 await deleteDoc(doc(db, "telegramBlocked", chatId));
-                window.showToast('Unblocked ✓', 'success');
+                window.showToast('Unblocked', 'success');
                 loadBlockedTelegram();
             } catch (e) { console.error('unblock error:', e); window.showToast('Unblock failed.', 'fail'); }
         }
@@ -7886,7 +7910,7 @@ html.pref-compact .btn { min-height: 38px; }
                 }, { merge: true });
                 tfaMarkTrusted(currentAdminUsername); // this device just proved it — don't immediately re-prompt it
                 logAdminActivity('Enabled Authenticator (2FA)');
-                window.showToast('Authenticator enabled ✓', 'success');
+                window.showToast('Authenticator enabled', 'success');
                 closeTwoFactorSetupModal();
                 renderMyAccountModal();
                 renderTwoFactorSettingsCard();
@@ -8075,7 +8099,7 @@ html.pref-compact .btn { min-height: 38px; }
                 const avatarUrl = await uploadAdminAvatarToImgBB(file);
                 await setDoc(doc(db, "adminUsernames", username), { avatarUrl }, { merge: true });
                 logAdminActivity('Updated admin avatar', username);
-                window.showToast('Avatar updated ✓', 'success');
+                window.showToast('Avatar updated', 'success');
             } catch (error) {
                 console.error('Admin avatar upload error:', error);
                 window.showToast(error.message || 'Failed to update avatar.', 'fail');
@@ -8225,7 +8249,7 @@ html.pref-compact .btn { min-height: 38px; }
                         // actually loses its admin/adminRole claims, instead
                         // of staying valid until the next scheduled sync.
                         callAdminSyncClaims();
-                        window.showToast('Admin access revoked ✓', 'success');
+                        window.showToast('Admin access revoked', 'success');
                     } catch (e) {
                         console.error('Revoke admin error:', e);
                         window.showToast('Failed to revoke access.', 'fail');
@@ -8307,14 +8331,14 @@ html.pref-compact .btn { min-height: 38px; }
             telegramLinkUnsub = onSnapshot(doc(db, "adminUsernames", username), (snap) => {
                 if (snap.exists() && snap.data().telegramChatId) {
                     closeTelegramLinkModal();
-                    window.showToast('Telegram linked ✓', 'success');
+                    window.showToast('Telegram linked', 'success');
                 }
             });
             document.getElementById('telegram-link-modal-overlay').classList.add('show');
         }
         function copyTelegramLinkCommand(btn) {
             const text = '/link ' + (btn.dataset.code || '');
-            const done = () => { const o = btn.textContent; btn.textContent = 'Copied ✓'; setTimeout(() => { btn.textContent = o; }, 1500); };
+            const done = () => { const o = btn.innerHTML; btn.innerHTML = '<svg class="ui-icon ic-i" viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-check"></use></svg> Copied'; setTimeout(() => { btn.innerHTML = o; }, 1500); };
             if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(done, () => window.showToast('Copy failed — type it manually.', 'fail'));
             else window.showToast('Copy not supported — type it manually.', 'fail');
         }
@@ -8344,7 +8368,7 @@ html.pref-compact .btn { min-height: 38px; }
                             telegramChatId: deleteField(), telegramName: deleteField(), telegramUsername: deleteField(), telegramLinkedAt: deleteField(),
                             telegramLinkCode: deleteField(), telegramLinkCodeExpiresAt: deleteField()
                         }, { merge: true });
-                        window.showToast('Telegram unlinked ✓', 'success');
+                        window.showToast('Telegram unlinked', 'success');
                     } catch (e) {
                         console.error('Unlink Telegram error:', e);
                         window.showToast('Failed to unlink Telegram.', 'fail');
@@ -8463,7 +8487,7 @@ html.pref-compact .btn { min-height: 38px; }
                     if (!/^\d{6}$/.test(code)) throw new Error('Enter the 6-digit code.');
                     await recoveryCall({ op: 'verify', code });
                     logAdminActivity('Linked recovery email');
-                    window.showToast('Recovery email linked ✓', 'success');
+                    window.showToast('Recovery email linked', 'success');
                     closeRecoveryEmailModal();
                 }
             } catch (e) {
@@ -8562,7 +8586,7 @@ html.pref-compact .btn { min-height: 38px; }
                 // right away, instead of waiting for the next scheduled sync.
                 callAdminSyncClaims();
                 closeAddAdminModal();
-                window.showToast('Admin created ✓', 'success');
+                window.showToast('Admin created', 'success');
             } catch (e) {
                 console.error('Failed to create admin:', e);
                 errEl.textContent = 'Failed to create: ' + (e.code || e.message || 'unknown error');
@@ -9065,7 +9089,7 @@ html.pref-compact .btn { min-height: 38px; }
         async function cleanOrder(orderId) {
             try {
                 await updateDoc(doc(db, "orders", orderId), { adminCleared: true, adminClearedAt: serverTimestamp() });
-                window.showToast('Order cleaned from list ✓');
+                window.showToast('Order cleaned from list');
             } catch (error) {
                 console.error('Clean order error:', error);
                 window.showToast('Failed to clean order.', 'fail');
@@ -9076,7 +9100,7 @@ html.pref-compact .btn { min-height: 38px; }
         async function restoreOrder(orderId) {
             try {
                 await updateDoc(doc(db, "orders", orderId), { adminCleared: false, adminClearedAt: null });
-                window.showToast('Order restored ✓');
+                window.showToast('Order restored');
             } catch (error) {
                 console.error('Restore order error:', error);
                 window.showToast('Failed to restore order.', 'fail');
@@ -9098,7 +9122,7 @@ html.pref-compact .btn { min-height: 38px; }
         async function doCleanAllCompletedOrders(targets) {
             try {
                 await Promise.all(targets.map(o => updateDoc(doc(db, "orders", o.id), { adminCleared: true, adminClearedAt: serverTimestamp() })));
-                window.showToast(`${targets.length} order(s) cleaned ✓`);
+                window.showToast(`${targets.length} order(s) cleaned`);
             } catch (error) {
                 console.error('Clean all error:', error);
                 window.showToast('Failed to clean some orders.', 'fail');
@@ -9335,7 +9359,7 @@ html.pref-compact .btn { min-height: 38px; }
                     renderOrdersDependents();
                     checkOrdersAutoDelete(newOrders);
                     checkOrderDay20Notice(newOrders);
-                    if (silent !== true) window.showToast('Orders refreshed ✓');
+                    if (silent !== true) window.showToast('Orders refreshed');
                     // NOTE: Telegram push for new Pending orders and wallet-order auto-fulfillment
                     // are handled server-side by the Cloudflare Worker (see git history) - not here.
                 } catch (error) {
@@ -10083,7 +10107,7 @@ html.pref-compact .btn { min-height: 38px; }
                                     ${data.fazercardCategoryId ? `<div class="od-cell span-2" id="fazercard-role-cell-${orderId}">
                                         <div class="od-label">FazerCards Name Check</div>
                                         <div class="od-value" id="fazercard-role-value-${orderId}">${data.fazercardVerifiedName
-                                            ? `<span style="color:#28a745;">${escapeHtml(data.fazercardVerifiedName)} ✓ verified</span>`
+                                            ? `<span style="color:#28a745;">${escapeHtml(data.fazercardVerifiedName)} <svg class="ui-icon ic-i" viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-check"></use></svg> verified</span>`
                                             : `<button type="button" class="btn btn-outline" style="padding:5px 10px;font-size:12px;" onclick="verifyFazerCardPlayerId('${orderId}', this)">Verify Player ID</button>`}</div>
                                     </div>` : ''}
                                     <div class="od-cell">
@@ -10130,7 +10154,7 @@ html.pref-compact .btn { min-height: 38px; }
                                 ${Array.isArray(data.deliveredCodes) && data.deliveredCodes.length ? `<div style="margin-top:8px;padding:10px;background:var(--fill-soft);border-radius:8px;">
                                     <div style="font-size:11px;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.3px;margin-bottom:6px;">Delivered Voucher Code${data.deliveredCodes.length > 1 ? 's' : ''} — copy &amp; send to customer</div>
                                     ${data.deliveredCodes.map(c => `<div class="mono" style="font-size:13px;padding:4px 0;word-break:break-all;">${escapeHtml(String(c))}</div>`).join('')}
-                                    <button type="button" class="btn btn-outline" style="margin-top:6px;padding:6px 10px;font-size:12px;" onclick="navigator.clipboard.writeText('${data.deliveredCodes.map(c => String(c).replace(/'/g, "\\'")).join('\\n')}');window.showToast('Copied ✓','success')">Copy All</button>
+                                    <button type="button" class="btn btn-outline" style="margin-top:6px;padding:6px 10px;font-size:12px;" onclick="navigator.clipboard.writeText('${data.deliveredCodes.map(c => String(c).replace(/'/g, "\\'")).join('\\n')}');window.showToast('Copied','success')">Copy All</button>
                                 </div>` : ''}
                                 ${durationLine}
                                 <div class="od-card-footer" id="footer-${orderId}">
@@ -10525,7 +10549,7 @@ html.pref-compact .btn { min-height: 38px; }
                         status: "Success", confirmedAt: serverTimestamp(), g2bulkStatus: 'COMPLETED',
                         g2bulkSubOrders: subOrders, g2bulkSubOrdersDone: doneCount
                     });
-                    if (!silent) window.showToast('G2Bulk order completed ✓', 'success');
+                    if (!silent) window.showToast('G2Bulk order completed', 'success');
                     editTelegramOrderMessage(orderId, 'Success');
                     return 'COMPLETED';
                 } else if (failedCount === total) {
@@ -10692,7 +10716,7 @@ html.pref-compact .btn { min-height: 38px; }
 
                 if (status === 'completed') {
                     await updateDoc(doc(db, "orders", orderId), { status: "Success", confirmedAt: serverTimestamp(), fazercardStatus: status });
-                    window.showToast('FazerCards order completed ✓', 'success');
+                    window.showToast('FazerCards order completed', 'success');
                     editTelegramOrderMessage(orderId, 'Success');
                 } else if (status === 'failed' || status === 'cancelled' || status === 'refund' || status === 'refunded') {
                     // /topups/order's docs describe the lifecycle as
@@ -10805,7 +10829,7 @@ html.pref-compact .btn { min-height: 38px; }
                         fazercardGiftOrderId,
                         deliveredCodes: codes
                     });
-                    window.showToast('Gift card delivered ✓', 'success');
+                    window.showToast('Gift card delivered', 'success');
                     editTelegramOrderMessage(orderId, 'Success');
                     return 'success';
                 } catch (error) {
@@ -10858,7 +10882,7 @@ html.pref-compact .btn { min-height: 38px; }
 
                 if (status === 'completed' || codes.length) {
                     await updateDoc(doc(db, "orders", orderId), { status: "Success", confirmedAt: serverTimestamp(), fazercardGiftStatus: status || 'completed', deliveredCodes: codes });
-                    window.showToast('Gift card delivered ✓', 'success');
+                    window.showToast('Gift card delivered', 'success');
                     editTelegramOrderMessage(orderId, 'Success');
                 } else if (status === 'failed' || status === 'cancelled' || status === 'refund' || status === 'refunded') {
                     await markOrderFailedWithRefund(orderId, { fazercardGiftStatus: status });
@@ -10999,14 +11023,14 @@ html.pref-compact .btn { min-height: 38px; }
             try {
                 await updateDoc(doc(db, "orders", orderId), { fazercardVerifiedName: playerName });
                 order.fazercardVerifiedName = playerName;
-                if (valueEl) valueEl.innerHTML = `<span style="color:#28a745;">${escapeHtml(playerName)} ✓ verified</span>`;
-                window.showToast('Player ID verified ✓', 'success');
+                if (valueEl) valueEl.innerHTML = `<span style="color:#28a745;">${escapeHtml(playerName)} <svg class="ui-icon ic-i" viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-check"></use></svg> verified</span>`;
+                window.showToast('Player ID verified', 'success');
             } catch (error) {
                 console.error("Save fazercardVerifiedName error:", error);
                 // Verification itself succeeded — show it locally even though
                 // saving the result failed, so the admin isn't blocked from
                 // seeing it (it'll just re-prompt "Verify" next render).
-                if (valueEl) valueEl.innerHTML = `<span style="color:#28a745;">${escapeHtml(playerName)} ✓ verified</span> <span style="color:var(--text-muted);font-size:11px;">(not saved)</span>`;
+                if (valueEl) valueEl.innerHTML = `<span style="color:#28a745;">${escapeHtml(playerName)} <svg class="ui-icon ic-i" viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-check"></use></svg> verified</span> <span style="color:var(--text-muted);font-size:11px;">(not saved)</span>`;
                 window.showToast('Verified, but failed to save: ' + error.message, 'fail');
             }
         }
@@ -11141,7 +11165,7 @@ html.pref-compact .btn { min-height: 38px; }
                         g2bulkVoucherOrderId: data.order_id || null,
                         deliveredCodes: data.delivery_items || []
                     });
-                    window.showToast('Voucher delivered ✓', 'success');
+                    window.showToast('Voucher delivered', 'success');
                     editTelegramOrderMessage(orderId, 'Success');
                     return 'success';
                 } catch (error) {
@@ -11192,7 +11216,7 @@ html.pref-compact .btn { min-height: 38px; }
 
                 if (res.status === 200) {
                     await updateDoc(doc(db, "orders", orderId), { status: "Success", confirmedAt: serverTimestamp(), deliveredCodes: data.delivery_items || [] });
-                    window.showToast('Voucher delivered ✓', 'success');
+                    window.showToast('Voucher delivered', 'success');
                     editTelegramOrderMessage(orderId, 'Success');
                     return 'COMPLETED';
                 } else if (res.status === 410) {
@@ -11762,7 +11786,7 @@ html.pref-compact .btn { min-height: 38px; }
             try {
                 const { creditedAmount } = await creditWalletTopup(id, note);
                 logAdminActivity('Confirmed top-up', `${creditedAmount.toLocaleString()} MMK (id: ${id})`);
-                window.showToast(`Wallet credited ${creditedAmount.toLocaleString()} MMK ✓`, 'success');
+                window.showToast(`Wallet credited ${creditedAmount.toLocaleString()} MMK`, 'success');
                 editTelegramWalletTopupMessage(id, 'Completed');
                 emailTopupResultToCustomer(id);
             } catch (error) {
@@ -11876,7 +11900,7 @@ html.pref-compact .btn { min-height: 38px; }
             } else if (result.status === 'ok') {
                 const u = result.data || {};
                 el.className = 'topup-user-chip ok';
-                el.innerHTML = `<div class="tuc-title">✓ User Registered</div>
+                el.innerHTML = `<div class="tuc-title"><svg class="ui-icon ic-i" viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-check"></use></svg> User Registered</div>
                     <div class="tuc-grid">
                         <div><span>Name</span><b>${escapeHtml(u.name || '—')}</b></div>
                         <div><span>User ID</span><b>${escapeHtml(result.id)}</b></div>
@@ -11885,11 +11909,11 @@ html.pref-compact .btn { min-height: 38px; }
                     ${u.googleEmail ? `<div class="tuc-sub">${escapeHtml(u.googleEmail)}</div>` : ''}`;
             } else if (result.status === 'multiple') {
                 el.className = 'topup-user-chip bad';
-                el.innerHTML = `<div class="tuc-title">✕ More than one account uses this email</div>
+                el.innerHTML = `<div class="tuc-title"><svg class="ui-icon ic-i" viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-close"></use></svg> More than one account uses this email</div>
                     <div class="tuc-sub">Enter the exact UID instead: ${result.ids.map(escapeHtml).join(', ')}</div>`;
             } else {
                 el.className = 'topup-user-chip bad';
-                el.innerHTML = `<div class="tuc-title">✕ No Register</div>
+                el.innerHTML = `<div class="tuc-title"><svg class="ui-icon ic-i" viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-close"></use></svg> No Register</div>
                     <div class="tuc-sub">${escapeHtml(typed || '')} is not a registered user - nothing can be credited to it.</div>`;
             }
         }
@@ -11998,7 +12022,7 @@ html.pref-compact .btn { min-height: 38px; }
                     });
                 });
                 logAdminActivity('Manual top-up', `${amount.toLocaleString()} MMK to ${userName} (${uid})`);
-                window.showToast(`Credited ${amount.toLocaleString()} MMK to ${uid} ✓`, 'success');
+                window.showToast(`Credited ${amount.toLocaleString()} MMK to ${uid}`, 'success');
                 document.getElementById('manual-topup-uid').value = '';
                 document.getElementById('manual-topup-amount').value = '';
                 renderManualTopupChip({ status: 'empty' });
@@ -12438,7 +12462,7 @@ html.pref-compact .btn { min-height: 38px; }
                     <select id="os-status" onchange="osSetStatus(this.value)" style="padding:7px 8px;border:1px solid var(--border-glass);border-radius:10px;background:var(--bg-subtle-2);color:var(--text-primary);font-size:12px;"><option>All</option><option>Success</option><option>Pending</option><option>Processing</option><option>Fail</option></select>
                     <span style="flex:1;"></span>
                     <button class="btn btn-primary" style="flex:unset;padding:7px 14px;font-size:12px;" onclick="osDownload()">Download</button>
-                    <button class="btn btn-outline" style="flex:unset;padding:7px 12px;font-size:12px;" onclick="document.getElementById('os-modal').remove()">✕</button>
+                    <button class="btn btn-outline" style="flex:unset;padding:7px 12px;font-size:12px;" onclick="document.getElementById('os-modal').remove()" aria-label="Close"><svg class="ui-icon ic-i" viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-close"></use></svg></button>
                 </div>
                 <div id="os-body" style="flex:1;overflow:auto;padding:0 12px 12px;"></div></div>`;
             document.body.appendChild(m);
@@ -12832,7 +12856,7 @@ html.pref-compact .btn { min-height: 38px; }
             });
             const text = names.join('\n');
 
-            const doCopy = () => window.showToast(`Copied ${names.length} game name${names.length === 1 ? '' : 's'} ✓`, 'success');
+            const doCopy = () => window.showToast(`Copied ${names.length} game name${names.length === 1 ? '' : 's'}`, 'success');
             if (navigator.clipboard && navigator.clipboard.writeText) {
                 navigator.clipboard.writeText(text).then(doCopy).catch(() => fallbackCopyText(text, doCopy));
             } else {
@@ -13512,7 +13536,7 @@ html.pref-compact .btn { min-height: 38px; }
                     p.cost = liveCost;
                 });
                 if (withPrice && Number(p.cost) > 0) {
-                    const np = autoPriceForCost(Number(p.cost));
+                    const np = autoPriceForCost(Number(p.cost), typeof g.priceMarginPct === 'number' ? g.priceMarginPct : null);
                     if (np && np !== Number(p.price)) { p.price = np; changed++; }
                 }
             });
@@ -13542,6 +13566,7 @@ html.pref-compact .btn { min-height: 38px; }
             for (const [gameId, g] of Object.entries(GAMES || {})) {
                 const linked = g.g2bulkCode || g.jcplaysProduct || g.fazercardCategoryId || (g.fulfillProvider === 'g2bulk_voucher' && g.g2bulkVoucherCategory);
                 if (!linked) continue;
+                if (g.autoPriceUpdate === false) continue; // Cost Auto Update switched OFF for this game
                 try {
                     const changed = await applyLiveCostUpdatesForGame(gameId, g, opts);
                     if (changed > 0) { updatedGames++; updatedPackages += changed; }
@@ -13549,7 +13574,7 @@ html.pref-compact .btn { min-height: 38px; }
                     console.error('Auto price update error for', gameId, error);
                 }
             }
-            if (updatedPackages > 0) window.showToast(`Auto price update: ${updatedGames} game(s), ${updatedPackages} price(s) updated ✓`, 'success');
+            if (updatedPackages > 0) window.showToast(`Auto price update: ${updatedGames} game(s), ${updatedPackages} price(s) updated`, 'success');
         }
         window.runAutoPriceUpdateForAllGames = runAutoPriceUpdateForAllGames;
 
@@ -13602,7 +13627,7 @@ html.pref-compact .btn { min-height: 38px; }
             box.innerHTML = COST_SCHEDULE_DRAFT.map((t, i) => `
                 <div style="display:flex;gap:8px;align-items:center;">
                     <input type="time" value="${t}" onchange="onCostScheduleTimeChange(${i}, this.value)" style="flex:1;padding:10px;border:1px solid var(--border-glass);background:var(--bg-subtle-2);color:var(--text-primary);border-radius:12px;font-size:14px;box-sizing:border-box;">
-                    <button type="button" class="btn btn-outline" onclick="removeCostScheduleTime(${i})" aria-label="Remove time">✕</button>
+                    <button type="button" class="btn btn-outline" onclick="removeCostScheduleTime(${i})" aria-label="Remove time"><svg class="ui-icon ic-i" viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-close"></use></svg></button>
                 </div>`).join('');
         }
 
@@ -13636,7 +13661,7 @@ html.pref-compact .btn { min-height: 38px; }
             const statusEl = document.getElementById('cost-schedule-status');
             if (COST_SCHEDULE_DRAFT.some(t => !COST_TIME_RE.test(t))) {
                 statusEl.style.color = 'var(--danger-strong)';
-                statusEl.innerText = 'အချိန်တစ်ခု ကွက်လပ်ဖြစ်နေပါတယ် — ဖြည့်ပါ ဒါမှမဟုတ် ✕ နဲ့ ဖျက်ပါ။';
+                statusEl.innerText = 'အချိန်တစ်ခု ကွက်လပ်ဖြစ်နေပါတယ် — ဖြည့်ပါ ဒါမှမဟုတ် ဖျက်ရန် ခလုတ်နဲ့ ဖျက်ပါ။';
                 return;
             }
             const list = normalizeCostSchedule(COST_SCHEDULE_DRAFT);
@@ -13691,7 +13716,7 @@ html.pref-compact .btn { min-height: 38px; }
             box.innerHTML = PRICE_SCHEDULE_DRAFT.map((t, i) => `
                 <div style="display:flex;gap:8px;align-items:center;">
                     <input type="time" value="${t}" onchange="onPriceScheduleTimeChange(${i}, this.value)" style="flex:1;padding:10px;border:1px solid var(--border-glass);background:var(--bg-subtle-2);color:var(--text-primary);border-radius:12px;font-size:14px;box-sizing:border-box;">
-                    <button type="button" class="btn btn-outline" onclick="removePriceScheduleTime(${i})" aria-label="Remove time">✕</button>
+                    <button type="button" class="btn btn-outline" onclick="removePriceScheduleTime(${i})" aria-label="Remove time"><svg class="ui-icon ic-i" viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-close"></use></svg></button>
                 </div>`).join('');
         }
         function onPriceScheduleTimeChange(i, value) { PRICE_SCHEDULE_DRAFT[i] = value; priceScheduleDirty = true; }
@@ -13712,7 +13737,7 @@ html.pref-compact .btn { min-height: 38px; }
             const statusEl = document.getElementById('price-schedule-status');
             if (PRICE_SCHEDULE_DRAFT.some(t => !COST_TIME_RE.test(t))) {
                 statusEl.style.color = 'var(--danger-strong)';
-                statusEl.innerText = 'အချိန်တစ်ခု ကွက်လပ်ဖြစ်နေပါတယ် — ဖြည့်ပါ ဒါမှမဟုတ် ✕ နဲ့ ဖျက်ပါ။';
+                statusEl.innerText = 'အချိန်တစ်ခု ကွက်လပ်ဖြစ်နေပါတယ် — ဖြည့်ပါ ဒါမှမဟုတ် ဖျက်ရန် ခလုတ်နဲ့ ဖျက်ပါ။';
                 return;
             }
             const margin = Number(document.getElementById('price-margin-pct-input').value);
@@ -13825,7 +13850,7 @@ html.pref-compact .btn { min-height: 38px; }
                     renderAdminGamesList();
                     if (ordersLoadedAt) renderOrdersList();
                     if (lossFixSchedulerStarted) autoFixLossMakingPackages();
-                    if (silent !== true) window.showToast('Games refreshed ✓');
+                    if (silent !== true) window.showToast('Games refreshed');
                 } catch (error) {
                     console.error("Games load error:", error);
                     if (!gamesLoadedAt) document.getElementById('admin-games-container').innerHTML = '<p class="empty-msg" style="color:red;">Could not load games. Check connection.</p>';
@@ -13891,7 +13916,7 @@ html.pref-compact .btn { min-height: 38px; }
                     if (bal > 0 && !hasHistory.has(d.id)) _noHistoryWallets.push({ id: d.id, name: u.name || u.googleEmail || d.id, balance: bal, telegramId: u.telegramId || '' });
                 });
                 if (!_noHistoryWallets.length) {
-                    out.innerHTML = '<b style="color:#10B981;">✓ History မရှိဘဲ ငွေရှိတဲ့ wallet မတွေ့ပါ။</b>';
+                    out.innerHTML = '<b style="color:#10B981;"><svg class="ui-icon ic-i" viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-check"></use></svg> History မရှိဘဲ ငွေရှိတဲ့ wallet မတွေ့ပါ။</b>';
                 } else {
                     const total = _noHistoryWallets.reduce((s, x) => s + x.balance, 0);
                     out.innerHTML = `<div style="margin-bottom:8px;"><b>${_noHistoryWallets.length}</b> user · စုစုပေါင်း <b>${fmtMoney(total)}</b></div>`
@@ -13959,7 +13984,7 @@ html.pref-compact .btn { min-height: 38px; }
             }
             _noHistoryWallets = [];
             logAdminActivity('Zeroed no-history wallets', `${done} user(s)`);
-            out.innerHTML = `<b style="color:#10B981;">✓ ${done} wallet 0 လုပ်ပြီး · Telegram warning ${notified} ခု ပို့ပြီး${skipped ? ` · ${skipped} ခု ကျော်ခဲ့ (balance ပြောင်းသွား/error)` : ''}</b>`;
+            out.innerHTML = `<b style="color:#10B981;"><svg class="ui-icon ic-i" viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-check"></use></svg> ${done} wallet 0 လုပ်ပြီး · Telegram warning ${notified} ခု ပို့ပြီး${skipped ? ` · ${skipped} ခု ကျော်ခဲ့ (balance ပြောင်းသွား/error)` : ''}</b>`;
             try { await fetchUsers(true); } catch (e) {}
             if (window.refreshWalletTotalStat) refreshWalletTotalStat(true);
             window.showToast(`${done} wallet cleared`, 'success');
@@ -13983,7 +14008,7 @@ html.pref-compact .btn { min-height: 38px; }
                 }
                 try { localStorage.removeItem(GAMES_CACHE_KEY); } catch (e) {}
                 await loadGames(false, true);
-                window.showToast(moved ? `${moved} game(s) migrated ✓` : 'Nothing to migrate - already clean', 'success');
+                window.showToast(moved ? `${moved} game(s) migrated` : 'Nothing to migrate - already clean', 'success');
             } catch (err) {
                 console.error('Cost migration error:', err);
                 window.showToast('Migration failed: ' + (err.message || err), 'fail');
@@ -14015,7 +14040,7 @@ html.pref-compact .btn { min-height: 38px; }
             const gallery = document.getElementById('game-banner-gallery');
             if (!gallery) return;
             const urls = editingBannerImageUrls.slice();
-            gallery.innerHTML = urls.map((url, i) => `<div class="game-banner-thumb" data-index="${i}"><img src="${url}" loading="lazy" decoding="async" alt="Banner ${i + 1}"><button type="button" onclick="removeGameBannerImage(${i})" aria-label="Remove banner">×</button></div>`).join('');
+            gallery.innerHTML = urls.map((url, i) => `<div class="game-banner-thumb" data-index="${i}"><img src="${url}" loading="lazy" decoding="async" alt="Banner ${i + 1}"><button type="button" onclick="removeGameBannerImage(${i})" aria-label="Remove banner"><svg class="ui-icon ic-i" viewBox="0 0 24 24" aria-hidden="true" style="width:12px;height:12px;margin:0"><use href="#icon-close"></use></svg></button></div>`).join('');
         }
         function removeGameBannerImage(index) {
             editingBannerImageUrls.splice(index, 1);
@@ -14127,7 +14152,7 @@ html.pref-compact .btn { min-height: 38px; }
                     }
                     builtinPkgTabLabels[tabId] = name;
                     renderPkgTabBar();
-                    window.showToast(`Tab renamed to "${name}" ✓`, 'success');
+                    window.showToast(`Tab renamed to "${name}"`, 'success');
                 }
             });
         }
@@ -14190,7 +14215,7 @@ html.pref-compact .btn { min-height: 38px; }
                     }
                     customPkgTabs.push(name);
                     switchPackageTab(name);
-                    window.showToast(`"${name}" tab added ✓`, 'success');
+                    window.showToast(`"${name}" tab added`, 'success');
                 }
             });
         }
@@ -15139,7 +15164,7 @@ html.pref-compact .btn { min-height: 38px; }
                     if (removeLink) removeLink.style.display = 'block';
                     syncPkgSummary(row);
                 });
-                if (window.showToast) window.showToast(`${rows.length} package(s) updated with the same image ✓`, 'success');
+                if (window.showToast) window.showToast(`${rows.length} package(s) updated with the same image`, 'success');
                 clearPkgSelection();
             } catch (error) {
                 console.error('Bulk package image upload failed:', error);
@@ -15202,7 +15227,7 @@ html.pref-compact .btn { min-height: 38px; }
 
             decorated.forEach(d => list.appendChild(d.row));
             renumberPackageRows();
-            window.showToast('Packages sorted ✓', 'success');
+            window.showToast('Packages sorted', 'success');
         }
         window.sortPackageRows = sortPackageRows;
 
@@ -15258,9 +15283,11 @@ html.pref-compact .btn { min-height: 38px; }
         // points) keeps it from drifting too far for very small Cost values.
         let AUTO_PRICE_MARGIN_PCT = 1; // overwritten by settings/pricing.priceMarginPct (Settings → Auto Price Update)
 
-        function autoPriceForCost(cost) {
+        function autoPriceForCost(cost, pctOverride) {
             if (!cost || cost <= 0) return 0;
-            const rawTarget = cost * (1 + AUTO_PRICE_MARGIN_PCT / 100); // exact target margin above cost
+            // 2nd arg given (a game's own % or null) -> that game's % or the global one; no 2nd arg -> the % typed in the open Game editor, else global
+            const pct = arguments.length > 1 ? (typeof pctOverride === 'number' ? pctOverride : AUTO_PRICE_MARGIN_PCT) : (typeof window.__geMarginPct === 'number' ? window.__geMarginPct : AUTO_PRICE_MARGIN_PCT);
+            const rawTarget = cost * (1 + pct / 100); // exact target margin above cost
             // Prices may ONLY end in 00 or 50: always round UP to the next 50 (530 -> 550, 560 -> 600).
             const step = 50;
             return Math.ceil(rawTarget / step) * step;
@@ -15358,7 +15385,7 @@ html.pref-compact .btn { min-height: 38px; }
                 window.showToast(`No packages had a ${bulkPkgField === 'price' ? 'Price' : 'Cost'} set to adjust`, 'fail');
             } else {
                 const priceNote = bulkPkgField === 'cost' ? ` (Price re-synced to ~${AUTO_PRICE_MARGIN_PCT}% margin)` : '';
-                window.showToast(`Updated ${changed} package(s) ${pct > 0 ? '+' : ''}${pct}%${priceNote} ✓`, 'success');
+                window.showToast(`Updated ${changed} package(s) ${pct > 0 ? '+' : ''}${pct}%${priceNote}`, 'success');
             }
         }
         window.applyBulkPkgAdjust = applyBulkPkgAdjust;
@@ -15401,7 +15428,7 @@ html.pref-compact .btn { min-height: 38px; }
                     if (changed === 0) {
                         window.showToast(skipped ? `Already synced — ${skipped} row(s) skipped (no Cost set)` : 'Every price already matches the target margin', 'success');
                     } else {
-                        window.showToast(`${changed} price(s) re-synced to ${fmtResyncPct(pct)} margin ✓${skipped ? ` (${skipped} skipped — no Cost)` : ''}`, 'success');
+                        window.showToast(`${changed} price(s) re-synced to ${fmtResyncPct(pct)} margin${skipped ? ` (${skipped} skipped — no Cost)` : ''}`, 'success');
                     }
                 }
             });
@@ -15438,7 +15465,7 @@ html.pref-compact .btn { min-height: 38px; }
                     });
                     window.showToast(changed === 0
                         ? (skipped ? `${skipped} card(s) skipped (no Cost set)` : 'Selected cards already match this %')
-                        : `${changed} card(s) set to ${fmtResyncPct(pct)} ✓${skipped ? ` (${skipped} skipped — no Cost)` : ''}`, changed === 0 ? 'fail' : 'success');
+                        : `${changed} card(s) set to ${fmtResyncPct(pct)}${skipped ? ` (${skipped} skipped — no Cost)` : ''}`, changed === 0 ? 'fail' : 'success');
                     if (changed > 0) clearPkgSelection();
                 }
             });
@@ -15580,6 +15607,9 @@ html.pref-compact .btn { min-height: 38px; }
                 document.getElementById('edit-game-app-ios-store-url').value = g.appIosStoreUrl || '';
                 document.getElementById('edit-game-popular').checked = !!g.popular;
                 document.getElementById('edit-game-autoprice').checked = g.autoPriceSync === true; // missing on older games = OFF (Cost only)
+                document.getElementById('edit-game-autocost').checked = g.autoPriceUpdate !== false;
+                document.getElementById('edit-game-margin').value = (typeof g.priceMarginPct === 'number') ? g.priceMarginPct : '';
+                onGameAutoCostToggle();
                 onGameAutoPriceToggle();
                 // Missing field on older games defaults to "required" so nothing changes for them.
                 document.getElementById('edit-game-playerid').checked = g.playerIdRequired !== false;
@@ -15657,6 +15687,9 @@ html.pref-compact .btn { min-height: 38px; }
                 document.getElementById('edit-game-app-ios-store-url').value = '';
                 document.getElementById('edit-game-popular').checked = false;
                 document.getElementById('edit-game-autoprice').checked = false;
+                document.getElementById('edit-game-autocost').checked = true;
+                document.getElementById('edit-game-margin').value = '';
+                onGameAutoCostToggle();
                 onGameAutoPriceToggle();
                 document.getElementById('edit-game-playerid').checked = false;
                 document.getElementById('edit-game-serverid').checked = false;
@@ -15806,7 +15839,7 @@ html.pref-compact .btn { min-height: 38px; }
                 catch (_) { throw new Error('Upload server error (HTTP ' + res.status + ')'); }
                 if (!data.success) throw new Error(data.error?.message || 'Upload failed');
 
-                statusEl.innerText = 'Photo uploaded ✓';
+                statusEl.innerText = 'Photo uploaded';
                 return data.data.url;
             } catch (error) {
                 // Leaving the status line stuck on "Uploading photo..." after a
@@ -15859,12 +15892,58 @@ html.pref-compact .btn { min-height: 38px; }
             document.getElementById('edit-game-disabled-wrap').style.display = on ? 'block' : 'none';
         }
         window.onGameDisabledToggle = onGameDisabledToggle;
+        function onGameAutoCostToggle() {
+            const on = document.getElementById('edit-game-autocost').checked;
+            const hint = document.getElementById('edit-game-autocost-hint');
+            if (hint) hint.textContent = on
+                ? 'ဖွင့်ထားတယ် — Cost Update Schedule အချိန်တွေမှာ ဒီဂိမ်းရဲ့ Cost ကို provider ရဲ့ လက်ရှိဈေးအတိုင်း auto update လုပ်မယ်။'
+                : 'ပိတ်ထားတယ် — ဒီဂိမ်းရဲ့ Cost ကို auto မပြောင်းပါ၊ လက်နဲ့ပဲ ပြင်မယ်။';
+        }
+        window.onGameAutoCostToggle = onGameAutoCostToggle;
+        function geMarginValue() {
+            const raw = (document.getElementById('edit-game-margin').value || '').trim();
+            const v = Number(raw);
+            return (raw !== '' && isFinite(v) && v >= 0) ? v : null;
+        }
+        function geMarginRefresh() {
+            const own = geMarginValue();
+            const eff = own === null ? AUTO_PRICE_MARGIN_PCT : own;
+            window.__geMarginPct = own;
+            const src = document.getElementById('ge-margin-src');
+            if (src) src.textContent = own === null ? ('Global ' + AUTO_PRICE_MARGIN_PCT + '% သုံးနေ') : 'ဒီဂိမ်းအတွက်သီးသန့်';
+            const ex = 10000;
+            const pv = document.getElementById('ge-margin-preview');
+            if (pv) pv.innerHTML = 'ဥပမာ Cost <b>' + ex.toLocaleString() + '</b> MMK &rarr; Price <b>' + autoPriceForCost(ex, eff).toLocaleString() + '</b> MMK <small>(' + eff + '% တိုး)</small>';
+            document.querySelectorAll('#ge-margin-chips .ge-chip').forEach(c => {
+                const v = c.dataset.v;
+                c.classList.toggle('on', v === '' ? own === null : own === Number(v));
+            });
+        }
+        function geMarginChanged() { geMarginRefresh(); }
+        function geMarginSet(v) { document.getElementById('edit-game-margin').value = v === '' ? '' : String(v); geMarginRefresh(); }
+        function geMarginStep(d) {
+            const cur = geMarginValue();
+            const base = cur === null ? AUTO_PRICE_MARGIN_PCT : cur;
+            const nv = Math.max(0, Math.round((base + d) * 100) / 100);
+            document.getElementById('edit-game-margin').value = String(nv);
+            geMarginRefresh();
+        }
+        function geApplyMarginNow() {
+            const own = geMarginValue();
+            resyncPct = own === null ? AUTO_PRICE_MARGIN_PCT : own;
+            updateResyncPctDisplay();
+            resyncAllPricesToMargin();
+        }
+        window.geMarginChanged = geMarginChanged; window.geMarginSet = geMarginSet; window.geMarginStep = geMarginStep; window.geApplyMarginNow = geApplyMarginNow;
         function onGameAutoPriceToggle() {
             const on = document.getElementById('edit-game-autoprice').checked;
             const hint = document.getElementById('edit-game-autoprice-hint');
             if (hint) hint.textContent = on
-                ? 'ဖွင့်ထားတယ် — Settings ထဲက Price Update Schedule အချိန်တွေမှာ ဒီဂိမ်းရဲ့ Price ကို Cost + Margin % အတိုင်း auto ချိန်ပေးမယ်။ (Cost က သူ့ Schedule နဲ့ သီးသန့် update ဖြစ်နေမယ်)'
-                : 'ပိတ်ထားတယ် — ဒီဂိမ်းရဲ့ Cost ပဲ auto update ဖြစ်မယ်၊ Price ကို မထိပါ။';
+                ? 'ဖွင့်ထားတယ် — Price Update Schedule အချိန်တွေမှာ Price ကို Cost + အောက်က % အတိုင်း auto ချိန်ပေးမယ်။'
+                : 'ပိတ်ထားတယ် — Price ကို auto မထိပါ၊ ကိုယ်တိုင်သတ်မှတ်တဲ့အတိုင်းပဲ ရှိမယ်။';
+            const wrap = document.getElementById('ge-margin-wrap');
+            if (wrap) wrap.classList.toggle('is-off', !on);
+            geMarginRefresh();
         }
         window.onGameAutoPriceToggle = onGameAutoPriceToggle;
 
@@ -15910,7 +15989,9 @@ html.pref-compact .btn { min-height: 38px; }
             const appIosStoreUrl = document.getElementById('edit-game-app-ios-store-url').value.trim();
             const popular = document.getElementById('edit-game-popular').checked;
             const autoPriceSync = document.getElementById('edit-game-autoprice').checked;
-            const autoPriceUpdate = true; // Cost auto update is always on (no switch) — kept true so the Worker's cost sweep never skips this game
+            const autoPriceUpdate = document.getElementById('edit-game-autocost').checked; // per-game Cost Auto Update switch (OFF = the cost sweep skips this game)
+            const marginRaw = document.getElementById('edit-game-margin').value.trim();
+            const priceMarginPct = (marginRaw !== '' && isFinite(Number(marginRaw)) && Number(marginRaw) >= 0) ? Math.round(Number(marginRaw) * 100) / 100 : null; // null = use the global margin
             const playerIdRequired = document.getElementById('edit-game-playerid').checked;
             const serverIdRequired = playerIdRequired && document.getElementById('edit-game-serverid').checked;
             const charNameRequired = document.getElementById('edit-game-charname').checked;
@@ -15982,7 +16063,7 @@ html.pref-compact .btn { min-height: 38px; }
                 // currently sit in them - without this, a tab created but left empty (or
                 // emptied out later) would vanish on reload since nothing else in the
                 // saved data would reference it.
-                const data = { name, serverName: serverName || '', image: imageUrl, banner: bannerUrl || imageUrl, bannerImages: existingBanners.length ? existingBanners : [imageUrl], packages, packageTabs: customPkgTabs.slice(), packageTabLabels: { package: builtinPkgTabLabels.package, currency: builtinPkgTabLabels.currency }, g2bulkCode: g2bulkCode || '', jcplaysProduct: jcplaysProduct || '', g2bulkVoucherCategory: g2bulkVoucherCategory || '', fazercardCategoryId: fazercardCategoryId || '', fazercardFields: fazercardCategoryId ? pendingFazerCardFields.slice() : [], fazercardServerMode: pendingFazerCardServerMode || '', fazercardServerOptions: pendingFazerCardServerOptions || [], g2bulkIdCheckCode: fazercardCategoryId ? (g2bulkIdCheckCode || '') : '', fazercardGiftCategoryId: fazercardGiftCategoryId || '', g2bulkServerMode: pendingG2BulkServerMode || '', g2bulkServerOptions: pendingG2BulkServerOptions || [], fulfillProvider: currentFulfillProvider, category: category || '', description: description || '', descriptionBase: descriptionBase || '', disabled: gameDisabled, disabledReason: gameDisabledReason, redeemLink: redeemLink || '', appAndroidPackage: appAndroidPackage || '', appAndroidScheme: appAndroidScheme || '', appAndroidStoreUrl: appAndroidStoreUrl || '', appIosScheme: appIosScheme || '', appIosStoreUrl: appIosStoreUrl || '', popular, autoPriceUpdate, autoPriceSync, playerIdRequired, serverIdRequired, charNameRequired };
+                const data = { name, serverName: serverName || '', image: imageUrl, banner: bannerUrl || imageUrl, bannerImages: existingBanners.length ? existingBanners : [imageUrl], packages, packageTabs: customPkgTabs.slice(), packageTabLabels: { package: builtinPkgTabLabels.package, currency: builtinPkgTabLabels.currency }, g2bulkCode: g2bulkCode || '', jcplaysProduct: jcplaysProduct || '', g2bulkVoucherCategory: g2bulkVoucherCategory || '', fazercardCategoryId: fazercardCategoryId || '', fazercardFields: fazercardCategoryId ? pendingFazerCardFields.slice() : [], fazercardServerMode: pendingFazerCardServerMode || '', fazercardServerOptions: pendingFazerCardServerOptions || [], g2bulkIdCheckCode: fazercardCategoryId ? (g2bulkIdCheckCode || '') : '', fazercardGiftCategoryId: fazercardGiftCategoryId || '', g2bulkServerMode: pendingG2BulkServerMode || '', g2bulkServerOptions: pendingG2BulkServerOptions || [], fulfillProvider: currentFulfillProvider, category: category || '', description: description || '', descriptionBase: descriptionBase || '', disabled: gameDisabled, disabledReason: gameDisabledReason, redeemLink: redeemLink || '', appAndroidPackage: appAndroidPackage || '', appAndroidScheme: appAndroidScheme || '', appAndroidStoreUrl: appAndroidStoreUrl || '', appIosScheme: appIosScheme || '', appIosStoreUrl: appIosStoreUrl || '', popular, autoPriceUpdate, autoPriceSync, priceMarginPct, playerIdRequired, serverIdRequired, charNameRequired };
 
                 if (gameId) {
                     await updateDoc(doc(db, "games", gameId), data);
@@ -16351,7 +16432,7 @@ html.pref-compact .btn { min-height: 38px; }
                     await batch.commit();
                     logAdminActivity('Reordered games');
                 }
-                window.showToast('Game order saved ✓', 'success');
+                window.showToast('Game order saved', 'success');
                 closeGameReorder();
             } catch (error) {
                 console.error('saveGameOrder error:', error);
@@ -17359,7 +17440,7 @@ html.pref-compact .btn { min-height: 38px; }
         function copyUserId(event, userId) {
             event.stopPropagation();
             navigator.clipboard.writeText(userId).then(() => {
-                window.showToast('User ID copied ✓');
+                window.showToast('User ID copied');
             }).catch((error) => {
                 console.error('Copy user ID error:', error);
                 window.showToast('Could not copy ID.', 'fail');
@@ -17400,7 +17481,7 @@ html.pref-compact .btn { min-height: 38px; }
                     if (currentUserDetailsId && USERS[currentUserDetailsId]) {
                         document.getElementById('ud-wallet-balance-h').innerText = fmtMoney(USERS[currentUserDetailsId].walletBalance || 0);
                     }
-                    if (silent !== true && window.showToast) window.showToast('Users refreshed ✓');
+                    if (silent !== true && window.showToast) window.showToast('Users refreshed');
                 } catch (error) {
                     console.error("Users fetch error:", error);
                     if (!usersLoadedAt) {
@@ -17653,9 +17734,9 @@ html.pref-compact .btn { min-height: 38px; }
                 openUserDetails(id);
                 switchUserDetailTab(tab);
                 window.scrollTo(0, y);
-                if (window.showToast) window.showToast('Updated ✓');
+                if (window.showToast) window.showToast('Updated');
             } finally {
-                if (btn) { btn.disabled = false; btn.classList.remove('busy'); btn.innerText = '↻ Update'; }
+                if (btn) { btn.disabled = false; btn.classList.remove('busy'); btn.innerHTML = '<svg class="ui-icon ic-i" viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-refresh"></use></svg> Update'; }
             }
         }
         window.refreshUserDetails = refreshUserDetails;
@@ -17823,7 +17904,7 @@ html.pref-compact .btn { min-height: 38px; }
             const note = document.getElementById('ud-admin-note').value.trim();
             try {
                 await updateDoc(doc(db, "users", currentUserDetailsId), { adminNote: note });
-                window.showToast('Note saved ✓');
+                window.showToast('Note saved');
             } catch (error) {
                 console.error('Save admin note error:', error);
                 window.showToast('Failed to save note.', 'fail');
@@ -17869,7 +17950,7 @@ html.pref-compact .btn { min-height: 38px; }
                 if (u) u.kycStatus = status;
                 renderUserKycSection(USERS[userId] || {});
                 logAdminActivity(status === 'verified' ? 'Approved KYC' : 'Rejected KYC', (u && u.name) || userId);
-                window.showToast(status === 'verified' ? 'Identity verified ✓' : 'Marked as rejected', status === 'verified' ? 'success' : 'fail');
+                window.showToast(status === 'verified' ? 'Identity verified' : 'Marked as rejected', status === 'verified' ? 'success' : 'fail');
             } catch (error) {
                 console.error('KYC status update error:', error);
                 window.showToast('Failed to update verification status.', 'fail');
@@ -18096,7 +18177,7 @@ html.pref-compact .btn { min-height: 38px; }
                             });
                         });
                         input.value = '';
-                        window.showToast(`Deducted ${fmtMoney(amount)} ✓`, 'success');
+                        window.showToast(`Deducted ${fmtMoney(amount)}`, 'success');
                         if (USERS[userId]) USERS[userId].walletBalance = Math.max(0, currentBalance - amount);
                         if (currentUserDetailsId === userId) {
                             const balEl = document.getElementById('ud-wallet-balance-h');
@@ -18793,7 +18874,7 @@ html.pref-compact .btn { min-height: 38px; }
                     + (hasCur ? '' : `<option value="${escA(cur)}" selected>${escA(cur)}</option>`)
                     + names.map(n => `<option value="${escA(n)}"${n.toLowerCase() === cur.toLowerCase() ? ' selected' : ''}>${escA(n)}</option>`).join('');
                 return `<div class="hb-row-wrap" style="display:flex;flex-wrap:wrap;align-items:center;gap:8px;width:100%;">`
-                    + `<div class="game-banner-thumb" data-index="${i}" style="flex:0 0 auto;"><img src="${url}" loading="lazy" decoding="async" alt="Banner ${i + 1}"><button type="button" onclick="removeHomeBannerImage(${i})" aria-label="Remove banner">×</button></div>`
+                    + `<div class="game-banner-thumb" data-index="${i}" style="flex:0 0 auto;"><img src="${url}" loading="lazy" decoding="async" alt="Banner ${i + 1}"><button type="button" onclick="removeHomeBannerImage(${i})" aria-label="Remove banner"><svg class="ui-icon ic-i" viewBox="0 0 24 24" aria-hidden="true" style="width:12px;height:12px;margin:0"><use href="#icon-close"></use></svg></button></div>`
                     + `<button type="button" class="hb-pick-btn${cur ? ' has' : ''}" onclick="openHomeBannerGamePicker(${i})" aria-label="Choose game for banner ${i + 1}"><span class="hb-pick-label">${cur ? (/^(https?:\/\/|tg:\/\/|mailto:|\/)/i.test(cur) ? '' : '') + escA(cur) : 'No link (tap to set link / game)'}</span><svg class="ui-icon" style="width:14px;height:14px;flex:0 0 auto;"><use href="#icon-chevron-down"></use></svg></button>`
                     + `</div>`;
             }).join('');
@@ -18839,10 +18920,10 @@ html.pref-compact .btn { min-height: 38px; }
             const draw = () => {
                 const q = search.value.trim().toLowerCase();
                 const rows = [];
-                if (!q) rows.push(`<div class="hb-row${!cur ? ' sel' : ''}" data-v=""><div class="hb-ico hb-ico-none">⨯</div><span>No link</span>${!cur ? '<i>✓</i>' : ''}</div>`);
+                if (!q) rows.push(`<div class="hb-row${!cur ? ' sel' : ''}" data-v=""><div class="hb-ico hb-ico-none"><svg class="ui-icon ic-i" viewBox="0 0 24 24" aria-hidden="true" style="width:16px;height:16px;margin:0"><use href="#icon-close"></use></svg></div><span>No link</span>${!cur ? '<i><svg class="ui-icon ic-i" viewBox="0 0 24 24" aria-hidden="true" style="width:13px;height:13px;margin:0"><use href="#icon-check"></use></svg></i>' : ''}</div>`);
                 games.filter(g => !q || g.name.toLowerCase().includes(q)).forEach(g => {
                     const on = g.name.toLowerCase() === curL;
-                    rows.push(`<div class="hb-row${on ? ' sel' : ''}" data-v="${escA(g.name)}"><img class="hb-ico" src="${escA(g.image)}" alt="" loading="lazy" onerror="this.style.visibility='hidden'"><span>${escA(g.name)}</span>${on ? '<i>✓</i>' : ''}</div>`);
+                    rows.push(`<div class="hb-row${on ? ' sel' : ''}" data-v="${escA(g.name)}"><img class="hb-ico" src="${escA(g.image)}" alt="" loading="lazy" onerror="this.style.visibility='hidden'"><span>${escA(g.name)}</span>${on ? '<i><svg class="ui-icon ic-i" viewBox="0 0 24 24" aria-hidden="true" style="width:13px;height:13px;margin:0"><use href="#icon-check"></use></svg></i>' : ''}</div>`);
                 });
                 list.innerHTML = rows.length ? rows.join('') : '<p class="hb-empty">No games found</p>';
             };
@@ -19265,7 +19346,7 @@ html.pref-compact .btn { min-height: 38px; }
             try {
                 await fazercardRequest('/account/webhook', { method: 'PUT', body: { url, enabled }, settings: FAZERCARD_SETTINGS });
                 await setDoc(doc(db, "settings", "fazercard"), { webhookUrl: url, webhookEnabled: enabled }, { merge: true });
-                statusEl.innerText = 'Webhook saved ✓ (secret is only shown right after creation or a regenerate — use the button below if you need it)';
+                statusEl.innerText = 'Webhook saved (secret is only shown right after creation or a regenerate — use the button below if you need it)';
                 statusEl.style.color = 'var(--accent)';
                 logAdminActivity('Saved FazerCards webhook', url);
                 window.showToast('FazerCards webhook saved!', 'success');
@@ -19376,7 +19457,7 @@ html.pref-compact .btn { min-height: 38px; }
                     fazercardRequest('/me', { settings: { apiKey, proxyUrl } }),
                     fazercardRequest('/balance', { settings: { apiKey, proxyUrl } })
                 ]);
-                statusEl.innerText = 'Key valid ✓';
+                statusEl.innerText = 'Key valid';
                 statusEl.style.color = 'var(--accent)';
                 gridEl.style.display = 'block';
                 gridEl.className = 'details-grid';
@@ -20458,7 +20539,7 @@ html.pref-compact .btn { min-height: 38px; }
                 document.getElementById('edit-game-category').value = id;
                 renderGameCategorySelect();
                 closeAddCategoryModal();
-                window.showToast('Game Role added ✓', 'success');
+                window.showToast('Game Role added', 'success');
             } catch (error) {
                 console.error('Save custom game category error:', error);
                 CUSTOM_GAME_CATEGORIES.pop();
@@ -21136,8 +21217,8 @@ html.pref-compact .btn { min-height: 38px; }
 
                 statusEl.style.color = 'var(--accent)';
                 let statusMsg = updatedCount
-                    ? `Cost ${updatedCount} ခု update လုပ်ပြီး, Package အသစ် ${addedCount} ခု ထည့်ပြီးပါပြီ ✓ — Price/Image/နေရာ မပြောင်းလဲပါ။`
-                    : `Imported ${addedCount} packages ✓ — Cost & Price (~${AUTO_PRICE_MARGIN_PCT}% margin) filled in automatically; adjust if needed before saving.`;
+                    ? `Cost ${updatedCount} ခု update လုပ်ပြီး, Package အသစ် ${addedCount} ခု ထည့်ပြီးပါပြီ — Price/Image/နေရာ မပြောင်းလဲပါ။`
+                    : `Imported ${addedCount} packages — Cost & Price (~${AUTO_PRICE_MARGIN_PCT}% margin) filled in automatically; adjust if needed before saving.`;
 
                 // Check /v1/games/fields for whether this game needs a
                 // server id, and auto-set "Requires Server ID" from the
@@ -21163,8 +21244,8 @@ html.pref-compact .btn { min-height: 38px; }
                     onPlayerIdRequiredToggle();
                     document.getElementById('edit-game-serverid').checked = needsG2BulkServerId;
                     statusMsg += needsG2BulkServerId
-                        ? '\n✓ "Requires Server ID" auto-enabled for this game.'
-                        : '\n✓ "Requires Server ID" auto-disabled — this game doesn\'t need it.';
+                        ? '\n "Requires Server ID" auto-enabled for this game.'
+                        : '\n "Requires Server ID" auto-disabled — this game doesn\'t need it.';
 
                     if (needsG2BulkServerId) {
                         // A 403 here means "no server needed" per G2Bulk's own
@@ -21181,7 +21262,7 @@ html.pref-compact .btn { min-height: 38px; }
                             if (serverEntries.length > 0) {
                                 pendingG2BulkServerMode = 'select';
                                 pendingG2BulkServerOptions = serverEntries.map(([label, value]) => ({ label, value }));
-                                statusMsg += `\n✓ Server dropdown detected (${serverEntries.length} options: ${serverEntries.map(e => e[0]).join(', ')}).`;
+                                statusMsg += `\n Server dropdown detected (${serverEntries.length} options: ${serverEntries.map(e => e[0]).join(', ')}).`;
                             } else {
                                 pendingG2BulkServerMode = null;
                                 pendingG2BulkServerOptions = null;
@@ -21206,7 +21287,7 @@ html.pref-compact .btn { min-height: 38px; }
 
                 statusEl.innerText = statusMsg;
                 sortPackageRows();
-                window.showToast('Catalogue imported ✓', 'success');
+                window.showToast('Catalogue imported', 'success');
             } catch (error) {
                 console.error("Import G2Bulk catalogue error:", error);
                 statusEl.style.color = 'var(--danger-strong)';
@@ -21325,14 +21406,14 @@ html.pref-compact .btn { min-height: 38px; }
 
                 statusEl.style.color = 'var(--accent)';
                 statusEl.innerText = (updatedCount
-                    ? `Cost ${updatedCount} ခု update လုပ်ပြီး, Package အသစ် ${addedCount} ခု ထည့်ပြီးပါပြီ ✓ — Price/Image/နေရာ မပြောင်းလဲပါ။`
-                    : `Imported ${addedCount} packages ✓ — Cost & Price (~${AUTO_PRICE_MARGIN_PCT}% margin) filled in automatically; adjust if needed before saving.`)
-                    + (fazerNeedsServerIdField ? '\n✓ "Requires Server ID" auto-enabled for this game.' : '\n✓ "Requires Server ID" auto-disabled — this game doesn\'t need it.')
+                    ? `Cost ${updatedCount} ခု update လုပ်ပြီး, Package အသစ် ${addedCount} ခု ထည့်ပြီးပါပြီ — Price/Image/နေရာ မပြောင်းလဲပါ။`
+                    : `Imported ${addedCount} packages — Cost & Price (~${AUTO_PRICE_MARGIN_PCT}% margin) filled in automatically; adjust if needed before saving.`)
+                    + (fazerNeedsServerIdField ? '\n "Requires Server ID" auto-enabled for this game.' : '\n "Requires Server ID" auto-disabled — this game doesn\'t need it.')
                     + (pendingFazerCardServerMode === 'select'
-                        ? `\n✓ Server dropdown detected (${pendingFazerCardServerOptions.length} options).`
+                        ? `\n Server dropdown detected (${pendingFazerCardServerOptions.length} options).`
                         : (fazerNeedsServerIdField ? '\nNo fixed server list found for this field — Server ID stays free-text (check console log for the raw field shape).' : ''));
                 sortPackageRows();
-                window.showToast('FazerCards catalogue imported ✓', 'success');
+                window.showToast('FazerCards catalogue imported', 'success');
             } catch (error) {
                 console.error("Import FazerCards catalogue error:", error);
                 statusEl.style.color = 'var(--danger-strong)';
@@ -21586,7 +21667,7 @@ html.pref-compact .btn { min-height: 38px; }
             }
 
             countEl.innerText = `${added} imported${failed ? `, ${failed} failed` : ''}`;
-            window.showToast(`Imported ${added} game${added === 1 ? '' : 's'}${failed ? `, ${failed} failed` : ''} ✓`, (failed && !added) ? 'fail' : 'success');
+            window.showToast(`Imported ${added} game${added === 1 ? '' : 's'}${failed ? `, ${failed} failed` : ''}`, (failed && !added) ? 'fail' : 'success');
             if (failedNames.length) console.warn(`${bulkProviderLabel(kind)} bulk import failures:`, failedNames);
 
             pickerBulkSelected = new Set();
@@ -21682,12 +21763,12 @@ html.pref-compact .btn { min-height: 38px; }
 
                 statusEl.style.color = 'var(--accent)';
                 statusEl.innerText = updatedCount
-                    ? `Cost ${updatedCount} ခု update လုပ်ပြီး, Product အသစ် ${addedCount} ခု ထည့်ပြီးပါပြီ ✓ — Price/Image/နေရာ မပြောင်းလဲပါ။`
-                    : `Imported ${addedCount} products ✓ — Cost & Price (~${AUTO_PRICE_MARGIN_PCT}% margin) filled in automatically; adjust if needed before saving.`;
+                    ? `Cost ${updatedCount} ခု update လုပ်ပြီး, Product အသစ် ${addedCount} ခု ထည့်ပြီးပါပြီ — Price/Image/နေရာ မပြောင်းလဲပါ။`
+                    : `Imported ${addedCount} products — Cost & Price (~${AUTO_PRICE_MARGIN_PCT}% margin) filled in automatically; adjust if needed before saving.`;
                 // Same auto-sort as the direct-games import above, so newly
                 // imported voucher rows land smallest-to-largest right away.
                 sortPackageRows();
-                window.showToast('Voucher catalogue imported ✓', 'success');
+                window.showToast('Voucher catalogue imported', 'success');
                 refreshVoucherGameStock();
             } catch (error) {
                 console.error('Import G2Bulk voucher catalogue error:', error);
@@ -21745,10 +21826,10 @@ html.pref-compact .btn { min-height: 38px; }
 
                 statusEl.style.color = 'var(--accent)';
                 statusEl.innerText = updatedCount
-                    ? `Cost ${updatedCount} ခု update လုပ်ပြီး, Card အသစ် ${addedCount} ခု ထည့်ပြီးပါပြီ ✓ — Price/Image/နေရာ မပြောင်းလဲပါ။`
-                    : `Imported ${addedCount} cards ✓ — Cost & Price (~${AUTO_PRICE_MARGIN_PCT}% margin) filled in automatically; adjust if needed before saving.`;
+                    ? `Cost ${updatedCount} ခု update လုပ်ပြီး, Card အသစ် ${addedCount} ခု ထည့်ပြီးပါပြီ — Price/Image/နေရာ မပြောင်းလဲပါ။`
+                    : `Imported ${addedCount} cards — Cost & Price (~${AUTO_PRICE_MARGIN_PCT}% margin) filled in automatically; adjust if needed before saving.`;
                 sortPackageRows();
-                window.showToast('FazerCards gift card catalogue imported ✓', 'success');
+                window.showToast('FazerCards gift card catalogue imported', 'success');
             } catch (error) {
                 console.error("Import FazerCards gift card catalogue error:", error);
                 statusEl.style.color = 'var(--danger-strong)';
@@ -22098,7 +22179,7 @@ html.pref-compact .btn { min-height: 38px; }
             if (lines.length === 0) { window.showToast('No packages to copy', 'fail'); return; }
             const text = lines.join('\n');
 
-            const doCopy = () => window.showToast(`Copied ${lines.length} package(s) ✓`, 'success');
+            const doCopy = () => window.showToast(`Copied ${lines.length} package(s)`, 'success');
             if (navigator.clipboard && navigator.clipboard.writeText) {
                 navigator.clipboard.writeText(text).then(doCopy).catch(() => fallbackCopyText(text, doCopy));
             } else {
@@ -22155,7 +22236,7 @@ html.pref-compact .btn { min-height: 38px; }
                 });
                 const data = await res.json();
                 if (res.ok && data && data.success !== false) {
-                    statusEl.innerText = 'Key valid ✓';
+                    statusEl.innerText = 'Key valid';
                     statusEl.style.color = 'var(--accent)';
                     gridEl.className = 'details-grid';
                     gridEl.innerHTML = `
@@ -22360,7 +22441,7 @@ html.pref-compact .btn { min-height: 38px; }
                 const data = await jcplaysRequest('querypoints', {}, { baseUrl, proxyUrl, uid, email, mKey });
                 if (data.status === 200) {
                     statusEl.style.color = '#28a745';
-                    statusEl.innerText = `Connected ✓ — jcnew balance: ${data.smile_points}`;
+                    statusEl.innerText = `Connected — jcnew balance: ${data.smile_points}`;
                     window.showToast('JCPlays credentials verified!', 'success');
                 } else {
                     statusEl.style.color = 'var(--danger-strong)';
@@ -22546,12 +22627,12 @@ html.pref-compact .btn { min-height: 38px; }
 
                 statusEl.style.color = 'var(--accent)';
                 statusEl.innerText = updatedCount
-                    ? `Cost ${updatedCount} ခု update လုပ်ပြီး, Package အသစ် ${addedCount} ခု ထည့်ပြီးပါပြီ ✓ — Price/Image/နေရာ မပြောင်းလဲပါ။`
-                    : `Imported ${addedCount} packages ✓ — Cost & Price (~${AUTO_PRICE_MARGIN_PCT}% margin) filled in automatically; adjust if needed before saving.`;
+                    ? `Cost ${updatedCount} ခု update လုပ်ပြီး, Package အသစ် ${addedCount} ခု ထည့်ပြီးပါပြီ — Price/Image/နေရာ မပြောင်းလဲပါ။`
+                    : `Imported ${addedCount} packages — Cost & Price (~${AUTO_PRICE_MARGIN_PCT}% margin) filled in automatically; adjust if needed before saving.`;
                 // Same auto-sort as G2Bulk/FazerCards/Voucher imports above, so
                 // newly-imported denominations land smallest-to-largest too.
                 sortPackageRows();
-                window.showToast('JCPlays denominations imported ✓', 'success');
+                window.showToast('JCPlays denominations imported', 'success');
             } catch (error) {
                 console.error("JCPlays productlist error:", error);
                 statusEl.style.color = 'var(--danger-strong)';
@@ -22663,7 +22744,7 @@ html.pref-compact .btn { min-height: 38px; }
                     // Detail without the admin needing to copy/paste it by hand.
                     deliveredCodes: deliveredCodesList
                 });
-                window.showToast(redeemCode ? 'JCPlays code delivered ✓ — customer can see it now' : 'JCPlays confirmed, but no code field was recognized — check Raw Response on the order', redeemCode ? 'success' : 'fail');
+                window.showToast(redeemCode ? 'JCPlays code delivered — customer can see it now' : 'JCPlays confirmed, but no code field was recognized — check Raw Response on the order', redeemCode ? 'success' : 'fail');
                 return 'success';
             } catch (error) {
                 console.error("JCPlays order succeeded but saving the result failed:", error);
@@ -22687,7 +22768,7 @@ html.pref-compact .btn { min-height: 38px; }
             if (!order) return;
             const text = order.jcplaysRedeemCode || order.jcplaysRedeemRaw || '';
             if (!text) { window.showToast('No code to copy yet.', 'fail'); return; }
-            const done = () => window.showToast('Copied ✓', 'success');
+            const done = () => window.showToast('Copied', 'success');
             if (navigator.clipboard && navigator.clipboard.writeText) {
                 navigator.clipboard.writeText(text).then(done).catch(() => fallbackCopyText(text, done));
             } else {
@@ -22986,6 +23067,9 @@ html.pref-compact .btn { min-height: 38px; }
             document.getElementById('edit-game-app-ios-store-url').value = base.appIosStoreUrl || '';
             document.getElementById('edit-game-popular').checked = !!base.popular;
             document.getElementById('edit-game-autoprice').checked = base.autoPriceUpdate !== false;
+            document.getElementById('edit-game-autocost').checked = base.autoPriceUpdate !== false;
+            document.getElementById('edit-game-margin').value = (typeof base.priceMarginPct === 'number') ? base.priceMarginPct : '';
+            onGameAutoCostToggle();
             onGameAutoPriceToggle();
             document.getElementById('edit-game-playerid').checked = base.playerIdRequired !== false;
             document.getElementById('edit-game-serverid').checked = base.serverIdRequired !== false;
@@ -23918,9 +24002,9 @@ a, button, [role="button"], .nav-item, .header-icon, .btn, .picker-btn, label { 
 </script>
 
 <style id="lg-polish">
-/* ===== Notification toast: liquid glass, sits lower ===== */
+/* ===== Notification toast: liquid glass, pinned near the top ===== */
 html body #toast {
-  top: calc(env(safe-area-inset-top, 0px) + 122px) !important;
+  top: calc(env(safe-area-inset-top, 0px) + 10px) !important;
   left: 16px !important; right: 16px !important; max-width: 440px;
   padding: 11px 14px 11px 12px !important; gap: 11px !important;
   border-radius: 22px !important; overflow: hidden;
@@ -23951,6 +24035,62 @@ html[data-theme="dark"] body #toast::before { opacity: .22; }
 html body #toast > * { position: relative; }
 html body #toast .toast-icon-circle { width: 26px; height: 26px; box-shadow: inset 0 1.5px 0 rgba(255,255,255,.55), 0 4px 10px -3px rgba(0,0,0,.35); }
 html body #toast .toast-icon-circle svg { width: 14px; height: 14px; stroke-width: 2.6; }
+</style>
+<style id="ge-upgrade">
+/* ===== inline SVG icons that replaced ✓ ✕ ↻ text glyphs ===== */
+svg.ic-i { width: 1em !important; height: 1em !important; min-width: 1em; vertical-align: -0.14em; margin-right: 5px; fill: none; stroke: currentColor; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
+.btn svg.ic-i, button svg.ic-i { margin-right: 6px; }
+button > svg.ic-i:only-child { margin-right: 0; }
+.tuc-title svg.ic-i, .hb-ico svg.ic-i, .game-banner-thumb button svg.ic-i, .modal-close svg.ic-i { margin-right: 0; }
+.tuc-title svg.ic-i { width: 16px !important; height: 16px !important; margin-right: 6px; }
+
+/* ===== Game editor: sectioned layout ===== */
+#game-editor-page .modal-body { display: flex; flex-direction: column; gap: 0; padding-bottom: 8px; }
+#game-editor-page .modal-header h3 { font-size: 22px; font-weight: 700; letter-spacing: -.2px; }
+.ge-sec { display: flex; align-items: baseline; gap: 8px; margin: 26px 2px 10px; padding-bottom: 8px; border-bottom: 1px solid var(--border-glass, rgba(128,140,160,.25)); }
+.ge-sec:first-child { margin-top: 6px; }
+.ge-sec b { font-size: 13px; font-weight: 700; letter-spacing: .5px; text-transform: uppercase; color: var(--text-strong, var(--text-primary)); }
+.ge-sec small { font-size: 11px; color: var(--text-muted); font-weight: 500; margin-left: auto; text-align: right; }
+.ge-sec-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); align-self: center; box-shadow: 0 0 0 4px rgba(var(--accent-rgb, 59,130,246), .16); flex-shrink: 0; }
+#game-editor-page .modal-body > label { margin-top: 14px; font-size: 12.5px; font-weight: 600; }
+#game-editor-page .modal-body input[type="text"], #game-editor-page .modal-body input[type="number"], #game-editor-page .modal-body textarea { border-radius: 13px; transition: border-color .18s, box-shadow .18s; }
+#game-editor-page .modal-body input:focus, #game-editor-page .modal-body textarea:focus { outline: none; border-color: var(--accent) !important; box-shadow: 0 0 0 4px rgba(var(--accent-rgb, 59,130,246), .14); }
+#game-editor-page .switch-row { padding: 12px 14px; margin: 8px 0; border: 1px solid var(--border-glass, rgba(128,140,160,.25)); border-radius: 15px; background: var(--bg-subtle-2); transition: border-color .2s, background .2s; }
+#game-editor-page .switch-row:has(input:checked) { border-color: rgba(var(--accent-rgb, 59,130,246), .45); background: var(--accent-soft); }
+#game-editor-page .switch-label { font-size: 13.5px; font-weight: 600; }
+#game-editor-page .modal-footer { position: sticky; bottom: 0; z-index: 6; display: flex; gap: 10px; padding: 12px 14px calc(12px + env(safe-area-inset-bottom, 0px)); margin: 14px -4px 0; border-radius: 20px 20px 0 0; background: color-mix(in srgb, var(--bg, #fff) 84%, transparent); -webkit-backdrop-filter: blur(18px) saturate(160%); backdrop-filter: blur(18px) saturate(160%); border-top: 1px solid var(--border-glass, rgba(128,140,160,.25)); box-shadow: 0 -10px 30px -18px rgba(15,23,42,.35); }
+#game-editor-page .modal-footer .btn { height: 48px; border-radius: 15px; font-weight: 700; }
+#game-editor-page .modal-footer .btn-primary { flex: 1; }
+
+/* ===== Auto Cost & Price card ===== */
+.ge-auto-card { border: 1px solid var(--border-glass, rgba(128,140,160,.25)); border-radius: 18px; background: var(--bg-subtle-2); overflow: hidden; }
+.ge-auto-row { display: flex; align-items: center; gap: 12px; padding: 14px; }
+.ge-auto-row + .ge-auto-row { border-top: 1px dashed var(--border-glass, rgba(128,140,160,.3)); }
+.ge-auto-ico { width: 38px; height: 38px; border-radius: 12px; display: grid; place-items: center; flex-shrink: 0; }
+.ge-auto-ico svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+.ge-auto-ico.c1 { background: rgba(255,149,0,.15); color: #E07B00; }
+.ge-auto-ico.c2 { background: rgba(52,199,89,.15); color: #1E9E4B; }
+.ge-auto-txt { flex: 1; min-width: 0; }
+.ge-auto-txt .switch-hint { line-height: 1.45; margin-top: 3px; }
+.ge-margin { padding: 14px; border-top: 1px solid var(--border-glass, rgba(128,140,160,.25)); background: color-mix(in srgb, var(--accent-soft) 55%, transparent); transition: opacity .25s, filter .25s; }
+.ge-margin.is-off { opacity: .45; filter: grayscale(.6); }
+.ge-margin-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 13px; font-weight: 600; margin-bottom: 10px; }
+.ge-margin-top small { font-weight: 500; color: var(--text-muted); }
+.ge-margin-src { font-size: 10.5px; font-weight: 700; padding: 3px 9px; border-radius: 999px; background: var(--bg-subtle); color: var(--text-secondary); white-space: nowrap; }
+.ge-stepper { display: flex; align-items: center; gap: 8px; }
+.ge-step-btn { width: 46px; height: 46px; flex-shrink: 0; border-radius: 14px; border: 1px solid var(--border-glass, rgba(128,140,160,.3)); background: var(--bg-subtle); color: var(--text-strong, var(--text-primary)); font-size: 22px; font-weight: 600; line-height: 1; cursor: pointer; transition: transform .12s, background .15s; -webkit-tap-highlight-color: transparent; }
+.ge-step-btn:active { transform: scale(.92); background: var(--accent-soft); }
+.ge-stepper input { flex: 1; min-width: 0; height: 46px; text-align: center; font-size: 20px !important; font-weight: 700 !important; font-variant-numeric: tabular-nums; margin: 0 !important; padding: 0 8px !important; -moz-appearance: textfield; }
+.ge-stepper input::-webkit-outer-spin-button, .ge-stepper input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.ge-stepper input::placeholder { font-size: 14px; font-weight: 600; color: var(--text-muted); }
+.ge-pct { font-weight: 700; color: var(--text-muted); margin-left: -2px; }
+.ge-chips { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 10px; }
+.ge-chip { padding: 7px 13px; border-radius: 999px; border: 1px solid var(--border-glass, rgba(128,140,160,.3)); background: var(--bg-subtle); color: var(--text-secondary); font-size: 12.5px; font-weight: 600; cursor: pointer; transition: all .18s; -webkit-tap-highlight-color: transparent; }
+.ge-chip.on { background: var(--accent); border-color: var(--accent); color: #fff; box-shadow: 0 6px 14px -8px var(--accent); }
+.ge-preview { margin-top: 12px; padding: 10px 12px; border-radius: 12px; background: var(--bg-subtle); font-size: 12.5px; color: var(--text-secondary); line-height: 1.5; }
+.ge-preview b { color: var(--accent); font-variant-numeric: tabular-nums; }
+.ge-preview small { color: var(--text-muted); }
+.ge-apply-now { width: 100%; margin-top: 12px; justify-content: center; height: 44px; border-radius: 13px; font-size: 13px; font-weight: 600; }
 </style>
 </body>
 </html>
