@@ -25882,6 +25882,140 @@ html body #game-list .game-tile-name{margin-top:5px;padding:0 2px;font-size:11.5
 html body #game-action-sheet-name{font-size:14px!important;font-weight:500!important}
 html body #game-action-sheet-overlay .btn-block{width:100%;margin-top:8px}
 </style>
+<style id="glass-restore">
+/* ===== Glass restored: translucent surfaces + blur + mesh; soft tinted titles/tabs/nav ===== */
+:root, html[data-theme="light"]{--bg-app: #EEF1F8; --mesh-1: rgba(120,170,255,0.35); --mesh-2: rgba(199,150,255,0.28); --mesh-3: rgba(120,230,210,0.22); --surface: rgba(255,255,255,0.62); --surface-strong: rgba(255,255,255,0.8); --bg-subtle: rgba(255,255,255,0.38); --bg-subtle-2: rgba(255,255,255,0.5); --fill-soft: rgba(30,41,59,0.08); --border-glass: rgba(255,255,255,0.55); --shadow-soft: 0 8px 30px -8px rgba(30,41,59,0.18); --glass-blur: 14px; --glass-hi:rgba(255,255,255,.7);}
+html[data-theme="dark-blue"]{--bg-app: #050813; --mesh-1: rgba(37,99,235,0.45); --mesh-2: rgba(124,58,237,0.32); --mesh-3: rgba(14,165,233,0.24); --surface: rgba(23,32,58,0.58); --surface-strong: rgba(28,38,68,0.75); --bg-subtle: rgba(255,255,255,0.05); --bg-subtle-2: rgba(255,255,255,0.07); --fill-soft: rgba(255,255,255,0.09); --border-glass: rgba(255,255,255,0.14); --shadow-soft: 0 14px 40px -10px rgba(0,0,10,0.6); --glass-blur: 16px; --glass-hi:rgba(255,255,255,.12);}
+html[data-theme="midnight-purple"]{--bg-app: #0B0715; --mesh-1: rgba(168,85,247,0.4); --mesh-2: rgba(236,72,153,0.24); --mesh-3: rgba(99,102,241,0.3); --surface: rgba(35,24,56,0.58); --surface-strong: rgba(42,29,68,0.75); --bg-subtle: rgba(255,255,255,0.05); --bg-subtle-2: rgba(255,255,255,0.07); --fill-soft: rgba(255,255,255,0.09); --border-glass: rgba(255,255,255,0.14); --shadow-soft: 0 14px 40px -10px rgba(10,0,20,0.6); --glass-blur: 16px; --glass-hi:rgba(255,255,255,.12);}
+html body::before{display:block!important;content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;background:radial-gradient(38% 30% at 12% 8%,var(--mesh-1) 0%,transparent 70%),radial-gradient(42% 34% at 88% 18%,var(--mesh-2) 0%,transparent 72%),radial-gradient(46% 38% at 30% 92%,var(--mesh-3) 0%,transparent 70%),var(--bg-app)!important}
+/* page tint (same palette as the nav tabs) */
+html body .page-section{--t:6,182,212}
+#dashboard{--t:59,130,246}#order-list{--t:139,92,246}#game-list{--t:236,72,153}
+#topup-list,#payin-list,#payment-list{--t:16,185,129}#user-list{--t:245,158,11}
+/* blur on every glass surface (not .admin-card with a popup inside: blur would trap its fixed popup) */
+html body :is(.glass,.header,.top-nav-wrap,.top-nav-wrap .top-nav,.modal-box,.dialog-box,#toast,.od-card,.title-header,.seg-tabs,.udp-tabs,.pkg-type-tabs,.game-list-tabs,.wl-tile,.quick-topup-grid,.pm-card,.user-grid-card,.stat-card,.chart-card,.an-card,.date-filter-trigger,.admin-search-wrap input,.admin-card:not(:has(.od-overlay))){-webkit-backdrop-filter:blur(var(--glass-blur,14px)) saturate(160%)!important;backdrop-filter:blur(var(--glass-blur,14px)) saturate(160%)!important}
+html body :is(.admin-card,.user-grid-card,.pm-card,.wl-tile,.quick-topup-grid,.chart-card,.an-card,.stat-card,.modal-box){background:var(--surface)!important;border:1px solid var(--border-glass)!important;box-shadow:var(--shadow-soft),inset 0 1px 0 var(--glass-hi)!important}
+html body .modal-box,html body .od-card{background:var(--surface-strong)!important}
+html body .header,html body .top-nav-wrap{background:color-mix(in srgb,var(--bg-app) 55%,transparent)!important;box-shadow:none!important}
+/* Nav: glass capsule, 6 soft-tinted tabs, active = solid tint */
+html body .top-nav-wrap{padding:8px 10px!important;border-bottom:0!important}
+html body .top-nav-wrap .top-nav{display:grid!important;grid-template-columns:repeat(6,1fr);gap:4px!important;padding:4px!important;width:100%!important;overflow:hidden!important;border:1px solid var(--border-glass)!important;border-radius:20px!important;background:var(--surface)!important;box-shadow:var(--shadow-soft),inset 0 1px 0 var(--glass-hi)!important}
+html body .top-nav-wrap .top-nav .nav-item{min-width:0;min-height:48px!important;padding:6px 0!important;border-radius:15px!important;border:1px solid rgba(var(--t),.2)!important;background:rgba(var(--t),.10)!important;color:var(--text-secondary)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.28)!important}
+html body .top-nav-wrap .top-nav .nav-item .ui-icon{stroke:rgb(var(--t))!important}
+html body .top-nav-wrap .top-nav .nav-item.active{color:#fff!important;border-color:rgba(255,255,255,.38)!important;background:linear-gradient(180deg,rgba(255,255,255,.28),rgba(255,255,255,0) 55%),rgb(var(--t))!important;box-shadow:0 8px 18px -8px rgba(var(--t),.8),inset 0 1px 0 rgba(255,255,255,.45)!important}
+html body .top-nav-wrap .top-nav .nav-item.active .ui-icon{stroke:#fff!important}
+html body .top-nav-wrap .top-nav .nav-item.active::after{display:none!important}
+/* Titles: soft tint like the nav tabs */
+html body .title-header{background:rgba(var(--t),.12)!important;color:color-mix(in srgb,rgb(var(--t)) 70%,var(--text-strong))!important;border:1px solid rgba(var(--t),.24)!important;box-shadow:inset 0 1px 0 var(--glass-hi)!important}
+html body .title-header .btn-outline{background:rgba(var(--t),.14)!important;color:inherit!important;border:1px solid rgba(var(--t),.28)!important}
+html body .title-header .btn-primary{background:rgb(var(--t))!important;color:#fff!important}
+html body .title-header .badge{background:rgba(var(--t),.16)!important;color:inherit!important}
+html body #dashboard .title-header>span:last-child{background:rgba(var(--t),.14)!important;border-color:rgba(var(--t),.28)!important;color:inherit!important}
+/* Tabs: glass track, tinted active */
+html body :is(.seg-tabs,.udp-tabs,.pkg-type-tabs,.game-list-tabs){background:var(--fill-soft)!important;border:1px solid var(--border-glass)!important}
+html body :is(.seg-tab,.udp-tab,.pkg-type-tab,.game-list-tab-btn).active{background:rgba(var(--t),.18)!important;color:color-mix(in srgb,rgb(var(--t)) 72%,var(--text-strong))!important;box-shadow:inset 0 1px 0 var(--glass-hi)!important}
+html body #game-list-subtabs .game-list-tab-btn.active{background:rgba(var(--t),.16)!important;border-color:rgba(var(--t),.4)!important;color:color-mix(in srgb,rgb(var(--t)) 72%,var(--text-strong))!important}
+html body .od-card-header,html body .od-card-footer{background:color-mix(in srgb,var(--bg-app) 92%,transparent)!important}
+</style>
+<style id="clarity-v3">
+/* ===== Clarity v3: higher contrast, obvious tabs, clear sections (last layer) ===== */
+:root,html[data-theme="light"]{--surface:rgba(255,255,255,.82);--surface-strong:rgba(255,255,255,.94);--border-glass:rgba(15,23,42,.10);--line-strong:rgba(15,23,42,.2);--text-secondary:#3F495A;--text-muted:#667085}
+html[data-theme="dark-blue"]{--surface:rgba(26,36,64,.8);--surface-strong:rgba(28,38,68,.92)}
+html[data-theme="midnight-purple"]{--surface:rgba(38,27,60,.8);--surface-strong:rgba(42,29,68,.92)}
+html[data-theme="ocean"]{--surface:rgba(11,42,54,.8);--surface-strong:rgba(12,46,58,.92)}
+html[data-theme="dark-blue"],html[data-theme="midnight-purple"],html[data-theme="ocean"]{--border-glass:rgba(255,255,255,.16);--line-strong:rgba(255,255,255,.26);--text-secondary:rgba(255,255,255,.84);--text-muted:rgba(255,255,255,.62)}
+/* deeper tints so white-on-colour stays readable (nav + pages share them) */
+#group-wallet,#topup-list,#payin-list,#payment-list{--t:5,150,105}
+#group-userlist,#user-list{--t:217,119,6}
+#group-setting{--t:8,145,178}
+html body .page-section{--pt:var(--t)}
+/* Title card: tinted + coloured edge */
+html body .title-header{border-left:4px solid rgb(var(--t))!important;border-radius:14px!important;font-size:15px!important;color:color-mix(in srgb,rgb(var(--t)) 80%,var(--text-strong))!important}
+/* Section labels get a tint bar */
+html body .dash-section-label{padding-left:8px;border-left:3px solid rgb(var(--t));color:var(--text-secondary)}
+/* Tabs: clear track, solid active pill — one colour per page */
+html body .page-section :is(.udp-tab,.pkg-type-tab,.game-list-tab-btn):nth-child(n){--t:var(--pt)}
+html body :is(.seg-tabs,.udp-tabs,.pkg-type-tabs,.game-list-tabs){padding:4px!important;gap:4px!important;background:rgba(var(--t),.08)!important;border:1px solid rgba(var(--t),.24)!important}
+html body :is(.seg-tab,.udp-tab,.pkg-type-tab,.game-list-tab-btn){min-height:38px!important;color:var(--text-secondary)!important;font-weight:500!important}
+html body :is(.seg-tab,.udp-tab,.pkg-type-tab,.game-list-tab-btn).active{background:rgb(var(--t))!important;color:#fff!important;font-weight:600!important;box-shadow:0 4px 12px -4px rgba(var(--t),.7),inset 0 1px 0 rgba(255,255,255,.35)!important}
+html body .seg-tab b{background:rgba(var(--t),.16)!important;color:inherit!important}
+html body .seg-tab.active b{background:rgba(255,255,255,.28)!important;color:#fff!important}
+html body #game-list-subtabs .game-list-tab-btn{border:1px solid rgba(var(--t),.3)!important;color:var(--text-secondary)!important}
+html body #game-list-subtabs .game-list-tab-btn.active{background:rgba(var(--t),.18)!important;color:color-mix(in srgb,rgb(var(--t)) 80%,var(--text-strong))!important;border-color:rgb(var(--t))!important}
+/* Nav tabs: stronger tint + readable label */
+html body .top-nav-wrap .top-nav .nav-item{background:rgba(var(--t),.14)!important;border:1px solid rgba(var(--t),.32)!important;color:var(--text-primary)!important}
+html body .nav-label{font-size:11px!important;font-weight:500!important}
+/* Cards, inputs, buttons: visible edges */
+html body :is(.admin-card,.user-grid-card,.pm-card,.wl-tile,.quick-topup-grid){border:1px solid var(--line-strong)!important}
+html body .admin-card{margin-bottom:10px!important}
+html body .btn-outline{background:var(--surface)!important;border:1px solid var(--line-strong)!important;color:var(--text-primary)!important}
+html body :is(input[type=text],input[type=search],input[type=number],input[type=password],input[type=email],select,textarea),html body .admin-search-wrap input,html body .date-filter-trigger{border:1px solid var(--line-strong)!important}
+html body :is(.oc-meta,.wl-k,.wl-s,.od-label,.pm-acc){color:var(--text-secondary)!important}
+</style>
+<style id="orders-v3">
+/* ===== Orders v3 + empty states ===== */
+/* Day bar: clear chips, solid active */
+html body #order-list .orders-day-bar{gap:6px;padding:2px 0 12px}
+html body #order-list .odb-chip{min-height:32px;padding:0 12px;border-radius:999px;border:1px solid var(--line-strong);background:var(--surface);color:var(--text-secondary);font-size:12px;font-weight:500}
+html body #order-list .odb-chip.active{background:rgb(var(--t));border-color:transparent;color:#fff;font-weight:600}
+/* Day divider: tint bar + label */
+html body #order-list .od-day-head{margin:16px 2px 8px;padding-left:8px;border-left:3px solid rgb(var(--t));font-size:12.5px;font-weight:600;color:var(--text-primary)}
+html body #order-list .od-day-head:first-child{margin-top:2px}
+html body #order-list .odb-hide{border:1px solid var(--line-strong);background:var(--surface);font-size:11px;padding:3px 10px}
+/* Game-tabs switch row + tabs */
+html body .og-toggle-row{background:var(--surface);border:1px solid var(--line-strong);padding:10px 14px}
+html body .og-toggle-row .switch-label{font-size:13px;font-weight:500}
+html body .og-toggle-row .switch-hint{font-size:11px;color:var(--text-secondary)}
+html body .ogt-name{display:inline-block;max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;vertical-align:bottom}
+html body .ogt-count{font-size:11px;font-weight:500;opacity:.85;margin-left:4px}
+/* Bulk bar */
+html body .order-bulk-bar{border:1px solid rgba(var(--t),.4);background:var(--surface-strong)}
+html body .obb-selectall span{font-weight:500}
+html body .obb-actions .btn{min-height:36px}
+/* Order cards: meta wraps to 2 lines so price + customer stay visible */
+html body #orders-container .admin-card{padding:10px 12px!important}
+html body #orders-container .oc-top{gap:10px}
+html body #orders-container .oc-thumb{width:40px;height:40px;flex:0 0 40px;border-radius:10px}
+html body #orders-container .oc-top .oc-meta{white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;line-height:1.4}
+html body #orders-container .oc-top .oc-meta b{font-weight:600;color:var(--text-strong)}
+html body #orders-container .order-select-box input[type=checkbox]{width:20px;height:20px}
+/* Empty / loading messages: a clear panel */
+html body .empty-msg{margin:12px 0;padding:26px 16px;text-align:center;font-size:13px;color:var(--text-secondary);background:var(--surface);border:1px dashed var(--line-strong);border-radius:14px}
+</style>
+<style id="settings-v3">
+/* ===== Settings pages v3 (Settings, JCPlays, G2Bulk, API, Notifications, Ticker, VIP tiers) ===== */
+html body .page-section{--t:8,145,178}
+/* Toolbar */
+html body .st-toolbar{display:flex;gap:8px;align-items:stretch;margin:0 0 12px}
+html body .st-search{flex:1;min-width:0;display:flex;align-items:center;gap:8px;min-height:40px;padding:0 12px;border:1px solid var(--line-strong);border-radius:12px;background:var(--surface)}
+html body .st-search input{border:0!important;background:transparent!important;box-shadow:none!important;outline:0;min-height:0!important;flex:1;min-width:0;font-size:14px}
+html body .st-collapse{flex:0 0 auto;min-height:40px;padding:0 14px;border:1px solid rgba(var(--t),.35);border-radius:12px;background:rgba(var(--t),.10);color:color-mix(in srgb,rgb(var(--t)) 80%,var(--text-strong));font:inherit;font-size:12.5px;font-weight:500}
+/* Accordion cards: tint edge, clear header row */
+html body :is(#settings,#jcplays,#g2bulk,#api-docs,#notify-list,#ticker-list,#tier-list) .admin-card{border-left:3px solid rgba(var(--t),.75)!important}
+html body .sc-head{min-height:40px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+html body .sc-head:active{background:rgba(var(--t),.08)}
+html body .sc-title{font-size:14px;font-weight:600;color:var(--text-strong)}
+html body .sc-chevron{flex:0 0 auto;width:26px;height:26px;padding:5px;border-radius:50%;background:rgba(var(--t),.14);stroke:rgb(var(--t))}
+html body .pp-badge{font-size:10px;font-weight:500;padding:2px 8px;border-radius:999px;background:rgba(var(--t),.14);color:color-mix(in srgb,rgb(var(--t)) 80%,var(--text-strong))}
+/* Form rows */
+html body .u-label{display:block;margin:12px 0 5px;font-size:12px;font-weight:500;color:var(--text-secondary)}
+html body .field{min-height:40px;border-radius:10px}
+html body .pp-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0;border-top:1px solid var(--border-glass)}
+html body .pp-row:first-child{border-top:0}
+html body .pp-txt b{display:block;font-size:13px;font-weight:500}
+html body .pp-txt small{display:block;margin-top:2px;font-size:11.5px;color:var(--text-secondary)}
+html body .pp-foot{display:flex;justify-content:space-between;align-items:center;padding-top:8px;font-size:11.5px;color:var(--text-secondary)}
+/* Notes */
+html body :is(.note-glass,.note-ok){padding:10px 12px!important;border-radius:12px;font-size:12px;line-height:1.5;color:var(--text-secondary);background:rgba(var(--t),.08);border:1px solid rgba(var(--t),.22)}
+html body .note-ok{background:rgba(16,185,129,.10);border-color:rgba(16,185,129,.3)}
+/* API docs + VIP tiers */
+html body .api-doc-card{border:1px solid var(--line-strong)}
+html body .api-doc-icon{background:rgba(var(--t),.14);border-radius:12px}
+html body .api-doc-icon .ui-icon{stroke:rgb(var(--t))}
+html body .api-doc-title{font-size:14px;font-weight:500}
+html body .tier-row{background:var(--surface);border:1px solid var(--line-strong);border-radius:14px}
+html body #save-tiers-btn{width:100%;min-height:44px;margin-top:10px}
+</style>
 <script id="lg-dashwallet-v12-js">
 (function(){
   function el(t,c,h){var e=document.createElement(t);if(c)e.className=c;if(h)e.innerHTML=h;return e;}
