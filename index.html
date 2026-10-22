@@ -4496,6 +4496,13 @@ html.perf-low [data-pcbg] *,html.perf-low [data-pcbg] *::before,html.perf-low [d
                 <div id="wallet-cleanup-result" style="margin-top:10px;font-size:12px;"></div>
             </div>
 
+            <div class="admin-card" id="settings-card-walletdebit" style="margin-top:14px;">
+                <span class="sc-title">Wallet Debit Scan</span>
+                <p class="note-glass note-bad" style="font-size:11px;color:var(--text-secondary);line-height:1.5;margin:8px 0;">Wallet နဲ့ဝယ်ပြီး <b>Success/Processing ဖြစ်ပေမဲ့ Wallet ကနေ မဖြတ်ရသေးတဲ့</b> order တွေကို ရှာပါမယ်။ <b>Debit</b> နှိပ်ရင် Wallet ကနေ ဖြတ်မယ်၊ Payment နဲ့ပေးထားတာဆိုရင် <b>Wallet မဟုတ်ဘူး</b> နှိပ်ပါ (Wallet စာရင်းကနေ ဖယ်မယ်)။</p>
+                <button class="btn btn-outline" id="wallet-debit-scan-btn" onclick="scanUndebitedWalletOrders(this)">Scan</button>
+                <div id="wallet-debit-result" style="margin-top:10px;font-size:12px;"></div>
+            </div>
+
             <div class="admin-card" id="settings-card-costmigrate" style="margin-top:14px;">
                 <span class="sc-title">Cost Privacy Migration</span>
                 <p class="note-glass note-ok" style="font-size:11px;color:var(--text-secondary);line-height:1.5;margin:8px 0;">Package Cost တွေကို ပြည်သူဖတ်လို့ရတဲ့ <b>games</b> ထဲကနေ admin-only <b>gameCosts</b> ထဲ ရွှေ့ပါမယ် (ထပ်နှိပ်လည်း အန္တရာယ်မရှိပါ)။</p>
@@ -14327,6 +14334,150 @@ html.perf-low [data-pcbg] *,html.perf-low [data-pcbg] *::before,html.perf-low [d
                 scheduleGamesRefetch();
             } catch (e) { /* never break a write */ }
         }
+        // ---------- Wallet debit scan ----------
+        // Finds wallet orders (walletFlow 2) that went through but were never debited.
+        // Per row: Debit (takes the money now, atomically) or "Not wallet" (paid another way -> remove wallet flag).
+        let _undebitedOrders = [];
+        function _udRow(x) {
+            return `<div data-oid="${escapeHtml(x.id)}" style="padding:8px 0;border-bottom:1px solid var(--border-glass);">`
+                + `<div style="display:flex;justify-content:space-between;gap:8px;"><span style="overflow:hidden;text-overflow:ellipsis;">${escapeHtml(x.title)}<br><small style="color:var(--text-muted);">${escapeHtml(x.userName)} · ${escapeHtml(x.status)} · ${escapeHtml(x.method || 'no method')} · ${escapeHtml(x.when)}</small></span><b style="white-space:nowrap;">${fmtMoney(x.price)}</b></div>`
+                + `<div style="display:flex;gap:6px;margin-top:6px;"><button class="btn btn-primary" style="flex:1;height:34px;" onclick="debitWalletOrder('${escapeHtml(x.id)}',this)">Debit</button><button class="btn btn-outline" style="flex:1;height:34px;" onclick="clearWalletOrderFlag('${escapeHtml(x.id)}',this)">Wallet မဟုတ်ဘူး</button></div></div>`;
+        }
+        window.scanUndebitedWalletOrders = async function (btn) {
+            const out = document.getElementById('wallet-debit-result');
+            const label = btn ? btn.innerText : '';
+            if (btn) { btn.disabled = true; btn.innerText = 'Scanning...'; }
+            out.innerHTML = '<span style="color:var(--text-secondary);">Scanning wallet orders…</span>';
+            try {
+                const snap = await getDocs(query(collection(db, 'orders'), where('paidFromWallet', '==', true)));
+                _undebitedOrders = [];
+                snap.forEach(d => {
+                    const o = d.data();
+                    if (o.walletFlow !== 2 || o.walletDebited === true) return;
+                    if (o.status !== 'Success' && o.status !== 'Processing') return;
+                    const t = o.timestamp && o.timestamp.toMillis ? o.timestamp.toMillis() : 0;
+                    _undebitedOrders.push({ id: d.id, userId: o.userId || '', userName: o.userName || o.name || (USERS[o.userId] && USERS[o.userId].name) || o.userId || '?',
+                        title: `${o.game || 'Order'}${o.itemAmount ? ' · ' + o.itemAmount : ''}`, price: Number(o.price) || 0, status: o.status, method: o.paymentMethod || '',
+                        when: t ? new Date(t).toLocaleString() : '' });
+                });
+                if (!_undebitedOrders.length) {
+                    out.innerHTML = '<b style="color:#10B981;">မဖြတ်ရသေးတဲ့ wallet order မတွေ့ပါ။</b>';
+                } else {
+                    const total = _undebitedOrders.reduce((a, x) => a + x.price, 0);
+                    out.innerHTML = `<div style="margin-bottom:8px;"><b>${_undebitedOrders.length}</b> order · စုစုပေါင်း <b>${fmtMoney(total)}</b></div>`
+                        + `<div id="wallet-debit-list" style="max-height:340px;overflow:auto;border:1px solid var(--border-glass);border-radius:10px;padding:0 8px;">${_undebitedOrders.map(_udRow).join('')}</div>`;
+                }
+            } catch (err) {
+                console.error('Wallet debit scan error:', err);
+                out.innerHTML = '<span style="color:#EF4444;">Scan failed: ' + escapeHtml(err.message || String(err)) + '</span>';
+            } finally { if (btn) { btn.disabled = false; btn.innerText = label; } }
+        };
+        function _udDone(id, msg, ok) {
+            _undebitedOrders = _undebitedOrders.filter(x => x.id !== id);
+            const row = document.querySelector(`#wallet-debit-list [data-oid="${id}"]`);
+            if (row) row.remove();
+            window.showToast(msg, ok ? 'success' : 'fail');
+            if (!_undebitedOrders.length) document.getElementById('wallet-debit-result').innerHTML = '<b style="color:#10B981;">ပြီးပါပြီ — ကျန်တာမရှိတော့ပါ။</b>';
+        }
+        window.debitWalletOrder = function (id, btn) {
+            const x = _undebitedOrders.find(v => v.id === id); if (!x) return;
+            window.showActionDialog({
+                type: 'delete', title: 'Debit wallet?',
+                message: `${x.userName} ရဲ့ Wallet ကနေ ${fmtMoney(x.price)} ဖြတ်ပါမယ် (${x.title})။`,
+                confirmText: 'Debit',
+                onConfirm: async () => {
+                    if (btn) btn.disabled = true;
+                    try {
+                        await runTransaction(db, async (tx) => {
+                            const oRef = doc(db, 'orders', id), uRef = doc(db, 'users', x.userId);
+                            const [oSnap, uSnap] = await Promise.all([tx.get(oRef), tx.get(uRef)]);
+                            if (!oSnap.exists()) throw new Error('ORDER_GONE');
+                            const o = oSnap.data();
+                            if (o.walletDebited === true) throw new Error('ALREADY');
+                            const price = Number(o.price) || 0;
+                            const bal = Number((uSnap.exists() && uSnap.data().walletBalance) || 0);
+                            if (bal < price) throw new Error('INSUFFICIENT_BALANCE');
+                            tx.set(uRef, { walletBalance: increment(-price), walletUpdatedAt: serverTimestamp() }, { merge: true });
+                            tx.update(oRef, { walletDebited: true, walletDebitedAmount: price, walletBalanceBefore: bal, walletBalanceAfter: bal - price, walletDebitedAt: serverTimestamp(), walletDebitedBy: 'admin-scan', walletDebitFailed: false });
+                        });
+                        logAdminActivity('Wallet debited (scan)', `${x.userName} ${x.price}`);
+                        if (USERS[x.userId]) USERS[x.userId].walletBalance = Math.max(0, Number(USERS[x.userId].walletBalance || 0) - x.price);
+                        _udDone(id, 'Debited ' + fmtMoney(x.price), true);
+                    } catch (e) {
+                        if (btn) btn.disabled = false;
+                        const m = e.message === 'INSUFFICIENT_BALANCE' ? 'Wallet balance မလုံလောက်ပါ' : e.message === 'ALREADY' ? 'ဖြတ်ပြီးသားပါ' : 'Failed: ' + (e.message || e);
+                        window.showToast(m, 'fail');
+                        if (e.message === 'ALREADY') _udDone(id, m, true);
+                    }
+                }
+            });
+        };
+        window.clearWalletOrderFlag = function (id, btn) {
+            const x = _undebitedOrders.find(v => v.id === id); if (!x) return;
+            window.showActionDialog({
+                type: 'delete', title: 'Wallet မဟုတ်ဘူး?',
+                message: `${x.title} (${fmtMoney(x.price)}) ကို Wallet payment အဖြစ်မသတ်မှတ်တော့ဘဲ Wallet စာရင်းကနေ ဖယ်ပါမယ်။ ငွေမဖြတ်ပါ။`,
+                confirmText: 'Confirm',
+                onConfirm: async () => {
+                    if (btn) btn.disabled = true;
+                    try {
+                        await _fsUpdateDoc(doc(db, 'orders', id), { paidFromWallet: false, walletFlowCleared: true, walletFlowClearedAt: serverTimestamp() });
+                        logAdminActivity('Wallet flag cleared (scan)', `${x.userName} ${x.price}`);
+                        _udDone(id, 'Wallet စာရင်းကနေ ဖယ်ပြီး', true);
+                    } catch (e) { if (btn) btn.disabled = false; window.showToast('Failed: ' + (e.message || e), 'fail'); }
+                }
+            });
+        };
+
+        // AUTO wallet debit: no clicks. Once per admin session (max every 6h) finds wallet orders that went
+        // through (Success/Processing) but were never debited, and takes the money in one atomic transaction.
+        // Skips (and leaves for the Wallet Debit Scan card) anything with insufficient balance.
+        async function autoDebitUndebitedWalletOrders() {
+            try {
+                const KEY = 'lgAutoDebitAt';
+                let last = 0; try { last = Number(localStorage.getItem(KEY)) || 0; } catch (e) {}
+                if (Date.now() - last < 10 * 60 * 1000) return;
+                try { localStorage.setItem(KEY, String(Date.now())); } catch (e) {}
+                // SCALES: normally only orders still marked walletChargeState 'pending' are read (a handful, never grows
+                // with users/orders). The full wallet-order scan (old orders without the marker) runs ONCE per browser.
+                let legacyDone = false; try { legacyDone = localStorage.getItem('lgLegacyDebitScan') === '1'; } catch (e) {}
+                const snap = await getDocs(legacyDone
+                    ? query(collection(db, 'orders'), where('walletChargeState', '==', 'pending'))
+                    : query(collection(db, 'orders'), where('paidFromWallet', '==', true)));
+                if (!legacyDone) { try { localStorage.setItem('lgLegacyDebitScan', '1'); } catch (e) {} }
+                const todo = [];
+                snap.forEach(d => {
+                    const o = d.data();
+                    if (o.walletFlow !== 2 || o.walletDebited === true || !o.userId) return;
+                    if (o.status !== 'Success' && o.status !== 'Processing') return;
+                    todo.push({ id: d.id, userId: o.userId });
+                });
+                let ok = 0, left = 0, total = 0;
+                for (const x of todo) {
+                    try {
+                        let amt = 0;
+                        await runTransaction(db, async (tx) => {
+                            const oRef = doc(db, 'orders', x.id), uRef = doc(db, 'users', x.userId);
+                            const [oSnap, uSnap] = await Promise.all([tx.get(oRef), tx.get(uRef)]);
+                            if (!oSnap.exists()) return;
+                            const o = oSnap.data();
+                            if (o.walletDebited === true) return;
+                            const price = Number(o.price) || 0;
+                            const bal = Number((uSnap.exists() && uSnap.data().walletBalance) || 0);
+                            if (price <= 0 || bal < price) throw new Error('INSUFFICIENT_BALANCE');
+                            tx.set(uRef, { walletBalance: increment(-price), walletUpdatedAt: serverTimestamp() }, { merge: true });
+                            tx.update(oRef, { walletDebited: true, walletDebitedAmount: price, walletBalanceBefore: bal, walletBalanceAfter: bal - price, walletDebitedAt: serverTimestamp(), walletDebitedBy: 'auto-scan', walletDebitFailed: false, walletChargeState: 'done' });
+                            amt = price;
+                        });
+                        if (amt) { ok++; total += amt; if (USERS[x.userId]) USERS[x.userId].walletBalance = Math.max(0, Number(USERS[x.userId].walletBalance || 0) - amt); }
+                    } catch (e) { left++; }
+                }
+                if (ok) { logAdminActivity('Auto wallet debit', `${ok} order(s), ${total} MMK`); window.showToast(`Wallet auto-debit: ${ok} order · ${fmtMoney(total)}`, 'success'); if (window.refreshUserTxnsIfOpen) try { refreshUserTxnsIfOpen(); } catch (e) {} }
+                if (left) window.showToast(`${left} order ဖြတ်လို့မရ (balance မလုံ) — Settings → Wallet Debit Scan`, 'fail');
+            } catch (err) { console.error('autoDebitUndebitedWalletOrders', err); }
+        }
+        (function () { const t = setInterval(() => { if (typeof adminAppStarted !== 'undefined' && adminAppStarted) { clearInterval(t); setTimeout(autoDebitUndebitedWalletOrders, 4000); } }, 3000); })();
+
         // ---------- No-history wallet cleanup ----------
         // "History" = at least one Completed walletTopups doc (customer top-up, admin
         // top-up, Telegram top-up) OR at least one order paid from the wallet (that is
@@ -24351,7 +24502,7 @@ a, button, [role="button"], .nav-item, .header-icon, .btn, .picker-btn, label { 
 
   /* ---------- Settings: icons, groups, search, collapse all ---------- */
   var ICONS = { sociallinks: 'send', homebanner: 'camera', branding: 'palette', panelprefs: 'gear', maintenance: 'gear', orderrouting: 'refresh', adminbroadcastsecret: 'key',
-    push: 'bell', walletcleanup: 'trash', costmigrate: 'shield', autoprice: 'trending-up', 'autoprice-sell': 'tag', adminlogin: 'lock', '2fa': 'shield', adminpin: 'key', accounts: 'users', danger: 'warning' };
+    push: 'bell', walletcleanup: 'trash', walletdebit: 'shield', costmigrate: 'shield', autoprice: 'trending-up', 'autoprice-sell': 'tag', adminlogin: 'lock', '2fa': 'shield', adminpin: 'key', accounts: 'users', danger: 'warning' };
   function sym(name) { return '<svg class="ui-icon"><use href="#icon-' + name + '"></use></svg>'; }
   function cardKey(card) {
     if (card.id === 'admin-accounts-card') return 'accounts';
@@ -24374,7 +24525,7 @@ a, button, [role="button"], .nav-item, .header-icon, .btn, .picker-btn, label { 
       });
       var GROUPS = [
         ['General', ['panelprefs', 'sociallinks', 'homebanner', 'branding']],
-        ['Operations', ['maintenance', 'orderrouting', 'push', 'autoprice', 'autoprice-sell', 'walletcleanup', 'costmigrate']],
+        ['Operations', ['maintenance', 'orderrouting', 'push', 'autoprice', 'autoprice-sell', 'walletcleanup', 'walletdebit', 'costmigrate']],
         ['Security', ['adminlogin', '2fa', 'adminpin', 'adminbroadcastsecret', 'accounts']],
         ['Danger zone', ['danger']]
       ];
@@ -25007,7 +25158,7 @@ body.wl-select #topups-container { padding-bottom: 84px; }
       '<div class="wl-tile"><div class="wl-k">Money in</div><div class="wl-v" style="color:#16A34A">+' + fmt(s.in) + '</div><div class="wl-s">top-ups and refunds</div></div>' +
       '<div class="wl-tile"><div class="wl-k">Spent on orders</div><div class="wl-v">' + fmt(s.buy) + '</div><div class="wl-s">' + fmt(s.out) + ' deducted by admin</div></div>';
     sum.querySelector('.wl-flag').style.display = bad ? '' : 'none';
-    sum.querySelector('.wl-flag').textContent = bad + ' order' + (bad > 1 ? 's' : '') + ' went through without a wallet debit. Check the rows marked "Wallet NOT debited".';
+    sum.querySelector('.wl-flag').textContent = bad + ' order' + (bad > 1 ? 's' : '') + ' went through without a wallet debit. Settings → Wallet Debit Scan မှာ စစ်ပြီး Debit လုပ်ပါ။';
     var els = tbox.querySelectorAll('.wtx-row');
     if (!rows.length || els.length !== rows.length) return;
     tobs.disconnect();
@@ -25461,7 +25612,7 @@ html body #settings .set-index button:active{background:var(--accent-soft);color
     var groups=[
       {k:'device',t:'This device',d:'Only affects this browser',c:[byId('settings-card-panelprefs')]},
       {k:'store',t:'Storefront',d:'What customers see',c:['sociallinks','homebanner','branding','pcbg'].map(function(x){return byId('settings-card-'+x);})},
-      {k:'ops',t:'Operations',d:'Orders, pricing and maintenance',c:['maintenance','orderrouting','autoprice','autoprice-sell','walletcleanup','costmigrate'].map(function(x){return byId('settings-card-'+x);})},
+      {k:'ops',t:'Operations',d:'Orders, pricing and maintenance',c:['maintenance','orderrouting','autoprice','autoprice-sell','walletcleanup','walletdebit','costmigrate'].map(function(x){return byId('settings-card-'+x);})},
       {k:'sec',t:'Notifications & security',d:'Alerts, login and admin access',c:[byId('settings-card-adminbroadcastsecret'),byTitle('Push Notifications'),byId('settings-card-adminlogin'),byId('settings-card-2fa'),byId('settings-card-adminpin'),byId('admin-accounts-card')]}
     ];
     var used=[]; groups.forEach(function(g){g.c=g.c.filter(Boolean);used=used.concat(g.c);});
@@ -26016,6 +26167,354 @@ html body .api-doc-title{font-size:14px;font-weight:500}
 html body .tier-row{background:var(--surface);border:1px solid var(--line-strong);border-radius:14px}
 html body #save-tiers-btn{width:100%;min-height:44px;margin-top:10px}
 </style>
+<style id="blue-glass-final">
+/* ===== Blue Glass final layer: gradient-glass header, all-blue nav/tabs/titles, tidy Game Editor ===== */
+:root, html[data-theme="light"]{ --bl:59,130,246; --bt:#1D4ED8; --bt-soft:#2563EB; }
+html[data-theme]:not([data-theme="light"]){ --bt:#93C5FD; --bt-soft:#60A5FA; }
+
+/* 1) One colour for every tint: blue (same as Dashboard) */
+:root,
+html body :is(.page-section,.nav-item,.pkg-type-tab,.udp-tab,.game-list-tab-btn,.seg-tab,.wtx-chip,.pay-type-tab,.pkg-tab-btn,.wseg-btn,.odb-chip,
+  #group-dashboard,#group-order,#group-game,#group-wallet,#group-userlist,#group-setting,
+  #dashboard,#order-list,#game-list,#topup-list,#payin-list,#payment-list,#user-list,#game-editor-page,#user-detail-page,
+  #nav-group-sheet-overlay,#nav-group-sheet-list > *){ --t:59,130,246 !important; --pt:59,130,246 !important; }
+
+/* 2) Header: Gradient Glass */
+html body .header{
+  background-color:transparent !important;
+  background-image:
+    linear-gradient(180deg,rgba(255,255,255,.26) 0%,rgba(255,255,255,0) 62%),
+    linear-gradient(135deg,rgba(37,99,235,.92) 0%,rgba(59,130,246,.80) 52%,rgba(99,102,241,.78) 100%) !important;
+  -webkit-backdrop-filter:blur(18px) saturate(180%) !important; backdrop-filter:blur(18px) saturate(180%) !important;
+  border-bottom:1px solid rgba(255,255,255,.38) !important;
+  box-shadow:0 10px 30px -12px rgba(37,99,235,.55),inset 0 1px 0 rgba(255,255,255,.5),inset 0 -1px 0 rgba(255,255,255,.10) !important;
+  color:#fff !important;
+}
+html body .header .logo-icon{ background:rgba(255,255,255,.22) !important; border:1px solid rgba(255,255,255,.40) !important; color:#fff !important; }
+html body .header .logo-icon.has-custom-logo{ background:transparent !important; border:0 !important; }
+html body .header .logo-icon .ui-icon{ stroke:#fff !important; }
+html body .header .header-icon{ background:rgba(255,255,255,.18) !important; border:1px solid rgba(255,255,255,.34) !important; color:#fff !important; box-shadow:inset 0 1px 0 rgba(255,255,255,.35) !important; }
+html body .header .header-icon:hover,html body .header .header-icon:active{ background:rgba(255,255,255,.30) !important; }
+html body .header .ui-icon{ stroke:#fff !important; color:#fff !important; }
+html body .header #header-clock .hc-time,html body .header .hc-time,html body .header .hc-colon{ color:#fff !important; text-shadow:0 1px 8px rgba(15,40,120,.35); }
+html body .header .conn-status{ background:rgba(255,255,255,.18) !important; border:1px solid rgba(255,255,255,.34) !important; box-shadow:inset 0 1px 0 rgba(255,255,255,.3); }
+html body .header .conn-label{ color:#fff !important; }
+
+/* 3) Nav bar: blue glass capsule, every tab blue */
+html body .top-nav-wrap .top-nav{
+  background:linear-gradient(180deg,rgba(59,130,246,.16),rgba(59,130,246,.05)),var(--surface) !important;
+  border:1px solid rgba(59,130,246,.32) !important;
+  box-shadow:0 12px 28px -16px rgba(37,99,235,.55),inset 0 1px 0 var(--glass-hi,rgba(255,255,255,.6)) !important;
+}
+html body .top-nav-wrap .top-nav .nav-item{
+  background:linear-gradient(180deg,rgba(59,130,246,.18),rgba(59,130,246,.08)) !important;
+  border:1px solid rgba(59,130,246,.32) !important;
+  color:var(--bt) !important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.35) !important;
+}
+html body .top-nav-wrap .top-nav .nav-item .nav-label{ color:inherit !important; }
+html body .top-nav-wrap .top-nav .nav-item .ui-icon{ stroke:var(--bt-soft) !important; }
+html body .top-nav-wrap .top-nav .nav-item.active{
+  color:#fff !important; border-color:rgba(255,255,255,.45) !important;
+  background:linear-gradient(180deg,rgba(255,255,255,.30),rgba(255,255,255,0) 55%),linear-gradient(135deg,#2563EB,#3B82F6) !important;
+  box-shadow:0 8px 18px -8px rgba(37,99,235,.85),inset 0 1px 0 rgba(255,255,255,.5) !important;
+}
+html body .top-nav-wrap .top-nav .nav-item.active .ui-icon{ stroke:#fff !important; }
+
+/* 4) Small titles / labels: light blue text + light blue grid cell */
+html body :is(.title-header){
+  background:linear-gradient(135deg,rgba(59,130,246,.16),rgba(59,130,246,.06)) !important;
+  border:1px solid rgba(59,130,246,.28) !important; border-left:4px solid #3B82F6 !important;
+  color:var(--bt) !important;
+}
+html body :is(.dash-section-label,.detail-section-title,.chart-card-head h4,.an-head,.od-card-title,.od-card-title-text,.pcbg-sec-cap,.fulfill-group-label,
+  .pkg-actions-label,.qj-sec,.tuc-title,.wtx-title,.pulse-head,.od-day-head,.api-doc-title,.sc-title,.modal-header h3,.dialog-title,.pkg-summary-label,.svt-label,.hb-pick-label,.cal2-month-title){
+  display:inline-block; width:fit-content; max-width:100%;
+  padding:4px 11px !important; border-radius:10px;
+  background:linear-gradient(135deg,rgba(59,130,246,.13),rgba(59,130,246,.05)) !important;
+  border:1px solid rgba(59,130,246,.24) !important; border-left:3px solid #3B82F6 !important;
+  color:var(--bt) !important; text-transform:none;
+}
+html body :is(.od-label,.stat-card-label,.u-label,.img-update-label,.picker-btn-label,.pkg-bulk-pct-label,.reorder-size-label,.rev-bar-label){
+  width:fit-content; max-width:100%;
+  padding:1px 8px; border-radius:8px;
+  background:rgba(59,130,246,.08); border:1px solid rgba(59,130,246,.18);
+  color:var(--bt) !important;
+}
+html body .chart-card-head .chart-card-tag{ background:rgba(59,130,246,.10) !important; border:1px solid rgba(59,130,246,.24) !important; color:var(--bt) !important; }
+html body .pp-badge,html body .ogt-count{ background:rgba(59,130,246,.14) !important; color:var(--bt) !important; }
+html body .sc-chevron{ background:rgba(59,130,246,.14) !important; stroke:#3B82F6 !important; }
+
+/* 5) Game Editor */
+html body #game-editor-page .udp-back{ background:rgba(59,130,246,.10); border:1px solid rgba(59,130,246,.28); color:var(--bt); padding:0 14px; }
+html body #game-editor-page .modal-header{ border:0 !important; }
+html body #game-editor-page .modal-header h3{ font-size:20px !important; padding:6px 14px !important; }
+/* section jump bar now sticks BELOW the header/nav (offset is measured live) */
+html body #game-editor-page .ge-idx{
+  top:var(--ge-stick,0px) !important; z-index:6; margin:0 -2px; padding:8px 2px !important;
+  background:color-mix(in srgb,var(--bg-app) 72%,transparent) !important;
+  -webkit-backdrop-filter:blur(14px) saturate(160%); backdrop-filter:blur(14px) saturate(160%);
+  border-bottom:1px solid rgba(59,130,246,.18);
+}
+html body #game-editor-page .ge-idx button{ background:rgba(59,130,246,.10) !important; border:1px solid rgba(59,130,246,.30) !important; color:var(--bt) !important; }
+html body #game-editor-page .ge-idx button.on{ background:linear-gradient(135deg,#2563EB,#3B82F6) !important; border-color:transparent !important; color:#fff !important; box-shadow:0 4px 12px -4px rgba(37,99,235,.7); }
+html body #game-editor-page .ge-sec{
+  background:linear-gradient(135deg,rgba(59,130,246,.18),rgba(59,130,246,.06)),var(--surface-strong) !important;
+  border:1px solid rgba(59,130,246,.32) !important; border-left:4px solid #3B82F6 !important;
+  scroll-margin-top:calc(var(--ge-stick,0px) + 58px) !important;
+}
+html body #game-editor-page .ge-sec b{ color:var(--bt) !important; }
+html body #game-editor-page .ge-sec small{ color:var(--text-muted) !important; }
+html body #game-editor-page .ge-sec::after{ border-right-color:#3B82F6 !important; border-bottom-color:#3B82F6 !important; }
+html body #game-editor-page .ge-body{
+  background:linear-gradient(180deg,rgba(59,130,246,.05),rgba(59,130,246,0) 140px),var(--surface-strong) !important;
+  border:1px solid rgba(59,130,246,.24) !important; border-top:0 !important;
+}
+html body #game-editor-page .ge-body :is(input[type=text],input[type=number],input[type=search],input[type=url],select,textarea){
+  border:1px solid rgba(59,130,246,.30) !important;
+  background:color-mix(in srgb,var(--surface-strong) 94%,#3B82F6) !important;
+  border-radius:12px;
+}
+html body #game-editor-page .ge-body :is(input,select,textarea):focus{ border-color:#3B82F6 !important; box-shadow:0 0 0 4px rgba(59,130,246,.16) !important; outline:none; }
+html body #game-editor-page .field-lock-row{ display:flex; align-items:center; justify-content:space-between; gap:8px; margin-top:8px; }
+html body #game-editor-page .field-lock-row label{ margin:0 !important; }
+html body #game-editor-page #edit-game-pcfx-list label{ margin:0 !important; display:flex !important; }
+html body #game-editor-page .switch-row{ border-top:1px solid rgba(59,130,246,.18) !important; }
+html body #game-editor-page .switch-row:has(input:checked){ background:rgba(59,130,246,.08) !important; }
+html body #game-editor-page #game-fx-box,html body #game-editor-page .ge-auto-card{ background:rgba(59,130,246,.06) !important; border:1px solid rgba(59,130,246,.26) !important; }
+html body #game-editor-page .modal-footer{
+  background:linear-gradient(180deg,rgba(59,130,246,.12),rgba(59,130,246,.04)),var(--surface-strong) !important;
+  border-top:1px solid rgba(59,130,246,.32) !important; border-radius:18px 18px 0 0;
+  -webkit-backdrop-filter:blur(14px) saturate(160%); backdrop-filter:blur(14px) saturate(160%);
+}
+html body #game-editor-page #save-game-btn{ background:linear-gradient(135deg,#2563EB,#3B82F6) !important; color:#fff !important; border:0 !important; box-shadow:0 8px 18px -8px rgba(37,99,235,.8); }
+
+/* 6) Dashboard icons + chips: blue (status badges keep their own meaning colours) */
+html body :is(.stat-card-icon,.tx-row-icon,.game-picker-thumb.ico){ background:linear-gradient(135deg,#2563EB,#3B82F6) !important; }
+html body .stat-card-icon .ui-icon{ color:#fff !important; stroke:#fff !important; }
+html body .api-doc-icon{ background:rgba(59,130,246,.14) !important; }
+html body .api-doc-icon .ui-icon{ stroke:#3B82F6 !important; color:#3B82F6 !important; }
+html body .stat-chip{ --chip-color:#3B82F6 !important; border-left-color:#3B82F6 !important; }
+html body .stat-chip-dot{ background:#3B82F6 !important; }
+html body .live-dot{ color:#3B82F6 !important; }
+html body .ge-auto-ico.c1,html body .ge-auto-ico.c2{ background:rgba(59,130,246,.15) !important; color:#2563EB !important; }
+
+/* 7) Buttons: slightly rounded corners, wide where the action is the main one */
+html body :is(.btn,.udp-update-btn,.field-lock-btn,.st-collapse,.pkg-move-btn){ border-radius:9px !important; }
+html body .btn-sm,html body .btn-xs{ border-radius:8px !important; }
+html body .btn-danger-outline{ border-radius:9px !important; }
+html body .btn{ display:inline-flex; align-items:center; justify-content:center; gap:6px; }
+/* button groups: buttons share the row and stretch to full width */
+html body :is(.modal-footer,.dialog-actions,.ugc-actions,.od-card-footer,.ac-footer,.pkg-card-footer,.maint-actions,.th-actions,.cal2-actions,.wl-actions,.pkg-summary-actions) > .btn{ flex:1 1 0 !important; min-width:0; width:auto; }
+html body :is(.modal-footer,.dialog-actions,.od-card-footer,.pkg-card-footer) > .btn-primary{ flex:2 1 0 !important; }
+html body .modal-footer,html body .dialog-actions{ display:flex; gap:10px; }
+/* lone primary action under a form/card = full width */
+html body :is(.modal-body,.admin-card) > .btn-primary:not(.btn-sm):not(.btn-xs){ width:100%; }
+html body .pkg-actions-row .btn{ width:100% !important; }
+
+/* 8) User list: clean card layout */
+html body .users-grid{ grid-template-columns:repeat(auto-fill,minmax(290px,1fr)) !important; gap:12px !important; }
+@media (max-width:640px){ html body .users-grid{ grid-template-columns:1fr !important; } }
+html body .user-grid-card{
+  position:relative; padding:14px !important; gap:0 !important; border-radius:16px !important;
+  background:linear-gradient(180deg,rgba(59,130,246,.07),rgba(59,130,246,0) 90px),var(--surface) !important;
+  border:1px solid rgba(59,130,246,.22) !important; border-top:3px solid #3B82F6 !important;
+  box-shadow:0 10px 24px -16px rgba(37,99,235,.45),inset 0 1px 0 var(--glass-hi,rgba(255,255,255,.5)) !important;
+}
+/* row 1: presence + status badges, left aligned, wrapping */
+html body .user-grid-card .ugc-top{ display:flex; flex-wrap:wrap; align-items:center; gap:6px; margin:0 0 12px !important; justify-content:flex-start; }
+html body .user-grid-card .ugc-top .badge{ margin:0 !important; }
+/* row 2: avatar + name/id */
+html body .user-grid-card .ugc-identity{ gap:12px; margin:0 0 12px !important; padding-bottom:12px; border-bottom:1px dashed rgba(59,130,246,.25); }
+html body .user-grid-card .user-avatar{ width:48px !important; height:48px !important; border-radius:14px; background:rgba(59,130,246,.14); color:#3B82F6; border:1px solid rgba(59,130,246,.28); }
+html body .user-grid-card .ugc-identity h5{ font-size:15px !important; font-weight:600 !important; color:var(--text-strong) !important; }
+html body .user-grid-card .ugc-id{ font-size:11.5px !important; color:var(--text-muted) !important; }
+/* row 3: two stat cells */
+html body .user-grid-card .ugc-meta{ grid-template-columns:1fr 1fr; gap:8px !important; margin:0 0 10px !important; }
+html body .user-grid-card .ugc-meta-cell{ padding:8px 10px !important; border-radius:10px !important; background:rgba(59,130,246,.08) !important; border:1px solid rgba(59,130,246,.18) !important; }
+html body .user-grid-card .ugc-meta-cell span{ font-size:10px !important; letter-spacing:.4px; text-transform:uppercase; color:var(--bt) !important; font-weight:600; }
+html body .user-grid-card .ugc-meta-cell b{ display:block; margin-top:2px; font-size:14px !important; font-weight:600 !important; color:var(--text-strong); }
+/* row 4-5: contact lines as tidy rows */
+html body .user-grid-card .ugc-contact{ display:flex; align-items:center; gap:8px; margin:0 !important; padding:7px 0; font-size:12px !important; color:var(--text-secondary) !important; border-top:1px solid rgba(59,130,246,.12); overflow-wrap:anywhere; }
+html body .user-grid-card .ugc-contact:first-of-type{ border-top:0; }
+html body .user-grid-card .ugc-contact .ui-icon{ flex:0 0 auto; stroke:#3B82F6 !important; color:#3B82F6 !important; }
+/* actions: Visit is long, Delete is compact */
+html body .user-grid-card .ugc-actions{ display:flex; gap:8px; margin-top:12px; padding-top:0; }
+html body .user-grid-card .ugc-actions .btn{ min-height:40px !important; padding:0 12px !important; width:auto !important; }
+html body .user-grid-card .ugc-actions .btn-primary{ flex:3 1 0 !important; }
+html body .user-grid-card .ugc-actions .btn-danger-outline{ flex:1 1 0 !important; }
+/* search + list spacing */
+html body #user-list .admin-search-wrap{ margin-bottom:12px; }
+
+/* 9) User card: compact (about 40% shorter) - actions beside the name, stats on one line */
+html body .user-grid-card{
+  display:grid !important; grid-template-columns:minmax(0,1fr) 156px; column-gap:10px !important; row-gap:0 !important;
+  grid-template-areas:"top top" "ident act" "meta meta"; padding:10px 12px !important; align-content:start;
+}
+html body .user-grid-card .ugc-top{ grid-area:top; margin:0 0 8px !important; gap:5px; }
+html body .user-grid-card .ugc-top .badge,html body .user-grid-card .ugc-top .pres-chip{ font-size:10.5px !important; padding:2px 8px !important; line-height:1.3; }
+html body .user-grid-card .ugc-identity{ grid-area:ident; min-width:0; gap:10px; margin:0 0 8px !important; padding:0 !important; border-bottom:0 !important; }
+html body .user-grid-card .user-avatar{ width:40px !important; height:40px !important; border-radius:12px; }
+html body .user-grid-card .ugc-identity > div:last-child{ min-width:0; display:flex; flex-wrap:wrap; align-items:center; column-gap:6px; }
+html body .user-grid-card .ugc-identity h5{ flex:0 0 100%; font-size:14px !important; line-height:1.3; margin:0; }
+html body .user-grid-card .ugc-id{ margin:1px 0 0 !important; font-size:11px !important; }
+html body .user-grid-card .tier-mini-badge{ margin-top:1px; }
+html body .user-grid-card .ugc-actions{ grid-area:act; align-self:center; margin:0 0 8px !important; gap:6px; }
+html body .user-grid-card .ugc-actions .btn{ min-height:34px !important; height:34px; padding:0 8px !important; font-size:13px !important; }
+html body .user-grid-card .ugc-actions .btn-primary{ flex:3 1 0 !important; }
+html body .user-grid-card .ugc-actions .btn-danger-outline{ flex:2 1 0 !important; }
+html body .user-grid-card .ugc-meta{ grid-area:meta; grid-template-columns:1fr 1fr; gap:6px !important; margin:0 0 4px !important; }
+html body .user-grid-card .ugc-meta-cell{ display:flex; align-items:center; justify-content:space-between; gap:6px; padding:5px 10px !important; min-height:30px; }
+html body .user-grid-card .ugc-meta-cell b{ display:inline; margin:0; font-size:13px !important; }
+html body .user-grid-card .ugc-meta-cell span{ font-size:10.5px !important; }
+html body .user-grid-card .ugc-contact{ grid-column:1 / -1; padding:4px 0 !important; font-size:11.5px !important; border-top:0 !important; line-height:1.3; }
+html body .user-grid-card .ugc-contact .ui-icon{ width:13px !important; height:13px !important; }
+@media (max-width:360px){ html body .user-grid-card{ grid-template-columns:minmax(0,1fr) 138px; } }
+
+/* 10) Order + Top Up cards (list row + detail sheet) */
+html body :is(#orders-container,#topups-container) .admin-card{
+  padding:0 !important; margin:0 0 8px !important; border-radius:14px !important;
+  background:linear-gradient(180deg,rgba(59,130,246,.06),rgba(59,130,246,0) 60px),var(--surface) !important;
+  border:1px solid rgba(59,130,246,.22) !important; border-left:4px solid #3B82F6 !important;
+  box-shadow:0 8px 20px -16px rgba(37,99,235,.5) !important;
+}
+html body :is(#orders-container,#topups-container) .admin-card:has(.oc-status .badge-pending){ border-left-color:#FBBF24 !important; }
+html body :is(#orders-container,#topups-container) .admin-card:has(.oc-status .badge-processing){ border-left-color:#38BDF8 !important; }
+html body :is(#orders-container,#topups-container) .admin-card:has(.oc-status .badge-success){ border-left-color:#34D399 !important; }
+html body :is(#orders-container,#topups-container) .admin-card:has(.oc-status .badge-danger){ border-left-color:#FB7185 !important; }
+html body :is(#orders-container,#topups-container) .oc-top{ padding:10px 12px !important; gap:10px !important; align-items:center; }
+html body :is(#orders-container,#topups-container) .oc-thumb{ width:42px !important; height:42px !important; flex:0 0 42px !important; border-radius:12px !important; border:1px solid rgba(59,130,246,.25) !important; }
+html body :is(#orders-container,#topups-container) .oc-game-name{ font-size:14px !important; font-weight:600 !important; color:var(--text-strong) !important; }
+html body :is(#orders-container,#topups-container) .oc-meta{ font-size:11.5px !important; color:var(--text-secondary) !important; margin-top:2px !important; }
+html body :is(#orders-container,#topups-container) .oc-meta b{ color:var(--bt) !important; font-weight:600 !important; }
+html body :is(#orders-container,#topups-container) .oc-status{ gap:5px !important; align-items:flex-end; }
+html body :is(#orders-container,#topups-container) .oc-status .badge{ font-size:11px !important; font-weight:600 !important; padding:3px 10px 3px 7px !important; border-radius:999px !important; }
+html body .wl-tag{ font-size:10.5px !important; padding:2px 8px !important; border-radius:999px !important; }
+/* detail sheet */
+html body .od-card-header{ background:linear-gradient(135deg,rgba(59,130,246,.18),rgba(59,130,246,.06)),var(--surface-strong) !important; border-bottom:1px solid rgba(59,130,246,.3) !important; }
+html body .od-card-close{ background:rgba(59,130,246,.14) !important; color:var(--bt) !important; border:1px solid rgba(59,130,246,.3) !important; }
+html body .od-cell{ background:rgba(59,130,246,.06) !important; border:1px solid rgba(59,130,246,.18) !important; border-radius:10px !important; }
+html body .od-card-footer{ display:flex !important; flex-wrap:wrap !important; gap:8px !important; }
+html body .od-card-footer > .btn{ flex:1 1 calc(50% - 4px) !important; min-width:0 !important; min-height:42px !important; }
+html body .od-card-footer > .btn-primary{ flex:1 1 100% !important; }
+html body .od-card-footer > .od-done-label{ flex:1 1 100%; }
+
+/* 11) Tabs and buttons that are easy to see */
+html body :is(.pkg-type-tabs,.udp-tabs,.seg-tabs,.game-list-tabs){ background:rgba(59,130,246,.12) !important; border:1.5px solid rgba(59,130,246,.4) !important; border-radius:14px !important; padding:4px !important; gap:4px !important; }
+html body :is(.seg-tab,.udp-tab,.pkg-type-tab,.game-list-tab-btn,.odb-chip,.wl-chip,.wtx-chip,.pay-type-tab){
+  background:var(--surface-strong) !important; color:var(--bt) !important; border:1px solid rgba(59,130,246,.28) !important;
+  border-radius:10px !important; min-height:40px !important; font-size:13px !important; font-weight:600 !important;
+}
+html body :is(.seg-tab,.udp-tab,.pkg-type-tab,.game-list-tab-btn,.odb-chip,.wl-chip,.wtx-chip,.pay-type-tab).active{
+  background:linear-gradient(135deg,#2563EB,#3B82F6) !important; color:#fff !important; border-color:transparent !important;
+  box-shadow:0 6px 14px -6px rgba(37,99,235,.85),inset 0 1px 0 rgba(255,255,255,.35) !important;
+}
+html body .seg-tab b,html body .udp-tab span,html body .pkg-type-tab span{ font-weight:600; }
+html body .btn-primary{ background:linear-gradient(135deg,#2563EB,#3B82F6) !important; color:#fff !important; border:0 !important; font-weight:600 !important; box-shadow:0 8px 16px -8px rgba(37,99,235,.85) !important; }
+html body .btn-outline{ background:rgba(59,130,246,.10) !important; color:var(--bt) !important; border:1.5px solid rgba(59,130,246,.45) !important; font-weight:600 !important; }
+html body .btn-danger{ background:#EF4444 !important; color:#fff !important; border:0 !important; font-weight:600 !important; box-shadow:0 8px 16px -8px rgba(239,68,68,.75) !important; }
+html body .btn-danger-outline{ background:rgba(239,68,68,.10) !important; color:#DC2626 !important; border:1.5px solid rgba(239,68,68,.45) !important; font-weight:600 !important; }
+html[data-theme]:not([data-theme="light"]) body .btn-danger-outline{ color:#FCA5A5 !important; }
+html body .btn:active{ transform:scale(.97); }
+
+/* 12) Less clutter */
+html body :is(.od-label,.u-label,.img-update-label,.picker-btn-label){ background:none !important; border:0 !important; padding:0 !important; color:var(--bt) !important; font-size:11.5px !important; font-weight:600 !important; }
+html body :is(.admin-card,.stat-card,.chart-card,.an-card){ box-shadow:0 6px 16px -14px rgba(37,99,235,.4) !important; }
+html body .switch-hint{ font-size:11px !important; color:var(--text-muted) !important; line-height:1.4; }
+html body .page-section > .admin-card + .admin-card{ margin-top:8px; }
+html body .og-toggle-row{ border-radius:14px !important; }
+
+/* 13) Live count badges */
+.lv-pill{ display:inline-flex; align-items:center; gap:6px; margin-left:10px; padding:2px 10px; border-radius:999px; font-size:12px; font-weight:600; vertical-align:middle; color:var(--bt); background:rgba(59,130,246,.14); border:1px solid rgba(59,130,246,.32); }
+.lv-pill b{ font-weight:700; font-variant-numeric:tabular-nums; }
+.lv-pill em{ font-style:normal; font-weight:500; }
+.lv-dot{ width:8px; height:8px; border-radius:50%; background:#3B82F6; box-shadow:0 0 0 0 rgba(59,130,246,.6); animation:lvPulse 1.6s infinite; }
+.lv-pill.has{ color:#B45309; background:rgba(251,191,36,.18); border-color:rgba(251,191,36,.5); }
+.lv-pill.has .lv-dot{ background:#F59E0B; box-shadow:0 0 0 0 rgba(245,158,11,.6); }
+html[data-theme]:not([data-theme="light"]) .lv-pill.has{ color:#FCD34D; }
+.lv-bump{ animation:lvBump .5s ease; }
+.row-count{ margin-left:auto; min-width:24px; height:24px; padding:0 8px; border-radius:999px; background:#EF4444; color:#fff; font-size:12px; font-weight:700; display:inline-flex; align-items:center; justify-content:center; }
+.row-count.zero{ background:rgba(59,130,246,.16); color:var(--bt); }
+@keyframes lvPulse{ 0%{box-shadow:0 0 0 0 rgba(59,130,246,.55)} 70%{box-shadow:0 0 0 8px rgba(59,130,246,0)} 100%{box-shadow:0 0 0 0 rgba(59,130,246,0)} }
+@keyframes lvBump{ 0%{transform:scale(1)} 40%{transform:scale(1.35)} 100%{transform:scale(1)} }
+</style>
+<script id="blue-glass-ge-js">
+(function(){
+  /* keep the Game Editor jump bar glued just under the (sometimes hidden) header + nav */
+  var raf=0,until=0;
+  function upd(){
+    var h=document.querySelector('.header'),n=document.querySelector('.top-nav-wrap');
+    var top=h?Math.max(0,h.getBoundingClientRect().bottom):0;
+    if(n){var r=n.getBoundingClientRect(); if(r.bottom>top&&r.top<window.innerHeight) top=Math.max(top,r.bottom);}
+    document.documentElement.style.setProperty('--ge-stick',Math.round(top)+'px');
+  }
+  function loop(){upd(); if(performance.now()<until) raf=requestAnimationFrame(loop); else raf=0;}
+  function kick(ms){until=performance.now()+(ms||450); if(!raf) raf=requestAnimationFrame(loop);}
+  function boot(){
+    window.addEventListener('scroll',function(){kick(120);},{passive:true});
+    window.addEventListener('resize',function(){kick(200);});
+    var n=document.querySelector('.top-nav-wrap');
+    if(n) new MutationObserver(function(){kick(450);}).observe(n,{attributes:true,attributeFilter:['class','style']});
+    var p=document.getElementById('game-editor-page');
+    if(p) new MutationObserver(function(){kick(300);}).observe(p,{attributes:true,attributeFilter:['class']});
+    kick(600);
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',boot); else boot();
+})();
+</script>
+<script id="blue-glass-live-js">
+(function(){
+  /* Live pending counts for Wallet Top Up (reads the in-memory data the app already keeps - no extra Firestore reads) */
+  var last = {pend:-1, pay:-1};
+  function L(){ return window.__lg || {}; }
+  function ok(t){ try { return !window.matchesCurrentStore || window.matchesCurrentStore(t); } catch(e){ return true; } }
+  function counts(){
+    var pend=0, proc=0, pay=0, payKnown=false;
+    Object.values(L().WALLET_TOPUPS || {}).forEach(function(t){ if(!ok(t)) return; if(t.status==='Pending') pend++; else if(t.status==='Processing') proc++; });
+    var P = L().PAYINS; if (P && P.length){ payKnown=true; P.forEach(function(x){ if(x.status==='Waiting') pay++; }); }
+    return {pend:pend, proc:proc, pay:pay, payKnown:payKnown};
+  }
+  function navBadge(){
+    var w=document.getElementById('group-wallet'); if(!w) return null;
+    var b=document.getElementById('wallet-nav-count-badge');
+    if(!b){ b=document.createElement('span'); b.className='nav-item-count-badge'; b.id='wallet-nav-count-badge'; b.title='Pending top ups'; w.appendChild(b); }
+    return b;
+  }
+  function pill(){
+    var host=document.querySelector('#topup-list .title-header > span:first-child'); if(!host) return null;
+    var p=document.getElementById('topup-live-pill');
+    if(!p){ p=document.createElement('span'); p.id='topup-live-pill'; p.className='lv-pill'; p.title='Live: top ups waiting for you'; p.innerHTML='<i class="lv-dot"></i><b>0</b><em>pending</em>'; host.appendChild(p); }
+    return p;
+  }
+  function bump(el){ if(!el) return; el.classList.remove('lv-bump'); void el.offsetWidth; el.classList.add('lv-bump'); }
+  function setRows(c){
+    document.querySelectorAll('#nav-group-sheet-list > button').forEach(function(btn){
+      var sp=btn.querySelector('span'); if(!sp) return;
+      var name=sp.textContent.trim(), key = name==='Top Up' ? 'pend' : (name==='Phone Pay' ? 'pay' : '');
+      if(!key) return;
+      var rc=btn.querySelector('.row-count');
+      if(!rc){ rc=document.createElement('span'); rc.className='row-count'; btn.appendChild(rc); }
+      if(key==='pay' && !c.payKnown){ rc.style.display='none'; return; }
+      rc.style.display=''; rc.textContent = c[key]>99 ? '99+' : String(c[key]); rc.classList.toggle('zero', !c[key]);
+    });
+  }
+  function update(){
+    if(document.hidden) return;
+    var c=counts(), b=navBadge(), p=pill();
+    if(b){ if(c.pend>0){ b.textContent = c.pend>99?'99+':String(c.pend); b.style.display='block'; } else { b.style.display='none'; } }
+    if(p){ p.querySelector('b').textContent=c.pend; p.querySelector('em').textContent = c.proc ? 'pending · '+c.proc+' reviewing' : 'pending'; p.classList.toggle('has', c.pend>0); }
+    if(last.pend!==-1 && c.pend>last.pend){ bump(b); bump(p); try{ navigator.vibrate && navigator.vibrate([60,40,60]); }catch(e){} }
+    last.pend=c.pend; last.pay=c.pay;
+    setRows(c);
+  }
+  function boot(){
+    var list=document.getElementById('nav-group-sheet-list');
+    if(list) new MutationObserver(function(){ setRows(counts()); }).observe(list,{childList:true});
+    update(); setInterval(update, 1500);
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',boot); else boot();
+})();
+</script>
 <script id="lg-dashwallet-v12-js">
 (function(){
   function el(t,c,h){var e=document.createElement(t);if(c)e.className=c;if(h)e.innerHTML=h;return e;}
