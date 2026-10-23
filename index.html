@@ -3685,6 +3685,9 @@ html.perf-low [data-pcbg] *,html.perf-low [data-pcbg] *::before,html.perf-low [d
         <div class="nav-item" id="group-userlist" onclick="openNavGroupSheet('userlist')">
             <svg class="ui-icon"><use href="#icon-users"></use></svg> <span class="nav-label">Userlist</span>
         </div>
+        <div class="nav-item" id="group-events" onclick="showPage('events-page')">
+            <span class="ui-icon" style="font-size:20px;line-height:1;display:inline-block;text-align:center">🏮</span> <span class="nav-label">Event</span>
+        </div>
         <div class="nav-item" id="group-festival" onclick="showPage('festival-page')">
             <svg class="ui-icon"><use href="#icon-palette"></use></svg> <span class="nav-label">Theme</span>
         </div>
@@ -5134,7 +5137,374 @@ html.perf-low [data-pcbg] *,html.perf-low [data-pcbg] *::before,html.perf-low [d
             </div>
         </div>
 
-        <!-- STORE THEME STUDIO: live preview on top, tabs (Theme / အရောင် / နောက်ခံ / Dark Mode / အဆင့်မြင့်), sticky save bar. Saved to settings/branding.festival + settings/branding.darkMode and painted by the store (linn.html). -->
+        <!-- ===== EVENTS ADMIN: settings/branding.events (config) + eventPlayers / eventInvites / eventClaims (live data, written by the Worker) ===== -->
+<div id="events-page" class="page-section">
+<style>
+#events-page{--ea-b:var(--border-glass,#dcdcdc);--ea-t:var(--text-primary,#111);--ea-s:var(--text-secondary,#666);--ea-acc:var(--accent,#2f6bff)}
+#events-page .evA-card{background:var(--surface-strong,var(--surface));border:1px solid var(--ea-b);border-radius:18px;padding:14px;margin-top:12px}
+#events-page .evA-h{display:flex;align-items:center;justify-content:space-between;gap:8px;font-weight:800;font-size:16px;color:var(--ea-t)}
+#events-page .evA-hn{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#events-page .evA-meta{font-size:12px;color:var(--ea-s);margin-top:3px;line-height:1.6}
+#events-page label{display:block;font-size:12px;font-weight:600;color:var(--ea-s);margin:10px 0 4px}
+#events-page input[type=text],#events-page input[type=number],#events-page input[type=date],#events-page textarea,#events-page select{width:100%;box-sizing:border-box;padding:10px;border-radius:10px;border:1px solid var(--ea-b);background:var(--surface);color:var(--ea-t);font:inherit;font-size:14px}
+#events-page input[type=color]{width:100%;height:42px;box-sizing:border-box;padding:3px;border-radius:10px;border:1px solid var(--ea-b);background:var(--surface);cursor:pointer}
+#events-page .evA-g{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+#events-page .evA-g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+@media(max-width:420px){#events-page .evA-g3{grid-template-columns:1fr 1fr}}
+#events-page .evA-chip{font-size:11px;font-weight:700;padding:4px 11px;border-radius:99px;white-space:nowrap;border:0;font-family:inherit}
+#events-page button.evA-chip{cursor:pointer}
+#events-page .evA-chip.live{background:#d3f5df;color:#0a5a2a}#events-page .evA-chip.soon{background:#e0e8ff;color:#1e3a8a}#events-page .evA-chip.end{background:#eee;color:#555}#events-page .evA-chip.off{background:#ffe1e1;color:#8a1a1a}
+#events-page .evA-chip.won{background:#e6dcff;color:#3d1d8a}#events-page .evA-chip.pending{background:#fff0c2;color:#6b4a00}#events-page .evA-chip.paid{background:#d3f5df;color:#0a5a2a}#events-page .evA-chip.rejected{background:#ffe1e1;color:#8a1a1a}
+#events-page .evA-dot{display:inline-block;width:14px;height:14px;border-radius:50%;flex:0 0 auto;vertical-align:-2px;margin-right:4px;border:1px solid rgba(0,0,0,.25)}
+#events-page .evA-note{font-size:12px;color:var(--ea-s);line-height:1.6;margin:6px 0 0}
+#events-page .evA-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+/* page tabs + event tabs */
+#events-page .evA-tabs{display:flex;gap:6px;overflow-x:auto;margin:12px -2px 0;padding:3px 2px;scrollbar-width:none}
+#events-page .evA-tabs::-webkit-scrollbar{display:none}
+#events-page .evA-tabs button{flex:0 0 auto;border:1px solid var(--ea-b);background:var(--surface);color:var(--ea-s);font:inherit;font-size:13px;font-weight:700;padding:8px 14px;border-radius:99px;cursor:pointer;white-space:nowrap}
+#events-page .evA-tabs button.on{background:var(--ea-acc);border-color:var(--ea-acc);color:#fff}
+#events-page .evA-tabs button i{font-style:normal;font-size:11px;background:#ef4444;color:#fff;border-radius:9px;padding:0 6px;margin-left:5px}
+#events-page .evA-pane[hidden]{display:none}
+#events-page .evA-pane2{margin-top:6px}
+/* section heading */
+#events-page .evA-sh{margin:16px 0 6px;display:flex;flex-direction:column;gap:1px}
+#events-page .evA-sh b{font-size:14.5px;color:var(--ea-t)}#events-page .evA-sh small{font-size:12px;color:var(--ea-s)}
+#events-page .evA-card2{border:1px solid var(--ea-b);border-radius:14px;padding:4px 12px 12px;background:rgba(127,127,127,.05)}
+#events-page .evA-sw{display:flex;align-items:center;gap:8px;margin-top:10px;font-size:13px;font-weight:600;color:var(--ea-t)}
+#events-page .evA-sw input{width:18px;height:18px;margin:0}
+/* compact collapsible row (task / tier) */
+#events-page details.evA-it2{margin-top:8px;border:1px solid var(--ea-b);border-radius:14px;background:var(--surface);overflow:hidden}
+#events-page details.evA-it2[open]{border-color:var(--ea-acc)}
+#events-page details.evA-it2>summary{display:flex;align-items:center;gap:10px;padding:10px 12px;cursor:pointer;list-style:none}
+#events-page details.evA-it2>summary::-webkit-details-marker{display:none}
+#events-page .evA-ic{flex:0 0 auto;width:34px;height:34px;border-radius:10px;background:rgba(127,127,127,.12);display:flex;align-items:center;justify-content:center;font-size:17px}
+#events-page .evA-st{flex:1;min-width:0;display:flex;flex-direction:column;line-height:1.35}
+#events-page .evA-st b{font-size:13.5px;color:var(--ea-t);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#events-page .evA-st b i{font-weight:500;opacity:.55}
+#events-page .evA-st small{font-size:11.5px;color:var(--ea-s);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#events-page .evA-rw{flex:0 0 auto;font-weight:800;font-size:13px;color:#b45309;background:#fff3d6;border-radius:99px;padding:3px 10px}
+#events-page .evA-chev{flex:0 0 auto;color:var(--ea-s);font-size:12px;transition:transform .2s}
+#events-page details[open]>summary .evA-chev{transform:rotate(180deg)}
+#events-page .evA-body{padding:2px 12px 12px;border-top:1px solid var(--ea-b)}
+#events-page .evA-tools{display:flex;gap:6px;justify-content:flex-end;margin-top:12px}
+#events-page .evA-b{border:1px solid var(--ea-b);background:var(--surface);color:var(--ea-t);font:inherit;font-size:12.5px;font-weight:700;padding:7px 12px;border-radius:10px;cursor:pointer}
+#events-page .evA-b.pri{background:var(--ea-acc);border-color:var(--ea-acc);color:#fff}
+#events-page .evA-b.danger{color:#c0261d;border-color:rgba(192,38,29,.35)}
+#events-page .evA-add{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+#events-page details.evA-more{margin-top:10px}
+#events-page details.evA-more>summary{cursor:pointer;font-size:12.5px;font-weight:700;color:var(--ea-acc);padding:4px 0;list-style:none}
+#events-page details.evA-more>summary::-webkit-details-marker{display:none}
+#events-page details.evA-more>summary::before{content:"＋ "}
+#events-page details.evA-more[open]>summary::before{content:"－ "}
+#events-page .evA-danger{margin-top:18px;padding-top:12px;border-top:1px dashed var(--ea-b);text-align:right}
+/* odds */
+#events-page .evA-bar{display:flex;height:12px;border-radius:99px;overflow:hidden;margin-top:6px;background:rgba(127,127,127,.2)}
+#events-page .evA-bar i{display:block;min-width:2px}
+#events-page .evA-odds{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:12px;color:var(--ea-s);margin:6px 0 4px}
+/* live / claims */
+#events-page .evA-clm{display:flex;flex-direction:column;gap:6px;padding:12px 0;border-bottom:1px solid var(--ea-b);font-size:13px;color:var(--ea-t)}
+#events-page .evA-clm:last-child{border-bottom:0}
+#events-page .evA-mini{padding:5px 10px;font-size:12px}
+#events-page .evA-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:10px}
+@media(max-width:480px){#events-page .evA-stats{grid-template-columns:repeat(2,1fr)}}
+#events-page .evA-stat{text-align:center;padding:10px 4px;border-radius:12px;background:rgba(127,127,127,.1)}
+#events-page .evA-stat b{display:block;font-size:20px;color:var(--ea-t)}#events-page .evA-stat span{font-size:11px;color:var(--ea-s)}
+/* sticky save bar */
+#events-page .evA-save{position:sticky;bottom:12px;z-index:5;display:flex;align-items:center;gap:10px;justify-content:space-between;margin-top:16px;padding:10px 12px;border-radius:16px;background:var(--surface-strong,var(--surface));border:1px solid var(--ea-b);box-shadow:0 10px 30px -10px rgba(0,0,0,.35)}
+#events-page .evA-save .evA-dirty{font-size:12px;font-weight:700;color:#c2410c}
+</style>
+<h2 class="title-header">🏮 Events</h2>
+<div class="evA-tabs" id="evA-ptabs"><button type="button" class="on" data-pane="cfg">⚙️ ပြင်ဆင်ရန်</button><button type="button" data-pane="clm">🎁 ဆုတောင်းလွှာ<i id="evA-clmN" style="display:none"></i></button><button type="button" data-pane="live">📊 Live</button></div>
+
+<div class="evA-pane" data-pane="cfg">
+<p class="evA-note">ရက်စွဲကျော်ရင် Store ကနေ Event အလိုလို ပျောက်ပါမယ်။ <b>Save</b> နှိပ်မှ Store ကို ပြောင်းပါမယ်။ မီးပုံးရေ၊ ဆုတောင်းလွှာတွေကို Worker ကပဲ ရေးလို့ Customer လိမ်လို့မရပါ။</p>
+<div id="evA-list"></div>
+<div class="evA-row"><button type="button" class="btn btn-outline btn-md" id="evA-add">+ Event အသစ်</button><button type="button" class="btn btn-outline btn-md" id="evA-preset">🏮 သီတင်းကျွတ် Preset</button></div>
+<div class="evA-save"><span class="evA-dirty" id="evA-dirty" style="display:none">● မသိမ်းရသေးပါ</span><button type="button" class="btn btn-md" id="evA-save" style="margin-left:auto">💾 Save</button></div>
+</div>
+
+<div class="evA-pane" data-pane="clm" hidden>
+<h2 class="title-header" style="margin-top:16px;">🎁 ဆုတောင်းလွှာများ</h2>
+<div class="evA-card">
+<select id="evA-cf"><option value="">အားလုံး</option><option value="won">ဆုရပြီး (မထုတ်သေး)</option><option value="pending">ထုတ်ယူရန် တောင်းထား (Pending)</option><option value="paid">ပေးပြီး</option><option value="rejected">ပယ်ချ</option></select>
+<div id="evA-claims" style="margin-top:8px">Loading...</div>
+</div>
+<button type="button" class="btn btn-outline btn-md" id="evA-reload" style="margin-top:10px;">Refresh</button>
+</div>
+
+<div class="evA-pane" data-pane="live" hidden>
+<h2 class="title-header" style="margin-top:16px;">📊 Live အခြေအနေ</h2>
+<div class="evA-card">
+<label style="margin-top:0">Event ရွေးပါ</label><select id="evA-sel"></select>
+<div class="evA-row" style="margin-top:8px"><button type="button" class="btn btn-outline btn-md" id="evA-load">Refresh</button></div>
+<div class="evA-stats" id="evA-stats"></div>
+<label>🧑 ကစားသူများ (မီးပုံးအများဆုံး ၃၀)</label><div id="evA-players" class="evA-note">-</div>
+<label>➕ မီးပုံး ထည့်/နှုတ် (User ID)</label>
+<div class="evA-g3"><input type="text" id="evA-gu" placeholder="User ID"><input type="number" id="evA-gn" placeholder="+5 / -2"><button type="button" class="btn btn-outline btn-md" id="evA-grant">ပေးမယ်</button></div>
+</div>
+<h2 class="title-header" style="margin-top:24px;">🔗 Invite မှတ်တမ်း</h2>
+<p class="evA-note">Revoke လုပ်ရင် အဲ့ဒီ Invite ရဲ့ မီးပုံးကို ဖိတ်သူဆီက ပြန်နုတ်ပါမယ်။</p>
+<div class="evA-card" id="evA-inv">-</div>
+</div>
+</div>
+<script type="module" id="evA-js">
+import { doc, getDoc, setDoc, updateDoc, deleteDoc, getDocs, collection, query, where, increment } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+const $ = (i) => document.getElementById(i);
+const esc = (x) => String(x == null ? '' : x).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const toast = (m, t) => { try { window.showToast(m, t || 'success'); } catch (e) { alert(m); } };
+const ymd = (d) => d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2);
+let LIST = [], loaded = false;
+const rid = () => 'x' + Math.random().toString(36).slice(2, 6).replace(/[^a-z0-9]/g, 'z');
+const newId = (n) => (String(n || 'ev').toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 8) || 'ev') + Math.random().toString(36).slice(2, 6).replace(/[^a-z0-9]/g, 'x');
+const status = (e) => { const t = ymd(new Date()); if (e.on === false) return ['off', 'OFF']; if (e.sd && t < e.sd) return ['soon', 'မစသေးပါ']; if (e.ed && t > e.ed) return ['end', 'ပြီးသွားပြီ']; return ['live', 'LIVE']; };
+const val = (o, k, d) => (o[k] === undefined || o[k] === null ? d : o[k]);
+
+/* ---- tiny form helpers: every input carries its path (e.g. 0.tiers.1.cost) and writes straight into LIST ---- */
+function inp(path, lbl, type, ph, v) { return '<div><label>' + lbl + '</label><input type="' + type + '" data-p="' + path + '" data-t="' + (type === 'number' ? 'n' : 's') + '" value="' + esc(v) + '" placeholder="' + esc(ph || '') + '"></div>'; }
+function chk(path, lbl, v) { return '<label class="evA-sw"><input type="checkbox" data-p="' + path + '" data-t="b"' + (v ? ' checked' : '') + '>' + lbl + '</label>'; }
+function sel(path, lbl, opts, v) { return '<div><label>' + lbl + '</label><select data-p="' + path + '" data-t="s">' + opts.map(o => '<option value="' + o[0] + '"' + (o[0] === v ? ' selected' : '') + '>' + o[1] + '</option>').join('') + '</select></div>'; }
+function setPath(path, v) { const a = path.split('.'); let o = LIST; for (let i = 0; i < a.length - 1; i++) o = o[a[i]]; o[a[a.length - 1]] = v; }
+
+/* ================= ADMIN UI (tabs per event, compact collapsible rows) ================= */
+const KIND = { link: ['🔗', 'Link'], order: ['🛒', 'Order'], spend: ['💰', 'ဝယ်ယူမှု (Ks)'], topup: ['👛', 'Top-up (Ks)'] };
+const TAB = {}, OPEN = new Set(); let dirty = false;
+const setDirty = (v) => { dirty = v; const d = $('evA-dirty'); if (d) d.style.display = v ? '' : 'none'; };
+const arrOf = (p) => { const a = p.split('.'); const j = Number(a.pop()); let o = LIST; for (const k of a) o = o[k]; return [o, j]; };
+const objAt = (p) => { const [o, j] = arrOf(p); return o[j]; };
+const money = (n) => Number(n || 0).toLocaleString();
+
+function missionSum(m) {
+  const k = m.kind || 'link', kd = KIND[k] || KIND.link;
+  return '<span class="evA-ic">' + kd[0] + '</span><span class="evA-st"><b>' + (esc(m.title) || '<i>(ခေါင်းစဉ် မရှိသေး)</i>') + '</b><small>' + kd[1] + (k === 'link' ? '' : ' · ' + money(m.target) + (k === 'order' ? ' ခု' : ' Ks')) + ' · ' + (m.type === 'once' ? 'တစ်ခါပဲ' : 'နေ့စဉ်') + (m.on === false ? ' · OFF' : '') + '</small></span><span class="evA-rw">+' + (Number(m.reward) || 0) + ' 🏮</span>';
+}
+function bTierSum(t, b) {
+  const ts = (b && b.tiers || []).filter(x => x.on !== false), tot = ts.reduce((a, x) => a + (Number(x.weight) || 0), 0);
+  const pct = t.on !== false && tot ? ((Number(t.weight) || 0) / tot * 100).toFixed(1) + '%' : 'OFF';
+  return '<span class="evA-dot" style="background:' + esc(/^#[0-9a-fA-F]{6}$/.test(t.color || '') ? t.color : '#9aa4b2') + '"></span><span class="evA-st"><b>' + (esc(t.label) || '<i>(နာမည် မရှိသေး)</i>') + '</b><small>' + (esc(t.prize) || '-') + (Number(t.stock) > 0 ? ' · ' + t.stock + ' ခု' : '') + '</small></span><span class="evA-rw">' + pct + '</span>';
+}
+function tierSum(t) {
+  return '<span class="evA-ic">' + (t.mode === 'direct' ? '🎁' : '🎮') + '</span><span class="evA-st"><b>' + (esc(t.title) || '<i>(နာမည် မရှိသေး)</i>') + '</b><small>' + (esc(t.prize) || '-') + (t.mode === 'direct' ? ' · တိုက်ရိုက်ရ' : ' · Game') + (t.on === false ? ' · OFF' : '') + '</small></span><span class="evA-rw">' + (Number(t.cost) || 0) + ' 🏮</span>';
+}
+const sumOf = (type, p) => { const o = objAt(p); if (type === 'm') return missionSum(o); if (type === 'bt') return bTierSum(o, LIST[p.split('.')[0]].box); return tierSum(o); };
+const item = (p, type, body, extraTools) => '<details class="evA-it2" data-sum="' + p + '|' + type + '"' + (OPEN.has(p) ? ' open' : '') + '><summary>' + sumOf(type, p) + '<span class="evA-chev">▾</span></summary><div class="evA-body">' + body + '<div class="evA-tools">' + (extraTools || '') + '<button type="button" class="evA-b danger" data-rm="' + p + '">🗑 ဖျက်</button></div></div></details>';
+const mv = (p) => '<button type="button" class="evA-b" data-up="' + p + '">↑</button><button type="button" class="evA-b" data-dn="' + p + '">↓</button>';
+
+function missionHtml(i, j, m) {
+  const p = i + '.missions.' + j, k = m.kind || 'link';
+  return item(p, 'm',
+    inp(p + '.title', 'ခေါင်းစဉ်', 'text', 'Telegram Channel Join လုပ်ပါ', m.title || '') + inp(p + '.desc', 'ရှင်းလင်းချက် (မဖြည့်လည်းရ)', 'text', '', m.desc || '') +
+    '<div class="evA-g">' + sel(p + '.kind', 'Task အမျိုးအစား', [['link', '🔗 Link ဖွင့်ပြီး ယူ'], ['order', '🛒 Order အောင်မြင်ရမယ်'], ['spend', '💰 ဝယ်ယူမှု စုစုပေါင်း'], ['topup', '👛 Wallet Top-up စုစုပေါင်း']], k) +
+    inp(p + '.reward', '🏮 ရမယ့် မီးပုံး', 'number', '1', val(m, 'reward', 1)) + '</div>' +
+    '<div class="evA-g">' + sel(p + '.type', 'အကြိမ်', [['daily', 'နေ့စဉ် (တစ်နေ့ တစ်ခါ)'], ['once', 'တစ်ခါပဲ (Event တစ်ခုလုံး)']], m.type || 'daily') +
+    (k === 'link' ? inp(p + '.url', 'Link', 'text', 'https://t.me/...', m.url || '') : inp(p + '.target', k === 'order' ? 'ပန်းတိုင် (Order ခု)' : 'ပန်းတိုင် (Ks)', 'number', '1', val(m, 'target', 1))) + '</div>' +
+    chk(p + '.on', 'ဖွင့်ထားမယ်', m.on !== false) +
+    '<p class="evA-note">' + (k === 'link' ? 'Link task ကို Worker က အတည်ပြုလို့ မရပါ၊ တန်ဖိုးနည်းနည်းပဲ ပေးပါ။' : '✅ Worker က Customer ရဲ့ တကယ့် Order / Top-up ကို စစ်ပါတယ်။ ပန်းတိုင်မပြည့်ရင် မီးပုံးမရပါ။') + '</p>', mv(p));
+}
+function boxTierHtml(i, j, t) {
+  const p = i + '.box.tiers.' + j;
+  return item(p, 'bt',
+    '<div class="evA-g">' + inp(p + '.label', 'အဆင့်နာမည်', 'text', 'Rare', t.label || '') + '<div><label>အရောင်</label><input type="color" data-p="' + p + '.color" data-t="s" value="' + esc(/^#[0-9a-fA-F]{6}$/.test(t.color || '') ? t.color : '#9aa4b2') + '"></div></div>' +
+    '<div class="evA-g">' + inp(p + '.title', 'ဆု ခေါင်းစဉ်', 'text', 'ရှားပါးဆု', t.title || '') + inp(p + '.prize', 'ဆု (စာသား)', 'text', '300 Ks Wallet', t.prize || '') + '</div>' +
+    '<div class="evA-g3">' + inp(p + '.weight', 'ဖြစ်နိုင်ခြေ', 'number', '10', val(t, 'weight', 10)) + inp(p + '.stock', 'ဆုအရေအတွက်', 'number', '0', val(t, 'stock', 0)) + inp(p + '.perUser', 'တစ်ယောက်', 'number', '0', val(t, 'perUser', 0)) + '</div>' +
+    '<p class="evA-note">ဖြစ်နိုင်ခြေ = အလေးချိန် (ကြီးရင် ပိုရတတ်)။ ဆုအရေအတွက်/တစ်ယောက် → 0 ဆို အကန့်မဲ့။</p>' + chk(p + '.on', 'ဖွင့်ထားမယ်', t.on !== false), mv(p));
+}
+function tierHtml(i, j, t) {
+  const p = i + '.tiers.' + j;
+  return item(p, 't',
+    '<div class="evA-g">' + inp(p + '.title', 'နာမည်', 'text', 'မီးပုံးဖမ်းပွဲ', t.title || '') + inp(p + '.prize', 'ဆု (စာသား)', 'text', '500 Ks Wallet', t.prize || '') + '</div>' +
+    '<div class="evA-g3">' + inp(p + '.cost', '🏮 သုံးမယ့်ရေ', 'number', '3', val(t, 'cost', 3)) + sel(p + '.mode', 'ပုံစံ', [['game', '🎮 Game'], ['direct', '🎁 တိုက်ရိုက်']], t.mode || 'game') + inp(p + '.perUser', 'တစ်ယောက်', 'number', '1', val(t, 'perUser', 1)) + '</div>' +
+    (t.mode === 'direct' ? '' : '<div class="evA-g3">' + inp(p + '.goal', 'ထိရမယ့်ရေ', 'number', '15', val(t, 'goal', 15)) + inp(p + '.secs', 'စက္ကန့်', 'number', '12', val(t, 'secs', 12)) + inp(p + '.stock', 'ဆုအရေအတွက်', 'number', '0', val(t, 'stock', 0)) + '</div>') +
+    (t.mode === 'direct' ? '<div class="evA-g">' + inp(p + '.stock', 'ဆုအရေအတွက် (0=အကန့်မဲ့)', 'number', '0', val(t, 'stock', 0)) + '<div></div></div>' : chk(p + '.refund', 'ရှုံးရင် မီးပုံးပြန်ပေးမယ်', t.refund === true)) + chk(p + '.on', 'ဖွင့်ထားမယ်', t.on !== false), mv(p));
+}
+function oddsHtml(b) {
+  const ts = (b && b.tiers || []).filter(t => t.on !== false), tot = ts.reduce((a, t) => a + (Number(t.weight) || 0), 0);
+  if (!ts.length || !tot) return '<p class="evA-note">ဆုအဆင့် မရှိသေးပါ</p>';
+  return '<div class="evA-bar">' + ts.map(t => '<i style="flex:' + (Number(t.weight) || 0) + ';background:' + esc(t.color || '#9aa4b2') + '" title="' + esc(t.label || '') + '"></i>').join('') + '</div><div class="evA-odds">' + ts.map(t => '<span><span class="evA-dot" style="background:' + esc(t.color || '#9aa4b2') + '"></span>' + esc(t.label || '-') + ' <b>' + ((Number(t.weight) || 0) / tot * 100).toFixed(1) + '%</b></span>').join('') + '</div>';
+}
+const secT = (title, sub) => '<div class="evA-sh"><b>' + title + '</b>' + (sub ? '<small>' + sub + '</small>' : '') + '</div>';
+
+function paneBasic(i, e) {
+  const P = String(i);
+  return secT('⚙️ အခြေခံ') + '<div class="evA-g">' + inp(P + '.name', 'Event နာမည်', 'text', 'Thadingyut Lantern Festival', e.name || '') + inp(P + '.emoji', 'Emoji', 'text', '🏮', e.emoji || '') + inp(P + '.sd', 'စမယ့်ရက်', 'date', '', e.sd || '') + inp(P + '.ed', 'ပြီးမယ့်ရက် (ထိ ပါဝင်)', 'date', '', e.ed || '') + '</div>' +
+    '<label>Event ရှင်းလင်းချက်</label><textarea rows="3" data-p="' + P + '.desc" data-t="s">' + esc(e.desc || '') + '</textarea>' +
+    '<label>စည်းကမ်းချက်များ (တစ်ကြောင်း တစ်ချက်)</label><textarea rows="3" data-p="' + P + '.rules" data-t="s">' + esc(e.rules || '') + '</textarea>' +
+    '<details class="evA-more"><summary>Banner / Share link (မဖြည့်လည်းရ)</summary>' +
+    inp(P + '.bannerSub', 'မီးပုံးပျံ popup စာသား', 'text', 'မီးပုံးစုပြီး ဆုရယူပါ', e.bannerSub || '') +
+    inp(P + '.shareBase', 'Telegram Mini App link (ဥပမာ https://t.me/YourBot/app)', 'text', 'ကွက်လပ်ထားရင် Website link သုံးမယ်', e.shareBase || '') +
+    inp(P + '.shareText', 'Share လုပ်တဲ့အခါ ပါမယ့်စာ', 'text', '🏮 Event မှာ ငါနဲ့အတူ ပါဝင်ပါ!', e.shareText || '') + '</details>' +
+    '<div class="evA-danger"><button type="button" class="evA-b danger" data-del="' + i + '">🗑 ဒီ Event ကို ဖျက်မယ်</button></div>';
+}
+function paneEarn(i, e) {
+  const P = String(i), ms = e.missions || [];
+  const tpl = [['link', '🔗 Link'], ['order', '🛒 Order'], ['spend', '💰 ဝယ်ယူ Ks'], ['topup', '👛 Top-up Ks']].map(x => '<button type="button" class="evA-b pri" data-addm="' + i + '" data-k="' + x[0] + '">+ ' + x[1] + '</button>').join('');
+  return secT('📅 နေ့စဉ် Check-in', 'နေ့တိုင်း ဝင်ရင် ရမယ့်မီးပုံး') + '<div class="evA-card2">' + chk(P + '.checkinOn', 'Check-in ဖွင့်ထားမယ်', e.checkinOn !== false) + inp(P + '.checkinReward', '🏮 တစ်နေ့ ရမယ့်မီးပုံး', 'number', '1', val(e, 'checkinReward', 1)) + '</div>' +
+    secT('🔗 သူငယ်ချင်း ဖိတ်ခြင်း', 'ဖိတ်ခံရသူ စဝင်ရင် ဖိတ်သူက ရမယ်') + '<div class="evA-card2">' + chk(P + '.inviteOn', 'Invite ဖွင့်ထားမယ်', e.inviteOn !== false) +
+    '<div class="evA-g">' + inp(P + '.inviteReward', '🏮 တစ်ယောက်ကို ရမယ့်မီးပုံး', 'number', '1', val(e, 'inviteReward', 1)) + inp(P + '.inviteCap', 'ဖိတ်ခွင့် ကန့်သတ် (0=အကန့်မဲ့)', 'number', '3', val(e, 'inviteCap', 3)) + '</div>' +
+    '<details class="evA-more"><summary>ပိုတင်းကျပ်စွာ ထိန်းချုပ်ရန်</summary><div class="evA-g">' + inp(P + '.inviteMaxAgeDays', 'Account အသက် (ရက်)', 'number', '3', val(e, 'inviteMaxAgeDays', 3)) + inp(P + '.inviteDevMax', 'ဖုန်းတစ်လုံး ဖိတ်ခံရခွင့်', 'number', '1', val(e, 'inviteDevMax', 1)) + '</div>' +
+    '<p class="evA-note">Event စပြီးမှ ဖွင့်တဲ့ Account အသစ်ပဲ ရေတွက်ပါတယ်။ ဖုန်း/IP တူရင်၊ ကိုယ့်ကိုယ်ကို ဖိတ်ရင် မရပါ။ Worker က စစ်ပါတယ်။</p></details></div>' +
+    secT('🎯 Tasks (' + ms.length + ')', 'လုပ်ပြီးရင် မီးပုံးရမယ့် လုပ်ငန်းစဉ်') + (ms.length ? ms.map((m, j) => missionHtml(i, j, m)).join('') : '<p class="evA-note">Task မရှိသေးပါ။ အောက်က ခလုတ်နဲ့ ထည့်ပါ။</p>') + '<div class="evA-add">' + tpl + '</div>';
+}
+function paneBox(i, e) {
+  const b = e.box || (e.box = defaultBox()), p = i + '.box', ts = b.tiers || [];
+  return secT('🎁 Box', 'မီးပုံးနဲ့ ဖွင့်ရမယ့် ဆုသေတ္တာ') + '<div class="evA-card2">' + chk(p + '.on', 'Box ဖွင့်ထားမယ်', b.on === true) + inp(p + '.title', 'Box ခေါင်းစဉ်', 'text', '🎁 ဆု Box', b.title || '') +
+    '<div class="evA-g3">' + inp(p + '.cost', '🏮 Box တစ်လုံး', 'number', '3', val(b, 'cost', 3)) + '<div><label>⏳ ပွင့်ချိန် (မိနစ်)</label><input type="number" step="any" min="0" data-p="' + p + '.openSecs" data-t="m" value="' + esc(Math.round(val(b, 'openSecs', 60) / 60 * 100) / 100) + '" placeholder="1"></div>' + inp(p + '.slots', '📦 တပြိုင်နက်', 'number', '1', val(b, 'slots', 1)) + '</div>' +
+    '<details class="evA-more"><summary>ကန့်သတ်ချက်များ</summary><div class="evA-g">' + inp(p + '.perDay', 'တစ်နေ့ Box (0=အကန့်မဲ့)', 'number', '0', val(b, 'perDay', 0)) + inp(p + '.maxBoxes', 'စုစုပေါင်း Box (0=အကန့်မဲ့)', 'number', '0', val(b, 'maxBoxes', 0)) + '</div></details>' +
+    '<p class="evA-note">0 မိနစ်ဆို ချက်ချင်းပွင့်မယ်။ Box ပွင့်ရင် အရောင်အရင်ပြပြီးမှ ဆုကို Popup နဲ့ ပြမယ်။ ဆုကို Worker က ကျပန်းရွေးလို့ လိမ်လို့မရပါ။</p></div>' +
+    secT('🎨 ဆုအဆင့်များ (' + ts.length + ')', 'အရောင်တစ်ခုချင်းက ဆုအဆင့်တစ်ခု') + '<div id="evA-odds-' + i + '">' + oddsHtml(b) + '</div>' + ts.map((t, j) => boxTierHtml(i, j, t)).join('') +
+    '<div class="evA-add"><button type="button" class="evA-b pri" data-addbt="' + i + '">+ အဆင့်အသစ်</button><button type="button" class="evA-b" data-bxpreset="' + i + '">⚡ Preset ၄ ခု</button></div>';
+}
+function paneTiers(i, e) {
+  const ts = e.tiers || [];
+  return secT('🏆 ဆုလှေကား (' + ts.length + ')', 'စုထားတဲ့ မီးပုံးနဲ့ Game ကစားပြီး / တိုက်ရိုက် လဲယူရမယ့်ဆု') + (ts.length ? ts.map((t, j) => tierHtml(i, j, t)).join('') : '<p class="evA-note">မရှိသေးပါ</p>') + '<div class="evA-add"><button type="button" class="evA-b pri" data-addt="' + i + '">+ ဆင့်အသစ်</button></div>';
+}
+function draw() {
+  $('evA-list').innerHTML = LIST.length ? LIST.map((e, i) => {
+    const s = status(e), tab = TAB[i] || 'basic', P = String(i), bx = e.box || {}, tabs = [['basic', '⚙️ အခြေခံ'], ['earn', '🏮 မီးပုံးရနည်း'], ['box', '🎁 Box' + (bx.on ? ' ●' : '')], ['tiers', '🏆 ဆုလှေကား']];
+    return '<div class="evA-card"><div class="evA-h"><span class="evA-hn">' + esc(e.emoji || '🏮') + ' ' + esc(e.name || 'Event') + '</span><button type="button" class="evA-chip ' + s[0] + '" data-tog="' + i + '" title="နှိပ်ရင် ON/OFF">' + s[1] + '</button></div>' +
+      '<div class="evA-meta">' + esc(e.sd || '?') + ' → ' + esc(e.ed || '?') + ' · Check-in +' + val(e, 'checkinReward', 1) + ' · Invite +' + val(e, 'inviteReward', 1) + ' · Task ' + (e.missions || []).length + '</div>' +
+      '<div class="evA-tabs">' + tabs.map(t => '<button type="button" class="' + (t[0] === tab ? 'on' : '') + '" data-tab="' + i + ':' + t[0] + '">' + t[1] + '</button>').join('') + '</div>' +
+      '<div class="evA-pane2">' + (tab === 'basic' ? paneBasic(i, e) : tab === 'earn' ? paneEarn(i, e) : tab === 'box' ? paneBox(i, e) : paneTiers(i, e)) + '</div></div>';
+  }).join('') : '<p class="evA-note">Event မရှိသေးပါ။ "🏮 သီတင်းကျွတ် Preset" နှိပ်ပြီး စပါ။</p>';
+  const root = $('evA-list');
+  root.querySelectorAll('[data-p]').forEach(el => {
+    const h = (full) => {
+      const t = el.dataset.t, p = el.dataset.p;
+      setPath(p, t === 'b' ? el.checked : t === 'n' ? (el.value === '' ? '' : Number(el.value)) : t === 'm' ? (el.value === '' ? '' : Math.round(Number(el.value) * 60)) : el.value);
+      setDirty(true);
+      const a = p.split('.'), d = el.closest('details[data-sum]');
+      if (d) { const [dp, dt] = d.dataset.sum.split('|'); d.querySelector('summary').innerHTML = sumOf(dt, dp) + '<span class="evA-chev">▾</span>'; }
+      if (a[1] === 'box') {
+        const o = $('evA-odds-' + a[0]); if (o) o.innerHTML = oddsHtml(LIST[a[0]].box);
+        root.querySelectorAll('details[data-sum$="|bt"]').forEach(x => { const [dp, dt] = x.dataset.sum.split('|'); if (dp.split('.')[0] === a[0]) x.querySelector('summary').innerHTML = sumOf(dt, dp) + '<span class="evA-chev">▾</span>'; });
+      }
+      if (full) draw();
+    };
+    el.oninput = () => h(false);
+    el.onchange = () => h(el.dataset.p.endsWith('.kind') || el.dataset.p.endsWith('.mode') || /\.(name|emoji|sd|ed)$/.test(el.dataset.p) || /\.(checkinReward|inviteReward|on)$/.test(el.dataset.p));
+  });
+  root.querySelectorAll('details[data-sum]').forEach(d => d.addEventListener('toggle', () => { const p = d.dataset.sum.split('|')[0]; if (d.open) OPEN.add(p); else OPEN.delete(p); }));
+  root.querySelectorAll('[data-tab]').forEach(b => b.onclick = () => { const [i, t] = b.dataset.tab.split(':'); TAB[i] = t; draw(); });
+  root.querySelectorAll('[data-tog]').forEach(b => b.onclick = () => { const e = LIST[b.dataset.tog]; e.on = e.on === false; setDirty(true); draw(); });
+  root.querySelectorAll('[data-del]').forEach(b => b.onclick = () => { if (confirm('ဒီ Event ကို ဖျက်မလား?')) { LIST.splice(b.dataset.del, 1); setDirty(true); draw(); fillSel(); } });
+  const fresh = (path) => { OPEN.add(path); setDirty(true); draw(); };
+  root.querySelectorAll('[data-addm]').forEach(b => b.onclick = () => {
+    const e = LIST[b.dataset.addm], k = b.dataset.k || 'link', ms = (e.missions = e.missions || []);
+    const d = { link: ['Telegram Channel Join လုပ်ပါ', 1, 1], order: ['Order အောင်မြင်အောင် ဝယ်ပါ', 2, 1], spend: ['ဝယ်ယူမှု စုစုပေါင်း 10,000 Ks ပြည့်ပါ', 3, 10000], topup: ['Wallet Top-up 5,000 Ks ထည့်ပါ', 3, 5000] }[k];
+    ms.push({ id: rid(), title: d[0], desc: '', reward: d[1], type: k === 'link' ? 'once' : 'daily', kind: k, target: d[2], url: '', on: true }); fresh(b.dataset.addm + '.missions.' + (ms.length - 1));
+  });
+  root.querySelectorAll('[data-addbt]').forEach(b => b.onclick = () => { const e = LIST[b.dataset.addbt]; const bx = e.box || (e.box = defaultBox()); const ts = (bx.tiers = bx.tiers || []); ts.push({ id: bid(), label: '', color: '#9aa4b2', title: '', prize: '', weight: 10, stock: 0, perUser: 0, on: true }); fresh(b.dataset.addbt + '.box.tiers.' + (ts.length - 1)); });
+  root.querySelectorAll('[data-bxpreset]').forEach(b => b.onclick = () => { const e = LIST[b.dataset.bxpreset]; const bx = e.box || (e.box = defaultBox()); if ((bx.tiers || []).length && !confirm('ရှိပြီးသား အဆင့်တွေကို Preset နဲ့ အစားထိုးမလား?')) return; bx.tiers = boxPreset(); setDirty(true); draw(); });
+  root.querySelectorAll('[data-addt]').forEach(b => b.onclick = () => { const e = LIST[b.dataset.addt]; const ts = (e.tiers = e.tiers || []); ts.push({ id: rid(), title: '', prize: '', cost: 3, mode: 'game', goal: 15, secs: 12, stock: 0, perUser: 1, refund: false, on: true }); fresh(b.dataset.addt + '.tiers.' + (ts.length - 1)); });
+  root.querySelectorAll('[data-rm]').forEach(b => b.onclick = (ev) => { ev.preventDefault(); if (!confirm('ဖျက်မလား?')) return; const [o, j] = arrOf(b.dataset.rm); o.splice(j, 1); OPEN.clear(); setDirty(true); draw(); });
+  root.querySelectorAll('[data-up]').forEach(b => b.onclick = () => { const [o, j] = arrOf(b.dataset.up); if (j > 0) { [o[j - 1], o[j]] = [o[j], o[j - 1]]; OPEN.clear(); setDirty(true); draw(); } });
+  root.querySelectorAll('[data-dn]').forEach(b => b.onclick = () => { const [o, j] = arrOf(b.dataset.dn); if (j < o.length - 1) { [o[j + 1], o[j]] = [o[j], o[j + 1]]; OPEN.clear(); setDirty(true); draw(); } });
+}
+
+/* ---- Mystery box ---- */
+const defaultBox = () => ({ on: false, title: '🎁 ဆု Box', cost: 3, openSecs: 60, slots: 1, perDay: 0, maxBoxes: 0, tiers: [] });
+const boxPreset = () => [
+  { id: bid(), label: 'Common', color: '#9aa4b2', title: 'ပုံမှန်ဆု', prize: '100 Ks Wallet', weight: 60, stock: 0, perUser: 0, on: true },
+  { id: bid(), label: 'Rare', color: '#3b82f6', title: 'ရှားပါးဆု', prize: '300 Ks Wallet', weight: 25, stock: 0, perUser: 0, on: true },
+  { id: bid(), label: 'Epic', color: '#a855f7', title: 'အထူးဆု', prize: '1,000 Ks Wallet', weight: 12, stock: 20, perUser: 1, on: true },
+  { id: bid(), label: 'Legendary', color: '#f59e0b', title: 'ဆုကြီး', prize: '5,000 Ks Wallet', weight: 3, stock: 5, perUser: 1, on: true }
+];
+const bid = () => 'b' + Math.random().toString(36).slice(2, 7).replace(/[^a-z0-9]/g, 'z');
+function fillSel() {
+  const s = $('evA-sel'), keep = s.value;
+  s.innerHTML = LIST.map(e => '<option value="' + esc(e.id) + '">' + esc((e.emoji || '🏮') + ' ' + (e.name || e.id)) + '</option>').join('');
+  if (keep && LIST.some(e => e.id === keep)) s.value = keep;
+}
+async function loadCfg() {
+  try { const s = await getDoc(doc(window.db, 'settings', 'branding')); const l = s.exists() && s.data().events && s.data().events.list; LIST = Array.isArray(l) ? l.map(x => JSON.parse(JSON.stringify(x))) : []; loaded = true; } catch (e) { toast('Event ဖတ်မရပါ', 'fail'); }
+  draw(); fillSel(); setDirty(false);
+}
+const N = (v, d, lo, hi) => { v = Number(v); if (!isFinite(v)) v = d; return Math.min(hi, Math.max(lo, Math.floor(v))); };
+function clean() {
+  return LIST.map(e => ({
+    id: /^[a-z0-9]{2,24}$/.test(e.id) ? e.id : newId(e.name), name: String(e.name || '').trim(), emoji: e.emoji || '🏮', on: e.on !== false, sd: e.sd, ed: e.ed,
+    desc: String(e.desc || '').trim(), rules: String(e.rules || '').trim(), bannerSub: String(e.bannerSub || '').trim(), shareBase: String(e.shareBase || '').trim(), shareText: String(e.shareText || '').trim(),
+    inviteOn: e.inviteOn !== false, inviteReward: N(e.inviteReward, 1, 1, 50), inviteCap: N(e.inviteCap, 3, 0, 100000), inviteMaxAgeDays: N(e.inviteMaxAgeDays, 3, 1, 90), inviteDevMax: N(e.inviteDevMax, 1, 1, 50),
+    checkinOn: e.checkinOn !== false, checkinReward: N(e.checkinReward, 1, 1, 50),
+    missions: (e.missions || []).map(m => ({ id: /^[a-z0-9]{2,16}$/.test(m.id) ? m.id : rid(), title: String(m.title || '').trim(), desc: String(m.desc || '').trim(), reward: N(m.reward, 1, 1, 100), type: m.type === 'once' ? 'once' : 'daily', kind: ['order', 'spend', 'topup'].includes(m.kind) ? m.kind : 'link', target: N(m.target, 1, 1, 100000000), url: /^https?:\/\//.test(String(m.url || '').trim()) ? String(m.url).trim() : '', on: m.on !== false })),
+    box: (() => { const b = e.box || defaultBox(); return { on: b.on === true, title: String(b.title || '').trim(), cost: N(b.cost, 3, 1, 1000), openSecs: N(b.openSecs, 60, 0, 604800), slots: N(b.slots, 1, 1, 10), perDay: N(b.perDay, 0, 0, 1000), maxBoxes: N(b.maxBoxes, 0, 0, 100000),
+      tiers: (b.tiers || []).map(t => ({ id: /^[a-z0-9]{2,16}$/.test(t.id) ? t.id : bid(), label: String(t.label || '').trim(), color: /^#[0-9a-fA-F]{6}$/.test(t.color || '') ? t.color : '#9aa4b2', title: String(t.title || '').trim(), prize: String(t.prize || '').trim(), weight: N(t.weight, 10, 1, 1000000), stock: N(t.stock, 0, 0, 1000000), perUser: N(t.perUser, 0, 0, 1000), on: t.on !== false })) }; })(),
+    tiers: (e.tiers || []).map(t => ({ id: /^[a-z0-9]{2,16}$/.test(t.id) ? t.id : rid(), title: String(t.title || '').trim(), prize: String(t.prize || '').trim(), cost: N(t.cost, 3, 1, 1000), mode: t.mode === 'direct' ? 'direct' : 'game', goal: N(t.goal, 15, 1, 200), secs: N(t.secs, 12, 5, 120), stock: N(t.stock, 0, 0, 1000000), perUser: N(t.perUser, 1, 0, 1000), refund: t.refund === true, on: t.on !== false }))
+  }));
+}
+$('evA-add').onclick = () => { LIST.push({ id: newId('ev'), name: '', emoji: '🏮', on: true, sd: ymd(new Date()), ed: '', desc: '', rules: '', bannerSub: '', shareBase: '', shareText: '', inviteOn: true, inviteReward: 1, inviteCap: 3, inviteMaxAgeDays: 3, inviteDevMax: 1, checkinOn: true, checkinReward: 1, missions: [], tiers: [], box: defaultBox() }); TAB[LIST.length - 1] = 'basic'; setDirty(true); draw(); fillSel(); };
+$('evA-preset').onclick = () => {
+  const d = new Date(), e = new Date(Date.now() + 7 * 864e5);
+  LIST.push({ id: newId('thadi'), name: 'သီတင်းကျွတ် မီးပုံးပွဲတော်', emoji: '🏮', on: true, sd: ymd(d), ed: ymd(e), bannerSub: 'မီးပုံးစုပြီး ဆုရယူပါ',
+    desc: 'သီတင်းကျွတ်လပြည့်ညတွင် ဆုတောင်းပွဲ။ သူငယ်ချင်းတွေကို ဖိတ်၊ နေ့စဉ် Check-in လုပ်ပြီး မီးပုံးစုပါ။ စုမိတဲ့ မီးပုံးနဲ့ ဆုတွေ လဲယူပါ။', rules: 'ဖိတ်ခံရသူက Event စပြီးမှ အကောင့်အသစ်ဖွင့်သူ ဖြစ်ရမယ်။\nဖုန်းတစ်လုံးကနေ ဖိတ်ခံရတာ တစ်ခါပဲ ရတယ်။\nမှားယွင်းတဲ့နည်းနဲ့ စုထားတဲ့ မီးပုံးတွေကို Admin က ပယ်ဖျက်နိုင်တယ်။',
+    shareBase: '', shareText: '🏮 သီတင်းကျွတ် Event မှာ ငါနဲ့အတူ ပါဝင်ပြီး ဆုရယူကြစို့!', inviteOn: true, inviteReward: 1, inviteCap: 3, inviteMaxAgeDays: 3, inviteDevMax: 1, checkinOn: true, checkinReward: 1,
+    missions: [
+      { id: rid(), title: 'ပထမဆုံး Order တစ်ခု အောင်မြင်အောင် ဝယ်ပါ', desc: 'ဒီနေ့ Order အောင်မြင်ရင် ရမယ်', reward: 2, type: 'daily', kind: 'order', target: 1, url: '', on: true },
+      { id: rid(), title: 'Telegram Channel Join လုပ်ပါ', desc: '', reward: 1, type: 'once', kind: 'link', target: 1, url: 'https://t.me/linnlinnarea', on: true } ],
+    box: { on: true, title: '🎁 သီတင်းကျွတ် ဆု Box', cost: 3, openSecs: 60, slots: 2, perDay: 0, maxBoxes: 0, tiers: boxPreset() },
+    tiers: [
+      { id: rid(), title: 'မီးပုံးဖမ်းပွဲ', prize: '500 Ks Wallet', cost: 3, mode: 'game', goal: 12, secs: 12, stock: 0, perUser: 1, refund: false, on: true },
+      { id: rid(), title: 'ဆုကြီးဖမ်းပွဲ', prize: '1,000 Ks Wallet', cost: 6, mode: 'game', goal: 18, secs: 12, stock: 0, perUser: 1, refund: false, on: true },
+      { id: rid(), title: 'Lucky Draw ဝင်ခွင့်', prize: 'Lucky Draw ticket', cost: 10, mode: 'direct', goal: 15, secs: 12, stock: 0, perUser: 1, refund: false, on: true },
+      { id: rid(), title: 'ဆုကြီး', prize: '5,000 Ks Wallet', cost: 15, mode: 'direct', goal: 15, secs: 12, stock: 5, perUser: 1, refund: false, on: true }
+    ] });
+  setDirty(true); draw(); fillSel(); toast('Preset ထည့်ပြီး၊ ညှိပြီး Save နှိပ်ပါ');
+};
+$('evA-save').onclick = async () => {
+  for (const e of LIST) { if (!String(e.name || '').trim()) return toast('Event နာမည် ထည့်ပါ', 'fail'); if (!e.sd || !e.ed) return toast('စမယ့်ရက်၊ ပြီးမယ့်ရက် နှစ်ခုလုံးထည့်ပါ', 'fail'); if (e.ed < e.sd) return toast('ပြီးမယ့်ရက်က စမယ့်ရက်ထက် စောနေပါတယ်', 'fail'); for (const t of (e.tiers || [])) if (!String(t.title || '').trim() || !String(t.prize || '').trim()) return toast('ဆုလှေကားမှာ နာမည်နဲ့ ဆု စာသား ထည့်ပါ', 'fail'); for (const m of (e.missions || [])) if (!String(m.title || '').trim()) return toast('Mission ခေါင်းစဉ် ထည့်ပါ', 'fail');
+    const bx = e.box; if (bx && bx.on === true) { const on = (bx.tiers || []).filter(t => t.on !== false); if (!on.length) return toast('Box ဖွင့်ထားရင် ဆုအဆင့် အနည်းဆုံး ၁ ခု လိုပါတယ်', 'fail'); for (const t of on) if (!String(t.label || '').trim() || !String(t.prize || '').trim()) return toast('Box ဆုအဆင့်တိုင်းမှာ အဆင့်နာမည်နဲ့ ဆု စာသား ထည့်ပါ', 'fail'); } }
+  const c = clean();
+  try { await setDoc(doc(window.db, 'settings', 'branding'), { events: { list: c } }, { merge: true }); LIST = c.map(x => JSON.parse(JSON.stringify(x))); setDirty(false); draw(); fillSel(); toast('Save ပြီးပါပြီ'); } catch (e) { toast('Save မရပါ', 'fail'); }
+};
+
+/* ---------------- live data ---------------- */
+const tsOf = (r) => (r.createdAt && (r.createdAt.seconds || (r.createdAt.toMillis && r.createdAt.toMillis() / 1000))) || 0;
+const fmt = (s) => s ? new Date(s * 1000).toLocaleString() : '-';
+async function loadLive() {
+  const eid = $('evA-sel').value; if (!eid) { $('evA-stats').innerHTML = ''; return; }
+  $('evA-stats').innerHTML = '<div class="evA-note" style="grid-column:1/-1">Loading...</div>';
+  try {
+    const [pq, iq] = await Promise.all([getDocs(query(collection(window.db, 'eventPlayers'), where('eventId', '==', eid))), getDocs(query(collection(window.db, 'eventInvites'), where('eventId', '==', eid)))]);
+    const players = pq.docs.map(d => Object.assign({ _id: d.id }, d.data())), invites = iq.docs.map(d => Object.assign({ _id: d.id }, d.data()));
+    const bal = (p) => (p.inviteLanterns || 0) + (p.checkinLanterns || 0) + (p.missionLanterns || 0) + (p.bonus || 0) - (p.spent || 0);
+    const earned = players.reduce((a, p) => a + (p.inviteLanterns || 0) + (p.checkinLanterns || 0) + (p.missionLanterns || 0) + (p.bonus || 0), 0), spent = players.reduce((a, p) => a + (p.spent || 0), 0);
+    const okInv = invites.filter(r => r.counted).length;
+    $('evA-stats').innerHTML = [[players.length, 'ကစားသူ'], [earned, 'စုမိမီးပုံး'], [spent, 'သုံးပြီး'], [okInv, 'Invite (ရ)'], [invites.length - okInv, 'Invite (မရ)'], [players.filter(p => (p.checkinDays || []).length).length, 'Check-in လုပ်သူ'], [players.reduce((a, p) => a + (p.boxOpened || 0), 0), 'Box ဖွင့်ပြီး'], [players.reduce((a, p) => a + (Array.isArray(p.boxQ) ? p.boxQ.length : 0), 0), 'Box ပွင့်ဖို့စောင့်နေ']].map(x => '<div class="evA-stat"><b>' + x[0] + '</b><span>' + x[1] + '</span></div>').join('');
+    const top = players.slice().sort((a, b) => bal(b) - bal(a)).slice(0, 30);
+    $('evA-players').innerHTML = top.length ? top.map(p => '<div class="evA-clm" style="flex-direction:row;justify-content:space-between"><span><code>' + esc(p.userId) + '</code></span><span>🏮 ' + bal(p) + ' (invite ' + (p.inviteCount || 0) + ', ဆုရ ' + Object.values(p.tierWins || {}).reduce((a, b) => a + b, 0) + ')</span></div>').join('') : 'မရှိသေးပါ';
+    const rows = invites.sort((a, b) => tsOf(b) - tsOf(a)).slice(0, 50);
+    $('evA-inv').innerHTML = rows.length ? rows.map(r => '<div class="evA-clm"><div>ဖိတ်သူ <code>' + esc(r.inviter) + '</code> → ဖိတ်ခံ <code>' + esc(r.invitee) + '</code></div><div>' + (r.counted ? '<span class="evA-chip paid">ရပြီး +' + esc(r.reward) + '</span>' : '<span class="evA-chip rejected">မရ: ' + esc(r.reason) + '</span>') + ' · ' + esc(fmt(tsOf(r))) + (r.counted ? ' <button class="btn btn-outline evA-mini" data-rev="' + esc(r._id) + '" data-inv="' + esc(r.inviter) + '" data-rw="' + esc(r.reward) + '" data-e="' + esc(eid) + '">Revoke</button>' : '') + '</div></div>').join('') : '<p class="evA-note">မရှိသေးပါ</p>';
+    $('evA-inv').querySelectorAll('[data-rev]').forEach(b => b.onclick = async () => {
+      if (!confirm('ဒီ Invite ရဲ့ မီးပုံးကို ပြန်နုတ်မလား?')) return;
+      try { await updateDoc(doc(window.db, 'eventInvites', b.dataset.rev), { counted: false, reason: 'revoked', reward: 0 }); await updateDoc(doc(window.db, 'eventPlayers', b.dataset.e + '_' + b.dataset.inv), { inviteLanterns: increment(-Number(b.dataset.rw || 0)), inviteCount: increment(-1) }); toast('နုတ်ပြီးပါပြီ'); loadLive(); } catch (e) { toast('မပြောင်းနိုင်ပါ (rules စစ်ပါ)', 'fail'); }
+    });
+  } catch (e) { $('evA-stats').innerHTML = '<div class="evA-note" style="grid-column:1/-1">ဖတ်မရပါ - firestore.rules ထဲ eventPlayers / eventInvites ကို admin read ပေးထားရန်လိုပါတယ်</div>'; }
+}
+$('evA-load').onclick = loadLive; $('evA-sel').onchange = loadLive;
+$('evA-grant').onclick = async () => {
+  const eid = $('evA-sel').value, uid = $('evA-gu').value.trim(), n = Math.trunc(Number($('evA-gn').value));
+  if (!eid || !/^[A-Za-z0-9_-]{3,64}$/.test(uid) || !n) return toast('User ID နဲ့ အရေအတွက် ထည့်ပါ', 'fail');
+  if (!confirm(uid + ' ကို မီးပုံး ' + (n > 0 ? '+' : '') + n + ' လုပ်မလား?')) return;
+  try { await setDoc(doc(window.db, 'eventPlayers', eid + '_' + uid), { eventId: eid, userId: uid, bonus: increment(n) }, { merge: true }); toast('ပြီးပါပြီ'); $('evA-gu').value = ''; $('evA-gn').value = ''; loadLive(); } catch (e) { toast('မရပါ (rules စစ်ပါ)', 'fail'); }
+};
+async function loadClaims() {
+  const box = $('evA-claims'); box.textContent = 'Loading...';
+  try {
+    const q = await getDocs(collection(window.db, 'eventClaims')); let rows = q.docs.map(d => Object.assign({ _id: d.id }, d.data())); { const pn = rows.filter(r => (r.status || 'pending') === 'pending').length, nb = $('evA-clmN'); if (nb) { nb.textContent = pn || ''; nb.style.display = pn ? '' : 'none'; } }
+    const f = $('evA-cf').value; if (f) rows = rows.filter(r => (r.status || 'pending') === f);
+    rows.sort((a, b) => tsOf(b) - tsOf(a));
+    box.innerHTML = rows.length ? rows.slice(0, 80).map(r => '<div class="evA-clm"><div><b>' + esc(r.eventName) + '</b>' + (r.tierTitle ? ' · ' + esc(r.tierTitle) : '') + ' · ' + esc(r.userName || '-') + ' (<code>' + esc(r.userId) + '</code>)</div><div>ဆု: <b>' + esc(r.prize) + '</b>' + (r.source === 'box' ? ' · <span class="evA-dot" style="background:' + esc(r.color || '#9aa4b2') + '"></span>' + esc(r.tierLabel || '') + ' (Box)' : ' · Score ' + esc(r.score)) + ' · မီးပုံး ' + esc(r.lanterns) + ' · <span class="evA-chip ' + esc(r.status || 'pending') + '">' + esc(r.status || 'pending') + '</span> · ' + esc(fmt(tsOf(r))) + '</div>' +
+      '<input type="text" data-note="' + esc(r._id) + '" value="' + esc(r.note || '') + '" placeholder="Customer ကို ပြမယ့် မှတ်ချက် (ရွေးချယ်)">' +
+      '<div class="evA-row" style="margin-top:2px"><button class="btn btn-outline btn-md" data-st="paid" data-id="' + esc(r._id) + '">ဆုပေးပြီး</button><button class="btn btn-outline btn-md" data-st="rejected" data-id="' + esc(r._id) + '">ပယ်ချ</button><button class="btn btn-outline btn-md" data-st="pending" data-id="' + esc(r._id) + '">Pending</button></div></div>').join('') : '<p class="evA-note">ဆုတောင်းလွှာ မရှိသေးပါ။</p>';
+    box.querySelectorAll('[data-st]').forEach(b => b.onclick = async () => { const note = (box.querySelector('[data-note="' + b.dataset.id + '"]') || {}).value || ''; try { await updateDoc(doc(window.db, 'eventClaims', b.dataset.id), { status: b.dataset.st, note: note.trim() }); toast('ပြောင်းပြီးပါပြီ'); loadClaims(); } catch (e) { toast('မပြောင်းနိုင်ပါ (rules စစ်ပါ)', 'fail'); } });
+  } catch (e) { box.textContent = 'ဖတ်မရပါ - firestore.rules ထဲ eventClaims ကို admin read ပေးထားရန်လိုပါတယ်'; }
+}
+$('evA-reload').onclick = () => { loadClaims(); loadLive(); }; $('evA-cf').onchange = loadClaims;
+document.querySelectorAll('#evA-ptabs [data-pane]').forEach(b => b.onclick = () => { document.querySelectorAll('#evA-ptabs button').forEach(x => x.classList.toggle('on', x === b)); document.querySelectorAll('#events-page .evA-pane').forEach(p => { p.hidden = p.dataset.pane !== b.dataset.pane; }); if (b.dataset.pane === 'live') loadLive(); });
+const sp = window.showPage;
+window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 'events-page') { if (!loaded) loadCfg(); loadClaims(); } return r; };
+</script>
+
+<!-- STORE THEME STUDIO: live preview on top, tabs (Theme / အရောင် / နောက်ခံ / Dark Mode / အဆင့်မြင့်), sticky save bar. Saved to settings/branding.festival + settings/branding.darkMode and painted by the store (linn.html). -->
         <div id="festival-page" class="page-section">
             <style>
             #festival-page{--ft-r:16px;--ft-line:var(--border-glass);--ft-a:var(--accent,#1877F2)}
@@ -5299,8 +5669,9 @@ html.perf-low [data-pcbg] *,html.perf-low [data-pcbg] *::before,html.perf-low [d
                 <div class="ft-card">
                     <h3 class="ft-h">Animation</h3>
                     <div class="ft-sw-row" style="margin-top:6px;"><div><b>ကျလာတဲ့ Animation</b><span>မျက်နှာပြင်ပေါ် ပုံတွေ ကျ/တက်</span></div><label class="ft-tg"><input type="checkbox" id="festival-fx-toggle" onchange="festFx(this.checked)"><i></i></label></div>
-                    <div class="ft-sw-row"><div><b>ကြိုးတန်း</b><span>Header အောက်မှာ ချိတ်ထားတာ</span></div><label class="ft-tg"><input type="checkbox" id="festival-gl-toggle" onchange="festGl(this.checked)"><i></i></label></div>
+                    <div class="ft-sw-row"><div><b>ကြိုးတန်း / မီးပုံးတန်း</b><span>Header အောက်မှာ ချိတ်ထားတာ (မီးပုံးတွေ ၃ စက္ကန့်အတွင်း တစ်ခုပြီးတစ်ခု ပေါ်လာမယ်)</span></div><label class="ft-tg"><input type="checkbox" id="festival-gl-toggle" onchange="festGl(this.checked)"><i></i></label></div>
                     <div class="ft-sw-row"><div><b>ဖယောင်းတိုင် / ဆီမီး</b><span>Bottom Nav ပေါ်မှာ</span></div><label class="ft-tg"><input type="checkbox" id="festival-lp-toggle" onchange="festLp(this.checked)"><i></i></label></div>
+                    <div class="ft-sw-row"><div><b>Profile card + Sidebar ကို Theme နဲ့ညှိမယ်</b><span>Theme အရောင်နဲ့ပြောင်း၊ မီးပုံး/Theme အလှဆင်တန်း ချိတ်မယ် (ပိတ်ရင် မူလအတိုင်း)</span></div><label class="ft-tg"><input type="checkbox" id="festival-pl-toggle" onchange="festPl(this.checked)"><i></i></label></div>
                     <div class="ft-lbl">လားရာ</div>
                     <div class="ft-seg full" id="fest-dir-seg"><button type="button" data-v="1" onclick="festDir(1)">⬇ အပေါ်ကနေ ကျ</button><button type="button" data-v="-1" onclick="festDir(-1)">⬆ အောက်ကနေ တက်</button></div>
                     <div class="ft-lbl">ပုံသဏ္ဍာန်များ <span class="ft-chip" id="fest-shape-count"></span></div>
@@ -6688,7 +7059,7 @@ html.perf-low [data-pcbg] *,html.perf-low [data-pcbg] *::before,html.perf-low [d
             'g2bulk': 'group-setting', 'jcplays': 'group-setting', 'api-docs': 'group-setting',
             'payment-list': 'group-wallet', 'topup-list': 'group-wallet', 'payin-list': 'group-wallet',
             'user-list': 'group-userlist', 'tier-list': 'group-userlist',
-            'festival-page': 'group-festival', 'usage-page': 'group-setting', 'settings': 'group-setting', 'notify-list': 'group-setting', 'ticker-list': 'group-setting'
+            'events-page': 'group-events', 'festival-page': 'group-festival', 'usage-page': 'group-setting', 'settings': 'group-setting', 'notify-list': 'group-setting', 'ticker-list': 'group-setting'
         };
         function showPage(pageId) {
             const previousPageId = document.querySelector('.page-section.active')?.id || null;
@@ -19588,7 +19959,7 @@ return `
         }
         var FEST_OFF = { id: '', n: 'ပုံမှန် (Off)', i: 'off', c: '#1877F2', g: '#7C4DFF', l: '#F0F2F5', d: '#060B18', fx: ['sparkle'], lp: [], dir: 1 };
         var FEST_LIST = [FEST_OFF].concat(Object.keys(FZ.P).map(function (id) { var p = FZ.P[id]; return { id: id, n: p.n, i: p.i, c: p.c, g: p.g, l: p.l, d: p.d, fx: p.fx, lp: p.lp, dir: p.dir }; }));
-        var FS = { wish: '', sd: '', ed: '', font: '', rad: '', gs: '', id: '', fx: true, gl: true, lp: true, btn: 'grad', ov: {}, bgUrl: '', vUrl: '', bg: { blur: 0, mv: 'none', op: 100, sat: 100, vig: 0 }, dim: 0.35 };
+        var FS = { wish: '', sd: '', ed: '', font: '', rad: '', gs: '', id: '', fx: true, gl: true, lp: true, pl: true, btn: 'grad', ov: {}, bgUrl: '', vUrl: '', bg: { blur: 0, mv: 'none', op: 100, sat: 100, vig: 0 }, dim: 0.35 };
         var DM = { mode: 'auto', from: 7, to: 19, lock: false, rev: 0 };
         var festFile = null, festFileUrl = '', festPrevDark = false, festDirty = false, festTabNow = 'theme';
         var FEST_SW = ['#1877F2','#7C4DFF','#0E8FB8','#2E9D55','#F2C94C','#D97706','#E25822','#C62828','#E91E8C','#111827'];
@@ -19659,6 +20030,7 @@ return `
             document.getElementById('festival-fx-toggle').checked = FS.fx !== false;
             document.getElementById('festival-gl-toggle').checked = FS.gl !== false;
             document.getElementById('festival-lp-toggle').checked = FS.lp !== false;
+            document.getElementById('festival-pl-toggle').checked = FS.pl !== false;
             setVal('fest-wish', FS.wish); setVal('fest-sd', FS.sd); setVal('fest-ed', FS.ed);
             var sc = festSchedState(); setTxt('fest-sched-chip', sc);
             [].forEach.call(document.querySelectorAll('#fest-font-grid button'), function (x) { x.classList.toggle('on', x.getAttribute('data-v') === FS.font); });
@@ -19743,7 +20115,7 @@ return `
         }
         function festQuick(id) {
             FS.id = id;
-            if (id) { FS.sd = ''; FS.ed = ''; FS.fx = true; FS.gl = true; FS.lp = true; }
+            if (id) { FS.sd = ''; FS.ed = ''; FS.fx = true; FS.gl = true; FS.lp = true; FS.pl = true; }
             festMark(); festRedraw();
             window.showToast(id ? 'ဖွင့်ပြီ — Preview ကြည့်ပြီး Save နှိပ်ပါ' : 'ပုံမှန်ပြန်ထားပြီ — Save နှိပ်ပါ', 'success');
             var pv = document.getElementById('fest-preview'); if (pv && pv.scrollIntoView) pv.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -19797,7 +20169,7 @@ return `
                 sd: /^\d{4}-\d{2}-\d{2}$/.test(f.sd || '') ? f.sd : '', ed: /^\d{4}-\d{2}-\d{2}$/.test(f.ed || '') ? f.ed : '',
                 font: ['inter', 'noto', 'padauk', 'serif', 'system'].indexOf(f.font) >= 0 ? f.font : '', rad: f.rad === 'sharp' || f.rad === 'round' ? f.rad : '',
                 gs: (f.gs === '' || f.gs == null || isNaN(Number(f.gs))) ? '' : Math.min(100, Math.max(0, Number(f.gs))),
-                id: id, fx: f.fx !== false, gl: f.gl !== false, lp: f.lp !== false, btn: ['grad', 'solid', 'glass'].indexOf(f.btn) >= 0 ? f.btn : 'grad', ov: ov,
+                id: id, fx: f.fx !== false, gl: f.gl !== false, lp: f.lp !== false, pl: f.pl !== false, btn: ['grad', 'solid', 'glass'].indexOf(f.btn) >= 0 ? f.btn : 'grad', ov: ov,
                 bgUrl: f.bgUrl || '', vUrl: f.vUrl || '',
                 bg: { blur: Number(bg.blur) || 0, mv: ['none', 'drift', 'zoom', 'aurora'].indexOf(bg.mv) >= 0 ? bg.mv : 'none', op: bg.op == null ? 100 : Number(bg.op), sat: bg.sat == null ? 100 : Number(bg.sat), vig: Number(bg.vig) || 0 },
                 dim: typeof f.dim === 'number' ? f.dim : 0.35
@@ -19831,6 +20203,7 @@ return `
         function festFx(v) { FS.fx = !!v; festMark(); drawFestivalPreview(); }
         function festGl(v) { FS.gl = !!v; festMark(); drawFestivalPreview(); }
         function festLp(v) { FS.lp = !!v; festMark(); }
+        function festPl(v) { FS.pl = !!v; festMark(); }
         function festDim(v) { FS.dim = Number(v) / 100; festMark(); setTxt('fest-dim-val', v + '%'); drawFestivalPreview(); }
         function festBg(k, v) {
             FS.bg[k] = k === 'mv' ? v : Number(v); festMark();
@@ -19879,7 +20252,7 @@ return `
             var cc = ov[ovKey()] ? ov[ovKey()].c : '';
             var active = !!(FS.id || cc || FS.bgUrl || FS.vUrl || FS.bg.mv === 'aurora' || FS.bg.vig > 0 || FS.font || FS.rad || FS.gs !== '');
             return {
-                festival: { wish: FS.wish, sd: FS.sd, ed: FS.ed, font: FS.font, rad: FS.rad, gs: FS.gs, id: FS.id, on: active, fx: FS.fx, gl: FS.gl, lp: FS.lp, btn: FS.btn, c: '', g: '', e: '', dir: 0, ov: ov, bgUrl: FS.bgUrl, vUrl: FS.vUrl, bg: FS.bg, dim: FS.dim },
+                festival: { wish: FS.wish, sd: FS.sd, ed: FS.ed, font: FS.font, rad: FS.rad, gs: FS.gs, id: FS.id, on: active, fx: FS.fx, gl: FS.gl, lp: FS.lp, pl: FS.pl, btn: FS.btn, c: '', g: '', e: '', dir: 0, ov: ov, bgUrl: FS.bgUrl, vUrl: FS.vUrl, bg: FS.bg, dim: FS.dim },
                 darkMode: { mode: DM.mode, from: DM.from, to: DM.to, lock: !!DM.lock, rev: DM.rev || 0 }
             };
         }
