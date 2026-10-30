@@ -3430,6 +3430,410 @@ html.perf-low [data-pcbg] *,html.perf-low [data-pcbg] *::before,html.perf-low [d
 .pcbg-slider{margin-top:8px}.pcbg-slider label{font-size:12.5px;color:var(--text-secondary);display:flex;justify-content:space-between}
 .pcbg-slider input{width:100%}
 </style>
+
+<style id="layout-grid-v1">
+/* =====================================================================
+   LAYOUT v2 — tighter rhythm, aligned columns, calmer density
+   ===================================================================== */
+:root {
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --layout-pad-x: 14px;
+  --layout-pad-y: 14px;
+  --layout-gap: 10px;
+  --layout-max: 1080px;
+  --layout-radius: 14px;
+  --section-stack: 12px;
+  --card-pad: 12px;
+  --title-size: 16.5px;
+}
+
+/* ---- Shell ---- */
+html, body { overflow-x: hidden; }
+.app-layout {
+  display: block;
+  width: 100%;
+  min-width: 0;
+}
+.content-area {
+  width: 100%;
+  max-width: var(--layout-max);
+  margin: 0 auto;
+  padding:
+    var(--layout-pad-y)
+    max(var(--layout-pad-x), env(safe-area-inset-left))
+    calc(24px + env(safe-area-inset-bottom))
+    max(var(--layout-pad-x), env(safe-area-inset-right));
+  box-sizing: border-box;
+  min-width: 0;
+}
+.page-section { display: none; min-width: 0; }
+.page-section.active {
+  display: flex;
+  flex-direction: column;
+  gap: var(--section-stack);
+  animation: lgPageIn 0.22s ease;
+}
+@keyframes lgPageIn {
+  from { opacity: 0; transform: translateY(3px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* ---- Header: one tight bar ---- */
+.header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 56px;
+  padding: 8px max(12px, env(safe-area-inset-left)) 8px max(12px, env(safe-area-inset-right));
+  box-sizing: border-box;
+}
+.header .logo { flex: 0 0 auto; }
+.header #header-clock { flex: 1 1 auto; min-width: 0; justify-content: center; }
+.header .row-center {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 0 0 auto;
+}
+.header-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 11px;
+}
+
+/* ---- Top nav: aligned under header ---- */
+.top-nav-wrap {
+  top: 56px;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 6px max(10px, env(safe-area-inset-left)) 8px max(10px, env(safe-area-inset-right));
+}
+.top-nav-wrap .top-nav {
+  max-width: min(100%, var(--layout-max));
+  margin: 0 auto;
+}
+
+/* ---- Titles ---- */
+.title-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin: 0;
+  padding: 2px 0 10px;
+  border-bottom: 1px solid var(--fill-soft);
+  font-size: var(--title-size);
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  color: var(--text-strong);
+  line-height: 1.2;
+}
+.title-header > :first-child { min-width: 0; flex: 1 1 auto; }
+.dash-section-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: 2px 0 0;
+  padding: 0;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+/* ---- Toolbar rows (tabs / filters / actions) ---- */
+.pkg-actions-row,
+.game-list-tabs,
+.game-list-subtabs,
+.orders-day-bar,
+.pkg-tab-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  margin: 0;
+}
+.pkg-actions-row { gap: 6px; }
+.pkg-actions-row .btn {
+  flex: 0 1 auto;
+  min-height: 34px;
+  padding: 7px 10px;
+  font-size: 12.5px;
+}
+.admin-search-wrap {
+  flex: 1 1 160px;
+  min-width: 0;
+  margin: 0;
+}
+.admin-search-wrap input {
+  width: 100%;
+  min-width: 0;
+}
+
+/* ---- Grids ---- */
+.stat-grid,
+.usage-grid,
+.details-grid,
+.udp-stat-grid,
+.stats-row,
+.dashboard-charts-row,
+.game-picker-grid,
+.quick-topup-grid {
+  display: grid;
+  width: 100%;
+  min-width: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+.stat-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--layout-gap);
+}
+.usage-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--layout-gap);
+}
+.details-grid,
+.udp-stat-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+.stats-row {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+.dashboard-charts-row {
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--layout-gap);
+}
+.game-picker-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+.quick-topup-grid {
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.quick-topup-grid .btn,
+.quick-topup-grid .topup-user-chip { grid-column: 1 / -1; }
+
+.stat-grid > *,
+.usage-grid > *,
+.details-grid > *,
+.udp-stat-grid > *,
+.stats-row > *,
+.dashboard-charts-row > * {
+  min-width: 0;
+}
+
+/* KPI hero: full width only on narrow phones */
+.stat-card.kpi-hero { grid-column: 1 / -1; }
+
+/* ---- Card density ---- */
+.stat-card {
+  padding: var(--card-pad);
+  border-radius: var(--layout-radius);
+}
+.stat-card-top {
+  margin-bottom: 8px;
+}
+.stat-card-value {
+  font-size: 19px;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.stat-card-sub {
+  margin-top: 5px;
+  min-height: 16px;
+}
+.details-grid-item {
+  padding: 10px;
+  border-radius: 12px;
+  gap: 3px;
+}
+.details-grid-item span { font-size: 10.5px; }
+.details-grid-item b {
+  font-size: 13.5px;
+  line-height: 1.25;
+  word-break: break-word;
+}
+.chart-card {
+  padding: 14px;
+  border-radius: var(--layout-radius);
+  margin: 0;
+}
+.admin-card {
+  padding: 12px 13px;
+  border-radius: var(--layout-radius);
+  margin-bottom: 0;
+  width: 100%;
+  box-sizing: border-box;
+}
+.api-doc-card {
+  padding: 11px 12px;
+  border-radius: 14px;
+  margin-bottom: 0;
+}
+.page-section > .admin-card,
+.page-section > .api-doc-card,
+.content-area > .admin-card {
+  margin-bottom: 0;
+}
+.dash-deck {
+  margin: 0;
+  padding: 16px 14px 14px;
+  border-radius: 18px;
+  width: 100%;
+  box-sizing: border-box;
+}
+.dash-deck-value {
+  font-size: 28px;
+  margin: 6px 0 12px;
+}
+
+/* ---- List shells ---- */
+#orders-container,
+#topups-container,
+#admin-games-container,
+#admin-payment-container,
+#admin-users-container,
+#notif-history-container,
+#ticker-list-container,
+#payin-list-container {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  max-height: min(62vh, 680px);
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  padding: 8px;
+  border: 1px solid var(--border-glass);
+  border-radius: var(--layout-radius);
+  background: var(--surface);
+  box-shadow: var(--shadow-soft), inset 0 1px 0 var(--border-glass);
+  min-width: 0;
+  scrollbar-width: thin;
+}
+#orders-container .admin-card,
+#topups-container .admin-card,
+#admin-games-container .admin-card,
+#admin-payment-container .admin-card,
+#admin-users-container .admin-card,
+#notif-history-container .admin-card,
+#ticker-list-container .admin-card {
+  margin-bottom: 0;
+}
+
+/* Stack helper (analytics nested blocks) */
+.stat-grid.stack {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* ---- Breakpoints ---- */
+@media (min-width: 640px) {
+  :root {
+    --layout-pad-x: 18px;
+    --layout-pad-y: 18px;
+    --layout-gap: 12px;
+    --card-pad: 14px;
+    --title-size: 17.5px;
+    --section-stack: 14px;
+  }
+  .stat-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .stat-card.kpi-hero { grid-column: auto; }
+  .usage-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .details-grid,
+  .udp-stat-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .stats-row { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .dashboard-charts-row {
+    grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+    align-items: start;
+  }
+  .game-picker-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .stat-card-value { font-size: 21px; }
+  .dash-deck { padding: 20px 18px 16px; }
+  .dash-deck-value { font-size: 32px; }
+}
+
+@media (min-width: 900px) {
+  :root {
+    --layout-pad-x: 24px;
+    --layout-pad-y: 22px;
+    --layout-max: 1140px;
+    --section-stack: 16px;
+    --title-size: 18.5px;
+  }
+  .header {
+    padding-left: max(20px, env(safe-area-inset-left));
+    padding-right: max(20px, env(safe-area-inset-right));
+  }
+  .top-nav-wrap {
+    padding-left: max(16px, env(safe-area-inset-left));
+    padding-right: max(16px, env(safe-area-inset-right));
+  }
+  #admin-games-container,
+  #orders-container,
+  #admin-payment-container,
+  #admin-users-container,
+  #notif-history-container,
+  #ticker-list-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 10px;
+    align-content: start;
+    align-items: start;
+    max-height: min(68vh, 760px);
+    padding: 10px;
+  }
+  .game-picker-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+  .details-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .pkg-actions-row .btn { min-height: 36px; }
+}
+
+@media (min-width: 1200px) {
+  :root {
+    --layout-max: 1240px;
+    --layout-pad-x: 28px;
+  }
+  .game-picker-grid { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+}
+
+@media (max-width: 380px) {
+  :root {
+    --layout-pad-x: 11px;
+    --layout-gap: 8px;
+    --card-pad: 11px;
+  }
+  .stat-card-value { font-size: 17.5px; }
+  .quick-topup-grid { grid-template-columns: 1fr; }
+  .pkg-actions-row .btn { font-size: 12px; padding: 6px 8px; }
+}
+
+/* Prefer denser UI when user wants less motion / smaller screens in height */
+@media (max-height: 700px) {
+  .page-section.active { gap: 10px; }
+  #orders-container,
+  #topups-container,
+  #admin-games-container { max-height: min(55vh, 520px); }
+}
+</style>
 </head>
 <body>
 
@@ -3979,7 +4383,7 @@ html.perf-low [data-pcbg] *,html.perf-low [data-pcbg] *::before,html.perf-low [d
                 </span>
             </h2>
 
-            <div class="stat-grid" style="margin-top:0;display:flex;flex-direction:column;gap:12px;">
+            <div class="stat-grid stack">
                 <div class="stat-card" style="width:100%;box-sizing:border-box;padding:18px 16px;">
                     <div class="stat-card-top">
                         <span class="stat-card-label">G2Bulk</span>
@@ -7878,46 +8282,73 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
             measurementId: "G-1TXV2X1PBY"
         };
 
-        // ---- Cloudinary (free, no Firebase Storage / Blaze plan) ----
-        // 1) cloudinary.com -> Settings -> Upload -> Upload presets -> Add: Signing mode = UNSIGNED
-        // 2) paste your Cloud name + that preset name below. No API key / secret in the browser.
-        const CLOUDINARY_CLOUD_NAME = 'YOUR_CLOUD_NAME';
-        const CLOUDINARY_UPLOAD_PRESET = 'YOUR_UNSIGNED_PRESET';
-        async function cloudinaryUpload(file, folder, timeoutMs, extraFields) {
-            if (!CLOUDINARY_CLOUD_NAME || CLOUDINARY_CLOUD_NAME.indexOf('YOUR_') === 0) throw new Error('Cloudinary is not configured (cloud name / upload preset).');
+        // ---- Cloudflare R2 image upload (via dedicated upload Worker) ----
+        // Browser -> r2-upload-worker -> R2 bucket "linn-images"
+        // -> public URL on https://img.linngamestore.com
+        // Worker contract (see r2-upload-worker.js):
+        //   POST multipart/form-data  fields: image (file), folder (admin/<name>)
+        //   Header: Authorization: Bearer <Firebase ID token>
+        //   Reply: { success:true, data:{ url, display_url, key } }
+        // Put your deployed Worker URL here (workers.dev or custom domain).
+        const IMAGE_UPLOAD_URL = 'https://imgbb-function.linngamestore.workers.dev';
+        async function r2Upload(file, folder, timeoutMs) {
+            if (!file) throw new Error('No file selected');
+            if (!IMAGE_UPLOAD_URL || /YOUR_|example\.com/i.test(IMAGE_UPLOAD_URL)) {
+                throw new Error('IMAGE_UPLOAD_URL is not configured');
+            }
+            const a = (typeof auth !== 'undefined' && auth) || window.__adminAuth;
+            if (!a || !a.currentUser) throw new Error('Admin not signed in');
+            if (a.authStateReady) await a.authStateReady();
+            const tok = await a.currentUser.getIdToken();
+
+            // Worker only accepts admin/<1-32 safe chars> for admin uploads.
+            let sub = String(folder || 'img').replace(/[^A-Za-z0-9_-]/g, '') || 'img';
+            if (sub.length > 32) sub = sub.slice(0, 32);
+            const dir = 'admin/' + sub;
+
             const fd = new FormData();
-            fd.append('file', file);
-            fd.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
-            if (folder) fd.append('folder', folder);
-            if (extraFields) Object.keys(extraFields).forEach(k => fd.append(k, extraFields[k]));
+            fd.append('image', file, file.name || ('upload.' + ((file.type || '').split('/')[1] || 'jpg')));
+            fd.append('folder', dir);
+
             const ctl = new AbortController();
-            const t = setTimeout(() => ctl.abort(), timeoutMs || 40000);
+            const t = setTimeout(() => ctl.abort(), timeoutMs || 60000);
             try {
-                const res = await fetch('https://api.cloudinary.com/v1_1/' + CLOUDINARY_CLOUD_NAME + '/image/upload', { method: 'POST', body: fd, signal: ctl.signal });
+                const res = await fetch(IMAGE_UPLOAD_URL.replace(/\/+$/, ''), {
+                    method: 'POST',
+                    headers: { 'Authorization': 'Bearer ' + tok },
+                    body: fd,
+                    signal: ctl.signal
+                });
                 let j = null;
-                try { j = await res.json(); } catch (e) { /* non-JSON reply */ }
-                if (!res.ok || !j || !j.secure_url) {
-                    const err = new Error((j && j.error && j.error.message) || ('HTTP ' + res.status));
+                try { j = await res.json(); } catch (e) { /* non-JSON */ }
+                if (!res.ok || !j || j.success !== true) {
+                    const msg = (j && j.error && j.error.message) || (j && (j.error || j.message)) || ('HTTP ' + res.status);
+                    const err = new Error(typeof msg === 'string' ? msg : 'Upload failed');
                     err.status = res.status;
                     throw err;
                 }
-                return j.secure_url;
+                const url = j.data && (j.data.url || j.data.display_url);
+                if (!url) {
+                    const err = new Error('Upload succeeded but no URL returned');
+                    err.status = res.status;
+                    throw err;
+                }
+                return url;
             } finally { clearTimeout(t); }
         }
 
-        // All admin image uploads (icons, banners, logos, QR, avatars ...) go straight to Cloudinary.
+        // All admin image uploads (icons, banners, logos, QR, avatars ...) go to R2 via the upload Worker.
         async function fbStorageUpload(file, folder) {
             if (!file) throw new Error('No file selected');
-            const dir = 'admin/' + (String(folder || 'img').replace(/[^A-Za-z0-9_-]/g, '') || 'img');
             let lastErr = null;
             for (let attempt = 0; attempt < 3; attempt++) {
                 try {
-                    return await cloudinaryUpload(file, dir, 40000);
+                    return await r2Upload(file, folder, 60000);
                 } catch (e) {
-                    console.warn('Cloudinary upload failed:', e);
+                    console.warn('R2 upload failed:', e);
                     lastErr = new Error('Upload failed: ' + (e && e.message ? e.message : 'network error'));
-                    if (e && e.status >= 400 && e.status < 500) break; // bad preset / file: retrying won't help
-                    await new Promise(r2 => setTimeout(r2, 800 * (attempt + 1)));
+                    if (e && e.status >= 400 && e.status < 500) break; // auth / bad file: retrying won't help
+                    await new Promise(r => setTimeout(r, 800 * (attempt + 1)));
                 }
             }
             throw lastErr || new Error('Upload failed');
@@ -13871,7 +14302,7 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
         let editingBannerImageUrls = [];
         // Set when a G2Bulk game link auto-fills the Game Image from G2Bulk's own
         // cover image (already hosted, so saveGame() uses this URL directly
-        // instead of re-uploading to ImgBB). Cleared the moment the admin picks
+        // instead of re-uploading to R2). Cleared the moment the admin picks
         // their own file, so a manual upload always wins.
         let editingImageRemoteUrl = null;
         let editingPaymentImageFile = null;
@@ -15606,7 +16037,7 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
         }
         window.refreshPackageRowProviderVisibility = refreshPackageRowProviderVisibility;
 
-        // Uploads a package's card image to ImgBB the moment it's picked, showing
+        // Uploads a package's card image to R2 the moment it's picked, showing
         // an instant local preview while the real upload happens in the
         // background. The final hosted URL lands in the preview box's
         // data-url attribute, which saveGame() reads when building `packages`.
@@ -15807,7 +16238,7 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
         }
         window.handlePackageImageSelect = handlePackageImageSelect;
 
-        // Same ImgBB upload as uploadImageToImgBB(), but without a fixed status
+        // Same R2 upload as uploadImageToImgBB(), but without a fixed status
         // element ID — package rows are created dynamically so there's no single
         // #id to write status text into.
         async function uploadPackageImageToImgBB(file) {
@@ -17096,7 +17527,7 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
         }
 
         // Resizes + re-encodes an image file entirely in the browser (canvas)
-        // before it's sent to ImgBB, so a raw 3-5MB phone photo turns into a
+        // before it's sent to R2, so a raw 3-5MB phone photo turns into a
         // ~20-60KB file instead. maxDim caps the longest side (package/game
         // icons are only ever shown small, so anything above ~800px is wasted
         // bytes); quality is JPEG quality 0-1. Falls back to the original file
@@ -17154,8 +17585,7 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
             }
         }
 
-        // Uploads a phone photo to a free image host (ImgBB) and resolves with its direct URL.
-        // No Firebase Storage / Blaze plan involved.
+        // Uploads a phone photo to R2 (via the admin Worker) and resolves with its public URL.
         async function uploadImageToImgBB(file, statusElId = 'upload-status', compressOptions = undefined) {
             const statusEl = document.getElementById(statusElId);
             statusEl.style.display = 'block';
@@ -17811,7 +18241,7 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
 
         // Telegram side of a notification. In-app notification is already saved when this runs,
         // so this never throws - it just returns a short note appended to the success toast.
-        // Optional image for a notification: picked here, uploaded to ImgBB (through the imgbb Worker) when
+        // Optional image for a notification: picked here, uploaded to R2 (through the admin Worker) when
         // Send is tapped, then the same URL goes to the in-app notification, the FCM push and the Telegram DM.
         let notifImageFile = null;
         function onNotifImagePick(e) {
@@ -19821,7 +20251,7 @@ return `
         // settings call path as well as subscribeTabListeners().
         window.listenSocialLinks = listenSocialLinks;
 
-        // Local preview only - the actual ImgBB upload happens in
+        // Local preview only - the actual R2 upload happens in
         // saveSocialLinks(), same lazy-upload pattern as the game/payment
         // image pickers so a discarded edit never wastes an upload.
         function previewSocialImage(e, platform) {
@@ -20397,7 +20827,7 @@ return `
             btn.disabled = true; btn.innerText = 'Saving...';
             try {
                 if (festFile) {
-                    // Photos are compressed first; GIFs are uploaded untouched so they keep animating. (Video can't be uploaded: ImgBB refuses it.)
+                    // Photos are compressed first; GIFs are uploaded untouched so they keep animating. (Video is not uploaded here — paste a direct mp4/webm link instead.)
                     (festFileScope === 'fest' ? FSF : FSN).bgUrl = await uploadImageToImgBB(festFile, 'festival-upload-status', { maxDim: 1600, quality: 0.8 });
                     festFile = null; festFileUrl = '';
                 }
