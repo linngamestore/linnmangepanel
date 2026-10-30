@@ -5748,7 +5748,7 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
                 <div class="ft-card">
                     <h3 class="ft-h">Video နောက်ခံ</h3>
                     <input class="ft-in" type="url" id="fest-v-url" placeholder="https://.../video.mp4" oninput="festVideoUrl(this.value)" style="margin-top:12px;">
-                    <div class="ft-note warn" id="fest-v-note">⚠️ Video ကို တိုက်ရိုက် upload မရပါ (ImgBB က မလက်ခံ)။ mp4 / webm လင့်ခ်ပဲ ထည့်ပါ။ ဖုန်းအားနည်းရင် Video အစား ပုံပဲ ပြမယ်။</div>
+                    <div class="ft-note warn" id="fest-v-note">⚠️ Video ကို တိုက်ရိုက် upload မရပါ (Firebase Storage နဲ့ ဗီဒီယို မသုံးထားပါ)။ mp4 / webm လင့်ခ်ပဲ ထည့်ပါ။ ဖုန်းအားနည်းရင် Video အစား ပုံပဲ ပြမယ်။</div>
                 </div>
                 <div class="ft-card">
                     <h3 class="ft-h">နောက်ခံ Effect</h3>
@@ -7878,11 +7878,50 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
             measurementId: "G-1TXV2X1PBY"
         };
 
-        // Free image hosting for game/admin photos (no Firebase Storage / Blaze
-        // plan needed). Uploads go through the imgbb-functions Cloudflare Worker
-        // instead of calling api.imgbb.com directly, so the ImgBB API key stays
-        // server-side (same pattern as store.html) instead of sitting in this file.
-        const IMGBB_UPLOAD_URL = 'https://imgbb-function.linngamestore.workers.dev';
+        // ---- Cloudinary (free, no Firebase Storage / Blaze plan) ----
+        // 1) cloudinary.com -> Settings -> Upload -> Upload presets -> Add: Signing mode = UNSIGNED
+        // 2) paste your Cloud name + that preset name below. No API key / secret in the browser.
+        const CLOUDINARY_CLOUD_NAME = 'YOUR_CLOUD_NAME';
+        const CLOUDINARY_UPLOAD_PRESET = 'YOUR_UNSIGNED_PRESET';
+        async function cloudinaryUpload(file, folder, timeoutMs, extraFields) {
+            if (!CLOUDINARY_CLOUD_NAME || CLOUDINARY_CLOUD_NAME.indexOf('YOUR_') === 0) throw new Error('Cloudinary is not configured (cloud name / upload preset).');
+            const fd = new FormData();
+            fd.append('file', file);
+            fd.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+            if (folder) fd.append('folder', folder);
+            if (extraFields) Object.keys(extraFields).forEach(k => fd.append(k, extraFields[k]));
+            const ctl = new AbortController();
+            const t = setTimeout(() => ctl.abort(), timeoutMs || 40000);
+            try {
+                const res = await fetch('https://api.cloudinary.com/v1_1/' + CLOUDINARY_CLOUD_NAME + '/image/upload', { method: 'POST', body: fd, signal: ctl.signal });
+                let j = null;
+                try { j = await res.json(); } catch (e) { /* non-JSON reply */ }
+                if (!res.ok || !j || !j.secure_url) {
+                    const err = new Error((j && j.error && j.error.message) || ('HTTP ' + res.status));
+                    err.status = res.status;
+                    throw err;
+                }
+                return j.secure_url;
+            } finally { clearTimeout(t); }
+        }
+
+        // All admin image uploads (icons, banners, logos, QR, avatars ...) go straight to Cloudinary.
+        async function fbStorageUpload(file, folder) {
+            if (!file) throw new Error('No file selected');
+            const dir = 'admin/' + (String(folder || 'img').replace(/[^A-Za-z0-9_-]/g, '') || 'img');
+            let lastErr = null;
+            for (let attempt = 0; attempt < 3; attempt++) {
+                try {
+                    return await cloudinaryUpload(file, dir, 40000);
+                } catch (e) {
+                    console.warn('Cloudinary upload failed:', e);
+                    lastErr = new Error('Upload failed: ' + (e && e.message ? e.message : 'network error'));
+                    if (e && e.status >= 400 && e.status < 500) break; // bad preset / file: retrying won't help
+                    await new Promise(r2 => setTimeout(r2, 800 * (attempt + 1)));
+                }
+            }
+            throw lastErr || new Error('Upload failed');
+        }
 
         // gamestore-auth-worker: the customer-facing pcagamestore_bot Worker
         // (separate from ADMIN_SYNC_WORKER_URL below, which is the admin/order
@@ -9121,12 +9160,7 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
         // since this fires straight from a small circle in the accounts list.
         async function uploadAdminAvatarToImgBB(file) {
             const compressed = await compressImageFile(file, { maxDim: 400, quality: 0.85 });
-            const form = new FormData();
-            form.append('image', compressed);
-            const res = await fetch(IMGBB_UPLOAD_URL, { method: 'POST', body: form });
-            const data = await res.json();
-            if (!data.success) throw new Error(data.error?.message || 'Avatar upload failed');
-            return data.data.url;
+            return await fbStorageUpload(compressed, 'avatar');
         }
 
         // Each admin's own photo, stored on their adminUsernames/{username}
@@ -15778,12 +15812,7 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
         // #id to write status text into.
         async function uploadPackageImageToImgBB(file) {
             const compressed = await compressImageFile(file);
-            const form = new FormData();
-            form.append('image', compressed);
-            const res = await fetch(IMGBB_UPLOAD_URL, { method: 'POST', body: form });
-            const data = await res.json();
-            if (!data.success) throw new Error(data.error?.message || 'Upload failed');
-            return data.data.url;
+            return await fbStorageUpload(compressed, 'package');
         }
 
         function removePackageImage(linkEl) {
@@ -17137,20 +17166,10 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
                 const compressed = await compressImageFile(file, compressOptions);
                 statusEl.innerText = 'Uploading photo...';
 
-                const form = new FormData();
-                form.append('image', compressed);
-
-                const res = await fetch(IMGBB_UPLOAD_URL, {
-                    method: 'POST',
-                    body: form
-                });
-                let data;
-                try { data = await res.json(); }
-                catch (_) { throw new Error('Upload server error (HTTP ' + res.status + ')'); }
-                if (!data.success) throw new Error(data.error?.message || 'Upload failed');
+                const url = await fbStorageUpload(compressed, 'photo');
 
                 statusEl.innerText = 'Photo uploaded';
-                return data.data.url;
+                return url;
             } catch (error) {
                 // Leaving the status line stuck on "Uploading photo..." after a
                 // failed upload (e.g. a dropped connection - "Failed to fetch")
