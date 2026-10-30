@@ -4136,7 +4136,7 @@ html.perf-low [data-pcbg] *,html.perf-low [data-pcbg] *::before,html.perf-low [d
 <svg class="ui-icon sc-chevron" id="panel-prefs-chevron" style="transform:rotate(180deg)"><use href="#icon-chevron-down"></use></svg>
 </div>
 <div id="panel-prefs-body" style="display:block;margin-top:12px;">
-<div class="pp-row"><div class="pp-txt"><b>Animations</b><small>Turn motion off for a faster, calmer panel</small></div><button type="button" class="pp-switch" role="switch" aria-checked="false" data-pref="calm"><i></i></button></div><div class="pp-row"><div class="pp-txt"><b>Compact layout</b><small>Tighter cards and spacing, more on screen</small></div><button type="button" class="pp-switch" role="switch" aria-checked="false" data-pref="compact"><i></i></button></div><div class="pp-row"><div class="pp-txt"><b>Tap feedback</b><small>Short vibration when you press buttons</small></div><button type="button" class="pp-switch" role="switch" aria-checked="false" data-pref="haptic"><i></i></button></div><div class="pp-row"><div class="pp-txt"><b>Back-to-top button</b><small>Floating button after you scroll down</small></div><button type="button" class="pp-switch" role="switch" aria-checked="false" data-pref="totop"><i></i></button></div><div class="pp-row"><div class="pp-txt"><b>Esc closes pop-ups</b><small>Keyboard / hardware-key shortcut</small></div><button type="button" class="pp-switch" role="switch" aria-checked="false" data-pref="esc"><i></i></button></div>
+<div class="pp-row"><div class="pp-txt"><b>Animations</b><small>Turn motion off for a faster, calmer panel</small></div><button type="button" class="pp-switch" role="switch" aria-checked="false" data-pref="calm"><i></i></button></div><div class="pp-row"><div class="pp-txt"><b>Compact layout</b><small>Tighter cards and spacing, more on screen</small></div><button type="button" class="pp-switch" role="switch" aria-checked="false" data-pref="compact"><i></i></button></div><div class="pp-row"><div class="pp-txt"><b>Tap feedback</b><small>Short vibration when you press buttons</small></div><button type="button" class="pp-switch" role="switch" aria-checked="false" data-pref="haptic"><i></i></button></div><div class="pp-row"><div class="pp-txt"><b>Back-to-top button</b><small>Floating button after you scroll down</small></div><button type="button" class="pp-switch" role="switch" aria-checked="false" data-pref="totop"><i></i></button></div><div class="pp-row"><div class="pp-txt"><b>Esc closes pop-ups</b><small>Keyboard / hardware-key shortcut</small></div><button type="button" class="pp-switch" role="switch" aria-checked="false" data-pref="esc"><i></i></button></div><div class="pp-row"><div class="pp-txt"><b>Event tab</b><small>အပေါ်ဆုံး menu မှာ Event tab ပြ / ဖျောက်</small></div><button type="button" class="pp-switch" role="switch" aria-checked="true" data-pref="showEvent"><i></i></button></div><div class="pp-row"><div class="pp-txt"><b>Theme tab</b><small>အပေါ်ဆုံး menu မှာ Theme tab ပြ / ဖျောက်</small></div><button type="button" class="pp-switch" role="switch" aria-checked="true" data-pref="showTheme"><i></i></button></div>
 <div class="pp-foot"><span>Saved on this device only.</span><button type="button" class="pp-reset" id="pp-reset">Reset</button></div>
 </div>
 </div>
@@ -5536,7 +5536,7 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
 </script>
 
 <!-- STORE THEME STUDIO: live preview on top, tabs (Theme / အရောင် / နောက်ခံ / Dark Mode / အဆင့်မြင့်), sticky save bar. Saved to settings/branding.festival + settings/branding.darkMode and painted by the store (linn.html). -->
-        <div id="festival-page" class="page-section">
+        <div id="festival-page" class="page-section" data-scope="normal" data-fid="0">
             <style>
             #festival-page{--ft-r:16px;--ft-line:var(--border-glass);--ft-a:var(--accent,#1877F2)}
             #festival-page .ft-card{background:var(--surface-strong,var(--surface));border:1px solid var(--ft-line);border-radius:var(--ft-r);padding:16px;margin-top:12px;box-shadow:var(--shadow-soft)}
@@ -5549,11 +5549,11 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
             #festival-page .ft-pv-bar{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}
             #festival-page .ft-seg{display:inline-flex;background:var(--fill-soft);border-radius:12px;padding:3px;gap:2px;max-width:100%}
             #festival-page .ft-seg.full{display:flex;width:100%}
-            #festival-page .ft-seg button{flex:1;border:0;background:transparent;color:var(--text-secondary);font:600 12.5px/1 inherit;font-family:inherit;padding:9px 12px;border-radius:9px;cursor:pointer;white-space:nowrap;transition:background .2s,color .2s,box-shadow .2s}
+            #festival-page .ft-seg button{flex:1;border:0;background:transparent;color:var(--text-secondary);font-weight:600;font-size:12.5px;line-height:1.75;font-family:inherit;padding:7px 12px;border-radius:9px;cursor:pointer;white-space:nowrap;transition:background .2s,color .2s,box-shadow .2s}
             #festival-page .ft-seg button.on{background:var(--surface-strong,#fff);color:var(--text-primary);box-shadow:0 1px 4px rgba(15,23,42,.18)}
             #festival-page .ft-tabs{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin-top:12px;padding:4px;background:var(--fill-soft);border-radius:14px;position:sticky;top:61px;z-index:20;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
             #festival-page .ft-tabs::-webkit-scrollbar{display:none}
-            #festival-page .ft-tab{flex:1 0 auto;border:0;background:transparent;color:var(--text-secondary);font:600 13px/1 inherit;font-family:inherit;padding:10px 14px;border-radius:10px;cursor:pointer;white-space:nowrap;position:relative;transition:background .2s,color .2s}
+            #festival-page .ft-tab{flex:1 0 auto;border:0;background:transparent;color:var(--text-secondary);font-weight:600;font-size:13px;line-height:1.75;font-family:inherit;padding:8px 14px;border-radius:10px;cursor:pointer;white-space:nowrap;position:relative;transition:background .2s,color .2s}
             #festival-page .ft-tab.on{background:var(--surface-strong,#fff);color:var(--ft-a);box-shadow:0 1px 6px rgba(15,23,42,.18)}
             #festival-page .ft-panel{display:none}
             #festival-page .ft-panel.on{display:block;animation:fadeIn .25s ease-out}
@@ -5615,24 +5615,45 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
             #festival-page .ft-savebar .btn{margin:0;width:auto;padding:12px 22px}
             #festival-page textarea.ft-in{min-height:140px;font:12px ui-monospace,Menlo,monospace;resize:vertical}
             #festival-page .ftpv-sw{animation:ftpvSw 4s ease-in-out infinite alternate;transform-origin:50% 0}
+            /* Burmese needs taller lines or the stacked marks get clipped */
+            #festival-page .ft-tabs{align-items:center;padding:5px 4px}
+            #festival-page .ft-h{line-height:1.6}
+            #festival-page .ft-sub{line-height:1.75}
+            #festival-page .ft-lbl{line-height:1.6}
+            #festival-page .ft-sw-row b,#festival-page .ft-sw-row span{line-height:1.65}
+            #festival-page .ft-theme span,#festival-page .ft-fx button b,#festival-page .ft-fx button span,#festival-page .ft-shapes button span{line-height:1.6}
+            #festival-page .ft-btn,#festival-page .ft-chip{line-height:1.6;font-family:inherit}
+            /* Festival Theme and Normal Theme are separate: the switch at the top sets data-scope on #festival-page */
+            #festival-page[data-scope="normal"] .ft-fonly,#festival-page[data-scope="fest"] .ft-nonly{display:none!important}
+            #festival-page[data-scope="fest"][data-fid="0"] .ft-needf{display:none!important}
+            #festival-page .ft-scope-card{margin-top:8px}
+            #festival-page .ft-scope-card .ft-seg button{padding:10px 12px;font-size:13.5px}
             @keyframes ftpvSw{from{transform:rotate(-3.5deg)}to{transform:rotate(3.5deg)}}
             </style>
 
             <h2 class="title-header">Store Theme</h2>
 
-            <div class="ft-card" id="ft-quick" style="margin-top:8px;">
-                <h3 class="ft-h">⚡ အမြန်ဖွင့်</h3>
-                <p class="ft-sub">① ဖွင့်မယ် နှိပ် → ② အောက်က Preview သို့ Store မှာ စမ်းကြည့် → ③ ကြိုက်ရင် Save။</p>
-                <div class="ft-grid2" style="margin-top:12px;">
+            <div class="ft-card ft-scope-card">
+                <div class="ft-seg full" id="ft-scope">
+                    <button type="button" data-v="normal" onclick="festScopeSet('normal')">🎨 ပုံမှန် Theme</button>
+                    <button type="button" data-v="fest" onclick="festScopeSet('fest')">🎉 Festival Theme</button>
+                </div>
+                <p class="ft-sub" id="ft-scope-note"></p>
+            </div>
+
+            <div class="ft-card" id="ft-quick">
+                <h3 class="ft-h" id="ft-quick-h">⚡ အမြန်ဖွင့်</h3>
+                <p class="ft-sub ft-fonly">① ဖွင့်မယ် နှိပ် → ② အောက်က Preview သို့ Store မှာ စမ်းကြည့် → ③ ကြိုက်ရင် Save။</p>
+                <div class="ft-grid2 ft-fonly" style="margin-top:12px;">
                     <button type="button" class="btn btn-primary" style="margin:0;" onclick="festQuick('thadingyut')">🏮 သီတင်းကျွတ် ဖွင့်မယ်</button>
                     <button type="button" class="ft-btn" style="margin-top:0;" onclick="festQuick('')">ပုံမှန်ပြန်</button>
                 </div>
                 <button type="button" class="ft-btn" onclick="festTestStore()">📱 Store မှာ စမ်းကြည့်မယ် (မသိမ်းဘဲ)</button>
-                <label class="ft-lbl" style="display:block;">🙏 ဆုတောင်းစာ (Home ရဲ့ Profile bar + Profile card မှာ ပေါ်မယ်)<textarea class="ft-in" id="fest-wish" rows="2" maxlength="160" placeholder="အလွတ်ထားရင် မူလဆုတောင်းစာတွေ တစ်ရက်ကို တစ်ခု လှည့်ပြမယ်" oninput="FS.wish=this.value;festMark()" style="margin-top:6px;min-height:64px;font:13px/1.5 inherit;"></textarea></label>
+                <label class="ft-lbl ft-fonly" style="display:block;">🙏 ဆုတောင်းစာ (Home ရဲ့ Profile bar + Profile card မှာ ပေါ်မယ်)<textarea class="ft-in" id="fest-wish" rows="2" maxlength="160" placeholder="အလွတ်ထားရင် မူလဆုတောင်းစာတွေ တစ်ရက်ကို တစ်ခု လှည့်ပြမယ်" oninput="festWish(this.value)" style="margin-top:6px;min-height:64px;font-size:13px;line-height:1.7;font-family:inherit;"></textarea></label>
                 <p class="ft-sub" id="ft-quick-st">စမ်းကြည့်တာက ဒီဖုန်း/browser မှာပဲ ပေါ်မယ်။ Customer တွေ မမြင်ပါ။ <a href="#" onclick="festStoreLink();return false;" style="color:var(--ft-a);">🔗 Store link ပြောင်း</a></p>
             </div>
 
-            <div class="ft-pv-wrap">
+            <div class="ft-pv-wrap ft-needf">
                 <div class="ft-pv-bar">
                     <span class="ft-h" style="font-size:13px;">အစမ်းကြည့်ရန် <span class="ft-chip" id="ft-pv-name"></span></span>
                     <div class="ft-seg"><button type="button" id="fest-pv-light" onclick="festPrevMode(false)">☀️ Light</button><button type="button" id="fest-pv-dark" onclick="festPrevMode(true)">🌙 Dark</button></div>
@@ -5641,16 +5662,16 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
             </div>
 
             <div class="ft-tabs" id="ft-tabs">
-                <button type="button" class="ft-tab on" data-t="theme" onclick="festTab('theme')">🎉 Theme</button>
-                <button type="button" class="ft-tab" data-t="color" onclick="festTab('color')">🎨 အရောင်</button>
-                <button type="button" class="ft-tab" data-t="bg" onclick="festTab('bg')">🖼 နောက်ခံ</button>
-                <button type="button" class="ft-tab" data-t="style" onclick="festTab('style')">✨ ပုံစံ</button>
-                <button type="button" class="ft-tab" data-t="dark" onclick="festTab('dark')">🌙 Dark Mode</button>
-                <button type="button" class="ft-tab" data-t="adv" onclick="festTab('adv')">⚙️ အဆင့်မြင့်</button>
+                <button type="button" class="ft-tab ft-fonly on" data-t="theme" onclick="festTab('theme')">🎉 Festival ရွေး</button>
+                <button type="button" class="ft-tab ft-needf" data-t="color" onclick="festTab('color')">🎨 အရောင်</button>
+                <button type="button" class="ft-tab ft-needf" data-t="bg" onclick="festTab('bg')">🖼 နောက်ခံ</button>
+                <button type="button" class="ft-tab ft-needf" data-t="style" onclick="festTab('style')">✨ ပုံစံ</button>
+                <button type="button" class="ft-tab ft-nonly" data-t="dark" onclick="festTab('dark')">🌙 Dark Mode</button>
+                <button type="button" class="ft-tab ft-needf" data-t="adv" onclick="festTab('adv')">⚙️ အဆင့်မြင့်</button>
             </div>
 
             <!-- TAB: THEME -->
-            <div class="ft-panel on" data-p="theme">
+            <div class="ft-panel ft-fonly on" data-p="theme">
                 <div class="ft-card">
                     <h3 class="ft-h">Theme ရွေးပါ</h3>
                     <p class="ft-sub">ရွေးလိုက်တာနဲ့ အပေါ်က preview မှာ ချက်ချင်းမြင်ရမယ်။ "ပြင်ထား" လို့ပြတဲ့ Theme က သီးသန့်အရောင်ပြင်ထားတာ။</p>
@@ -5687,7 +5708,7 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
                         <button type="button" class="ft-btn" onclick="festSwapColors()">⇄ Main နဲ့ ဒုတိယ လဲမယ်</button>
                         <button type="button" class="ft-btn" onclick="festResetColors()">Preset အရောင်ပြန်သုံး</button>
                     </div>
-                    <button type="button" class="ft-btn" onclick="festCopyToAll()">ဒီအရောင်ကို Theme အားလုံးမှာ သုံးမယ်</button>
+                    <button type="button" class="ft-btn ft-fonly" onclick="festCopyToAll()">ဒီအရောင်ကို Theme အားလုံးမှာ သုံးမယ်</button>
                 </div>
 
                 <div class="ft-card">
@@ -5697,7 +5718,7 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
                     </div>
                 </div>
 
-                <div class="ft-card">
+                <div class="ft-card ft-fonly">
                     <h3 class="ft-h">Animation</h3>
                     <div class="ft-sw-row" style="margin-top:6px;"><div><b>ကျလာတဲ့ Animation</b><span>မျက်နှာပြင်ပေါ် ပုံတွေ ကျ/တက်</span></div><label class="ft-tg"><input type="checkbox" id="festival-fx-toggle" onchange="festFx(this.checked)"><i></i></label></div>
                     <div class="ft-sw-row"><div><b>ကြိုးတန်း / မီးပုံးတန်း</b><span>Header အောက်မှာ ချိတ်ထားတာ (မီးပုံးတွေ ၃ စက္ကန့်အတွင်း တစ်ခုပြီးတစ်ခု ပေါ်လာမယ်)</span></div><label class="ft-tg"><input type="checkbox" id="festival-gl-toggle" onchange="festGl(this.checked)"><i></i></label></div>
@@ -5775,7 +5796,7 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
             </div>
 
             <!-- TAB: DARK MODE -->
-            <div class="ft-panel" data-p="dark">
+            <div class="ft-panel ft-nonly" data-p="dark">
                 <div class="ft-card">
                     <h3 class="ft-h">Store ရဲ့ မူလ Mode</h3>
                     <div class="ft-seg full" id="dm-mode-seg" style="margin-top:12px;"><button type="button" data-v="auto" onclick="dmSet('mode','auto')">⏱ Auto</button><button type="button" data-v="light" onclick="dmSet('mode','light')">☀️ Light</button><button type="button" data-v="dark" onclick="dmSet('mode','dark')">🌙 Dark</button></div>
@@ -5806,8 +5827,8 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
                 </div>
                 <div class="ft-card">
                     <h3 class="ft-h">Reset</h3>
-                    <button type="button" class="ft-btn danger" onclick="festResetTheme()">ဒီ Theme ရဲ့ ပြင်ထားတာအားလုံး ဖျက်မယ်</button>
-                    <button type="button" class="ft-btn danger" onclick="festResetEverything()">Theme + နောက်ခံ အားလုံး ပုံမှန်ပြန်ထားမယ် (Off)</button>
+                    <button type="button" class="ft-btn danger" onclick="festResetTheme()">အရောင်ပြင်ထားတာအားလုံး ဖျက်မယ်</button>
+                    <button type="button" class="ft-btn danger" onclick="festResetEverything()">ဒီ Theme တစ်ခုလုံး မူလပြန်ထားမယ်</button>
                 </div>
             </div>
 
@@ -17067,7 +17088,7 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
             // the transparent areas filled in solid black. Re-encode PNGs as
             // PNG instead — still resized/downscaled, just without dropping
             // the alpha channel.
-            const outType = file.type === 'image/png' ? 'image/png' : 'image/jpeg';
+            let outType = 'image/jpeg'; // becomes PNG below only if the picture really has transparent pixels
             try {
                 const bitmap = await createImageBitmap(file);
                 let { width, height } = bitmap;
@@ -17079,9 +17100,16 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
                 const canvas = document.createElement('canvas');
                 canvas.width = width;
                 canvas.height = height;
-                const ctx = canvas.getContext('2d');
+                const ctx = canvas.getContext('2d', { willReadFrequently: true });
                 ctx.drawImage(bitmap, 0, 0, width, height);
                 bitmap.close?.();
+                // Background-removed (transparent) PNG/WebP must stay transparent. JPEG has no alpha, so
+                // re-encoding would paint the cut-out area solid black/white. Only pictures that really
+                // contain transparent pixels are kept as PNG; opaque ones are still compressed to JPEG.
+                if (file.type === 'image/png' || file.type === 'image/webp') {
+                    const px = ctx.getImageData(0, 0, width, height).data;
+                    for (let i = 3; i < px.length; i += 4) { if (px[i] < 250) { outType = 'image/png'; break; } }
+                }
 
                 const blob = await new Promise(resolve => canvas.toBlob(resolve, outType, quality));
                 if (!blob) return file; // toBlob can resolve null on decode failure - keep the original
@@ -19988,9 +20016,11 @@ return `
             if (k === 'off') return '<svg viewBox="0 0 24 24" width="' + size + '" height="' + size + '" style="color:' + color + ';flex-shrink:0;"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><path d="M6 18L18 6" stroke="currentColor" stroke-width="2"/></svg>';
             return FZ.svg(k, size, c, g);
         }
-        var FEST_OFF = { id: '', n: 'ပုံမှန် (Off)', i: 'off', c: '#1877F2', g: '#7C4DFF', l: '#F0F2F5', d: '#060B18', fx: ['sparkle'], lp: [], dir: 1 };
+        var FEST_OFF = { id: '', n: 'Festival မသုံး', i: 'off', c: '#1877F2', g: '#7C4DFF', l: '#F0F2F5', d: '#060B18', fx: ['sparkle'], lp: [], dir: 1 };
         var FEST_LIST = [FEST_OFF].concat(Object.keys(FZ.P).map(function (id) { var p = FZ.P[id]; return { id: id, n: p.n, i: p.i, c: p.c, g: p.g, l: p.l, d: p.d, fx: p.fx, lp: p.lp, dir: p.dir }; }));
-        var FS = { wish: '', sd: '', ed: '', font: '', rad: '', gs: '', id: '', fx: true, gl: true, lp: true, pl: true, btn: 'grad', ov: {}, bgUrl: '', vUrl: '', bg: { blur: 0, mv: 'none', op: 100, sat: 100, vig: 0 }, dim: 0.35 };
+        // Festival Theme (FSF) and Normal Theme (FSN) are two separate states; FS always points at the one being edited.
+        function festNewState() { return { wish: '', sd: '', ed: '', font: '', rad: '', gs: '', id: '', fx: true, gl: true, lp: true, pl: true, btn: 'grad', ov: {}, bgUrl: '', vUrl: '', bg: { blur: 0, mv: 'none', op: 100, sat: 100, vig: 0 }, dim: 0.35 }; }
+        var FSF = festNewState(), FSN = festNewState(), FS = FSN, festScope = 'normal', festScopeChosen = false, festFileScope = 'normal';
         var DM = { mode: 'auto', from: 7, to: 19, lock: false, rev: 0 };
         var festFile = null, festFileUrl = '', festPrevDark = false, festDirty = false, festTabNow = 'theme';
         var FEST_SW = ['#1877F2','#7C4DFF','#0E8FB8','#2E9D55','#F2C94C','#D97706','#E25822','#C62828','#E91E8C','#111827'];
@@ -20037,7 +20067,7 @@ return `
         function drawFestivalForm() {
             festPal();
             var p = festPreset(), c = ovGet('c') || p.c;
-            setTxt('fest-cur-name', p.n); setTxt('ft-pv-name', p.n);
+            var nm = festScope === 'normal' ? 'ပုံမှန် Theme' : p.n; setTxt('fest-cur-name', nm); setTxt('ft-pv-name', nm);
             ['c', 'g', 'l', 'd'].forEach(function (k) {
                 var v = ovGet(k) || p[k];
                 setVal('fest-' + k, v);
@@ -20076,14 +20106,14 @@ return `
             setVal('fest-op', b.op); setTxt('fest-op-val', b.op + '%');
             setVal('fest-sat', b.sat); setTxt('fest-sat-val', b.sat + '%');
             setVal('fest-vig', b.vig); setTxt('fest-vig-val', b.vig + '%');
-            var shown = festFileUrl || FS.bgUrl, pv = document.getElementById('fest-bg-preview');
+            var shown = festPend() || FS.bgUrl, pv = document.getElementById('fest-bg-preview');
             pv.src = shown || ''; pv.style.display = shown ? 'block' : 'none';
             var bx0 = document.getElementById('fest-bg-box');
             pv.onload = function () { if (pv.naturalWidth && pv.naturalHeight) { bx0.style.aspectRatio = pv.naturalWidth + '/' + pv.naturalHeight; bx0.style.maxWidth = pv.naturalHeight > pv.naturalWidth ? '230px' : '100%'; bx0.style.marginLeft = bx0.style.marginRight = 'auto'; } };
             if (!shown) { bx0.style.aspectRatio = ''; bx0.style.maxWidth = ''; }
             document.getElementById('fest-bg-box').classList.toggle('has', !!shown);
             document.getElementById('fest-bg-remove').style.display = shown ? '' : 'none';
-            var u = document.getElementById('fest-bg-url'); if (u && document.activeElement !== u) u.value = festFileUrl ? '' : FS.bgUrl;
+            var u = document.getElementById('fest-bg-url'); if (u && document.activeElement !== u) u.value = festPend() ? '' : FS.bgUrl;
             var v = document.getElementById('fest-v-url'); if (v && document.activeElement !== v) v.value = FS.vUrl;
         }
         function dmHour(h) { return (h % 12 || 12) + (h < 12 ? ' AM' : ' PM'); }
@@ -20104,7 +20134,7 @@ return `
             var box = document.getElementById('fest-preview'); if (!box) return;
             var p = festPreset(), c = ovGet('c') || p.c, g = ovGet('g') || p.g, dark = festPrevDark,
                 base = dark ? (ovGet('d') || p.d) : (ovGet('l') || p.l),
-                hasP = !!(FS.id || ovGet('c')), img = festFileUrl || FS.bgUrl, vid = /^https?:\/\//i.test(FS.vUrl) ? FS.vUrl : '',
+                hasP = !!(FS.id || ovGet('c')), plain = festScope === 'normal', img = festPend() || FS.bgUrl, vid = /^https?:\/\//i.test(FS.vUrl) ? FS.vUrl : '',
                 b = FS.bg, ink = dark ? '#F1F3FA' : '#222';
             var pz = (FZ.P && FZ.P[FS.id]) || null, bo = !!(pz && pz.bo);
             var custom = !!img, scn = !!(!img && !vid && pz && pz.thadi && window.FZ && FZ.thadiScene);
@@ -20131,15 +20161,15 @@ return `
             if (b.vig > 0) h += '<div style="position:absolute;inset:0;opacity:' + (b.vig / 100) + ';background:radial-gradient(120% 90% at 50% 42%,transparent 52%,rgba(0,0,0,.55));"></div>';
             if (pz && pz.thadi && FS.fx !== false && window.FZ && FZ.thadiFx) { FZ.thadiDefs(); h += '<div class="fzs-fx" style="--rise:-440px">' + FZ.thadiFx(6, 9, { zs: .5, sp: .6, u: 'px', m: 2, dark: dark }) + '</div>'; }
             var sh = festShapesOf().filter(function (k) { return !(FZ.isLamp && FZ.isLamp(k)); }); if (!sh.length) sh = ['sparkle'];
-            if (hasP && !bo) h += '<div style="position:absolute;left:0;right:0;top:0;height:4px;background:linear-gradient(90deg,' + c + ',' + g + ',' + c + ');"></div>';
+            if (hasP && !bo && !plain) h += '<div style="position:absolute;left:0;right:0;top:0;height:4px;background:linear-gradient(90deg,' + c + ',' + g + ',' + c + ');"></div>';
             h += '<div style="position:absolute;left:0;right:0;top:4px;height:34px;padding:8px 14px;font-weight:700;color:' + (sceneOn ? (dark ? '#FFE3B3' : '#fff') : ink) + ';' + (sceneOn ? 'text-shadow:0 1px 3px rgba(60,5,20,.7);' : '') + 'font-size:14px;">Linn Game Store</div>';
             var i;
             if (pz && pz.thadi) h += festThadiPv();
-            if (hasP && !bo && FS.gl !== false) {
+            if (hasP && !bo && !plain && FS.gl !== false) {
                 h += '<svg viewBox="0 0 280 12" preserveAspectRatio="none" width="100%" height="12" style="display:block;position:absolute;left:0;top:40px;"><path d="M0 2Q35 16 70 2Q105 16 140 2Q175 16 210 2Q245 16 280 2" fill="none" stroke="' + c + '" stroke-width="1.4" stroke-opacity=".7"/></svg>';
                 for (i = 0; i < 4; i++) h += '<span style="position:absolute;top:48px;left:' + (12.5 + i * 25) + '%;width:26px;height:26px;margin-left:-13px;">' + FZ.svg(sh[i % sh.length], '100%') + '</span>';
             }
-            if (hasP && !bo && FS.fx !== false) for (i = 0; i < 6; i++) h += '<span style="position:absolute;left:' + (8 + i * 16) + '%;top:' + (86 + (i % 3) * 14) + 'px;width:' + (14 + (i % 3) * 5) + 'px;height:' + (14 + (i % 3) * 5) + 'px;opacity:.8;">' + FZ.svg(sh[i % sh.length], '100%') + '</span>';
+            if (hasP && !bo && !plain && FS.fx !== false) for (i = 0; i < 6; i++) h += '<span style="position:absolute;left:' + (8 + i * 16) + '%;top:' + (86 + (i % 3) * 14) + 'px;width:' + (14 + (i % 3) * 5) + 'px;height:' + (14 + (i % 3) * 5) + 'px;opacity:.8;">' + FZ.svg(sh[i % sh.length], '100%') + '</span>';
             var bs = FS.btn === 'solid' ? 'background:' + c + ';color:#fff;' : FS.btn === 'glass' ? 'background:' + festRgba(c, .16) + ';color:' + (dark ? '#fff' : c) + ';border:1px solid ' + festRgba(c, .5) + ';' : 'background:linear-gradient(135deg,' + c + ',' + g + ');color:#fff;';
             h += '<div style="position:absolute;left:14px;right:14px;bottom:14px;padding:11px;border-radius:' + brad + 'px;text-align:center;font-weight:600;font-size:13px;' + bs + '">Top Up</div>';
             box.innerHTML = h;
@@ -20161,7 +20191,7 @@ return `
             var u = ''; try { u = localStorage.getItem('ft_store_url') || ''; } catch (e) {}
             if (!u) { u = festStoreLink(); if (!u) return; }
             if (festFile) window.showToast('ပုံအသစ်က Save မလုပ်ခင် Store မှာ မမြင်ရပါ', 'fail');
-            var f = festPayload().festival; f.sd = ''; f.ed = ''; f.on = true;
+            var f = festPayload().festival; f.sd = ''; f.ed = ''; f.on = true; if (festScope === 'normal') f.id = '';
             var b = btoa(unescape(encodeURIComponent(JSON.stringify(f))));
             window.open(u.replace(/[#?].*$/, '') + '#fztest=' + encodeURIComponent(b), '_blank');
             setTxt('ft-quick-st', 'Store ကို စမ်းသပ်ပုံစံနဲ့ ဖွင့်ပြီ။ Save မလုပ်ရင် Customer မမြင်ပါ။');
@@ -20185,17 +20215,37 @@ return `
             }
             return h;
         }
-        function festRedraw() { drawFestivalGrid(); drawFestivalForm(); drawFestivalPreview(); }
-        function renderFestivalAdmin(f, dm, force) {
-            if (festDirty && !force) return; // don't wipe unsaved edits when Firestore pushes an update
-            f = f || {}; dm = dm || {};
+        function festPend() { return festFileScope === festScope ? festFileUrl : ''; }
+        function festApplyScope() {
+            var pg = document.getElementById('festival-page'); if (!pg) return;
+            pg.setAttribute('data-scope', festScope);
+            pg.setAttribute('data-fid', (festScope === 'fest' && !FS.id) ? '0' : '1');
+            festSeg('ft-scope', festScope);
+            var n = document.getElementById('ft-scope-note');
+            if (n) n.textContent = festScope === 'fest'
+                ? (FS.id ? 'Festival Theme ဖွင့်ထားတယ်။ ရက်သတ်မှတ်ထားရင် ထိုရက်ပိုင်းပဲ ပေါ်ပြီး ပြီးရင် ပုံမှန် Theme ကို အလိုအလျောက် ပြန်ပြောင်းမယ်။' : 'Festival မရွေးရသေးပါ။ အောက်က Theme တစ်ခု ရွေးမှ ကျန်တဲ့ setting တွေ ပေါ်မယ်။ မရွေးရင် ပုံမှန် Theme ပဲ ပေါ်နေမယ်။')
+                : 'ပုံမှန် Theme — Store ရဲ့ အရောင်၊ နောက်ခံ၊ စာလုံး၊ Dark Mode ကိုပဲ ချိန်ညှိတာ။ ကြယ်ကြွေကျတာ၊ မီးကြိုးတန်း၊ မီးပုံးတွေ မပါပါ။ Festival မဖွင့်တဲ့အချိန် ဒီ Theme ပေါ်မယ်။';
+            var h = document.getElementById('ft-quick-h'); if (h) h.textContent = festScope === 'fest' ? '⚡ အမြန်ဖွင့်' : '🧪 Store မှာ စမ်းကြည့်ရန်';
+            if (festScope === 'fest' && (!FS.id || festTabNow === 'dark') && festTabNow !== 'theme') festTab('theme');
+            else if (festScope === 'normal' && festTabNow === 'theme') festTab('color');
+        }
+        function festScopeSet(s) {
+            festScope = s === 'fest' ? 'fest' : 'normal'; festScopeChosen = true;
+            FS = festScope === 'fest' ? FSF : FSN;
+            festTab(festScope === 'fest' ? 'theme' : 'color');
+            festRedraw(); drawDarkForm();
+        }
+        function festWish(v) { FS.wish = v; festMark(); }
+        function festRedraw() { festApplyScope(); drawFestivalGrid(); drawFestivalForm(); drawFestivalPreview(); }
+        function festParse(f, forceId) {
+            f = f || {};
             var ov = {};
             Object.keys(f.ov || {}).forEach(function (k) { ov[k] = Object.assign({}, f.ov[k]); });
-            var id = f.on === false ? '' : (f.id || ''), key = id || '_';
+            var id = forceId !== undefined ? forceId : (f.on === false ? '' : (f.id || '')), key = id || '_';
             // Old format: one global colour set -> becomes this theme's own colours (same look on the store).
             if ((f.c || f.g || f.e || f.dir) && !ov[key]) ov[key] = { c: f.c || '', g: f.g || '', e: f.e || '', dir: f.dir || '' };
             var bg = f.bg || {};
-            FS = {
+            return {
                 wish: String(f.wish || '').slice(0, 160),
                 sd: /^\d{4}-\d{2}-\d{2}$/.test(f.sd || '') ? f.sd : '', ed: /^\d{4}-\d{2}-\d{2}$/.test(f.ed || '') ? f.ed : '',
                 font: ['inter', 'noto', 'padauk', 'serif', 'system'].indexOf(f.font) >= 0 ? f.font : '', rad: f.rad === 'sharp' || f.rad === 'round' ? f.rad : '',
@@ -20205,6 +20255,18 @@ return `
                 bg: { blur: Number(bg.blur) || 0, mv: ['none', 'drift', 'zoom', 'aurora'].indexOf(bg.mv) >= 0 ? bg.mv : 'none', op: bg.op == null ? 100 : Number(bg.op), sat: bg.sat == null ? 100 : Number(bg.sat), vig: Number(bg.vig) || 0 },
                 dim: typeof f.dim === 'number' ? f.dim : 0.35
             };
+        }
+        function renderFestivalAdmin(f, dm, force) {
+            if (festDirty && !force) return; // don't wipe unsaved edits when Firestore pushes an update
+            f = f || {}; dm = dm || {};
+            var festOn = !!(f.id && f.on !== false);
+            // Festival Theme = only when a festival is picked. Normal Theme = f.nt (new) or, for data saved before the split, the old custom colours.
+            FSF = festOn ? festParse(f) : festNewState();
+            if (f.nt && typeof f.nt === 'object') FSN = festParse(f.nt, '');
+            else if (!f.id) FSN = festParse(f, '');
+            else { FSN = festNewState(); if (f.ov && f.ov._) FSN.ov._ = Object.assign({}, f.ov._); }
+            if (!festScopeChosen) festScope = festOn ? 'fest' : 'normal';
+            FS = festScope === 'fest' ? FSF : FSN;
             var h = function (v, d) { return (v === undefined || v === null || v === '' || isNaN(Number(v))) ? d : Number(v); };
             DM = { mode: ['auto', 'light', 'dark'].indexOf(dm.mode) >= 0 ? dm.mode : 'auto', from: h(dm.from, 7), to: h(dm.to, 19), lock: !!dm.lock, rev: dm.rev || 0 };
             DM._rev0 = DM.rev;
@@ -20251,39 +20313,52 @@ return `
         function festRad(v) { FS.rad = v; festMark(); drawFestivalForm(); drawFestivalPreview(); }
         function festGlass(v) { FS.gs = v === '' ? '' : Number(v); festMark(); drawFestivalForm(); drawFestivalPreview(); }
         function festBgReset() { FS.bg = { blur: 0, mv: FS.bg.mv, op: 100, sat: 100, vig: 0 }; FS.dim = 0.35; festMark(); drawFestivalForm(); drawFestivalPreview(); }
-        function festBgUrl(v) { festMark(); FS.bgUrl = (v || '').trim(); if (FS.bgUrl) { festFile = null; festFileUrl = ''; } drawFestivalPreview(); var pv = document.getElementById('fest-bg-preview'), bx = document.getElementById('fest-bg-box'); pv.src = FS.bgUrl; pv.style.display = FS.bgUrl ? 'block' : 'none'; bx.classList.toggle('has-image', !!FS.bgUrl); document.getElementById('fest-bg-remove').style.display = FS.bgUrl ? '' : 'none'; }
+        function festBgUrl(v) { festMark(); FS.bgUrl = (v || '').trim(); if (FS.bgUrl && festFileScope === festScope) { festFile = null; festFileUrl = ''; } drawFestivalPreview(); var pv = document.getElementById('fest-bg-preview'), bx = document.getElementById('fest-bg-box'); pv.src = FS.bgUrl; pv.style.display = FS.bgUrl ? 'block' : 'none'; bx.classList.toggle('has-image', !!FS.bgUrl); document.getElementById('fest-bg-remove').style.display = FS.bgUrl ? '' : 'none'; }
         function festVideoUrl(v) { FS.vUrl = (v || '').trim(); festMark(); drawFestivalPreview(); }
         function festResetColors() { var o = FS.ov[ovKey()]; if (o) { o.c = o.g = o.l = o.d = ''; } festMark(); festRedraw(); }
         function festResetTheme() { delete FS.ov[ovKey()]; festMark(); festRedraw(); }
         function festResetEverything() {
-            if (!confirm('Theme နဲ့ နောက်ခံ အားလုံးကို ပုံမှန် (Off) ပြန်ထားမလား? Save နှိပ်မှ Store မှာ ပြောင်းမယ်။')) return;
-            renderFestivalAdmin({}, { mode: DM.mode, from: DM.from, to: DM.to, lock: DM.lock, rev: DM.rev }, true); festMark();
+            if (!confirm(festScope === 'fest' ? 'Festival Theme ကို ပိတ်ပြီး ဒီအပိုင်းက setting အားလုံး မူလပြန်ထားမလား? Save နှိပ်မှ Store မှာ ပြောင်းမယ်။' : 'ပုံမှန် Theme (အရောင်၊ နောက်ခံ၊ စာလုံး) အားလုံး မူလပြန်ထားမလား? Save နှိပ်မှ Store မှာ ပြောင်းမယ်။')) return;
+            if (festScope === 'fest') FSF = festNewState(); else FSN = festNewState();
+            FS = festScope === 'fest' ? FSF : FSN;
+            if (festFileScope === festScope) { festFile = null; festFileUrl = ''; }
+            festMark(); festRedraw();
         }
         function festPrevMode(d) { festPrevDark = !!d; drawFestivalPreview(); }
         function festPickImage(e) {
             var file = e.target.files[0]; if (!file) return;
-            festFile = file;
+            festFile = file; festFileScope = festScope;
             var r = new FileReader();
             festMark(); r.onload = function (ev) { festFileUrl = ev.target.result; drawFestivalForm(); drawFestivalPreview(); };
             r.readAsDataURL(file);
         }
         function festRemoveImage() {
-            festFile = null; festFileUrl = ''; FS.bgUrl = ''; festMark();
+            if (festFileScope === festScope) { festFile = null; festFileUrl = ''; } FS.bgUrl = ''; festMark();
             document.getElementById('fest-bg-file').value = '';
             festRedraw();
         }
         function dmSet(k, v) { festMark(); DM[k] = (k === 'from' || k === 'to') ? Number(v) : (k === 'lock' ? !!v : v); drawDarkForm(); }
         function dmResetAll() { festMark(); DM.rev = Date.now(); drawDarkForm(); window.showToast('Save နှိပ်ရင် အကုန်ပြန်ဖျက်မယ်', 'success'); }
-        function festPayload() {
+        function festSerialize(S, normal) {
             var ov = {};
-            Object.keys(FS.ov).forEach(function (k) {
-                var o = FS.ov[k] || {};
+            Object.keys(S.ov).forEach(function (k) {
+                if (normal && k !== '_') return;
+                var o = S.ov[k] || {};
                 ov[k] = { c: o.c || '', g: o.g || '', l: o.l || '', d: o.d || '', e: o.e || '', dir: o.dir || '' };
             });
-            var cc = ov[ovKey()] ? ov[ovKey()].c : '';
-            var active = !!(FS.id || cc || FS.bgUrl || FS.vUrl || FS.bg.mv === 'aurora' || FS.bg.vig > 0 || FS.font || FS.rad || FS.gs !== '');
+            var key = S.id || '_', cc = ov[key] ? ov[key].c : '';
+            var active = !!(S.id || cc || S.bgUrl || S.vUrl || S.bg.mv === 'aurora' || S.bg.vig > 0 || S.font || S.rad || S.gs !== '');
+            return { wish: S.wish, sd: S.sd, ed: S.ed, font: S.font, rad: S.rad, gs: S.gs, id: S.id, on: active, fx: S.fx, gl: S.gl, lp: S.lp, pl: S.pl, btn: S.btn, c: '', g: '', e: '', dir: 0, ov: ov, bgUrl: S.bgUrl, vUrl: S.vUrl, bg: S.bg, dim: S.dim };
+        }
+        function festPayload() {
+            // festival = the Festival Theme (only when an id is picked); festival.nt = the Normal Theme (colours / background / font only, no effects).
+            var f = festSerialize(FSF), n = festSerialize(FSN, true);
+            n.id = ''; n.sd = ''; n.ed = ''; n.wish = ''; n.fx = false; n.gl = false; n.lp = false; n.pl = false; n.e = ''; n.dir = 0;
+            if (n.ov._) { n.ov._.e = ''; n.ov._.dir = ''; }
+            if (!FSF.id) f.on = false;
+            f.nt = n;
             return {
-                festival: { wish: FS.wish, sd: FS.sd, ed: FS.ed, font: FS.font, rad: FS.rad, gs: FS.gs, id: FS.id, on: active, fx: FS.fx, gl: FS.gl, lp: FS.lp, pl: FS.pl, btn: FS.btn, c: '', g: '', e: '', dir: 0, ov: ov, bgUrl: FS.bgUrl, vUrl: FS.vUrl, bg: FS.bg, dim: FS.dim },
+                festival: f,
                 darkMode: { mode: DM.mode, from: DM.from, to: DM.to, lock: !!DM.lock, rev: DM.rev || 0 }
             };
         }
@@ -20304,12 +20379,12 @@ return `
             try {
                 if (festFile) {
                     // Photos are compressed first; GIFs are uploaded untouched so they keep animating. (Video can't be uploaded: ImgBB refuses it.)
-                    FS.bgUrl = await uploadImageToImgBB(festFile, 'festival-upload-status', { maxDim: 1600, quality: 0.8 });
+                    (festFileScope === 'fest' ? FSF : FSN).bgUrl = await uploadImageToImgBB(festFile, 'festival-upload-status', { maxDim: 1600, quality: 0.8 });
                     festFile = null; festFileUrl = '';
                 }
                 await setDoc(doc(db, "settings", "branding"), festPayload(), { merge: true });
                 DM._rev0 = DM.rev;
-                logAdminActivity('Updated store theme' + (FS.id ? ': ' + FS.id : '') + ' / dark mode: ' + DM.mode);
+                logAdminActivity('Updated store theme' + (FSF.id ? ': festival ' + FSF.id : ': normal') + ' / dark mode: ' + DM.mode);
                 window.showToast('Store theme saved!', 'success');
                 festMark(false); drawDarkForm(); drawFestivalForm();
             } catch (e) {
@@ -20328,6 +20403,7 @@ return `
         window.festTab = festTab; window.festHexIn = festHexIn; window.festSwapColors = festSwapColors; window.festCopyToAll = festCopyToAll; window.festBgReset = festBgReset;
         window.festResetTheme = festResetTheme; window.festResetEverything = festResetEverything; window.festExport = festExport; window.festImport = festImport;
         window.festSched = festSched; window.festFont = festFont; window.festRad = festRad; window.festGlass = festGlass;
+        window.festPl = festPl; window.festWish = festWish; window.festScopeSet = festScopeSet;
 
         function previewLogoImage(e) {
             const file = e.target.files[0];
@@ -25508,13 +25584,15 @@ a, button, [role="button"], .nav-item, .header-icon, .btn, .picker-btn, label { 
 (function () {
   if (window.__uxInit) return; window.__uxInit = true;
   var root = document.documentElement, KEY = 'linn-admin-prefs';
-  var DEF = { calm: false, compact: false, haptic: false, totop: true, esc: true };
+  var DEF = { calm: false, compact: false, haptic: false, totop: true, esc: true, showEvent: true, showTheme: true };
   var prefs = Object.assign({}, DEF);
   try { Object.assign(prefs, JSON.parse(localStorage.getItem(KEY) || '{}')); } catch (e) {}
   function save() { try { localStorage.setItem(KEY, JSON.stringify(prefs)); } catch (e) {} }
   function apply() {
     root.classList.toggle('pref-calm', !!prefs.calm);
     root.classList.toggle('pref-compact', !!prefs.compact);
+    root.classList.toggle('pref-hide-events', prefs.showEvent === false);
+    root.classList.toggle('pref-hide-theme', prefs.showTheme === false);
     document.querySelectorAll('.pp-switch').forEach(function (b) { b.setAttribute('aria-checked', prefs[b.dataset.pref] ? 'true' : 'false'); });
     if (topBtn && !prefs.totop) topBtn.classList.remove('show');
   }
@@ -27132,6 +27210,7 @@ html body .seg-tab.active b{background:rgba(255,255,255,.28)!important;color:#ff
 html body #game-list-subtabs .game-list-tab-btn{border:1px solid rgba(var(--t),.3)!important;color:var(--text-secondary)!important}
 html body #game-list-subtabs .game-list-tab-btn.active{background:rgba(var(--t),.18)!important;color:color-mix(in srgb,rgb(var(--t)) 80%,var(--text-strong))!important;border-color:rgb(var(--t))!important}
 /* Nav tabs: stronger tint + readable label */
+html.pref-hide-events #group-events,html.pref-hide-theme #group-festival{display:none!important}
 html body .top-nav-wrap .top-nav .nav-item{background:rgba(var(--t),.14)!important;border:1px solid rgba(var(--t),.32)!important;color:var(--text-primary)!important}
 html body .nav-label{font-size:11px!important;font-weight:500!important}
 /* Cards, inputs, buttons: visible edges */
