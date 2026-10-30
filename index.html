@@ -576,6 +576,33 @@ html[data-theme]:not([data-theme="light"]) #boot-cover{--bg1:#0A0E1A;--bg2:#0F12
             --icon-fg: #ffffff;
             --scheme: dark;
         }
+        html[data-theme="halloween"] {
+            --bg-app: #0B0508;
+            --mesh-1: rgba(255,122,24,0.42);
+            --mesh-2: rgba(168,85,247,0.28);
+            --mesh-3: rgba(249,115,22,0.22);
+            --surface: rgba(36,16,22,0.62);
+            --surface-strong: rgba(48,22,30,0.78);
+            --bg-subtle: rgba(255,255,255,0.05);
+            --bg-subtle-2: rgba(255,255,255,0.08);
+            --fill-soft: rgba(255,255,255,0.10);
+            --border-glass: rgba(255,170,80,0.22);
+            --text-primary: #FFE8D2;
+            --text-strong: #FFF7ED;
+            --text-secondary: rgba(255,232,210,0.68);
+            --text-muted: rgba(255,232,210,0.42);
+            --accent: #FF7A18;
+            --accent-rgb: 255,122,24;
+            --accent-soft: rgba(255,122,24,0.22);
+            --danger: #FF4D6D;
+            --danger-strong: #FFB3C1;
+            --danger-soft: rgba(255,77,109,0.18);
+            --border-dashed: rgba(255,170,80,0.3);
+            --shadow-soft: 0 16px 42px -12px rgba(40,8,0,0.7);
+            --glass-blur: 16px;
+            --icon-fg: #ffffff;
+            --scheme: dark;
+        }
 
         html, body { min-height: 100%; }
         body {
@@ -1593,7 +1620,10 @@ html[data-theme]:not([data-theme="light"]) #boot-cover{--bg1:#0A0E1A;--bg2:#0F12
            other 300-tier overlays too (order reject-with-note is launched from
            the open order-details card, .od-overlay, also z-index 300) — at an
            equal z-index the one later in the DOM paints on top, and since this
-           overlay is a static element near the top of <body> while order cards
+           overlay is a static element near the top of <body>
+    <div id="hw-web-bl" aria-hidden="true"></div>
+    <div id="hw-web-br" aria-hidden="true"></div>
+ while order cards
            render further down, the order-details overlay was covering the
            confirm dialog instead of the dialog showing above it. */
         .dialog-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 400; opacity: 0; pointer-events: none; transition: opacity 0.2s ease; padding: 24px; }
@@ -2249,6 +2279,18 @@ html[data-theme]:not([data-theme="light"]) #boot-cover{--bg1:#0A0E1A;--bg2:#0F12
             --shadow-soft: 0 1px 2px rgba(0,0,0,0.35), 0 12px 28px -14px rgba(0,0,0,0.6);
             --glass-blur: 0px;
         }
+        html[data-theme="halloween"] {
+            --bg-app: #0B0508;
+            --surface: #241016; --surface-strong: #30161E;
+            --bg-subtle: rgba(255,255,255,0.05); --bg-subtle-2: rgba(255,255,255,0.08);
+            --fill-soft: rgba(255,255,255,0.09);
+            --border-glass: rgba(255,170,80,0.18); --line: rgba(255,170,80,0.28);
+            --text-primary: #FFE8D2; --text-strong: #FFF7ED;
+            --text-secondary: rgba(255,232,210,0.68); --text-muted: rgba(255,232,210,0.42);
+            --accent: #FF7A18; --accent-rgb: 255,122,24; --accent-soft: rgba(255,122,24,0.20);
+            --shadow-soft: 0 1px 2px rgba(0,0,0,0.4), 0 14px 30px -12px rgba(40,8,0,0.65);
+            --glass-blur: 0px;
+        }
 
         /* Flat backdrop: one soft accent glow at the top, nothing animated. */
         body::before {
@@ -2420,7 +2462,7 @@ html[data-theme]:not([data-theme="light"]) #boot-cover{--bg1:#0A0E1A;--bg2:#0F12
             -webkit-tap-highlight-color: transparent;
         }
         .top-nav-wrap .top-nav .nav-item .ui-icon { width: 18px; height: 18px; stroke: rgb(var(--t)); transition: stroke .2s ease; }
-        .top-nav-wrap .top-nav .nav-item:active { transform: scale(0.96); background: rgba(var(--t), 0.18); }
+        .top-nav-wrap .top-nav .nav-item:active { transform: none; background: rgba(var(--t), 0.18); }
         .top-nav-wrap .top-nav .nav-item.active,
         .top-nav-wrap .top-nav .nav-item.active:active {
             color: #fff;
@@ -2756,6 +2798,7 @@ html[data-theme]:not([data-theme="light"]) #boot-cover{--bg1:#0A0E1A;--bg2:#0F12
         [data-theme="dark"], [data-theme="dark-blue"] { --hdr-a: #1D4ED8; --hdr-b: #4F46E5; }
         [data-theme="midnight-purple"] { --hdr-a: #6D28D9; --hdr-b: #C026D3; }
         [data-theme="ocean"] { --hdr-a: #0D9488; --hdr-b: #0369A1; }
+        [data-theme="halloween"] { --hdr-a: #FF7A18; --hdr-b: #A855F7; }
         .header {
             background-color: var(--hdr-a) !important;
             background-image: linear-gradient(135deg, var(--hdr-a) 0%, var(--hdr-b) 100%) !important;
@@ -2767,7 +2810,7 @@ html[data-theme]:not([data-theme="light"]) #boot-cover{--bg1:#0A0E1A;--bg2:#0F12
         .top-nav-wrap .top-nav { border-color: color-mix(in srgb, var(--hdr-a) 22%, var(--border-glass)); }
         #nav-group-sheet-overlay .modal-box { border-color: color-mix(in srgb, var(--hdr-a) 28%, var(--border-glass)); }
         #nav-group-sheet-overlay .modal-box::before { border-color: color-mix(in srgb, var(--hdr-a) 28%, var(--border-glass)); }
-        :is([data-theme="dark"], [data-theme="dark-blue"], [data-theme="midnight-purple"], [data-theme="ocean"]) #nav-group-sheet-overlay { background: linear-gradient(to bottom, transparent var(--sheet-top, 118px), rgba(0,0,0,0.62) var(--sheet-top, 118px)) !important; }
+        :is([data-theme="dark"], [data-theme="dark-blue"], [data-theme="midnight-purple"], [data-theme="ocean"], [data-theme="halloween"]) #nav-group-sheet-overlay { background: linear-gradient(to bottom, transparent var(--sheet-top, 118px), rgba(0,0,0,0.62) var(--sheet-top, 118px)) !important; }
 
         /* ---- Order list: Game tabs switch + strip ---- */
         .og-toggle-row { padding: 10px 14px; margin-bottom: 12px; border-radius: 16px; background: var(--bg-subtle); border: 1px solid var(--border-glass); }
@@ -2798,11 +2841,11 @@ html[data-theme]:not([data-theme="light"]) #boot-cover{--bg1:#0A0E1A;--bg2:#0F12
         /* ---- Badges: .badge-warning was used in 4 places but never defined (no colour) ---- */
         .badge-warning { background: rgba(251,191,36,0.16); color: #B45309; }
         /* Dark themes: the light-theme badge text is too dark to read, use lighter tones */
-        :is([data-theme="dark"], [data-theme="dark-blue"], [data-theme="midnight-purple"], [data-theme="ocean"]) .badge-pending,
-        :is([data-theme="dark"], [data-theme="dark-blue"], [data-theme="midnight-purple"], [data-theme="ocean"]) .badge-warning { color: #FCD34D; }
-        :is([data-theme="dark"], [data-theme="dark-blue"], [data-theme="midnight-purple"], [data-theme="ocean"]) .badge-processing { color: #7DD3FC; }
-        :is([data-theme="dark"], [data-theme="dark-blue"], [data-theme="midnight-purple"], [data-theme="ocean"]) .badge-success { color: #6EE7B7; }
-        :is([data-theme="dark"], [data-theme="dark-blue"], [data-theme="midnight-purple"], [data-theme="ocean"]) .badge-danger { color: #FDA4AF; }
+        :is([data-theme="dark"], [data-theme="dark-blue"], [data-theme="midnight-purple"], [data-theme="ocean"], [data-theme="halloween"]) .badge-pending,
+        :is([data-theme="dark"], [data-theme="dark-blue"], [data-theme="midnight-purple"], [data-theme="ocean"], [data-theme="halloween"]) .badge-warning { color: #FCD34D; }
+        :is([data-theme="dark"], [data-theme="dark-blue"], [data-theme="midnight-purple"], [data-theme="ocean"], [data-theme="halloween"]) .badge-processing { color: #7DD3FC; }
+        :is([data-theme="dark"], [data-theme="dark-blue"], [data-theme="midnight-purple"], [data-theme="ocean"], [data-theme="halloween"]) .badge-success { color: #6EE7B7; }
+        :is([data-theme="dark"], [data-theme="dark-blue"], [data-theme="midnight-purple"], [data-theme="ocean"], [data-theme="halloween"]) .badge-danger { color: #FDA4AF; }
 
         /* ---- Picker sheet rows drop in from the top, one by one ---- */
         @keyframes navRowIn {
@@ -3834,6 +3877,1202 @@ html, body { overflow-x: hidden; }
   #admin-games-container { max-height: min(55vh, 520px); }
 }
 </style>
+
+<style id="interior-polish-v1">
+/* =====================================================================
+   INTERIOR POLISH v2 — richer glass, clearer hierarchy, prettier chrome
+   ===================================================================== */
+
+:root {
+  --shine: inset 0 1px 0 rgba(255,255,255,0.34);
+  --card-shadow: 0 12px 32px -18px rgba(15, 23, 42, 0.38);
+  --card-shadow-soft: 0 8px 22px -16px rgba(15, 23, 42, 0.28);
+}
+
+/* Ambient mesh: a bit more present so glass has something to catch */
+body::before {
+  background:
+    radial-gradient(55% 32% at 8% -6%,  rgba(99,102,241,0.28) 0%, transparent 70%),
+    radial-gradient(50% 30% at 96% 8%,  rgba(236,72,153,0.16) 0%, transparent 72%),
+    radial-gradient(48% 34% at 12% 88%, rgba(45,212,191,0.12) 0%, transparent 70%),
+    radial-gradient(42% 28% at 88% 92%, rgba(251,191,36,0.10) 0%, transparent 72%),
+    var(--bg-app) !important;
+}
+
+/* ---- Shared card face ---- */
+.admin-card,
+.stat-card,
+.chart-card,
+.api-doc-card,
+.stat-chip {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background:
+    linear-gradient(165deg, rgba(255,255,255,0.16) 0%, rgba(255,255,255,0.03) 38%, transparent 60%),
+    var(--surface);
+  border: 1px solid color-mix(in srgb, var(--border-glass) 88%, #fff 12%);
+  box-shadow: var(--shine), var(--card-shadow);
+  transition: box-shadow 0.18s ease, border-color 0.18s ease;
+}
+html[data-theme="light"] .admin-card,
+html[data-theme="light"] .stat-card,
+html[data-theme="light"] .chart-card,
+html[data-theme="light"] .api-doc-card,
+html[data-theme="light"] .stat-chip {
+  background:
+    linear-gradient(165deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.78) 45%, rgba(255,255,255,0.62) 100%),
+    var(--surface);
+  border-color: rgba(255,255,255,0.7);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,1),
+    0 10px 28px -16px rgba(30, 41, 59, 0.16),
+    0 1px 2px rgba(30, 41, 59, 0.04);
+}
+
+/* Specular sweep on primary cards */
+.stat-card::before,
+.chart-card::before,
+.api-doc-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(115deg, transparent 35%, rgba(255,255,255,0.18) 48%, transparent 62%);
+  background-size: 220% 100%;
+  background-position: 120% 0;
+  pointer-events: none;
+  opacity: 0.55;
+  z-index: 0;
+}
+.stat-card > *,
+.chart-card > *,
+.api-doc-card > * { position: relative; z-index: 1; }
+
+/* Accent orb on KPI cards */
+.stat-card::after {
+  content: '';
+  position: absolute;
+  width: 120px;
+  height: 120px;
+  right: -36px;
+  top: -42px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, rgba(var(--accent-rgb),0.28), rgba(var(--accent-rgb),0.06) 45%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+.stat-card.kpi-hero::after {
+  width: 160px;
+  height: 160px;
+  background: radial-gradient(circle at 35% 35%, rgba(var(--accent-rgb),0.34), rgba(139,92,246,0.12) 42%, transparent 72%);
+}
+
+.stat-card-label {
+  font-size: 11px;
+  font-weight: 650;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.stat-card-value {
+  font-weight: 760;
+  letter-spacing: -0.03em;
+  color: var(--text-strong);
+  font-variant-numeric: tabular-nums;
+  background: linear-gradient(180deg, var(--text-strong), color-mix(in srgb, var(--text-strong) 75%, var(--accent)));
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+@supports not ((-webkit-background-clip: text) or (background-clip: text)) {
+  .stat-card-value { color: var(--text-strong); background: none; }
+}
+.stat-card-icon {
+  border-radius: 11px;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.35),
+    0 8px 16px -8px rgba(0,0,0,0.35);
+}
+.stat-delta {
+  border: 1px solid transparent;
+  backdrop-filter: blur(6px);
+}
+.stat-delta.up {
+  background: rgba(16,185,129,0.14);
+  color: #059669;
+  border-color: rgba(16,185,129,0.18);
+}
+.stat-delta.down {
+  background: rgba(244,63,94,0.12);
+  color: #e11d48;
+  border-color: rgba(244,63,94,0.16);
+}
+
+/* Details cells */
+.details-grid-item {
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.08), transparent),
+    var(--bg-subtle-2);
+  border: 1px solid var(--border-glass);
+  border-radius: 13px;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.14);
+}
+.details-grid-item span {
+  letter-spacing: 0.05em;
+  opacity: 0.9;
+}
+.details-grid-item b {
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--text-strong);
+}
+
+/* Titles */
+.title-header {
+  position: relative;
+  border-bottom: none;
+  padding-bottom: 12px;
+}
+.title-header::after {
+  content: '';
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  height: 2px;
+  border-radius: 2px;
+  background: linear-gradient(90deg,
+    rgba(var(--accent-rgb),0.75) 0%,
+    rgba(var(--accent-rgb),0.25) 35%,
+    transparent 78%);
+}
+.dash-section-label {
+  gap: 8px;
+}
+.dash-section-label::before {
+  content: '';
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent), #a78bfa);
+  box-shadow: 0 0 0 3px var(--accent-soft), 0 0 12px rgba(var(--accent-rgb),0.35);
+  flex: 0 0 auto;
+}
+
+/* Dash deck luxury */
+.dash-deck {
+  border: 1px solid rgba(255,255,255,0.08);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.14),
+    0 22px 48px -22px rgba(20, 10, 50, 0.62);
+}
+.dash-deck-value {
+  background: linear-gradient(100deg, #fff 10%, #ddd6fe 45%, #a5b4fc 90%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 10px 24px rgba(167,139,250,0.28));
+}
+.day-tick.filled {
+  background: linear-gradient(90deg, #8b5cf6, #c4b5fd);
+}
+.day-tick.current {
+  box-shadow: 0 0 10px 2px rgba(196,181,253,0.75);
+}
+
+/* Buttons */
+.page-section .btn {
+  border-radius: 12px;
+  font-weight: 650;
+  letter-spacing: 0.01em;
+  transition: box-shadow 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+}
+.page-section .btn:active { transform: none; }
+.page-section .btn-primary {
+  background: linear-gradient(180deg, rgba(255,255,255,0.22), transparent 55%), var(--accent);
+  border: 1px solid rgba(255,255,255,0.18);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.28),
+    0 10px 22px -10px rgba(var(--accent-rgb), 0.7);
+}
+.page-section .btn-outline {
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.1), transparent),
+    var(--bg-subtle-2);
+  border: 1px solid var(--border-glass);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.12);
+}
+
+/* Search */
+.admin-search-wrap input {
+  border-radius: 999px !important;
+  border: 1px solid var(--border-glass) !important;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.08), transparent),
+    var(--surface-strong) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.14) !important;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease !important;
+}
+.admin-search-wrap input:focus {
+  border-color: rgba(var(--accent-rgb), 0.55) !important;
+  box-shadow: 0 0 0 4px var(--accent-soft), inset 0 1px 0 rgba(255,255,255,0.14) !important;
+  outline: none !important;
+}
+
+/* Pill tabs */
+.game-list-tab-btn,
+.pkg-type-tab,
+.pkg-tab-btn,
+.udp-tab,
+.pay-type-tab,
+.wseg-btn,
+.ov-period-btn {
+  border-radius: 999px !important;
+  border: 1px solid var(--border-glass) !important;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.1), transparent),
+    var(--bg-subtle-2) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.12);
+  transition: background 0.16s ease, color 0.16s ease, box-shadow 0.16s ease, transform 0.12s ease;
+}
+.game-list-tab-btn.active,
+.pkg-type-tab.active,
+.pkg-tab-btn.active,
+.udp-tab.active,
+.pay-type-tab.active,
+.wseg-btn.active,
+.ov-period-btn.active {
+  color: #fff !important;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.28), rgba(255,255,255,0.05) 55%),
+    var(--accent) !important;
+  border-color: transparent !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.35),
+    0 10px 18px -10px rgba(var(--accent-rgb), 0.75);
+}
+
+/* List shells */
+#orders-container,
+#topups-container,
+#admin-games-container,
+#admin-payment-container,
+#admin-users-container,
+#notif-history-container,
+#ticker-list-container,
+#payin-list-container {
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.09), transparent 30%),
+    var(--surface);
+  border: 1px solid color-mix(in srgb, var(--border-glass) 75%, transparent);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.16),
+    var(--card-shadow-soft);
+}
+#orders-container .admin-card,
+#admin-games-container .admin-card,
+#topups-container .admin-card,
+#admin-payment-container .admin-card {
+  background:
+    linear-gradient(165deg, rgba(255,255,255,0.1), transparent 42%),
+    var(--surface-strong);
+  border: 1px solid var(--border-glass);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.12);
+}
+#orders-container .admin-card:active,
+#admin-games-container .admin-card:active {
+  border-color: rgba(var(--accent-rgb), 0.4);
+  box-shadow: 0 0 0 3px var(--accent-soft), inset 0 1px 0 rgba(255,255,255,0.12);
+}
+
+/* API docs */
+.api-doc-card { gap: 12px; }
+.api-doc-icon {
+  border-radius: 12px;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.3),
+    0 10px 18px -10px rgba(0,0,0,0.4);
+}
+.api-doc-title {
+  letter-spacing: -0.015em;
+  font-weight: 700;
+}
+
+/* Form controls */
+.page-section input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="color"]):not([type="range"]),
+.page-section select,
+.page-section textarea {
+  border-radius: 12px;
+  border: 1px solid var(--border-glass);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.07), transparent),
+    var(--surface-strong);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.1);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.page-section input:focus,
+.page-section select:focus,
+.page-section textarea:focus {
+  border-color: rgba(var(--accent-rgb), 0.55);
+  box-shadow: 0 0 0 4px var(--accent-soft);
+  outline: none;
+}
+
+/* Usage bars */
+.usage-bar {
+  height: 5px;
+  border-radius: 999px;
+  background: var(--fill-soft);
+  overflow: hidden;
+  box-shadow: inset 0 1px 1px rgba(0,0,0,0.08);
+}
+.usage-bar i {
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--accent), #a78bfa 70%, #f0abfc);
+}
+.usage-bar i.hot {
+  background: linear-gradient(90deg, #f43f5e, #fb7185);
+}
+
+/* Badges */
+.badge {
+  border-radius: 999px;
+  font-weight: 750;
+  letter-spacing: 0.02em;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.28);
+}
+
+/* Chart */
+.chart-card-head h4 {
+  letter-spacing: -0.02em;
+  font-weight: 700;
+}
+.chart-card-tag {
+  border: 1px solid var(--border-glass);
+  background: var(--bg-subtle-2);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.1);
+}
+.rev-bar {
+  background: linear-gradient(180deg, var(--accent), rgba(var(--accent-rgb),0.25));
+  box-shadow: 0 0 12px -4px rgba(var(--accent-rgb),0.45);
+}
+
+/* Top nav glass frame a bit richer */
+.top-nav-wrap .top-nav {
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.4),
+    inset 0 -1px 0 rgba(0,0,0,0.06),
+    0 14px 34px -20px rgba(0,0,0,0.42) !important;
+}
+
+/* Desktop hover */
+@media (hover: hover) and (pointer: fine) {
+  .admin-card:hover,
+  .stat-card:hover,
+  .api-doc-card:hover,
+  .chart-card:hover,
+  .stat-chip:hover {
+    border-color: color-mix(in srgb, var(--accent) 28%, var(--border-glass));
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.28),
+      0 14px 30px -16px rgba(15, 23, 42, 0.28);
+  }
+  .page-section .btn-outline:hover {
+    border-color: rgba(var(--accent-rgb), 0.45);
+    color: var(--accent);
+    background: var(--accent-soft);
+  }
+  .page-section .btn-primary:hover {
+    filter: brightness(1.05);
+  }
+}
+@keyframes cardShine {
+  from { background-position: 140% 0; }
+  to { background-position: -40% 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .admin-card, .stat-card, .api-doc-card, .chart-card, .page-section .btn {
+    transition: none !important;
+  }
+  .admin-card:hover, .stat-card:hover, .api-doc-card:hover, .chart-card:hover {
+    transform: none;
+  }
+  .stat-card:hover::before, .chart-card:hover::before, .api-doc-card:hover::before {
+    animation: none;
+  }
+}
+</style>
+
+
+
+
+
+<style id="ux-calm-v1">
+/* =====================================================================
+   UX CALM — multi-color OK, less motion, no press-sink / double-tap feel
+   ===================================================================== */
+
+/* Multi-color ambient (not locked to one accent) */
+body::before {
+  background:
+    radial-gradient(55% 32% at 10% -4%, rgba(99,102,241,0.18) 0%, transparent 72%),
+    radial-gradient(48% 28% at 94% 12%, rgba(236,72,153,0.11) 0%, transparent 74%),
+    radial-gradient(46% 30% at 16% 90%, rgba(45,212,191,0.09) 0%, transparent 72%),
+    radial-gradient(40% 26% at 88% 94%, rgba(251,191,36,0.07) 0%, transparent 72%),
+    var(--bg-app) !important;
+}
+
+/* ---- No visual sink on press (fixes "နှစ်ချက်ကျွံဝင်" feel) ---- */
+.btn:active,
+.btn:focus,
+button:active,
+[role="button"]:active,
+.header-icon:active,
+.nav-item:active,
+.top-nav-wrap .top-nav .nav-item:active,
+.game-list-tab-btn:active,
+.pkg-type-tab:active,
+.pkg-tab-btn:active,
+.udp-tab:active,
+.pay-type-tab:active,
+.wseg-btn:active,
+.ov-period-btn:active,
+.admin-card:active,
+.stat-card:active,
+.stat-chip:active,
+.api-doc-card:active,
+.chart-card:active,
+.oc-top:active,
+.picker-btn:active,
+.modal-close:active,
+.pkg-type-opt:active,
+.pkg-picker-chip:active,
+.pkg-card-save-btn:active,
+.pkg-cost-update-btn:active,
+.game-picker-card:active,
+.dialog-template-chip:active,
+.category-chip-select .cat-chip:active,
+#nav-group-sheet-list > button:active,
+#ov-period-bar button:active,
+#os-seg button:active,
+.login-box button:active {
+  transform: none !important;
+}
+
+/* Busy = ignore further taps, no sink, no layout jump */
+.lg-busy,
+.btn.lg-busy,
+button.lg-busy,
+[role="button"].lg-busy,
+.btn.busy,
+.btn.loading {
+  transform: none !important;
+  pointer-events: none !important;
+  cursor: progress !important;
+}
+
+/* Less decorative motion on cards */
+.stat-card::before,
+.chart-card::before,
+.api-doc-card::before {
+  animation: none !important;
+  opacity: 0.18 !important;
+}
+.admin-card,
+.stat-card,
+.api-doc-card,
+.chart-card,
+.stat-chip {
+  transition: box-shadow 0.15s ease, border-color 0.15s ease !important;
+}
+
+/* Images shouldn't scale/jump on tap */
+.logo-icon img,
+.oc-thumb img,
+.pkg-img-preview,
+img {
+  transition: opacity 0.12s ease !important;
+}
+button:active img,
+a:active img,
+.logo-icon:active img,
+.oc-thumb:active img {
+  transform: none !important;
+}
+
+/* Hover: no lift */
+@media (hover: hover) and (pointer: fine) {
+  .admin-card:hover,
+  .stat-card:hover,
+  .api-doc-card:hover,
+  .chart-card:hover,
+  .stat-chip:hover,
+  .page-section .btn:hover,
+  .page-section .btn-primary:hover {
+    transform: none !important;
+    filter: none !important;
+  }
+}
+
+/* Faster taps on mobile (reduces double-tap lag feel) */
+.btn,
+button,
+.header-icon,
+.nav-item,
+.game-list-tab-btn,
+.pkg-tab-btn,
+.udp-tab,
+[role="button"] {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Brand / semantic colors stay free — icons may use any color */
+.stat-card-icon,
+.api-doc-icon,
+.tx-row-icon,
+.badge {
+  filter: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+</style>
+
+
+<style id="halloween-theme-v1">
+/* =====================================================================
+   HALLOWEEN THEME — vivid night, pumpkin glow, living atmosphere
+   (CSS + SVG only, no emoji)
+   ===================================================================== */
+
+html[data-theme="halloween"] {
+  --hw-orange: #FF7A18;
+  --hw-amber: #FBBF24;
+  --hw-violet: #A855F7;
+  --hw-rose: #FB7185;
+  --hw-ink: #0B0508;
+}
+
+/* Deep night sky + warm horizon */
+html[data-theme="halloween"] body::before {
+  background:
+    radial-gradient(48% 34% at 14% -4%, rgba(255,122,24,0.42) 0%, transparent 68%),
+    radial-gradient(40% 28% at 92% 6%, rgba(168,85,247,0.28) 0%, transparent 70%),
+    radial-gradient(55% 40% at 50% 110%, rgba(255,90,10,0.22) 0%, transparent 62%),
+    radial-gradient(28% 20% at 72% 36%, rgba(255,200,80,0.10) 0%, transparent 72%),
+    radial-gradient(22% 16% at 30% 55%, rgba(168,85,247,0.08) 0%, transparent 70%),
+    linear-gradient(180deg, #14080c 0%, #0B0508 42%, #080306 100%) !important;
+}
+
+/* Atmosphere layer: moon + drifting sparks */
+html[data-theme="halloween"] body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 1;
+  background:
+    /* moon core */
+    radial-gradient(circle at 88% 10%, rgba(255,244,210,0.55) 0 18px, rgba(255,210,120,0.22) 28px, rgba(255,160,40,0.08) 48px, transparent 78px),
+    /* moon halo */
+    radial-gradient(circle at 88% 10%, rgba(255,180,80,0.10) 0 70px, transparent 130px),
+    /* sparks */
+    radial-gradient(circle at 12% 70%, rgba(255,140,40,0.55) 0 1.5px, transparent 2.5px),
+    radial-gradient(circle at 22% 42%, rgba(255,200,100,0.45) 0 1.2px, transparent 2.2px),
+    radial-gradient(circle at 38% 22%, rgba(200,140,255,0.4) 0 1.2px, transparent 2.2px),
+    radial-gradient(circle at 58% 78%, rgba(255,150,50,0.4) 0 1.4px, transparent 2.4px),
+    radial-gradient(circle at 70% 48%, rgba(255,210,120,0.35) 0 1px, transparent 2px),
+    radial-gradient(circle at 82% 66%, rgba(180,120,255,0.35) 0 1.2px, transparent 2.2px),
+    radial-gradient(circle at 46% 58%, rgba(255,160,60,0.3) 0 1px, transparent 2px);
+  animation: hwSpark 7s ease-in-out infinite alternate;
+}
+@keyframes hwSpark {
+  from { opacity: 0.75; filter: saturate(1); }
+  to { opacity: 1; filter: saturate(1.15); }
+}
+
+html[data-theme="halloween"] .header,
+html[data-theme="halloween"] .top-nav-wrap,
+html[data-theme="halloween"] .content-area,
+html[data-theme="halloween"] .app-layout {
+  position: relative;
+  z-index: 1;
+}
+
+/* Header: molten pumpkin glass */
+html[data-theme="halloween"] .header {
+  background:
+    linear-gradient(100deg, rgba(255,122,24,0.28), rgba(168,85,247,0.12) 45%, rgba(40,12,18,0.55)) !important;
+  border-bottom: 1px solid rgba(255,150,60,0.32) !important;
+  box-shadow:
+    0 12px 32px -14px rgba(255,100,0,0.5),
+    inset 0 1px 0 rgba(255,220,160,0.28) !important;
+}
+html[data-theme="halloween"] .header .header-icon {
+  background: rgba(255,140,40,0.18) !important;
+  border: 1px solid rgba(255,180,100,0.32) !important;
+  box-shadow: inset 0 1px 0 rgba(255,230,180,0.25) !important;
+}
+
+/* Nav capsule */
+html[data-theme="halloween"] .top-nav-wrap .top-nav {
+  background:
+    linear-gradient(180deg, rgba(255,140,40,0.14), rgba(40,12,18,0.35)),
+    var(--surface) !important;
+  border: 1px solid rgba(255,150,60,0.28) !important;
+  box-shadow:
+    0 12px 28px -16px rgba(255,90,0,0.45),
+    inset 0 1px 0 rgba(255,220,160,0.22) !important;
+}
+html[data-theme="halloween"] .top-nav-wrap .top-nav .nav-item.active {
+  box-shadow:
+    0 10px 20px -8px rgba(var(--t), 0.7),
+    inset 0 1px 0 rgba(255,255,255,0.35) !important;
+}
+
+/* Cards: warm glass */
+html[data-theme="halloween"] .stat-card,
+html[data-theme="halloween"] .admin-card,
+html[data-theme="halloween"] .chart-card,
+html[data-theme="halloween"] .api-doc-card,
+html[data-theme="halloween"] .stat-chip {
+  background:
+    linear-gradient(155deg, rgba(255,160,60,0.12) 0%, rgba(168,85,247,0.05) 40%, transparent 70%),
+    var(--surface) !important;
+  border: 1px solid rgba(255,150,60,0.24) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,220,160,0.14),
+    0 16px 36px -18px rgba(40,8,0,0.55) !important;
+}
+html[data-theme="halloween"] .stat-card::after {
+  background: radial-gradient(circle at 35% 35%, rgba(255,122,24,0.28), rgba(168,85,247,0.08) 50%, transparent 72%) !important;
+}
+html[data-theme="halloween"] .stat-card-value {
+  color: #FFF7ED !important;
+  text-shadow: 0 0 18px rgba(255,140,40,0.25);
+}
+
+/* Dashboard hero deck */
+html[data-theme="halloween"] .dash-deck {
+  background:
+    radial-gradient(90% 80% at 12% 0%, rgba(255,122,24,0.48) 0%, transparent 52%),
+    radial-gradient(70% 60% at 100% 10%, rgba(168,85,247,0.32) 0%, transparent 55%),
+    radial-gradient(50% 40% at 50% 100%, rgba(255,90,10,0.18) 0%, transparent 60%),
+    linear-gradient(165deg, #3a1608 0%, #1a0a0e 48%, #0c0508 100%) !important;
+  border: 1px solid rgba(255,150,60,0.34) !important;
+  box-shadow:
+    0 24px 50px -18px rgba(255,90,0,0.5),
+    inset 0 1px 0 rgba(255,220,160,0.22),
+    inset 0 -1px 0 rgba(0,0,0,0.25) !important;
+}
+html[data-theme="halloween"] .dash-deck-value {
+  background: linear-gradient(105deg, #fff8ef 8%, #ffd089 40%, #ff7a18 78%, #f59e0b 100%) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  filter: drop-shadow(0 8px 20px rgba(255,122,24,0.35));
+}
+html[data-theme="halloween"] .day-tick.filled {
+  background: linear-gradient(90deg, #FF7A18, #FBBF24) !important;
+}
+html[data-theme="halloween"] .day-tick.current {
+  background: #fff !important;
+  box-shadow: 0 0 12px 2px rgba(255,180,60,0.75) !important;
+}
+html[data-theme="halloween"] .live-dot {
+  background: #FF7A18 !important;
+  box-shadow: 0 0 0 0 rgba(255,122,24,0.55);
+  animation: hwPulse 1.8s ease-out infinite !important;
+}
+@keyframes hwPulse {
+  0% { box-shadow: 0 0 0 0 rgba(255,122,24,0.5); }
+  70% { box-shadow: 0 0 0 8px rgba(255,122,24,0); }
+  100% { box-shadow: 0 0 0 0 rgba(255,122,24,0); }
+}
+
+/* Bat marks on dash-deck */
+html[data-theme="halloween"] .dash-deck::after {
+  content: '';
+  position: absolute;
+  right: 16px;
+  top: 12px;
+  width: 0; height: 0;
+  pointer-events: none;
+  z-index: 2;
+  opacity: 0.5;
+  box-shadow:
+    0 0 0 0 transparent;
+  background: transparent;
+  /* three small bat-like blots */
+  width: 34px;
+  height: 16px;
+  border-radius: 40% 40% 50% 50%;
+  background: rgba(0,0,0,0.38);
+  filter: blur(0.2px);
+  box-shadow:
+    -26px 12px 0 -5px rgba(0,0,0,0.32),
+    20px 18px 0 -7px rgba(0,0,0,0.26);
+}
+
+/* Title accent */
+html[data-theme="halloween"] .title-header::after {
+  height: 2px !important;
+  background: linear-gradient(90deg, #FF7A18, #A855F7 42%, transparent 82%) !important;
+  box-shadow: 0 0 10px rgba(255,122,24,0.35);
+}
+html[data-theme="halloween"] .dash-section-label::before {
+  background: linear-gradient(135deg, #FF7A18, #A855F7) !important;
+  box-shadow: 0 0 0 3px rgba(255,122,24,0.2), 0 0 12px rgba(255,122,24,0.35) !important;
+}
+
+/* Buttons */
+html[data-theme="halloween"] .page-section .btn-primary {
+  background:
+    linear-gradient(180deg, rgba(255,230,180,0.35), transparent 52%),
+    linear-gradient(135deg, #FF8A2B, #E85D04) !important;
+  border: 1px solid rgba(255,220,160,0.28) !important;
+  color: #fff !important;
+  box-shadow:
+    0 12px 26px -10px rgba(255,100,0,0.7),
+    inset 0 1px 0 rgba(255,255,255,0.35) !important;
+}
+html[data-theme="halloween"] .page-section .btn-outline {
+  border-color: rgba(255,150,60,0.3) !important;
+  background: rgba(255,120,24,0.08) !important;
+  color: #FFE8D2 !important;
+}
+html[data-theme="halloween"] .page-section .btn-outline:hover {
+  background: rgba(255,122,24,0.16) !important;
+  border-color: rgba(255,160,60,0.5) !important;
+  color: #FFB347 !important;
+}
+
+/* Tabs active glow */
+html[data-theme="halloween"] .game-list-tab-btn.active,
+html[data-theme="halloween"] .pkg-type-tab.active,
+html[data-theme="halloween"] .pkg-tab-btn.active,
+html[data-theme="halloween"] .udp-tab.active,
+html[data-theme="halloween"] .ov-period-btn.active {
+  background: linear-gradient(180deg, rgba(255,220,160,0.25), transparent 55%), #FF7A18 !important;
+  box-shadow: 0 10px 18px -10px rgba(255,122,24,0.7) !important;
+}
+
+/* Inputs */
+html[data-theme="halloween"] .admin-search-wrap input,
+html[data-theme="halloween"] .page-section input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+html[data-theme="halloween"] .page-section select,
+html[data-theme="halloween"] .page-section textarea {
+  border-color: rgba(255,150,60,0.24) !important;
+  background: rgba(30,12,16,0.65) !important;
+}
+html[data-theme="halloween"] .admin-search-wrap input:focus,
+html[data-theme="halloween"] .page-section input:focus,
+html[data-theme="halloween"] .page-section select:focus,
+html[data-theme="halloween"] .page-section textarea:focus {
+  border-color: rgba(255,140,40,0.55) !important;
+  box-shadow: 0 0 0 3px rgba(255,122,24,0.2) !important;
+}
+
+/* List shells */
+html[data-theme="halloween"] #orders-container,
+html[data-theme="halloween"] #topups-container,
+html[data-theme="halloween"] #admin-games-container,
+html[data-theme="halloween"] #admin-payment-container,
+html[data-theme="halloween"] #admin-users-container {
+  border-color: rgba(255,150,60,0.22) !important;
+  background:
+    linear-gradient(180deg, rgba(255,140,40,0.08), transparent 28%),
+    var(--surface) !important;
+  box-shadow: inset 0 1px 0 rgba(255,200,120,0.1), 0 14px 30px -18px rgba(40,8,0,0.5) !important;
+}
+
+/* Charts / usage */
+html[data-theme="halloween"] .usage-bar i {
+  background: linear-gradient(90deg, #FF7A18, #FBBF24 55%, #A855F7) !important;
+}
+html[data-theme="halloween"] .rev-bar {
+  background: linear-gradient(180deg, #FF9F40, rgba(255,122,24,0.2)) !important;
+  box-shadow: 0 0 16px -4px rgba(255,140,40,0.55) !important;
+}
+
+/* Cobweb corners — real web frames (SVG), 4 corners of the viewport */
+html[data-theme="halloween"] body > .hw-web,
+html[data-theme="halloween"] .hw-web {
+  display: none;
+}
+html[data-theme="halloween"] .content-area {
+  position: relative;
+}
+html[data-theme="halloween"] .content-area::before,
+html[data-theme="halloween"] .content-area::after {
+  content: '';
+  position: absolute;
+  width: 120px;
+  height: 120px;
+  pointer-events: none;
+  z-index: 2;
+  opacity: 0.42;
+  background-repeat: no-repeat;
+  background-size: contain;
+  /* spider-web SVG (stroke only) */
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120' fill='none' stroke='%23FFC078' stroke-width='1.15' stroke-linecap='round' stroke-linejoin='round' opacity='0.95'><path d='M2 2 L118 2 M2 2 L2 118 M2 2 L118 118'/><path d='M2 2 L90 30 M2 2 L60 50 M2 2 L35 75 M2 2 L18 100'/><path d='M2 2 C28 10 48 22 58 42 C68 62 72 88 72 118'/><path d='M2 2 C12 30 24 52 44 62 C64 72 90 78 118 78'/><path d='M18 2 C22 20 32 36 48 44'/><path d='M40 2 C42 16 50 28 64 34'/><path d='M68 2 C70 12 76 20 88 24'/><path d='M2 22 C18 26 32 36 40 50'/><path d='M2 48 C14 50 24 58 30 70'/><path d='M2 78 C12 80 18 88 22 98'/><circle cx='2' cy='2' r='2.2' fill='%23FFC078' stroke='none'/></svg>");
+  filter: drop-shadow(0 0 6px rgba(255,160,60,0.25));
+}
+html[data-theme="halloween"] .content-area::before {
+  top: 0; left: 0;
+}
+html[data-theme="halloween"] .content-area::after {
+  top: 0; right: 0;
+  transform: scaleX(-1);
+  transform-origin: center;
+}
+
+/* Bottom cobweb corners (fixed to viewport, subtle) */
+html[data-theme="halloween"] body {
+  position: relative;
+}
+html[data-theme="halloween"] #hw-web-bl,
+html[data-theme="halloween"] #hw-web-br {
+  display: block;
+  position: fixed;
+  width: 110px;
+  height: 110px;
+  pointer-events: none;
+  z-index: 3;
+  opacity: 0.34;
+  background-repeat: no-repeat;
+  background-size: contain;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120' fill='none' stroke='%23FFC078' stroke-width='1.1' stroke-linecap='round' stroke-linejoin='round'><path d='M2 118 L118 118 M2 118 L2 2 M2 118 L118 2'/><path d='M2 118 L90 90 M2 118 L60 70 M2 118 L35 45 M2 118 L18 20'/><path d='M2 118 C28 110 48 98 58 78 C68 58 72 32 72 2'/><path d='M2 118 C12 90 24 68 44 58 C64 48 90 42 118 42'/><path d='M18 118 C22 100 32 84 48 76'/><path d='M40 118 C42 104 50 92 64 86'/><path d='M68 118 C70 108 76 100 88 96'/><path d='M2 98 C18 94 32 84 40 70'/><path d='M2 72 C14 70 24 62 30 50'/><path d='M2 42 C12 40 18 32 22 22'/><circle cx='2' cy='118' r='2.1' fill='%23FFC078' stroke='none'/></svg>");
+  filter: drop-shadow(0 0 5px rgba(255,150,50,0.2));
+}
+html[data-theme="halloween"] #hw-web-bl { left: 0; bottom: 0; }
+html[data-theme="halloween"] #hw-web-br { right: 0; bottom: 0; transform: scaleX(-1); }
+
+@media (max-width: 420px) {
+  html[data-theme="halloween"] .content-area::before,
+  html[data-theme="halloween"] .content-area::after,
+  html[data-theme="halloween"] #hw-web-bl,
+  html[data-theme="halloween"] #hw-web-br {
+    width: 84px;
+    height: 84px;
+    opacity: 0.3;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  html[data-theme="halloween"] .content-area::before,
+  html[data-theme="halloween"] .content-area::after {
+    filter: none;
+  }
+}
+
+/* Toast / modal slight warm tint */
+html[data-theme="halloween"] .modal-box,
+html[data-theme="halloween"] .dialog-box,
+html[data-theme="halloween"] #toast {
+  border-color: rgba(255,150,60,0.28) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,220,160,0.16),
+    0 24px 50px -20px rgba(40,8,0,0.7) !important;
+}
+
+/* Connection / success greens stay readable on dark orange UI */
+html[data-theme="halloween"] .conn-dot.conn-connected {
+  background: #34D399 !important;
+  box-shadow: 0 0 0 3px rgba(52,211,153,0.2) !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html[data-theme="halloween"] body::after,
+  html[data-theme="halloween"] .live-dot {
+    animation: none !important;
+  }
+}
+</style>
+
+
+<style id="tab-density-v1">
+/* =====================================================================
+   TAB DENSITY — compact, even, ordered (top nav + page tabs)
+   ===================================================================== */
+
+/* Top nav: 8 items → 4×2 on phone, 8×1 on wider; no sparse 6-col grid */
+html body .top-nav-wrap {
+  padding: 4px 8px 6px !important;
+}
+html body .top-nav-wrap .top-nav,
+html body .top-nav,
+html body #admin-top-nav {
+  display: grid !important;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  gap: 4px !important;
+  padding: 4px !important;
+  width: 100% !important;
+  overflow: hidden !important;
+  border-radius: 14px !important;
+  align-items: stretch;
+}
+html body .top-nav-wrap .top-nav .nav-item,
+html body #admin-top-nav .nav-item {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 2px !important;
+  min-width: 0 !important;
+  min-height: 40px !important;
+  max-height: 44px !important;
+  padding: 5px 2px !important;
+  margin: 0 !important;
+  border-radius: 11px !important;
+  font-size: 10px !important;
+  font-weight: 650 !important;
+  line-height: 1.15 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  transform: none !important;
+}
+html body .top-nav-wrap .top-nav .nav-item .ui-icon,
+html body #admin-top-nav .nav-item .ui-icon {
+  width: 15px !important;
+  height: 15px !important;
+  flex-shrink: 0;
+}
+html body .top-nav-wrap .top-nav .nav-item .nav-label,
+html body #admin-top-nav .nav-item .nav-label {
+  font-size: 10px !important;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+html body .top-nav-wrap .top-nav .nav-item .nav-item-count-badge {
+  top: 1px !important;
+  right: 2px !important;
+}
+
+@media (min-width: 720px) {
+  html body .top-nav-wrap .top-nav,
+  html body #admin-top-nav {
+    grid-template-columns: repeat(8, minmax(0, 1fr)) !important;
+    gap: 5px !important;
+  }
+  html body .top-nav-wrap .top-nav .nav-item,
+  html body #admin-top-nav .nav-item {
+    min-height: 42px !important;
+    flex-direction: row !important;
+    gap: 6px !important;
+    padding: 6px 8px !important;
+    font-size: 12px !important;
+  }
+  html body .top-nav-wrap .top-nav .nav-item .nav-label {
+    font-size: 12px !important;
+  }
+  html body .top-nav-wrap .top-nav .nav-item .ui-icon {
+    width: 16px !important;
+    height: 16px !important;
+  }
+}
+
+/* Page-level tabs: tighter track, even chips */
+html body :is(.pkg-type-tabs, .udp-tabs, .game-list-tabs, .game-list-subtabs, .pkg-tab-bar, #ov-period-bar, #os-seg) {
+  display: flex !important;
+  flex-wrap: nowrap !important;
+  align-items: center !important;
+  gap: 3px !important;
+  padding: 3px !important;
+  margin: 0 0 10px !important;
+  border-radius: 12px !important;
+  background: var(--fill-soft) !important;
+  border: 1px solid var(--border-glass);
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none !important;
+}
+html body :is(.pkg-type-tabs, .udp-tabs, .game-list-tabs, .game-list-subtabs, .pkg-tab-bar, #ov-period-bar, #os-seg)::-webkit-scrollbar {
+  display: none !important;
+}
+
+html body :is(.pkg-type-tab, .udp-tab, .game-list-tab-btn, .pkg-tab-btn, .ov-period-btn, .wseg-btn, .seg-tab) {
+  flex: 1 1 0 !important;
+  min-width: 0 !important;
+  min-height: 32px !important;
+  max-height: 36px !important;
+  padding: 5px 8px !important;
+  margin: 0 !important;
+  border-radius: 9px !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  line-height: 1.2 !important;
+  white-space: nowrap !important;
+  text-align: center !important;
+  transform: none !important;
+  box-sizing: border-box !important;
+}
+
+/* When many tabs, allow shrink but keep readable; scroll if needed */
+html body .udp-tabs .udp-tab,
+html body .pkg-type-tabs .pkg-type-tab {
+  flex: 1 0 auto !important;
+  min-width: max-content !important;
+  padding-left: 10px !important;
+  padding-right: 10px !important;
+}
+
+html body :is(.pkg-type-tab, .udp-tab, .game-list-tab-btn, .pkg-tab-btn, .ov-period-btn, .wseg-btn, .seg-tab):active {
+  transform: none !important;
+}
+
+/* Keep per-tab colors on top nav (density layer shouldn't force one color) */
+html body #group-dashboard { --t: 59,130,246 !important; }
+html body #group-order     { --t: 139,92,246 !important; }
+html body #group-game      { --t: 236,72,153 !important; }
+html body #group-wallet    { --t: 16,185,129 !important; }
+html body #group-userlist  { --t: 245,158,11 !important; }
+html body #group-events    { --t: 244,63,94 !important; }
+html body #group-festival  { --t: 168,85,247 !important; }
+html body #group-setting   { --t: 6,182,212 !important; }
+</style>
+
+
+<style id="tab-own-colors-v1">
+/* =====================================================================
+   TAB OWN COLORS — each nav / page tab keeps its own hue
+   ===================================================================== */
+
+/* --- Top nav group colors --- */
+html body #group-dashboard { --t: 59,130,246 !important; }
+html body #group-order     { --t: 139,92,246 !important; }
+html body #group-game      { --t: 236,72,153 !important; }
+html body #group-wallet    { --t: 16,185,129 !important; }
+html body #group-userlist  { --t: 245,158,11 !important; }
+html body #group-events    { --t: 244,63,94 !important; }
+html body #group-festival  { --t: 168,85,247 !important; }
+html body #group-setting   { --t: 6,182,212 !important; }
+
+/* Inactive: tinted by own --t */
+html body .top-nav-wrap .top-nav .nav-item,
+html body #admin-top-nav .nav-item {
+  background: rgba(var(--t), 0.12) !important;
+  border: 1px solid rgba(var(--t), 0.28) !important;
+  color: var(--text-primary) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.18) !important;
+}
+html body .top-nav-wrap .top-nav .nav-item .ui-icon,
+html body #admin-top-nav .nav-item .ui-icon {
+  stroke: rgb(var(--t)) !important;
+  color: rgb(var(--t)) !important;
+}
+html body .top-nav-wrap .top-nav .nav-item .nav-label {
+  color: inherit !important;
+}
+
+/* Active: solid own color */
+html body .top-nav-wrap .top-nav .nav-item.active,
+html body #admin-top-nav .nav-item.active {
+  color: #fff !important;
+  background: linear-gradient(180deg, rgba(255,255,255,0.28), rgba(255,255,255,0) 55%), rgb(var(--t)) !important;
+  border-color: rgba(255,255,255,0.35) !important;
+  box-shadow:
+    0 8px 16px -8px rgba(var(--t), 0.75),
+    inset 0 1px 0 rgba(255,255,255,0.4) !important;
+}
+html body .top-nav-wrap .top-nav .nav-item.active .ui-icon,
+html body #admin-top-nav .nav-item.active .ui-icon {
+  stroke: #fff !important;
+  color: #fff !important;
+}
+html body .top-nav-wrap .top-nav .nav-item.active .nav-label {
+  color: #fff !important;
+}
+
+/* --- Page tabs: cycle distinct colors --- */
+html body .pkg-type-tab:nth-child(6n+1),
+html body .udp-tab:nth-child(6n+1),
+html body .game-list-tab-btn:nth-child(6n+1),
+html body .pkg-tab-btn:nth-child(6n+1),
+html body .ov-period-btn:nth-child(6n+1),
+html body .wseg-btn:nth-child(6n+1),
+html body .seg-tab:nth-child(6n+1) { --t: 59,130,246 !important; }
+
+html body .pkg-type-tab:nth-child(6n+2),
+html body .udp-tab:nth-child(6n+2),
+html body .game-list-tab-btn:nth-child(6n+2),
+html body .pkg-tab-btn:nth-child(6n+2),
+html body .ov-period-btn:nth-child(6n+2),
+html body .wseg-btn:nth-child(6n+2),
+html body .seg-tab:nth-child(6n+2) { --t: 139,92,246 !important; }
+
+html body .pkg-type-tab:nth-child(6n+3),
+html body .udp-tab:nth-child(6n+3),
+html body .game-list-tab-btn:nth-child(6n+3),
+html body .pkg-tab-btn:nth-child(6n+3),
+html body .ov-period-btn:nth-child(6n+3),
+html body .wseg-btn:nth-child(6n+3),
+html body .seg-tab:nth-child(6n+3) { --t: 236,72,153 !important; }
+
+html body .pkg-type-tab:nth-child(6n+4),
+html body .udp-tab:nth-child(6n+4),
+html body .game-list-tab-btn:nth-child(6n+4),
+html body .pkg-tab-btn:nth-child(6n+4),
+html body .ov-period-btn:nth-child(6n+4),
+html body .wseg-btn:nth-child(6n+4),
+html body .seg-tab:nth-child(6n+4) { --t: 16,185,129 !important; }
+
+html body .pkg-type-tab:nth-child(6n+5),
+html body .udp-tab:nth-child(6n+5),
+html body .game-list-tab-btn:nth-child(6n+5),
+html body .pkg-tab-btn:nth-child(6n+5),
+html body .ov-period-btn:nth-child(6n+5),
+html body .wseg-btn:nth-child(6n+5),
+html body .seg-tab:nth-child(6n+5) { --t: 245,158,11 !important; }
+
+html body .pkg-type-tab:nth-child(6n+6),
+html body .udp-tab:nth-child(6n+6),
+html body .game-list-tab-btn:nth-child(6n+6),
+html body .pkg-tab-btn:nth-child(6n+6),
+html body .ov-period-btn:nth-child(6n+6),
+html body .wseg-btn:nth-child(6n+6),
+html body .seg-tab:nth-child(6n+6) { --t: 6,182,212 !important; }
+
+/* Inactive page tabs */
+html body :is(.pkg-type-tab, .udp-tab, .game-list-tab-btn, .pkg-tab-btn, .ov-period-btn, .wseg-btn, .seg-tab) {
+  background: rgba(var(--t), 0.10) !important;
+  border: 1px solid rgba(var(--t), 0.26) !important;
+  color: var(--text-primary) !important;
+  box-shadow: none !important;
+}
+/* Active page tabs = own solid color (not global accent) */
+html body :is(.pkg-type-tab, .udp-tab, .game-list-tab-btn, .pkg-tab-btn, .ov-period-btn, .wseg-btn, .seg-tab).active {
+  color: #fff !important;
+  background: linear-gradient(180deg, rgba(255,255,255,0.26), rgba(255,255,255,0) 55%), rgb(var(--t)) !important;
+  border-color: rgba(255,255,255,0.32) !important;
+  box-shadow: 0 8px 16px -8px rgba(var(--t), 0.7), inset 0 1px 0 rgba(255,255,255,0.35) !important;
+}
+
+/* Subtabs (game list) */
+html body #game-list-subtabs .game-list-tab-btn {
+  background: rgba(var(--t), 0.10) !important;
+  border: 1px solid rgba(var(--t), 0.26) !important;
+  color: var(--text-primary) !important;
+}
+html body #game-list-subtabs .game-list-tab-btn.active {
+  background: linear-gradient(180deg, rgba(255,255,255,0.26), transparent 55%), rgb(var(--t)) !important;
+  border-color: rgba(255,255,255,0.32) !important;
+  color: #fff !important;
+}
+
+/* Nav group sheet rows also keep color if --t set */
+html body #nav-group-sheet-list > button {
+  border-left: 3px solid rgb(var(--t, 59,130,246)) !important;
+}
+</style>
+
 </head>
 <body>
 
@@ -3993,6 +5232,9 @@ html, body { overflow-x: hidden; }
         <symbol id="icon-plug" viewBox="0 0 24 24"><path d="M9 2v4"></path><path d="M15 2v4"></path><path d="M6 8h12a1 1 0 0 1 1 1v3a7 7 0 0 1-7 7h0a7 7 0 0 1-7-7V9a1 1 0 0 1 1-1z"></path><path d="M12 19v3"></path></symbol>
         <symbol id="icon-telegram" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></symbol>
         <symbol id="icon-moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></symbol>
+        <symbol id="icon-pumpkin" viewBox="0 0 24 24"><path d="M12 4.5c.6 0 1.2.2 1.6.6.2-.7.8-1.2 1.5-1.3-.1 1.1-.6 1.9-1.3 2.4 2.2.5 3.7 2.6 3.7 5.1 0 3.4-2.5 6.2-5.5 6.2S6.5 14.7 6.5 11.3c0-2.5 1.5-4.6 3.7-5.1C9.5 5.7 9 4.9 8.9 3.8c.7.1 1.3.6 1.5 1.3.4-.4 1-.6 1.6-.6z"></path><path d="M9.2 12.2c.5-.4 1.1-.2 1.4.3M12 11.5c0-.6.5-.9 1-.7M14.8 12.2c-.5-.4-1.1-.2-1.4.3"></path><path d="M9.5 14.6c.7.9 1.6 1.3 2.5 1.3s1.8-.4 2.5-1.3"></path></symbol>
+        <symbol id="icon-bat" viewBox="0 0 24 24"><path d="M12 14c1.2 0 2.2-.7 2.6-1.7.7.3 1.6.3 2.4-.1 1.3-.7 2.2-2 2.5-3.4-.9.4-1.9.4-2.8 0C15.9 7.4 14 6.5 12 6.5S8.1 7.4 7.3 8.8c-.9.4-1.9.4-2.8 0 .3 1.4 1.2 2.7 2.5 3.4.8.4 1.7.4 2.4.1.4 1 1.4 1.7 2.6 1.7z"></path><path d="M10.5 15.2c.4.8 1.1 1.3 1.5 1.3s1.1-.5 1.5-1.3"></path></symbol>
+        <symbol id="icon-spiderweb" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><circle cx="12" cy="12" r="5.5"></circle><circle cx="12" cy="12" r="2.2"></circle><path d="M12 3v18M3 12h18M5.6 5.6l12.8 12.8M18.4 5.6 5.6 18.4"></path></symbol>
         <symbol id="icon-palette" viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 0 20c1.1 0 2-.9 2-2 0-.5-.2-1-.5-1.3-.3-.4-.5-.8-.5-1.2 0-1.1.9-2 2-2h2.3c2.6 0 4.7-2.1 4.7-4.7C22 5.9 17.5 2 12 2z"></path><circle cx="7" cy="10.5" r="1.4"></circle><circle cx="12" cy="7.5" r="1.4"></circle><circle cx="16.5" cy="10.5" r="1.4"></circle><circle cx="9.5" cy="15.5" r="1.4"></circle></symbol>
         <symbol id="icon-refresh" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></symbol>
         <symbol id="icon-sort" viewBox="0 0 24 24"><line x1="6" y1="4" x2="6" y2="20"></line><polyline points="3 7 6 4 9 7"></polyline><line x1="18" y1="20" x2="18" y2="4"></line><polyline points="15 17 18 20 21 17"></polyline></symbol>
@@ -7309,6 +8551,7 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
             { id: 'dark-blue',       label: 'Dark Blue',     sub: 'Deep navy',  icon: 'icon-moon', swatch: ['#0A0E1A', '#3E86FF', '#171F31'] },
             { id: 'midnight-purple', label: 'Midnight',      sub: 'Violet',     icon: 'icon-moon', swatch: ['#0D0916', '#9B5CF6', '#1D1631'] },
             { id: 'ocean',           label: 'Ocean',         sub: 'Teal',       icon: 'icon-moon', swatch: ['#061015', '#10A8A0', '#10232C'] },
+            { id: 'halloween',       label: 'Halloween',     sub: 'Pumpkin glow', icon: 'icon-pumpkin', swatch: ['#0B0508', '#FF7A18', '#2A1018'] },
         ];
 
         // "auto" resolves to Light between 7AM-7PM local time and Dark Blue
@@ -27766,26 +29009,49 @@ html body .header #header-clock .hc-time,html body .header .hc-time,html body .h
 html body .header .conn-status{ background:rgba(255,255,255,.18) !important; border:1px solid rgba(255,255,255,.34) !important; box-shadow:inset 0 1px 0 rgba(255,255,255,.3); }
 html body .header .conn-label{ color:#fff !important; }
 
-/* 3) Nav bar: blue glass capsule, every tab blue */
+/* 3) Nav bar: compact height + per-tab colors (not one fixed blue) */
+html body .top-nav-wrap{
+  padding:4px 8px 6px !important;
+  top:52px !important;
+}
 html body .top-nav-wrap .top-nav{
-  background:linear-gradient(180deg,rgba(59,130,246,.16),rgba(59,130,246,.05)),var(--surface) !important;
-  border:1px solid rgba(59,130,246,.32) !important;
-  box-shadow:0 12px 28px -16px rgba(37,99,235,.55),inset 0 1px 0 var(--glass-hi,rgba(255,255,255,.6)) !important;
+  background:linear-gradient(180deg,rgba(255,255,255,.10),transparent),var(--surface) !important;
+  border:1px solid var(--border-glass) !important;
+  box-shadow:0 10px 24px -16px rgba(0,0,0,.35),inset 0 1px 0 var(--glass-hi,rgba(255,255,255,.55)) !important;
+  gap:3px !important;
+  padding:3px !important;
+  border-radius:16px !important;
 }
 html body .top-nav-wrap .top-nav .nav-item{
-  background:linear-gradient(180deg,rgba(59,130,246,.18),rgba(59,130,246,.08)) !important;
-  border:1px solid rgba(59,130,246,.32) !important;
-  color:var(--bt) !important;
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.35) !important;
+  --t: 59,130,246;
+  min-height:34px !important;
+  padding:4px 0 !important;
+  border-radius:12px !important;
+  background:rgba(var(--t),.12) !important;
+  border:1px solid rgba(var(--t),.28) !important;
+  color:var(--text-primary) !important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.22) !important;
+  transform:none !important;
 }
-html body .top-nav-wrap .top-nav .nav-item .nav-label{ color:inherit !important; }
-html body .top-nav-wrap .top-nav .nav-item .ui-icon{ stroke:var(--bt-soft) !important; }
+html body .top-nav-wrap .top-nav .nav-item .nav-label{ color:inherit !important; font-size:10.5px !important; }
+html body .top-nav-wrap .top-nav .nav-item .ui-icon{ width:15px !important; height:15px !important; stroke:rgb(var(--t)) !important; }
 html body .top-nav-wrap .top-nav .nav-item.active{
-  color:#fff !important; border-color:rgba(255,255,255,.45) !important;
-  background:linear-gradient(180deg,rgba(255,255,255,.30),rgba(255,255,255,0) 55%),linear-gradient(135deg,#2563EB,#3B82F6) !important;
-  box-shadow:0 8px 18px -8px rgba(37,99,235,.85),inset 0 1px 0 rgba(255,255,255,.5) !important;
+  color:#fff !important; border-color:rgba(255,255,255,.35) !important;
+  background:linear-gradient(180deg,rgba(255,255,255,.28),rgba(255,255,255,0) 55%),rgb(var(--t)) !important;
+  box-shadow:0 8px 16px -8px rgba(var(--t),.75),inset 0 1px 0 rgba(255,255,255,.4) !important;
+  transform:none !important;
 }
 html body .top-nav-wrap .top-nav .nav-item.active .ui-icon{ stroke:#fff !important; }
+html body .top-nav-wrap .top-nav .nav-item:active{ transform:none !important; }
+/* Per-group colors restored */
+html body #group-dashboard { --t: 59,130,246 !important; }
+html body #group-order     { --t: 139,92,246 !important; }
+html body #group-game      { --t: 236,72,153 !important; }
+html body #group-wallet    { --t: 16,185,129 !important; }
+html body #group-userlist  { --t: 245,158,11 !important; }
+html body #group-setting   { --t: 6,182,212 !important; }
+html body #group-festival  { --t: 225,29,72 !important; }
+html body #group-theme     { --t: 168,85,247 !important; }
 
 /* 4) Small titles / labels: light blue text + light blue grid cell */
 html body :is(.title-header){
