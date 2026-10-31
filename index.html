@@ -884,7 +884,7 @@ html[data-theme]:not([data-theme="light"]) #boot-cover{--bg1:#0A0E1A;--bg2:#0F12
             width: 7px; height: 7px; border-radius: 50%; background: #FF3B30; display: none;
             box-shadow: 0 0 0 2px rgba(255,59,48,0.16); flex-shrink: 0;
         }
-        /* Numeric badge (e.g. "New orders" count on the Orders nav icon) —
+        /* Numeric badge —
            same red pill used elsewhere for counts, sized to sit on a nav
            icon. Hidden by default; JS sets its text and toggles display. */
         .nav-item-count-badge {
@@ -1268,7 +1268,7 @@ html[data-theme]:not([data-theme="light"]) #boot-cover{--bg1:#0A0E1A;--bg2:#0F12
         .fulfill-group-label { font-size: 10.5px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.4px; margin: 0 0 5px 2px; }
         .btn { padding: 7px 11px; border-radius: 8px; font-weight: 500; font-size: 12.5px; cursor: pointer; border: 1px solid transparent; text-align: center; flex: 1; transition: transform 0.12s ease, filter 0.15s ease, background 0.15s ease; }
         .btn svg { flex-shrink: 0; }
-        /* Multi-button toolbar rows (e.g. Package editor actions): size each
+        /* Multi-button toolbar rows: size each
            button to its own text instead of stretching to an equal share of
            the row, which was forcing labels like "+ Add Package" onto two
            lines. Buttons wrap onto a new row as needed, chip-style. */
@@ -3525,7 +3525,7 @@ html.perf-low [data-pcbg] *,html.perf-low [data-pcbg] *::before,html.perf-low [d
                     <p class="sub">Enter the 6-digit code from your authenticator app.</p>
                     <p id="tfa-login-error" class="login-msg-error"></p>
                     <form id="tfa-login-form" onsubmit="return false;">
-                        <input type="text" id="tfa-login-code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="000000" style="text-align:center;font-size:26px;letter-spacing:10px;font-weight:700;width:100%;" oninput="onTwoFactorCodeInput(this, 'login')">
+                        <input type="text" id="tfa-login-code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" style="text-align:center;font-size:26px;letter-spacing:10px;font-weight:700;width:100%;" oninput="onTwoFactorCodeInput(this, 'login')">
                         <button type="button" id="tfa-login-btn" style="margin-top:16px;" onclick="handleTwoFactorLoginVerify()">Verify</button>
                         <button type="button" class="login-secondary-btn" style="width:100%;" onclick="cancelTwoFactorLogin()">Use a different account</button>
                     </form>
@@ -3805,7 +3805,7 @@ html.perf-low [data-pcbg] *,html.perf-low [data-pcbg] *::before,html.perf-low [d
                 <p style="font-size:11.5px;color:var(--text-muted);margin-bottom:6px;">Or enter this key manually:</p>
                 <div class="code-secret-box" id="tfa-secret-display" style="font-size:15px;font-weight:700;letter-spacing:1.5px;color:var(--text-primary);"></div>
                 <label style="margin-top:14px;">Enter the 6-digit code from your app</label>
-                <input type="text" id="tfa-setup-code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="000000" style="text-align:center;font-size:22px;letter-spacing:8px;font-weight:700;" oninput="onTwoFactorCodeInput(this, 'setup')">
+                <input type="text" id="tfa-setup-code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" style="text-align:center;font-size:22px;letter-spacing:8px;font-weight:700;" oninput="onTwoFactorCodeInput(this, 'setup')">
                 <p id="tfa-setup-error" class="login-msg-error" style="display:none;"></p>
             </div>
             <div class="modal-footer">
@@ -3826,7 +3826,7 @@ html.perf-low [data-pcbg] *,html.perf-low [data-pcbg] *::before,html.perf-low [d
             </div>
             <div class="modal-body">
                 <p style="font-size:12.5px;color:var(--text-secondary);margin-bottom:14px;">Enter a current code from your authenticator app to turn 2FA off for your account.</p>
-                <input type="text" id="tfa-disable-code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="000000" style="text-align:center;font-size:22px;letter-spacing:8px;font-weight:700;" oninput="onTwoFactorCodeInput(this, 'disable')">
+                <input type="text" id="tfa-disable-code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" style="text-align:center;font-size:22px;letter-spacing:8px;font-weight:700;" oninput="onTwoFactorCodeInput(this, 'disable')">
                 <p id="tfa-disable-error" class="login-msg-error" style="display:none;"></p>
             </div>
             <div class="modal-footer">
@@ -3847,11 +3847,11 @@ html.perf-low [data-pcbg] *,html.perf-low [data-pcbg] *::before,html.perf-low [d
             <div class="modal-body">
                 <div id="recovery-step-email">
                     <p style="font-size:12.5px;color:var(--text-secondary);margin-bottom:12px;">Password reset links will be sent to this address. We'll email you a 6-digit code to confirm it.</p>
-                    <input type="text" id="recovery-email-input" inputmode="email" autocomplete="email" autocapitalize="off" placeholder="you@example.com">
+                    <input type="text" id="recovery-email-input" inputmode="email" autocomplete="email" autocapitalize="off">
                 </div>
                 <div id="recovery-step-code" style="display:none;">
                     <p id="recovery-code-hint" style="font-size:12.5px;color:var(--text-secondary);margin-bottom:12px;"></p>
-                    <input type="text" id="recovery-code-input" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="000000" style="text-align:center;font-size:22px;letter-spacing:8px;font-weight:700;">
+                    <input type="text" id="recovery-code-input" inputmode="numeric" autocomplete="one-time-code" maxlength="6" style="text-align:center;font-size:22px;letter-spacing:8px;font-weight:700;">
                 </div>
                 <p id="recovery-error" class="login-msg-error" style="display:none;"></p>
             </div>
@@ -4424,7 +4424,7 @@ html.perf-low [data-pcbg] *,html.perf-low [data-pcbg] *::before,html.perf-low [d
                         <option value="0">Warn + close right now</option>
                     </select>
                     <label class="maint-lbl">Reason <span class="u-muted">(optional — customers မြင်ရမည်)</span></label>
-                    <input type="text" id="maint-reason-input" class="maint-field" maxlength="300" placeholder="e.g. Fixing provider error">
+                    <input type="text" id="maint-reason-input" class="maint-field" maxlength="300">
                     <div class="maint-chips"><button type="button" class="maint-chip" onclick="var i=document.getElementById('maint-reason-input');i.value=this.textContent;i.dispatchEvent(new Event('input',{bubbles:true}));i.focus()">Fixing provider error</button><button type="button" class="maint-chip" onclick="var i=document.getElementById('maint-reason-input');i.value=this.textContent;i.dispatchEvent(new Event('input',{bubbles:true}));i.focus()">System upgrade</button><button type="button" class="maint-chip" onclick="var i=document.getElementById('maint-reason-input');i.value=this.textContent;i.dispatchEvent(new Event('input',{bubbles:true}));i.focus()">Payment issue</button><button type="button" class="maint-chip" onclick="var i=document.getElementById('maint-reason-input');i.value=this.textContent;i.dispatchEvent(new Event('input',{bubbles:true}));i.focus()">Server maintenance</button></div>
                     <div class="maint-actions">
                         <button class="btn maint-btn-close" id="maint-start-btn" onclick="maintenanceAction('start')">Notify &amp; Close</button>
@@ -4493,27 +4493,29 @@ html.perf-low [data-pcbg] *,html.perf-low [data-pcbg] *::before,html.perf-low [d
                 </div>
             </div>
 
-            <div class="admin-card" id="settings-card-walletcleanup" style="margin-top:14px;">
-                <span class="sc-title">No-History Wallet Cleanup</span>
-                <p class="note-glass note-bad" style="font-size:11px;color:var(--text-secondary);line-height:1.5;margin:8px 0;">Wallet ထဲမှာ ငွေရှိပေမဲ့ <b>Completed top-up မရှိ၊ Wallet နဲ့ order လည်းမရှိ</b> တဲ့ user တွေကို ရှာပါမယ်။ Scan လုပ်ပြီး စာရင်းကြည့်ပြီးမှ အတည်ပြုရင် Wallet ကို 0 လုပ်ပြီး warning ပို့ပါမယ် (အလိုအလျောက် မဖျက်ပါ)။</p>
-                <button class="btn btn-outline" id="wallet-cleanup-scan-btn" onclick="scanNoHistoryWallets(this)">Scan</button>
-                <div id="wallet-cleanup-result" style="margin-top:10px;font-size:12px;"></div>
-            </div>
+            <div class="admin-card" id="settings-card-scans" style="margin-top:14px;">
+<div class="sc-head" onclick="var b=document.getElementById('scans-body');var o=b.style.display==='none';b.style.display=o?'block':'none';this.classList.toggle('open',o)">
+<span class="sc-title">Data Scans</span>
+<svg class="ui-icon sc-chevron"><use href="#icon-chevron-down"></use></svg>
+</div>
+<div id="scans-body" style="display:none;margin-top:12px;">
+<div class="ls-seg" role="tablist">
+<button type="button" class="on" data-no-busy data-p="ls-p1" onclick="lsScanTab(this)">Wallet cleanup</button>
+<button type="button" data-no-busy data-p="ls-p2" onclick="lsScanTab(this)">Debit scan</button>
+<button type="button" data-no-busy data-p="ls-p3" onclick="lsScanTab(this)">Cost privacy</button>
+</div>
+<div class="ls-pane on" id="ls-p1"><p class="note-glass note-bad">Wallet ထဲမှာ ငွေရှိပေမဲ့ <b>Completed top-up မရှိ၊ Wallet နဲ့ order လည်းမရှိ</b> တဲ့ user တွေကို ရှာပါမယ်။ Scan လုပ်ပြီး စာရင်းကြည့်ပြီးမှ အတည်ပြုရင် Wallet ကို 0 လုပ်ပြီး warning ပို့ပါမယ် (အလိုအလျောက် မဖျက်ပါ)။</p>
+<button class="btn btn-outline" id="wallet-cleanup-scan-btn" onclick="scanNoHistoryWallets(this)">Scan</button>
+<div id="wallet-cleanup-result" style="margin-top:10px;font-size:12px;"></div></div>
+<div class="ls-pane" id="ls-p2"><p class="note-glass note-bad">Wallet နဲ့ဝယ်ပြီး <b>Success/Processing ဖြစ်ပေမဲ့ Wallet ကနေ မဖြတ်ရသေးတဲ့</b> order တွေကို ရှာပါမယ်။ <b>Debit</b> နှိပ်ရင် Wallet ကနေ ဖြတ်မယ်၊ Payment နဲ့ပေးထားတာဆိုရင် <b>Wallet မဟုတ်ဘူး</b> နှိပ်ပါ (Wallet စာရင်းကနေ ဖယ်မယ်)။</p>
+<button class="btn btn-outline" id="wallet-debit-scan-btn" onclick="scanUndebitedWalletOrders(this)">Scan</button>
+<div id="wallet-debit-result" style="margin-top:10px;font-size:12px;"></div></div>
+<div class="ls-pane" id="ls-p3"><p class="note-glass note-ok">Package Cost တွေကို ပြည်သူဖတ်လို့ရတဲ့ <b>games</b> ထဲကနေ admin-only <b>gameCosts</b> ထဲ ရွှေ့ပါမယ် (ထပ်နှိပ်လည်း အန္တရာယ်မရှိပါ)။</p>
+<button class="btn btn-primary" onclick="migrateCostsToAdminOnly(this)">Move Costs to Private</button></div>
+</div>
+</div>
 
-            <div class="admin-card" id="settings-card-walletdebit" style="margin-top:14px;">
-                <span class="sc-title">Wallet Debit Scan</span>
-                <p class="note-glass note-bad" style="font-size:11px;color:var(--text-secondary);line-height:1.5;margin:8px 0;">Wallet နဲ့ဝယ်ပြီး <b>Success/Processing ဖြစ်ပေမဲ့ Wallet ကနေ မဖြတ်ရသေးတဲ့</b> order တွေကို ရှာပါမယ်။ <b>Debit</b> နှိပ်ရင် Wallet ကနေ ဖြတ်မယ်၊ Payment နဲ့ပေးထားတာဆိုရင် <b>Wallet မဟုတ်ဘူး</b> နှိပ်ပါ (Wallet စာရင်းကနေ ဖယ်မယ်)။</p>
-                <button class="btn btn-outline" id="wallet-debit-scan-btn" onclick="scanUndebitedWalletOrders(this)">Scan</button>
-                <div id="wallet-debit-result" style="margin-top:10px;font-size:12px;"></div>
-            </div>
-
-            <div class="admin-card" id="settings-card-costmigrate" style="margin-top:14px;">
-                <span class="sc-title">Cost Privacy Migration</span>
-                <p class="note-glass note-ok" style="font-size:11px;color:var(--text-secondary);line-height:1.5;margin:8px 0;">Package Cost တွေကို ပြည်သူဖတ်လို့ရတဲ့ <b>games</b> ထဲကနေ admin-only <b>gameCosts</b> ထဲ ရွှေ့ပါမယ် (ထပ်နှိပ်လည်း အန္တရာယ်မရှိပါ)။</p>
-                <button class="btn btn-primary" onclick="migrateCostsToAdminOnly(this)">Move Costs to Private</button>
-            </div>
-
-            <div class="admin-card" id="settings-card-autoprice" style="margin-top:14px;">
+<div class="admin-card" id="settings-card-autoprice" style="margin-top:14px;">
                 <div class="sc-head" onclick="toggleAutoPriceSettings()">
                     <span class="sc-title">Auto Cost Update</span>
                     <svg class="ui-icon sc-chevron" id="autoprice-chevron"><use href="#icon-chevron-down"></use></svg>
@@ -5273,7 +5275,7 @@ html.perf-low [data-pcbg] *,html.perf-low [data-pcbg] *::before,html.perf-low [d
 <div class="evA-stats" id="evA-stats"></div>
 <label>ကစားသူများ (မီးပုံးအများဆုံး ၃၀)</label><div id="evA-players" class="evA-note">-</div>
 <label>မီးပုံး ထည့်/နှုတ် (User ID)</label>
-<div class="evA-g3"><input type="text" id="evA-gu" placeholder="User ID"><input type="number" id="evA-gn" placeholder="+5 / -2"><button type="button" class="ea-btn" id="evA-grant">ပေးမယ်</button></div>
+<div class="evA-g3"><input type="text" id="evA-gu" placeholder="User ID"><input type="number" id="evA-gn"><button type="button" class="ea-btn" id="evA-grant">ပေးမယ်</button></div>
 </div>
 <div class="ea-h2">Invite မှတ်တမ်း</div>
 <p class="ea-note">Revoke လုပ်ရင် အဲ့ဒီ Invite ရဲ့ မီးပုံးကို ဖိတ်သူဆီက ပြန်နုတ်ပါမယ်။</p>
@@ -5293,7 +5295,7 @@ const newId = (n) => (String(n || 'ev').toLowerCase().replace(/[^a-z0-9]/g, '').
 const status = (e) => { const n = Date.now(), s = e.sd ? Date.parse(e.sd + 'T' + (e.st || '00:00') + ':00+06:30') : 0, f = e.ed ? Date.parse(e.ed + 'T' + (e.et || '23:59') + ':59+06:30') : 0; if (e.on === false) return ['off', '⚫ ပိတ်ထား']; if (s && n < s) return ['soon', '🕒 မစသေးပါ']; if (f && n > f) return ['end', '✔ ပြီးပြီ']; return ['live', '🟢 ကစားနေ']; };
 const val = (o, k, d) => (o[k] === undefined || o[k] === null ? d : o[k]);
 
-/* ---- tiny form helpers: every input carries its path (e.g. 0.tiers.1.cost) and writes straight into LIST ---- */
+/* ---- tiny form helpers: every input carries its path and writes straight into LIST ---- */
 function inp(path, lbl, type, ph, v) { return '<div><label>' + lbl + '</label><input type="' + type + '" data-p="' + path + '" data-t="' + (type === 'number' ? 'n' : 's') + '" value="' + esc(v) + '" placeholder="' + esc(ph || '') + '"></div>'; }
 function chk(path, lbl, v) { return '<label class="evA-sw"><input type="checkbox" data-p="' + path + '" data-t="b"' + (v ? ' checked' : '') + '>' + lbl + '</label>'; }
 function sel(path, lbl, opts, v) { return '<div><label>' + lbl + '</label><select data-p="' + path + '" data-t="s">' + opts.map(o => '<option value="' + o[0] + '"' + (o[0] === v ? ' selected' : '') + '>' + o[1] + '</option>').join('') + '</select></div>'; }
@@ -5366,7 +5368,7 @@ function secEarn(i, e) {
 function secBox(i, e) {
   const b = e.box || (e.box = defaultBox()), p = i + '.box', ts = b.tiers || [];
   return '<div class="ea-opt"><div class="ea-line">' + swc(p + '.on', b.on === true, 'Box ဖွင့်ထားမယ်') + fld(p + '.cost', 'မီးပုံး', 'number', val(b, 'cost', 3), '3', 'ea-w') +
-    '<div class="ea-f ea-w"><label>ပွင့်ဖို့ စောင့်ချိန် (မိနစ်)</label><input type="number" step="any" min="0" inputmode="decimal" data-p="' + p + '.openSecs" data-t="m" value="' + esc(Math.round(val(b, 'openSecs', 60) / 60 * 100) / 100) + '" placeholder="1"></div></div></div>' +
+    '<div class="ea-f ea-w"><label>ပွင့်ဖို့ စောင့်ချိန် (မိနစ်)</label><input type="number" step="any" min="0" inputmode="decimal" data-p="' + p + '.openSecs" data-t="m" value="' + esc(Math.round(val(b, 'openSecs', 60) / 60 * 100) / 100) + '"></div></div></div>' +
     '<div id="evA-odds-' + i + '">' + oddsHtml(b) + '</div>' + ts.map((t, j) => boxTierHtml(i, j, t)).join('') +
     '<div class="ea-add">' + addBtn('data-addbt="' + i + '"', 'ဆုအဆင့်') + '<button type="button" class="ea-btn" data-bxpreset="' + i + '"><span>Preset ၄ ခု</span></button></div>';
 }
@@ -5413,7 +5415,7 @@ function draw() {
   root.querySelectorAll('[data-sec]').forEach(b => b.onclick = () => { SECT = SECT === b.dataset.sec ? '' : b.dataset.sec; draw(); });
   root.querySelectorAll('[data-edit]').forEach(b => b.onclick = () => { EDIT = Number(b.dataset.edit); SECT = 'basic'; draw(); });
   root.querySelectorAll('[data-tog]').forEach(b => b.onclick = () => { const e = LIST[b.dataset.tog]; e.on = e.on === false; setDirty(true); draw(); });
-  root.querySelectorAll('[data-del]').forEach(b => b.onclick = () => { if (confirm('ဒီ Event ကို ဖျက်မလား?')) { LIST.splice(b.dataset.del, 1); EDIT = -1; setDirty(true); draw(); fillSel(); } });
+  root.querySelectorAll('[data-del]').forEach(b => b.onclick = async () => { if (await uiConfirm('ဒီ Event ကို ဖျက်မလား?')) { LIST.splice(b.dataset.del, 1); EDIT = -1; setDirty(true); draw(); fillSel(); } });
   const again = () => { setDirty(true); draw(); };
   root.querySelectorAll('[data-addm]').forEach(b => b.onclick = () => {
     const e = LIST[b.dataset.addm], k = b.dataset.k || 'link', ms = (e.missions = e.missions || []);
@@ -5421,9 +5423,9 @@ function draw() {
     ms.push({ id: rid(), title: d[0], desc: '', reward: d[1], type: k === 'link' ? 'once' : 'daily', kind: k, target: d[2], url: '', on: true }); again();
   });
   root.querySelectorAll('[data-addbt]').forEach(b => b.onclick = () => { const e = LIST[b.dataset.addbt]; const bx = e.box || (e.box = defaultBox()); (bx.tiers = bx.tiers || []).push({ id: bid(), label: '', color: '#9aa4b2', title: '', prize: '', weight: 10, stock: 0, perUser: 0, on: true }); again(); });
-  root.querySelectorAll('[data-bxpreset]').forEach(b => b.onclick = () => { const e = LIST[b.dataset.bxpreset]; const bx = e.box || (e.box = defaultBox()); if ((bx.tiers || []).length && !confirm('ရှိပြီးသား အဆင့်တွေကို Preset နဲ့ အစားထိုးမလား?')) return; bx.tiers = boxPreset(); again(); });
+  root.querySelectorAll('[data-bxpreset]').forEach(b => b.onclick = async () => { const e = LIST[b.dataset.bxpreset]; const bx = e.box || (e.box = defaultBox()); if ((bx.tiers || []).length && !await uiConfirm('ရှိပြီးသား အဆင့်တွေကို Preset နဲ့ အစားထိုးမလား?')) return; bx.tiers = boxPreset(); again(); });
   root.querySelectorAll('[data-addt]').forEach(b => b.onclick = () => { const e = LIST[b.dataset.addt]; (e.tiers = e.tiers || []).push({ id: rid(), title: '', prize: '', cost: 3, mode: 'game', goal: 15, secs: 12, stock: 0, perUser: 1, refund: false, on: true }); again(); });
-  root.querySelectorAll('[data-rm]').forEach(b => b.onclick = () => { if (!confirm('ဖျက်မလား?')) return; const [o, j] = arrOf(b.dataset.rm); o.splice(j, 1); again(); });
+  root.querySelectorAll('[data-rm]').forEach(b => b.onclick = async () => { if (!await uiConfirm('ဖျက်မလား?')) return; const [o, j] = arrOf(b.dataset.rm); o.splice(j, 1); again(); });
   root.querySelectorAll('[data-up]').forEach(b => b.onclick = () => { const [o, j] = arrOf(b.dataset.up); if (j > 0) { [o[j - 1], o[j]] = [o[j], o[j - 1]]; again(); } });
   root.querySelectorAll('[data-dn]').forEach(b => b.onclick = () => { const [o, j] = arrOf(b.dataset.dn); if (j < o.length - 1) { [o[j + 1], o[j]] = [o[j], o[j + 1]]; again(); } });
 }
@@ -5502,7 +5504,7 @@ async function loadLive() {
     const rows = invites.sort((a, b) => tsOf(b) - tsOf(a)).slice(0, 50);
     $('evA-inv').innerHTML = rows.length ? rows.map(r => '<div class="evA-clm"><div>ဖိတ်သူ <code>' + esc(r.inviter) + '</code> → ဖိတ်ခံ <code>' + esc(r.invitee) + '</code></div><div>' + (r.counted ? '<span class="evA-chip paid">ရပြီး +' + esc(r.reward) + '</span>' : '<span class="evA-chip rejected">မရ: ' + esc(r.reason) + '</span>') + ' · ' + esc(fmt(tsOf(r))) + (r.counted ? ' <button class="btn btn-outline evA-mini" data-rev="' + esc(r._id) + '" data-inv="' + esc(r.inviter) + '" data-rw="' + esc(r.reward) + '" data-e="' + esc(eid) + '">Revoke</button>' : '') + '</div></div>').join('') : '<p class="evA-note">မရှိသေးပါ</p>';
     $('evA-inv').querySelectorAll('[data-rev]').forEach(b => b.onclick = async () => {
-      if (!confirm('ဒီ Invite ရဲ့ မီးပုံးကို ပြန်နုတ်မလား?')) return;
+      if (!await uiConfirm('ဒီ Invite ရဲ့ မီးပုံးကို ပြန်နုတ်မလား?')) return;
       try { await updateDoc(doc(window.db, 'eventInvites', b.dataset.rev), { counted: false, reason: 'revoked', reward: 0 }); await updateDoc(doc(window.db, 'eventPlayers', b.dataset.e + '_' + b.dataset.inv), { inviteLanterns: increment(-Number(b.dataset.rw || 0)), inviteCount: increment(-1) }); toast('နုတ်ပြီးပါပြီ'); loadLive(); } catch (e) { toast('မပြောင်းနိုင်ပါ (rules စစ်ပါ)', 'fail'); }
     });
   } catch (e) { $('evA-stats').innerHTML = '<div class="evA-note" style="grid-column:1/-1">ဖတ်မရပါ - firestore.rules ထဲ eventPlayers / eventInvites ကို admin read ပေးထားရန်လိုပါတယ်</div>'; }
@@ -5511,7 +5513,7 @@ $('evA-load').onclick = loadLive; $('evA-sel').onchange = loadLive;
 $('evA-grant').onclick = async () => {
   const eid = $('evA-sel').value, uid = $('evA-gu').value.trim(), n = Math.trunc(Number($('evA-gn').value));
   if (!eid || !/^[A-Za-z0-9_-]{3,64}$/.test(uid) || !n) return toast('User ID နဲ့ အရေအတွက် ထည့်ပါ', 'fail');
-  if (!confirm(uid + ' ကို မီးပုံး ' + (n > 0 ? '+' : '') + n + ' လုပ်မလား?')) return;
+  if (!await uiConfirm(uid + ' ကို မီးပုံး ' + (n > 0 ? '+' : '') + n + ' လုပ်မလား?')) return;
   try { await setDoc(doc(window.db, 'eventPlayers', eid + '_' + uid), { eventId: eid, userId: uid, bonus: increment(n) }, { merge: true }); toast('ပြီးပါပြီ'); $('evA-gu').value = ''; $('evA-gn').value = ''; loadLive(); } catch (e) { toast('မရပါ (rules စစ်ပါ)', 'fail'); }
 };
 async function loadClaims() {
@@ -5744,7 +5746,7 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
                 </div>
                 <div class="ft-card">
                     <h3 class="ft-h">Video နောက်ခံ</h3>
-                    <input class="ft-in" type="url" id="fest-v-url" placeholder="https://.../video.mp4" oninput="festVideoUrl(this.value)" style="margin-top:12px;">
+                    <input class="ft-in" type="url" id="fest-v-url" oninput="festVideoUrl(this.value)" style="margin-top:12px;">
                     <div class="ft-note warn" id="fest-v-note">⚠️ Video ကို တိုက်ရိုက် upload မရပါ (Firebase Storage နဲ့ ဗီဒီယို မသုံးထားပါ)။ mp4 / webm လင့်ခ်ပဲ ထည့်ပါ။ ဖုန်းအားနည်းရင် Video အစား ပုံပဲ ပြမယ်။</div>
                 </div>
                 <div class="ft-card">
@@ -6077,7 +6079,7 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
                 <textarea id="edit-game-description" rows="4" placeholder="Enter Description" style="width:100%;padding:10px;border-radius:12px;border:1px solid var(--border-glass);background:var(--bg-subtle-2);color:var(--text-primary);font-size:14px;font-family:inherit;resize:vertical;box-sizing:border-box;"></textarea>
 
                 <label>Redeem Link <span class="u-muted">(optional — "Redeem Now" button under the Description opens this link)</span></label>
-                <input type="text" id="edit-game-redeem-link" inputmode="url" autocapitalize="off" autocomplete="off" spellcheck="false" placeholder="https://..." style="width:100%;padding:10px;border-radius:12px;border:1px solid var(--border-glass);background:var(--bg-subtle-2);color:var(--text-primary);font-size:14px;font-family:inherit;box-sizing:border-box;">
+                <input type="text" id="edit-game-redeem-link" inputmode="url" autocapitalize="off" autocomplete="off" spellcheck="false" style="width:100%;padding:10px;border-radius:12px;border:1px solid var(--border-glass);background:var(--bg-subtle-2);color:var(--text-primary);font-size:14px;font-family:inherit;box-sizing:border-box;">
 
                 <!-- App deep-link fields: purely optional. When set, Store.html
                      shows a "Game ဖွင့်မယ်" button on the game detail page and
@@ -6090,7 +6092,7 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
                      this display:none once the feature's back in use. -->
                 <div style="display:none;margin:4px 0 2px;padding:12px;background:var(--fill-soft);border-radius:12px;border:1px solid var(--fill-soft);">
                     <p style="font-size:11px;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.3px;margin-bottom:8px;">App Link (optional)</p>
-                    <label style="margin-top:0;">Android Package <span class="u-muted">(e.g. com.mobile.legends)</span></label>
+                    <label style="margin-top:0;">Android Package <span class="u-muted"></span></label>
                     <input type="text" id="edit-game-app-android-package" placeholder="Enter Android Package Name">
                     <label>Android Scheme <span class="u-muted">(custom URL scheme, without "://")</span></label>
                     <input type="text" id="edit-game-app-android-scheme" placeholder="Enter Android Scheme">
@@ -6114,7 +6116,7 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
                 </div>
                 <div id="edit-game-disabled-wrap" style="display:none;margin-bottom:12px;">
                     <label>Reason shown to customers (top of the game's Description)</label>
-                    <textarea id="edit-game-disabled-reason" rows="2" placeholder="e.g. MLBB top-ups are delayed by the provider. Please order again later." style="width:100%;padding:10px;border-radius:12px;border:1px solid var(--border-glass);background:var(--bg-subtle-2);color:var(--text-primary);font-size:14px;font-family:inherit;resize:vertical;box-sizing:border-box;"></textarea>
+                    <textarea id="edit-game-disabled-reason" rows="2" style="width:100%;padding:10px;border-radius:12px;border:1px solid var(--border-glass);background:var(--bg-subtle-2);color:var(--text-primary);font-size:14px;font-family:inherit;resize:vertical;box-sizing:border-box;"></textarea>
                 </div>
 
                 <input type="hidden" id="edit-game-pcbg" value="">
@@ -6406,7 +6408,7 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
                         <div class="ge-margin-top"><span>Price တိုးမယ့် % <small>(Cost အပေါ်)</small></span><span class="ge-margin-src" id="ge-margin-src"></span></div>
                         <div class="ge-stepper">
                             <button type="button" class="ge-step-btn" onclick="geMarginStep(-0.25)" aria-label="Decrease">&minus;</button>
-                            <input type="number" id="edit-game-margin" inputmode="decimal" step="0.25" min="0" max="500" placeholder="Global" oninput="geMarginChanged()">
+                            <input type="number" id="edit-game-margin" inputmode="decimal" step="0.25" min="0" max="500" oninput="geMarginChanged()">
                             <span class="ge-pct">%</span>
                             <button type="button" class="ge-step-btn" onclick="geMarginStep(0.25)" aria-label="Increase">+</button>
                         </div>
@@ -6437,7 +6439,7 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
          action sheet's Edit button, or from "+ Add" on the game list. -->
 
     <!-- Bulk Price/Cost Adjust Modal: shift every package's Price or Cost by a
-         percentage in one tap (e.g. "+5% all prices" after a supplier hike).
+         percentage in one tap.
          Scoped to the currently-open tab by default so it matches Sort's
          per-tab behavior, with an "All tabs" option for a full-game-wide change. -->
     <div class="modal-overlay" id="bulk-pkg-modal-overlay" onclick="if(event.target===this) closeBulkPkgModal()">
@@ -6522,7 +6524,7 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
                 </div>
             </div>
             <label>Role Name</label>
-            <input type="text" id="add-category-label" placeholder="e.g. Card, Puzzle, Idle" autocomplete="off" style="width:100%;padding:10px 12px;border:1px solid var(--border-glass);border-radius:10px;font-size:14px;background:var(--bg-subtle-2);color:var(--text-primary);box-sizing:border-box;margin-top:6px;">
+            <input type="text" id="add-category-label" autocomplete="off" style="width:100%;padding:10px 12px;border:1px solid var(--border-glass);border-radius:10px;font-size:14px;background:var(--bg-subtle-2);color:var(--text-primary);box-sizing:border-box;margin-top:6px;">
             <label style="margin-top:12px;">Tab Color</label>
             <input type="color" id="add-category-color" value="#7C5CFC" style="width:100%;height:42px;padding:2px;border:1px solid var(--border-glass);border-radius:10px;background:var(--bg-subtle-2);box-sizing:border-box;margin-top:6px;cursor:pointer;">
             <div style="display:flex;gap:8px;margin-top:16px;">
@@ -7820,7 +7822,11 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
             const ctl = new AbortController();
             const t = setTimeout(() => ctl.abort(), timeoutMs || 40000);
             try {
-                const res = await fetch(IMG_UPLOAD_WORKER_URL, { method: 'POST', body: fd, signal: ctl.signal });
+                const hdrs = {};
+                try {
+                    if (typeof auth !== 'undefined' && auth.currentUser) hdrs['Authorization'] = 'Bearer ' + await auth.currentUser.getIdToken();
+                } catch (e) { /* falls through: Worker answers 401 and the message below explains it */ }
+                const res = await fetch(IMG_UPLOAD_WORKER_URL, { method: 'POST', headers: hdrs, body: fd, signal: ctl.signal });
                 let j = null, txt = '';
                 try { txt = await res.text(); j = JSON.parse(txt); } catch (e) { /* non-JSON reply */ }
                 // Accept the common reply shapes: {url} / {data:{url}} / {secure_url} / {result:{url}} / plain URL text
@@ -7843,7 +7849,7 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
                     return await workerImageUpload(file, dir, 40000);
                 } catch (e) {
                     console.warn('Worker image upload failed:', e);
-                    lastErr = new Error('Upload failed: ' + (e && e.message ? e.message : 'network error'));
+                    lastErr = new Error(String(e && e.message ? e.message : 'network error').replace(/^Upload failed:\s*/i, ''));
                     if (e && e.status >= 400 && e.status < 500) break; // bad file: retrying won't help
                     await new Promise(r2 => setTimeout(r2, 800 * (attempt + 1)));
                 }
@@ -8365,17 +8371,30 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
             const question = action === 'start'
                 ? (minutes > 0 ? `Warn ALL users now and close the store + bot in ${minutes} min?` : 'Close the store + bot RIGHT NOW and notify all users?')
                 : 'Reopen the store + bot and notify all users?';
-            if (!window.confirm(question)) return;
+            if (!await uiConfirm(question, { title: action === 'start' ? 'Close the store?' : 'Reopen the store?', confirmText: action === 'start' ? 'Notify & Close' : 'Reopen', danger: action === 'start' })) return;
             const btn = document.getElementById(action === 'start' ? 'maint-start-btn' : 'maint-stop-btn');
             const old = btn.innerText; btn.disabled = true; btn.innerText = 'Working…';
             try {
-                const token = await auth.currentUser.getIdToken();
-                const res = await fetch(`${ADMIN_SYNC_WORKER_URL}/maintenance`, {
-                    method: 'POST',
-                    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ action, minutes, reason })
-                });
-                const data = await res.json().catch(() => null);
+                let res, data;
+                for (let attempt = 0; attempt < 2; attempt++) {
+                    const token = await auth.currentUser.getIdToken(attempt > 0);
+                    res = await fetch(`${ADMIN_SYNC_WORKER_URL}/maintenance`, {
+                        method: 'POST',
+                        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ action, minutes, reason })
+                    });
+                    data = await res.json().catch(() => null);
+                    // The Worker wants a fresh admin-PIN check for this action: ask for it here, verify, retry once.
+                    if (attempt === 0 && /PIN required/i.test(String((data && data.error) || ''))) {
+                        const pin = await uiPrompt('Enter your 6-digit admin PIN to continue.', '', { title: 'Verify PIN', password: true, confirmText: 'Verify' });
+                        if (pin === null) return;
+                        if (!/^\d{6}$/.test(pin)) { window.showToast('PIN must be 6 digits', 'fail'); return; }
+                        const pr = await adminPinCall({ op: 'verify', pin });
+                        if (!(pr.data && pr.data.ok)) { window.showToast((pr.data && pr.data.error) || 'Wrong PIN', 'fail'); return; }
+                        continue;
+                    }
+                    break;
+                }
                 if (res.status === 404) { window.showToast("The /maintenance route isn't deployed on the Worker yet.", 'fail'); return; }
                 if (res.status === 401) { window.showToast('Not authorised - sign in again / run Sync Claims.', 'fail'); return; }
                 if (!data || !data.ok) { window.showToast((data && data.error) || ('Worker returned HTTP ' + res.status), 'fail'); return; }
@@ -9959,7 +9978,7 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
                     '<svg class="ui-icon" style="width:34px;height:34px;color:#4F46E5;"><use href="#icon-shield"></use></svg>' +
                     '<div style="font-size:18px;font-weight:800;margin:8px 0 4px;">Enter your PIN</div>' +
                     '<div style="font-size:12.5px;color:#5B6072;line-height:1.5;margin-bottom:14px;">Your 6-digit admin PIN is needed again (last entry was more than 6 hours ago).</div>' +
-                    '<input type="password" id="admin-pin-gate-input" inputmode="numeric" maxlength="6" autocomplete="off" placeholder="000000" style="width:100%;box-sizing:border-box;text-align:center;letter-spacing:10px;font-size:22px;padding:12px;border:1px solid #E2E4E9;border-radius:12px;">' +
+                    '<input type="password" id="admin-pin-gate-input" inputmode="numeric" maxlength="6" autocomplete="off" style="width:100%;box-sizing:border-box;text-align:center;letter-spacing:10px;font-size:22px;padding:12px;border:1px solid #E2E4E9;border-radius:12px;">' +
                     '<div id="admin-pin-gate-err" style="display:none;color:#DC2626;font-size:12.5px;margin-top:10px;"></div>' +
                     '<button type="button" id="admin-pin-gate-btn" style="width:100%;margin-top:14px;padding:12px;border:0;border-radius:12px;background:#4F46E5;color:#fff;font-weight:700;font-size:15px;">Verify</button>' +
                     '<button type="button" id="admin-pin-gate-out" style="width:100%;margin-top:8px;padding:10px;border:0;background:transparent;color:#5B6072;font-size:13px;">Sign out</button>' +
@@ -11067,7 +11086,7 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
                     const g2bulkTotal = Number(data.g2bulkSubOrdersTotal) || 1;
                     const g2bulkStatusLabel = g2bulkTotal > 1 ? `${Number(data.g2bulkSubOrdersDone) || 0}/${g2bulkTotal} units done` : (data.g2bulkStatus || 'PENDING');
                     actionButtons = `<button class="btn btn-outline" onclick="checkG2BulkOrderStatus('${orderId}')">Check G2Bulk Status (${g2bulkStatusLabel})</button>
-                                      <button class="btn btn-primary" onclick="markSuccess('${orderId}', this)" title="Use this if you've already confirmed delivery yourself (e.g. via the G2Bulk Telegram bot) and don't want to wait on the API check">Mark Success</button>
+                                      <button class="btn btn-primary" onclick="markSuccess('${orderId}', this)" title="Use this if you've already confirmed delivery yourself and don't want to wait on the API check">Mark Success</button>
                                       <button class="btn btn-danger" onclick="markFail('${orderId}', this)">Mark Fail</button>`;
                 } else if (data.status === 'Processing' && data.g2bulkVoucherPollUrl) {
                     actionButtons = `<button class="btn btn-outline" onclick="checkG2BulkVoucherDeliveryStatus('${orderId}', '${data.g2bulkVoucherPollUrl}')">Check G2Bulk Status (Voucher)</button>
@@ -11755,7 +11774,7 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
                         g2bulkSubOrdersTotal: quantity,
                         g2bulkSubOrdersDone: info.done,
                         // Kept for back-compat with anything still reading a single
-                        // id/status (e.g. older order-detail views) - reflects unit #1.
+                        // id/status - reflects unit #1.
                         g2bulkOrderId: subs[0].g2bulkOrderId || null
                     };
                     // If the webhook already finished the whole order, don't drag it back
@@ -12631,7 +12650,7 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
                 message: 'The customer will see this order as completed.',
                 confirmText: 'Mark as Success',
                 showNote: true,
-                notePlaceholder: 'Note (optional) — e.g. "Delivered manually, 5 min late"',
+                notePlaceholder: 'Note (optional)',
                 onConfirm: (note) => doMarkSuccess(orderId, btnElement, note)
             });
         }
@@ -12666,7 +12685,7 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
                 message: 'The customer will need to reorder. This action cannot be undone.',
                 confirmText: 'Mark as Failed',
                 showNote: true,
-                notePlaceholder: 'Reason (optional) — e.g. "Wrong player ID, please recheck and reorder"',
+                notePlaceholder: 'Reason (optional)',
                 templates: ORDER_REJECT_TEMPLATES,
                 onConfirm: (note) => doMarkFail(orderId, btnElement, note)
             });
@@ -12791,7 +12810,7 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
                 message: `Customers will need to reorder. Any wallet-paid orders among these are refunded automatically. This cannot be undone.`,
                 confirmText: `Reject ${ids.length} Order${ids.length > 1 ? 's' : ''}`,
                 showNote: true,
-                notePlaceholder: 'Reason (optional, applied to all selected) — e.g. "Wrong player ID, please recheck and reorder"',
+                notePlaceholder: 'Reason (optional, applied to all selected)',
                 templates: ORDER_REJECT_TEMPLATES,
                 onConfirm: (note) => doBulkReject(ids, note)
             });
@@ -12823,7 +12842,7 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
         // and then Confirm (-> Completed, credits users/{uid}.walletBalance by
         // the exact amount via a transaction) or Reject (-> Rejected, no
         // credit). A separate "Top Up by UID" form lets the admin credit a
-        // wallet directly (e.g. bonuses/refunds) without a customer request.
+        // wallet directly without a customer request.
         // ============================================================
         let topupsListenerAttached = false;
         let topupsUnsub = null; // closed by unsubscribeTabListeners() when the Top Up tab is left
@@ -13235,7 +13254,7 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
                 message: 'No amount will be credited. The customer will see this request as rejected.',
                 confirmText: 'Reject',
                 showNote: true,
-                notePlaceholder: 'Reason (optional) — e.g. "Receipt does not match amount"',
+                notePlaceholder: 'Reason (optional)',
                 templates: ORDER_REJECT_TEMPLATES.filter(t => ['Receipt unclear', 'Wrong amount', 'Payment not found', 'Duplicate order'].includes(t.label)),
                 onConfirm: (note) => doRejectTopup(id, btnElement, note)
             });
@@ -13245,7 +13264,7 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
         async function doRejectTopup(id, btnElement, note) {
             if (btnElement) { btnElement.innerText = "Updating..."; btnElement.disabled = true; }
             try {
-                // Guard: a request that was already credited/rejected (e.g. by another admin) must not flip status.
+                // Guard: a request that was already credited/rejected must not flip status.
                 const rjRef = doc(db, "walletTopups", id);
                 await runTransaction(db, async (tx) => {
                     const sn = await tx.get(rjRef);
@@ -14154,7 +14173,7 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
         let builtinPkgTabLabels = { package: 'Package', currency: 'Currency' };
 
         // Same rAF-coalescing trick as renderOrdersList: the games listener can
-        // fire repeatedly in a burst (e.g. on first load), and rebuilding every
+        // fire repeatedly in a burst, and rebuilding every
         // game card + thumbnail each time was making the Game List page stutter.
         let gamesRenderScheduled = null;
         // 'direct' = manual fulfillment, G2Bulk game top-ups, or JCPlays;
@@ -14280,7 +14299,7 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
         // name, nothing else (no price/ID/server/etc.) — regardless of
         // whatever is currently typed into the search box, since the whole
         // point is grabbing the full list at once. Multi-server variants of
-        // the same game (e.g. "Free Fire" as both Global and Malaysia) each
+        // the same game each
         // keep their own line since they're separate entries in the list.
         function copyAllGameNames() {
             const ids = Object.keys(GAMES).filter(id => gameInCurrentList(GAMES[id])).sort((a, b) => {
@@ -14290,7 +14309,7 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
 
             if (ids.length === 0) { window.showToast('No games to copy', 'fail'); return; }
             // One line per game NAME, not per server/region variant — a game
-            // with 3 server entries (e.g. Global/Malaysia/Myanmar) should
+            // with 3 server entries should
             // still only produce a single line here, matching the collapsed
             // (Edit Mode off) view of the list rather than every row in it.
             const seenNames = new Set();
@@ -14376,7 +14395,7 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
                 return;
             }
             // Count how many entries share each game name, so multi-server/
-            // region variants (e.g. "Free Fire" as both Global and Malaysia)
+            // region variants
             // can show a "how many variants" count badge on their card.
             const nameCounts = {};
             const provByName = {};
@@ -14496,7 +14515,7 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
         let gameStockOutCounts = {};     // gameId -> sold-out package count (0 = checked, none out)
         // --- request savers for the Games-list scan -------------------------------------------------
         // (a) The same provider response is shared by the Cost scan, the Stock-out scan and every game
-        //     that uses the same code/product (e.g. one MLBB code for many servers): 10 min memo +
+        //     that uses the same code/product: 10 min memo +
         //     in-flight de-dupe. Before, each linked game cost 2x G2Bulk / 2x JCPlays calls per scan.
         // (b) Scan results are kept in localStorage for 30 min, so reloading the admin panel does not
         //     re-scan every game again. Saving a game still clears just that game (invalidateGameCostScan).
@@ -14650,7 +14669,7 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
             const rate = G2BULK_SETTINGS.usdRate || 4500;
             const packages = g.packages || [];
             // A game can now carry more than one linked provider at once
-            // (e.g. some packages via G2Bulk, others via FazerCards) since
+            // since
             // Auto-Fulfill Provider became a per-package choice instead of a
             // single game-wide one — so each linked provider is checked
             // independently (by whether its code/product is actually saved,
@@ -15591,7 +15610,7 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
 
         // One-time: move every package's cost out of the public games docs into gameCosts.
         window.migrateCostsToAdminOnly = async function (btn) {
-            if (!confirm('Package Cost တွေကို games ထဲကနေ admin-only (gameCosts) ထဲ ရွှေ့မလား?')) return;
+            if (!await uiConfirm('Package Cost တွေကို games ထဲကနေ admin-only (gameCosts) ထဲ ရွှေ့မလား?')) return;
             const label = btn ? btn.innerText : '';
             if (btn) { btn.disabled = true; btn.innerText = 'Moving...'; }
             try {
@@ -15735,7 +15754,7 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
             window.showActionDialog({
                 type: 'success',
                 title: 'Rename Tab',
-                message: `"${pkgTabLabel(tabId)}" tab ကို နာမည်အသစ်ပေးပါ (ဥပမာ - "Diamond", "UC"):`,
+                message: `"${pkgTabLabel(tabId)}" tab ကို နာမည်အသစ်ပေးပါ:`,
                 confirmText: 'Rename',
                 cancelText: 'Cancel',
                 showNote: true,
@@ -15799,7 +15818,7 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
             window.showActionDialog({
                 type: 'success',
                 title: 'New Package Tab',
-                message: 'Name this tab (e.g. "Weekly Pass", "Bundle", "VIP"):',
+                message: 'Name this tab:',
                 confirmText: 'Add Tab',
                 cancelText: 'Cancel',
                 showNote: true,
@@ -15838,7 +15857,7 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
         // Shows/hides each package row's provider-specific ID field based on
         // that row's OWN "Auto-Fulfill" select — not the outer tab bar —
         // since a single game can now mix providers across its packages
-        // (e.g. some via G2Bulk, others via FazerCards). The one exception
+        //. The one exception
         // is Vouchers: that's still a whole-game "kind" switch (a
         // completely different catalogue/import flow), so while the
         // Vouchers tab is open every row falls back to the single shared
@@ -15987,13 +16006,13 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
                             </div>
                             <div class="pkg-row-pricing">
                                 <div class="pkg-price-field">
-                                    <label>Cost (Auto update ဖြင့်သာ ပြောင်းမည် — Store မှာ မပြပါ)</label>
-                                    <input type="number" class="pkg-cost" placeholder="0" value="${cost}" oninput="updatePackageProfit(this)" readonly title="Cost ကို manual ပြင်လို့မရပါ — Provider ဈေးနှုန်း update ဖြစ်ရင် သူ့ဘာသာတော့ update လုပ်ပေးပါလိမ့်မယ်" style="width:100%;padding:8px;border:1px solid var(--border-glass);background:var(--bg-subtle-2);color:var(--text-primary);border-radius:8px;font-size:13px;font-family:inherit;box-sizing:border-box;opacity:0.75;cursor:not-allowed;">
+                                    <label>Cost</label>
+                                    <input type="number" class="pkg-cost" value="${cost}" oninput="updatePackageProfit(this)" readonly title="Cost ကို manual ပြင်လို့မရပါ — Provider ဈေးနှုန်း update ဖြစ်ရင် သူ့ဘာသာတော့ update လုပ်ပေးပါလိမ့်မယ်" style="width:100%;padding:8px;border:1px solid var(--border-glass);background:var(--bg-subtle-2);color:var(--text-primary);border-radius:8px;font-size:13px;font-family:inherit;box-sizing:border-box;opacity:0.75;cursor:not-allowed;">
                                     <button type="button" class="pkg-cost-update-btn" style="display:none;" onclick="applyCostUpdate(this)"></button>
                                 </div>
                                 <div class="pkg-price-field">
-                                    <label>Price (Store မှာ ပြမည်)</label>
-                                    <input type="number" class="pkg-price" placeholder="0" value="${price}" oninput="updatePackageProfit(this)" onblur="enforceMinPriceMargin(this)" style="width:100%;padding:8px;border:1px solid var(--border-glass);background:var(--bg-subtle-2);color:var(--text-primary);border-radius:8px;font-size:13px;font-family:inherit;box-sizing:border-box;">
+                                    <label>Price</label>
+                                    <input type="number" class="pkg-price" value="${price}" oninput="updatePackageProfit(this)" onblur="enforceMinPriceMargin(this)" style="width:100%;padding:8px;border:1px solid var(--border-glass);background:var(--bg-subtle-2);color:var(--text-primary);border-radius:8px;font-size:13px;font-family:inherit;box-sizing:border-box;">
                                 </div>
                                 <div class="pkg-profit-badge" title="Profit margin = (Price − Cost) / Cost">--</div>
                             </div>
@@ -16031,7 +16050,7 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
         // Shows/hides each package row's provider-specific ID field based on
         // that row's OWN "Auto-Fulfill" select — not the outer tab bar —
         // since a single game can now mix providers across its packages
-        // (e.g. some via G2Bulk, others via FazerCards). The one exception
+        //. The one exception
         // is Vouchers: that's still a whole-game "kind" switch (a
         // completely different catalogue/import flow), so while the
         // Vouchers tab is open every row falls back to the single shared
@@ -16935,11 +16954,11 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
             updateResyncPctDisplay();
         }
         window.adjustResyncPct = adjustResyncPct;
-        function promptResyncPct() {
-            const raw = window.prompt('Resync % ကို ရိုက်ထည့်ပါ (ဥပမာ 0.5 သို့မဟုတ် -1.25)', String(resyncPct));
+        async function promptResyncPct() {
+            const raw = await uiPrompt('Resync % ကို ရိုက်ထည့်ပါ', String(resyncPct));
             if (raw === null) return;
             const v = parseFloat(raw);
-            if (isNaN(v) || v < -100 || v > 100) { window.showToast('Enter a valid % (e.g. 0.5)', 'fail'); return; }
+            if (isNaN(v) || v < -100 || v > 100) { window.showToast('Enter a valid %', 'fail'); return; }
             resyncPct = Math.round(v * 100) / 100;
             updateResyncPctDisplay();
         }
@@ -16956,7 +16975,7 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
             const pctInput = document.getElementById('bulk-pkg-percent');
             const pct = Number(pctInput.value);
             if (!pctInput.value.trim() || isNaN(pct) || pct === 0) {
-                window.showToast('Enter a percentage first (e.g. 5 or -10)', 'fail');
+                window.showToast('Enter a percentage first', 'fail');
                 return;
             }
             const allRows = Array.from(document.querySelectorAll('#edit-packages-list .package-row'));
@@ -17459,7 +17478,7 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
                 return url;
             } catch (error) {
                 // Leaving the status line stuck on "Uploading photo..." after a
-                // failed upload (e.g. a dropped connection - "Failed to fetch")
+                // failed upload
                 // was misleading: the calling save function's own catch block
                 // shows a toast, but this line never updated, so it looked
                 // like the upload was still in progress forever. Show the
@@ -17529,7 +17548,7 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
             if (src) src.textContent = own === null ? ('Global ' + AUTO_PRICE_MARGIN_PCT + '% သုံးနေ') : 'ဒီဂိမ်းအတွက်သီးသန့်';
             const ex = 10000;
             const pv = document.getElementById('ge-margin-preview');
-            if (pv) pv.innerHTML = 'ဥပမာ Cost <b>' + ex.toLocaleString() + '</b> MMK &rarr; Price <b>' + autoPriceForCost(ex, eff).toLocaleString() + '</b> MMK <small>(' + eff + '% တိုး)</small>';
+            if (pv) pv.innerHTML = 'Cost &rarr; Price <small>(+' + eff + '%)</small>';
             document.querySelectorAll('#ge-margin-chips .ge-chip').forEach(c => {
                 const v = c.dataset.v;
                 c.classList.toggle('on', v === '' ? own === null : own === Number(v));
@@ -19598,13 +19617,13 @@ return `
         // against the phone number/payment name on their last approved
         // top-up or order, the same way you'd verify identity for any other
         // account-recovery request.
-        function adminLinkGoogleEmail() {
+        async function adminLinkGoogleEmail() {
             if (!currentUserDetailsId) return;
             const userId = currentUserDetailsId;
             const u = USERS[userId];
             if (!u) return;
             if (u.googleEmail) { window.showToast('This account is already linked.', 'fail'); return; }
-            const email = (prompt('Gmail address to link to this account (verify it against their top-up/order details first):') || '').trim().toLowerCase();
+            const email = (await uiPrompt('Gmail address to link to this account (verify it against their top-up/order details first):') || '').trim().toLowerCase();
             if (!email) return;
             if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { window.showToast('That doesn\'t look like a valid email address.', 'fail'); return; }
             window.showActionDialog({
@@ -19630,13 +19649,13 @@ return `
         // Admin links a customer's account to their Telegram id (sets telegramId + authUid=tg_<id>
         // and the telegramAccounts link doc) so Wallet purchases pass firestore.rules. Needed for
         // accounts that already hold a balance: the browser is not allowed to claim those itself.
-        function adminLinkTelegram() {
+        async function adminLinkTelegram() {
             if (!currentUserDetailsId) return;
             const userId = currentUserDetailsId;
             const u = USERS[userId];
             if (!u) return;
             if (u.authUid && u.authUid !== 'tg_' + (u.telegramId || '')) { window.showToast('This account is already owned by another login.', 'fail'); return; }
-            const tgId = (prompt('Telegram ID (numbers only) - verify it really belongs to this customer first:', u.telegramId || '') || '').trim();
+            const tgId = (await uiPrompt('Telegram ID (numbers only) - verify it really belongs to this customer first:', u.telegramId || '') || '').trim();
             if (!tgId) return;
             if (!/^[0-9]{5,15}$/.test(tgId)) { window.showToast('Telegram ID must be numbers only.', 'fail'); return; }
             const uid = 'tg_' + tgId;
@@ -19713,8 +19732,8 @@ return `
         }
 
         // From the Bot /start tab: pick which store account this Telegram id belongs to.
-        function adminLinkBotUser(tgId) {
-            const raw = (prompt('Store account User ID (the "ID:" shown on the user card) to link Telegram ' + tgId + ' to:') || '').trim();
+        async function adminLinkBotUser(tgId) {
+            const raw = (await uiPrompt('Store account User ID (the "ID:" shown on the user card) to link Telegram ' + tgId + ' to:') || '').trim();
             if (!raw) return;
             const userId = USERS[raw] ? raw : Object.keys(USERS).find(k => (USERS[k].guestId || '') === raw);
             if (!userId) { window.showToast('No user found with that ID.', 'fail'); return; }
@@ -20050,7 +20069,7 @@ return `
         let editingSocialImageFiles = { facebook: null, telegram: null, tiktok: null, supportMessenger: null, supportTelegram: null };
         let removedSocialImages = { facebook: false, telegram: false, tiktok: false, supportMessenger: false, supportTelegram: false };
         // Platform list for the "Support Contact (Header Icons)" fields - these
-        // store a bare username (e.g. "yourpage"), not a full URL, since
+        // store a bare username, not a full URL, since
         // store.html builds the m.me/t.me link itself. Accepts a pasted full
         // URL or a leading "@" too and normalizes it down to just the username.
         const SUPPORT_CONTACT_PLATFORMS = { supportMessenger: /^(https?:\/\/)?(www\.)?m\.me\//i, supportTelegram: /^(https?:\/\/)?(www\.)?t\.me\//i };
@@ -20487,8 +20506,8 @@ return `
             window.showToast(id ? 'ဖွင့်ပြီ — Preview ကြည့်ပြီး Save နှိပ်ပါ' : 'ပုံမှန်ပြန်ထားပြီ — Save နှိပ်ပါ', 'success');
             var pv = document.getElementById('fest-preview'); if (pv && pv.scrollIntoView) pv.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
-        function festStoreLink() {
-            var u = prompt('Store ရဲ့ link (ဥပမာ https://yourstore.com)', localStorage.getItem('ft_store_url') || 'https://') || '';
+        async function festStoreLink() {
+            var u = await uiPrompt('Store ရဲ့ link', localStorage.getItem('ft_store_url') || 'https://') || '';
             u = u.trim(); if (!/^https:\/\/[^\s]+$/i.test(u)) { window.showToast('https:// နဲ့စတဲ့ link ထည့်ပါ', 'fail'); return ''; }
             try { localStorage.setItem('ft_store_url', u); } catch (e) {}
             return u;
@@ -20623,8 +20642,8 @@ return `
         function festVideoUrl(v) { FS.vUrl = (v || '').trim(); festMark(); drawFestivalPreview(); }
         function festResetColors() { var o = FS.ov[ovKey()]; if (o) { o.c = o.g = o.l = o.d = ''; } festMark(); festRedraw(); }
         function festResetTheme() { delete FS.ov[ovKey()]; festMark(); festRedraw(); }
-        function festResetEverything() {
-            if (!confirm(festScope === 'fest' ? 'Festival Theme ကို ပိတ်ပြီး ဒီအပိုင်းက setting အားလုံး မူလပြန်ထားမလား? Save နှိပ်မှ Store မှာ ပြောင်းမယ်။' : 'ပုံမှန် Theme (အရောင်၊ နောက်ခံ၊ စာလုံး) အားလုံး မူလပြန်ထားမလား? Save နှိပ်မှ Store မှာ ပြောင်းမယ်။')) return;
+        async function festResetEverything() {
+            if (!await uiConfirm(festScope === 'fest' ? 'Festival Theme ကို ပိတ်ပြီး ဒီအပိုင်းက setting အားလုံး မူလပြန်ထားမလား? Save နှိပ်မှ Store မှာ ပြောင်းမယ်။' : 'ပုံမှန် Theme (အရောင်၊ နောက်ခံ၊ စာလုံး) အားလုံး မူလပြန်ထားမလား? Save နှိပ်မှ Store မှာ ပြောင်းမယ်။')) return;
             if (festScope === 'fest') FSF = festNewState(); else FSN = festNewState();
             FS = festScope === 'fest' ? FSF : FSN;
             if (festFileScope === festScope) { festFile = null; festFileUrl = ''; }
@@ -21080,7 +21099,7 @@ return `
             const panel = document.createElement('div');
             panel.className = 'hb-inline';
             const curIsUrl = /^(https?:\/\/|tg:\/\/|mailto:|\/)/i.test(cur);
-            panel.innerHTML = `<div class="hb-custom"><input type="url" class="hb-custom-input" placeholder="Custom link  (https://...)" value="${curIsUrl ? escA(cur) : ''}" autocomplete="off" autocapitalize="off" spellcheck="false"><button type="button" class="hb-custom-set">Set</button></div>`
+            panel.innerHTML = `<div class="hb-custom"><input type="url" class="hb-custom-input" value="${curIsUrl ? escA(cur) : ''}" autocomplete="off" autocapitalize="off" spellcheck="false"><button type="button" class="hb-custom-set">Set</button></div>`
                 + `<div class="hb-or">or choose a game</div>`
                 + `<input type="text" class="hb-search" placeholder="Search game..." autocomplete="off"><div class="hb-list"></div>`;
             wrap.appendChild(panel);
@@ -21530,7 +21549,7 @@ return `
         window.saveFazerCardWebhook = saveFazerCardWebhook;
 
         async function deleteFazerCardWebhook() {
-            if (!confirm('Remove the FazerCards webhook? Deliveries stop immediately.')) return;
+            if (!await uiConfirm('Remove the FazerCards webhook? Deliveries stop immediately.')) return;
             const btn = document.getElementById('delete-fazercard-webhook-btn');
             const statusEl = document.getElementById('fazercard-webhook-status');
             const originalText = btn.innerText;
@@ -21556,7 +21575,7 @@ return `
         window.deleteFazerCardWebhook = deleteFazerCardWebhook;
 
         async function regenerateFazerCardWebhookSecret() {
-            if (!confirm('Regenerate the HMAC secret? The old one stops working immediately — make sure nothing else still depends on it before confirming.')) return;
+            if (!await uiConfirm('Regenerate the HMAC secret? The old one stops working immediately — make sure nothing else still depends on it before confirming.')) return;
             const btn = document.getElementById('regen-fazercard-secret-btn');
             const originalText = btn.innerText;
             btn.disabled = true; btn.innerText = 'Rotating...';
@@ -22389,7 +22408,7 @@ return `
             if (!key) return '';
             if (G2BULK_IMAGE_INDEX.has(key)) return G2BULK_IMAGE_INDEX.get(key);
             // Fallback 1: substring containment either way, guarded to at
-            // least 4 characters so short codes (e.g. "A9") don't grab an
+            // least 4 characters so short codes don't grab an
             // unrelated game's icon.
             if (key.length >= 4) {
                 for (const [gKey, image] of G2BULK_IMAGE_INDEX) {
@@ -22490,7 +22509,7 @@ return `
         
         
         // G2Bulk: POST /v1/games/fields (body {game}) returns which fields a
-        // game needs (e.g. ["userid","serverid"]); POST /v1/games/servers
+        // game needs; POST /v1/games/servers
         // returns the server list for games that have one, or a 403 meaning
         // "no server needed" (not an error - see G2Bulk's docs at
         // https://api.g2bulk.com/docs#games). Fetched during
@@ -22506,7 +22525,7 @@ return `
             // meta.has_more tells us when to stop. Using the max limit (500)
             // keeps the number of round trips as low as possible. `limit` caps
             // items per page, not the account's total category count - a
-            // smaller total (e.g. 316) than the limit just means everything
+            // smaller total than the limit just means everything
             // fit on the first page.
             const allItems = [];
             let cursor = null;
@@ -22585,7 +22604,7 @@ return `
         
         // GET /api/categories -> { status, total, categories: [{game_code,
         // name, description, image_url, game_fields}] }. game_fields tells
-        // us whether this game needs a Server ID (e.g. ["userid","serverid"])
+        // us whether this game needs a Server ID
         // so it can auto-apply to the Server ID toggle on import, same as
         
 
@@ -22761,7 +22780,7 @@ return `
         // HTML serialization spec that only escapes &, <, > in text-node context
         // and leaves " and ' untouched - unsafe wherever the result is placed
         // inside a quoted attribute (src="...", href="...", alt="..."), since a
-        // bare " lets an attacker break out of the attribute (e.g. `x" onerror="`).
+        // bare " lets an attacker break out of the attribute.
         // Escaping all five characters explicitly makes this safe in both text
         // and attribute contexts.
         function escapeHtml(str) {
@@ -23006,7 +23025,7 @@ return `
         }
 
         // Deterministic accent color per game name, used behind its initials
-        // whenever no cover image is available (e.g. most JCPlays entries).
+        // whenever no cover image is available.
         const PICKER_COLORS = ['var(--accent)', '#8E44AD', '#E67E22', '#16A085', 'var(--danger-strong)', '#2C3E50', '#D35400', '#2980B9'];
         function pickerColorFor(name) {
             let hash = 0;
@@ -24488,7 +24507,7 @@ return `
 
         // Low-level helper: signs + POSTs to a JCPlays endpoint and returns the
         // parsed JSON body. Throws if credentials are missing or the response
-        // isn't valid JSON (e.g. an HTML error page).
+        // isn't valid JSON.
         // Goes through the Worker's /jcplays-proxy route (its URL comes from
         // Settings → JCPlays → Proxy URL, saved as JCPLAYS_SETTINGS.proxyUrl)
         // instead of calling jcplays.com directly - a direct browser call
@@ -24769,7 +24788,7 @@ return `
             const btn = document.getElementById('jcplays-import-btn');
             if (!product) {
                 statusEl.style.color = 'var(--danger-strong)';
-                statusEl.innerText = 'Enter a JCPlays Product Code first (e.g. mobilelegends).';
+                statusEl.innerText = 'Enter a JCPlays Product Code first.';
                 return;
             }
             if (!JCPLAYS_SETTINGS.uid || !JCPLAYS_SETTINGS.email || !JCPLAYS_SETTINGS.mKey) {
@@ -24897,7 +24916,7 @@ return `
                 // balance, etc.) - nothing was charged, safe to retry.
                 window.showInfoDialog(
                     'JCPlays Order Failed',
-                    `JCPlays rejected the order (status ${data.status}): ${data.message || 'unknown error'}. The order stays Pending — fix the issue (e.g. balance) and try again, or fulfill manually.`
+                    `JCPlays rejected the order (status ${data.status}): ${data.message || 'unknown error'}. The order stays Pending — fix the issue and try again, or fulfill manually.`
                 );
                 if (btnElement) { btnElement.innerText = "Start Processing"; btnElement.disabled = false; }
                 return 'error';
@@ -27063,7 +27082,7 @@ html body #settings .set-index button:active{background:var(--accent-soft);color
     var groups=[
       {k:'device',t:'This device',d:'Only affects this browser',c:[byId('settings-card-panelprefs')]},
       {k:'store',t:'Storefront',d:'What customers see',c:['sociallinks','homebanner','branding','pcbg'].map(function(x){return byId('settings-card-'+x);})},
-      {k:'ops',t:'Operations',d:'Orders, pricing and maintenance',c:['maintenance','orderrouting','autoprice','autoprice-sell','walletcleanup','walletdebit','costmigrate'].map(function(x){return byId('settings-card-'+x);})},
+      {k:'ops',t:'Operations',d:'Orders, pricing and maintenance',c:['maintenance','orderrouting','autoprice','autoprice-sell','scans'].map(function(x){return byId('settings-card-'+x);})},
       {k:'sec',t:'Notifications & security',d:'Alerts, login and admin access',c:[byId('settings-card-adminbroadcastsecret'),byTitle('Push Notifications'),byId('settings-card-adminlogin'),byId('settings-card-2fa'),byId('settings-card-adminpin'),byId('admin-accounts-card')]}
     ];
     var used=[]; groups.forEach(function(g){g.c=g.c.filter(Boolean);used=used.concat(g.c);});
@@ -29016,14 +29035,15 @@ html body .pkg-summary-name{font-size:13px!important}
     ['Store',[['Theme & banners','festival-page'],['Events & festivals','events-page'],['Notifications','notify-list'],['Ticker','ticker-list']]],
     ['Settings',[['General','settings'],['G2Bulk','g2bulk'],['JCPlays','jcplays'],['API keys','api-docs'],['Usage','usage-page']]]
   ];
-  var MORE_PAGES={};MORE.forEach(function(g){g[1].forEach(function(i){MORE_PAGES[i[1]]=1;});});
+  var PV_IC={'topup-list':'<path d="M12 3v12M7 10l5 5 5-5"/><path d="M5 20h14"/>','payin-list':'<rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/>','payment-list':'<rect x="2" y="5" width="20" height="14" rx="3"/><path d="M2 10h20"/>','tier-list':'<path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/>','analytics':'<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>','festival-page':'<circle cx="13.5" cy="6.5" r="2"/><circle cx="17.5" cy="10.5" r="2"/><circle cx="8.5" cy="7.5" r="2"/><path d="M12 22a10 10 0 1 1 10-10c0 2.5-2 3-4 3h-2a2 2 0 0 0-1 3.7c.6.4.5 1.4-.2 1.9-.9.9-1.8 1.4-2.8 1.4z"/>','events-page':'<rect x="3" y="4" width="18" height="17" rx="3"/><path d="M8 2v4M16 2v4M3 10h18"/>','notify-list':'<path d="M6 16v-5a6 6 0 1 1 12 0v5l1.5 2h-15z"/><path d="M10 21h4"/>','ticker-list':'<path d="M3 11v3a1 1 0 0 0 1 1h3l8 4V6L7 10H4a1 1 0 0 0-1 1z"/><path d="M19 9a4 4 0 0 1 0 6"/>','settings':'<path d="M4 6h10M18 6h2M4 12h2M10 12h10M4 18h12M20 18h0"/><circle cx="16" cy="6" r="2"/><circle cx="8" cy="12" r="2"/><circle cx="18" cy="18" r="2"/>','g2bulk':'<path d="M13 2L4 14h7l-1 8 9-12h-7z"/>','jcplays':'<rect x="2" y="7" width="20" height="12" rx="5"/><path d="M7 11v4M5 13h4M16 12h.01M18 14h.01"/>','api-docs':'<circle cx="8" cy="15" r="4"/><path d="M11 12l9-9M16 7l3 3"/>','usage-page':'<path d="M5 20V11M12 20V4M19 20v-7"/>'};
+var MORE_PAGES={};MORE.forEach(function(g){g[1].forEach(function(i){MORE_PAGES[i[1]]=1;});});
   var ov=null;
   function build(){
     if(ov) return;
     ov=document.createElement('div');ov.id='pv-more';
     var h='<div class="pv-box"><div class="pv-grab"></div>';
     MORE.forEach(function(g){h+='<h4>'+g[0]+'</h4><div class="pv-grp">';
-      g[1].forEach(function(i){h+='<button type="button" data-no-busy data-p="'+i[1]+'">'+i[0].replace(/&/g,'&amp;')+'</button>';});
+      g[1].forEach(function(i){h+='<button type="button" data-no-busy data-p="'+i[1]+'"><span class="pv-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+(PV_IC[i[1]]||'<circle cx="12" cy="12" r="8"/>')+'</svg></span><span class="pv-tx">'+i[0].replace(/&/g,'&amp;')+'</span></button>';});
       h+='</div>';});
     ov.innerHTML=h+'</div>';
     ov.addEventListener('click',function(e){
@@ -29153,5 +29173,189 @@ html body .pkg-summary-name{font-size:13px!important}
 })();
 </script>
 
+<style id="linn-polish-css">
+/* ===== Linn polish: calmer settings, smaller tabs, visible buttons, in-app dialogs ===== */
+html body #sub-nav .sub-nav-item,html body .sub-nav .sub-nav-item{min-height:32px!important;padding:0 12px!important;font-size:12.5px!important;gap:6px}
+html body #sub-nav .sub-nav-item svg,html body .sub-nav .sub-nav-item svg{width:15px!important;height:15px!important}
+html body #settings .set-index{top:var(--set-top,0px)!important;gap:6px;padding:6px 0}
+html body #settings .set-index button{min-height:30px!important;padding:0 11px!important;font-size:12px!important}
+html body #settings .set-group{margin-top:18px}
+html body #settings .set-group h3{font-size:15px!important}
+html body #settings .set-group p{font-size:12px!important;margin:0 0 6px!important}
+html body #settings>.admin-card{padding:12px 14px!important;border-radius:16px!important;margin-top:8px!important}
+html body #settings .sc-head{min-height:38px!important}
+html body #settings .sc-title{font-size:14px!important}
+html body #settings .sc-ico{width:30px;height:30px;border-radius:10px}
+html body #settings .admin-card>:last-child:not(.sc-head){padding-bottom:0!important}
+html body #settings .note-glass{padding:10px 12px;border-radius:12px;font-size:12px!important;line-height:1.55;margin:0 0 10px!important}
+/* maintenance buttons must always show */
+html body #maint-body .maint-actions{display:flex!important;gap:10px;margin-top:6px;visibility:visible!important}
+html body #maint-body .maint-actions .btn{display:inline-flex!important;align-items:center;justify-content:center;flex:1 1 0;min-height:44px;border:0!important;border-radius:14px;color:#fff!important;font-weight:700;visibility:visible!important}
+html body #maint-body .maint-btn-close{background:linear-gradient(135deg,#FB923C,#EF4444)!important}
+html body #maint-body .maint-btn-open{background:linear-gradient(135deg,#34D399,#16A34A)!important}
+/* merged scans card */
+.ls-seg{display:flex;gap:4px;padding:3px;border-radius:14px;background:var(--fill-soft);margin-bottom:12px}
+.ls-seg button{flex:1;min-height:34px;border:0;border-radius:11px;background:transparent;color:var(--text-secondary);font:inherit;font-size:12px;font-weight:700;padding:0 6px}
+.ls-seg button.on{background:var(--surface);color:var(--accent);box-shadow:0 1px 5px rgba(0,0,0,.12)}
+.ls-pane{display:none}.ls-pane.on{display:block}
+.ls-pane .btn{width:100%;min-height:44px}
+/* in-app confirm / prompt */
+.ui-dlg-ov{position:fixed;inset:0;z-index:100000;display:flex;align-items:flex-end;justify-content:center;padding:16px;background:rgba(10,12,24,.5);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);animation:uiDlgFade .18s ease}
+@media (min-width:560px){.ui-dlg-ov{align-items:center}}
+.ui-dlg{width:100%;max-width:400px;background:var(--surface-strong,var(--surface,#fff));color:var(--text-primary);border:1px solid var(--border-glass,var(--line));border-radius:22px;padding:20px 18px 16px;box-shadow:0 24px 60px -18px rgba(0,0,0,.45);animation:uiDlgUp .22s cubic-bezier(.2,.9,.3,1.1)}
+.ui-dlg h4{margin:0 0 6px;font-size:16px;font-weight:700}
+.ui-dlg p{margin:0 0 14px;font-size:13.5px;line-height:1.6;color:var(--text-secondary);white-space:pre-wrap;word-break:break-word}
+.ui-dlg input{width:100%;box-sizing:border-box;min-height:44px;padding:0 12px;margin:0 0 14px;border-radius:12px;border:1px solid var(--border-glass,var(--line));background:var(--fill-soft);color:var(--text-primary);font:inherit;font-size:14px}
+.ui-dlg-act{display:flex;gap:8px}
+.ui-dlg-act button{flex:1;min-height:44px;border-radius:13px;border:1px solid var(--border-glass,var(--line));background:var(--fill-soft);color:var(--text-primary);font:inherit;font-weight:700}
+.ui-dlg-act button.ok{border:0;color:#fff;background:linear-gradient(135deg,var(--accent),var(--accent-2,var(--accent)))}
+.ui-dlg-act button.ok.danger{background:linear-gradient(135deg,#FB923C,#EF4444)}
+@keyframes uiDlgFade{from{opacity:0}to{opacity:1}}
+@keyframes uiDlgUp{from{opacity:0;transform:translateY(14px) scale(.97)}to{opacity:1;transform:none}}
+
+/* ===== Settings: Dark Glass theme (design 3) ===== */
+html body #settings{--surface:rgba(255,255,255,.075);--surface-strong:rgba(255,255,255,.09);--text-primary:#eef0ff;--text-secondary:#b4b8e6;--text-muted:#8e93c4;--border-glass:rgba(255,255,255,.14);--line:rgba(255,255,255,.14);--fill-soft:rgba(255,255,255,.09);--bg-subtle-2:rgba(255,255,255,.07);--accent:#38bdf8;--accent-soft:rgba(56,189,248,.18);--danger:#fb7185;--danger-soft:rgba(251,113,133,.16);--bg-app:#0e1124;
+color:var(--text-primary);background:radial-gradient(120% 60% at 15% 0,#312e81 0,#0e1124 60%);border-radius:26px;padding:14px 12px calc(120px + env(safe-area-inset-bottom,0px))!important;margin-bottom:8px}
+html body #settings .title-header,html body #settings h2{color:#fff}
+html body #settings>.admin-card{background:rgba(255,255,255,.075)!important;border:1px solid rgba(255,255,255,.14)!important;box-shadow:0 10px 30px -18px #000a!important;-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
+html body #settings .sc-title,html body #settings .sc-head{color:#fff!important}
+html body #settings .sc-chevron{color:#b4b8e6!important;stroke:currentColor}
+html body #settings .set-group h3{color:#fff!important}html body #settings .set-group p{color:#9da2d6!important}
+html body #settings .set-index{background:transparent!important;-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
+html body #settings .set-index button{background:rgba(255,255,255,.1)!important;border-color:rgba(255,255,255,.18)!important;color:#dfe2ff!important}
+html body #settings .set-index button:active{background:rgba(56,189,248,.25)!important;color:#fff!important}
+html body #settings .st-search,html body #settings .st-collapse{background:rgba(255,255,255,.09)!important;border-color:rgba(255,255,255,.16)!important;color:#dfe2ff!important}
+html body #settings .st-search input{color:#fff!important}
+html body #settings input:not([type=checkbox]):not([type=range]),html body #settings select,html body #settings textarea{background:rgba(255,255,255,.08)!important;border:1px solid rgba(255,255,255,.18)!important;color:#fff!important;-webkit-backdrop-filter:none;backdrop-filter:none}
+html body #settings input::placeholder,html body #settings textarea::placeholder{color:#8e93c4!important}
+html body #settings select option{background:#161a33;color:#fff}
+html body #settings label,html body #settings .maint-lbl,html body #settings .switch-label{color:#c9ccf2!important}
+html body #settings .u-muted{color:#8e93c4!important}
+html body #settings .note-glass{background:rgba(148,163,184,.14)!important;border:1px solid rgba(255,255,255,.12)!important;color:#d6d9ff!important}
+html body #settings .note-bad{background:rgba(248,113,113,.14)!important;border-color:rgba(248,113,113,.35)!important;color:#fecaca!important}
+html body #settings .note-ok{background:rgba(52,211,153,.13)!important;border-color:rgba(52,211,153,.32)!important;color:#bbf7d0!important}
+html body #settings .note-bad *,html body #settings .note-ok *{color:inherit!important}
+html body #settings .maint-status-box{background:rgba(255,255,255,.08)!important;border:1px solid rgba(255,255,255,.14)!important;color:#fff}
+html body #settings .maint-status-txt span{color:#b4b8e6!important}
+html body #settings .maint-chip{background:rgba(255,255,255,.1)!important;border-color:rgba(255,255,255,.18)!important;color:#dfe2ff!important}
+html body #settings .maint-pill{font-weight:800}
+/* buttons: every one gets a real colour, none is white-on-white */
+html body #settings .btn{border:0!important;color:#fff!important;font-weight:700;border-radius:14px;min-height:44px;background:linear-gradient(135deg,#6366f1,#38bdf8)!important;box-shadow:0 8px 18px -10px rgba(99,102,241,.9)}
+html body #settings .btn.btn-outline{background:rgba(56,189,248,.16)!important;border:1px solid rgba(56,189,248,.55)!important;color:#7dd3fc!important;box-shadow:none}
+html body #settings .btn.btn-danger,html body #settings .btn-danger{background:linear-gradient(135deg,#fb7185,#e11d48)!important}
+html body #settings .btn:disabled{opacity:.55}
+html body #settings #maint-body .maint-btn-close{background:linear-gradient(135deg,#FB923C,#EF4444)!important;color:#fff!important;border:0!important}
+html body #settings #maint-body .maint-btn-open{background:linear-gradient(135deg,#34D399,#16A34A)!important;color:#fff!important;border:0!important;box-shadow:0 8px 18px -8px rgba(22,163,74,.85)!important}
+html body #settings #maint-body:has(.maint-status-box.ok) .maint-btn-open{opacity:.78!important}
+html body #settings #maint-body:has(.maint-status-box.off) .maint-btn-close{opacity:.78!important}
+/* scans switch on dark */
+html body #settings .ls-seg{background:rgba(255,255,255,.09)}
+html body #settings .ls-seg button{color:#c9ccf2}
+html body #settings .ls-seg button.on{background:linear-gradient(135deg,#38bdf8,#6366f1);color:#06121f;box-shadow:none}
+/* in-app dialog: dark glass too */
+.ui-dlg{background:#161a33!important;color:#eef0ff!important;border-color:rgba(255,255,255,.18)!important;box-shadow:0 0 40px rgba(99,102,241,.35),0 24px 60px -18px #000!important}
+.ui-dlg p{color:#b4b8e6!important}.ui-dlg input{background:rgba(255,255,255,.08)!important;color:#fff!important;border-color:rgba(255,255,255,.2)!important}
+.ui-dlg-act button{background:rgba(255,255,255,.1)!important;color:#eef0ff!important;border-color:rgba(255,255,255,.18)!important}
+.ui-dlg-act button.ok{background:linear-gradient(135deg,#6366f1,#38bdf8)!important;color:#fff!important;border:0!important}
+.ui-dlg-act button.ok.danger{background:linear-gradient(135deg,#FB923C,#EF4444)!important}
+/* floating bottom nav must never cover content: reserve its height on every page */
+html body .page-section{padding-bottom:calc(112px + env(safe-area-inset-bottom,0px))!important}
+html body{scroll-padding-bottom:120px}
+html body #ux-top-btn{bottom:calc(92px + env(safe-area-inset-bottom,0px))!important}
+html body #wl-bulkbar{bottom:calc(92px + env(safe-area-inset-bottom,0px))!important}
+html body #game-editor-page .modal-footer{bottom:calc(84px + env(safe-area-inset-bottom,0px))!important}
+
+/* ===== More sheet: icon rows ===== */
+#pv-more .pv-grp button{display:flex!important;align-items:center;gap:12px;text-align:left}
+#pv-more .pv-grp button .pv-tx{flex:1;min-width:0;font-weight:600}
+#pv-more .pv-ic{flex:none;width:34px;height:34px;border-radius:11px;display:inline-grid;place-items:center;background:var(--accent-soft);color:var(--accent)}
+#pv-more .pv-ic svg{width:18px;height:18px}
+#pv-more .pv-box>h4:nth-of-type(1)~.pv-grp:nth-of-type(1) .pv-ic{background:rgba(16,185,129,.16);color:#10b981}
+#pv-more .pv-grp:nth-of-type(2) .pv-ic{background:rgba(236,72,153,.16);color:#ec4899}
+#pv-more .pv-grp:nth-of-type(3) .pv-ic{background:rgba(6,182,212,.16);color:#06b6d4}
+#pv-more .pv-grp button{min-height:52px}
+
+/* ===== Header icons: each one its own colour ===== */
+html body .header .header-icon .ui-icon,html body .header .header-icon svg{stroke:currentColor!important}
+html body #quick-jump-btn{color:#2f9bff!important;background:rgba(47,155,255,.14)!important}
+html body #activity-btn{color:#f59e0b!important;background:rgba(245,158,11,.16)!important}
+html body #theme-toggle-btn{color:#ec4899!important;background:rgba(236,72,153,.15)!important}
+html body #low-balance-alert-btn{color:#ef4444!important;background:rgba(239,68,68,.15)!important}
+/* ===== Buttons: solid bright colours, no gradients, no glow ===== */
+html body .btn-primary{background:#2f9bff!important;background-image:none!important;color:#fff!important;border:0!important;box-shadow:none!important}
+html body .btn-primary:active{background:#1e86ea!important}
+html body .btn-danger{background:#ff4d6d!important;background-image:none!important;color:#fff!important;border:0!important;box-shadow:none!important}
+html body #settings .btn{background:#2f9bff!important;background-image:none!important;box-shadow:none!important}
+html body #settings .btn.btn-outline{background:rgba(47,155,255,.16)!important;border:1px solid #2f9bff!important;color:#7cc4ff!important}
+html body #settings .btn.btn-danger,html body #settings .btn-danger{background:#ff4d6d!important;background-image:none!important}
+html body #settings #maint-body .maint-btn-close{background:#ff7a1a!important;background-image:none!important;box-shadow:none!important}
+html body #settings #maint-body .maint-btn-open{background:#22c55e!important;background-image:none!important;box-shadow:none!important}
+html body #maint-body .maint-btn-close{background:#ff7a1a!important;background-image:none!important;box-shadow:none!important}
+html body #maint-body .maint-btn-open{background:#22c55e!important;background-image:none!important;box-shadow:none!important}
+html body #settings .ls-seg button.on{background:#2f9bff!important;background-image:none!important;color:#fff!important}
+.ui-dlg-act button.ok{background:#2f9bff!important;background-image:none!important}
+.ui-dlg-act button.ok.danger{background:#ff4d6d!important;background-image:none!important}
+.ui-dlg{box-shadow:0 24px 60px -18px #000!important}
+
+/* ===== No shaking / bouncing / scaling on buttons and icons. Press feedback = ripple only ===== */
+html body :is(.btn,button,.header-icon,.nav-item,.pkg-type-tab,.udp-tab,.game-list-tab-btn,.pkg-tab-btn,.wtx-chip,.picker-btn,.maint-chip,.sub-nav-item,.cal2-nav-btn,.stat-chip,.field-lock-btn,.secret-toggle-btn,.od-card-close,.pkg-card-close,.pkg-move-btn,.sc-head,.pkg-cost-update-btn):active{transform:none!important;filter:none!important}
+html body :is(.btn,button,.header-icon,.nav-item,.pkg-type-tab,.udp-tab,.game-list-tab-btn,.pkg-tab-btn,.wtx-chip,.picker-btn,.maint-chip,.sub-nav-item,.cal2-nav-btn,.stat-chip,.field-lock-btn,.secret-toggle-btn,.od-card-close,.pkg-card-close,.pkg-move-btn,.sc-head,.pkg-cost-update-btn),html body :is(.btn,button,.header-icon,.nav-item,.pkg-type-tab,.udp-tab,.game-list-tab-btn,.pkg-tab-btn,.wtx-chip,.picker-btn,.maint-chip,.sub-nav-item,.cal2-nav-btn,.stat-chip,.field-lock-btn,.secret-toggle-btn,.od-card-close,.pkg-card-close,.pkg-move-btn,.sc-head,.pkg-cost-update-btn) .ui-icon,html body :is(.btn,button,.header-icon,.nav-item,.pkg-type-tab,.udp-tab,.game-list-tab-btn,.pkg-tab-btn,.wtx-chip,.picker-btn,.maint-chip,.sub-nav-item,.cal2-nav-btn,.stat-chip,.field-lock-btn,.secret-toggle-btn,.od-card-close,.pkg-card-close,.pkg-move-btn,.sc-head,.pkg-cost-update-btn) svg{animation:none!important}
+html body :is(.pkg-type-tab,.udp-tab,.game-list-tab-btn,.pkg-tab-btn,.wtx-chip).active{animation:none!important}
+html body .nav-item.active .ui-icon,html body #toast.show .toast-icon-circle,html body .login-card-left .logo-icon,html body .login-msg-error,html body .nav-item-low-balance-dot,html body .header-icon .nav-item-low-balance-dot{animation:none!important}
+html body #low-balance-alert-btn,html body #low-balance-alert-btn *{animation:none!important}
+.lg-rip-host{overflow:hidden!important}
+.lg-rip{position:absolute;border-radius:50%;pointer-events:none;background:currentColor;opacity:.28;transform:scale(0);animation:lgRipple .6s ease-out forwards!important;z-index:2}
+@keyframes lgRipple{to{transform:scale(1);opacity:0}}
+</style>
+<script id="linn-polish-js">
+(function(){
+function dlg(o){
+  return new Promise(function(res){
+    var ov=document.createElement('div');ov.className='ui-dlg-ov';ov.setAttribute('role','dialog');ov.setAttribute('aria-modal','true');
+    var box=document.createElement('div');box.className='ui-dlg';
+    var h=document.createElement('h4');h.textContent=o.title||'';
+    var p=document.createElement('p');p.textContent=o.message||'';
+    var inp=null;
+    box.appendChild(h);box.appendChild(p);
+    if(o.prompt){inp=document.createElement('input');inp.type=o.password?'password':'text';if(o.password){inp.inputMode='numeric';inp.maxLength=6;inp.autocomplete='off';}inp.value=o.value||'';inp.placeholder=o.placeholder||'';box.appendChild(inp);}
+    var act=document.createElement('div');act.className='ui-dlg-act';
+    var c=document.createElement('button');c.type='button';c.textContent=o.cancelText||'Cancel';
+    var k=document.createElement('button');k.type='button';k.className='ok'+(o.danger?' danger':'');k.textContent=o.confirmText||'OK';
+    act.appendChild(c);act.appendChild(k);box.appendChild(act);ov.appendChild(box);
+    function done(v){document.removeEventListener('keydown',key,true);ov.remove();res(v);}
+    function key(e){if(e.key==='Escape'){e.stopPropagation();done(o.prompt?null:false);}else if(e.key==='Enter'&&inp&&document.activeElement===inp){done(inp.value);}}
+    c.onclick=function(){done(o.prompt?null:false);};
+    k.onclick=function(){done(o.prompt?inp.value:true);};
+    ov.onclick=function(e){if(e.target===ov)done(o.prompt?null:false);};
+    document.addEventListener('keydown',key,true);
+    document.body.appendChild(ov);
+    setTimeout(function(){(inp||k).focus();},30);
+  });
+}
+window.uiConfirm=function(message,opt){opt=opt||{};return dlg({title:opt.title||'Please confirm',message:String(message==null?'':message),confirmText:opt.confirmText,cancelText:opt.cancelText,danger:opt.danger});};
+window.uiPrompt=function(message,def,opt){opt=opt||{};return dlg({title:opt.title||'Enter a value',message:String(message==null?'':message),prompt:true,password:opt.password,value:def==null?'':String(def),placeholder:opt.placeholder,confirmText:opt.confirmText||'Save'});};
+window.lsScanTab=function(b){var w=b.closest('#scans-body');w.querySelectorAll('.ls-seg button').forEach(function(x){x.classList.toggle('on',x===b);});w.querySelectorAll('.ls-pane').forEach(function(x){x.classList.toggle('on',x.id===b.getAttribute('data-p'));});};
+/* keep the Settings jump bar just under the sticky sub-nav instead of on top of it */
+function place(){var n=document.getElementById('sub-nav');var t=0;if(n){var cs=getComputedStyle(n);if(cs.position==='sticky'||cs.position==='fixed'){t=Math.max(0,Math.round(n.getBoundingClientRect().bottom));}}document.documentElement.style.setProperty('--set-top',t+'px');}
+window.addEventListener('scroll',place,{passive:true});window.addEventListener('resize',place);setTimeout(place,400);setInterval(place,2000);
+})();
+
+</script>
+<script id="linn-ripple-js">
+(function(){
+var SEL='.btn,button,.header-icon,.nav-item,.pkg-type-tab,.udp-tab,.game-list-tab-btn,.pkg-tab-btn,.wtx-chip,.picker-btn,.maint-chip,.sub-nav-item,.cal2-nav-btn,.stat-chip,.field-lock-btn,.secret-toggle-btn,.od-card-close,.pkg-card-close,.pkg-move-btn,.sc-head,.pkg-cost-update-btn';
+document.addEventListener('pointerdown',function(e){
+  var t=e.target&&e.target.closest?e.target.closest(SEL):null;
+  if(!t||t.disabled||t.getAttribute('aria-disabled')==='true'||t.hasAttribute('data-no-ripple')||t.closest('.nav-arrow,.toggle-switch,.pp-switch,input,select,textarea'))return;
+  var r=t.getBoundingClientRect();if(r.width<8||r.height<8||r.width>900)return;
+  var st=getComputedStyle(t).position==='static';if(st)t.style.position='relative';
+  t.classList.add('lg-rip-host');
+  var d=Math.max(r.width,r.height)*2.2,x=e.clientX-r.left-d/2,y=e.clientY-r.top-d/2;
+  var s=document.createElement('span');s.className='lg-rip';s.style.cssText='width:'+d+'px;height:'+d+'px;left:'+x+'px;top:'+y+'px';
+  t.appendChild(s);
+  setTimeout(function(){s.remove();if(!t.querySelector('.lg-rip')){t.classList.remove('lg-rip-host');if(st)t.style.position='';}},650);
+},{passive:true});
+})();
+</script>
 </body>
 </html>
