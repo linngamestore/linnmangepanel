@@ -17184,6 +17184,11 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
 
             if (gameId && GAMES[gameId]) {
                 const g = GAMES[gameId];
+                // Load the SAVED tab names (and empty custom tabs) into the editor. Before, they were reset to
+                // "Package"/"Currency" on every open, so the next Save wrote the defaults back over the renamed tab.
+                { const sl = g.packageTabLabels || {};
+                  builtinPkgTabLabels = { package: (typeof sl.package === 'string' && sl.package.trim()) || 'Package', currency: (typeof sl.currency === 'string' && sl.currency.trim()) || 'Currency' };
+                  (Array.isArray(g.packageTabs) ? g.packageTabs : []).forEach(t => { if (t && typeof t === 'string' && !['package', 'currency'].includes(t) && !customPkgTabs.includes(t)) customPkgTabs.push(t); }); }
                 // Rebuild each saved package as its own row — edit-packages-list
                 // was just cleared above and otherwise stays empty forever for
                 // an existing game, since nothing else ever refills it from
@@ -17201,6 +17206,7 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
                         null, p.badge || ''
                     );
                 });
+                renderPkgTabBar();
                 // If this game name has more than one server variant, show
                 // which one is currently open right in the title — makes it
                 // obvious you're editing Malaysia's prices and not Global's
