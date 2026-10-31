@@ -3649,6 +3649,7 @@ html.perf-low [data-pcbg] *,html.perf-low [data-pcbg] *::before,html.perf-low [d
                 <span class="conn-label" id="conn-label">Connecting</span>
             </div>
             <div class="header-icon" id="quick-jump-btn" title="Quick jump (Ctrl+K)" role="button" aria-label="Quick jump" style="flex-shrink:0;"><svg class="ui-icon" style="width:20px;" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.5" y2="16.5"></line></svg></div>
+            <div class="header-icon" id="activity-btn" title="Activity" role="button" aria-label="Activity" onclick="openActivitySheet()" style="flex-shrink:0;"><svg class="ui-icon" style="width:20px;"><use href="#icon-bell"></use></svg></div>
             <div class="header-icon" id="theme-toggle-btn" title="Theme" role="button" aria-label="Change theme" onclick="openThemeSheet()" style="flex-shrink:0;">
                 <svg class="ui-icon" style="width:20px;"><use href="#icon-palette"></use></svg>
             </div>
@@ -3670,14 +3671,14 @@ html.perf-low [data-pcbg] *,html.perf-low [data-pcbg] *::before,html.perf-low [d
              updateOrdersNavBadge(). API (G2Bulk/JCPlays/API Keys) now lives
              nested one level inside Setting instead of its own top icon. -->
         <div class="nav-item active" id="group-dashboard" onclick="openNavGroupSheet('dashboard')">
-            <svg class="ui-icon"><use href="#icon-trending-up"></use></svg> <span class="nav-label">Dashboard</span>
+            <svg class="ui-icon"><use href="#icon-trending-up"></use></svg> <span class="nav-label">Home</span>
         </div>
         <div class="nav-item" id="group-order" onclick="showPage('order-list')">
             <svg class="ui-icon"><use href="#icon-cart"></use></svg> <span class="nav-label">Orders</span>
             <span class="nav-item-count-badge" id="orders-nav-count-badge" title="New orders"></span>
         </div>
         <div class="nav-item" id="group-game" onclick="openNavGroupSheet('game')">
-            <svg class="ui-icon"><use href="#icon-gamepad-line"></use></svg> <span class="nav-label">Game</span>
+            <svg class="ui-icon"><use href="#icon-gamepad-line"></use></svg> <span class="nav-label">Games</span>
         </div>
         <div class="nav-item" id="group-wallet" onclick="openNavGroupSheet('wallet')">
             <svg class="ui-icon"><use href="#icon-users"></use></svg> <span class="nav-label">Customers</span>
@@ -3686,7 +3687,7 @@ html.perf-low [data-pcbg] *,html.perf-low [data-pcbg] *::before,html.perf-low [d
             <svg class="ui-icon"><use href="#icon-palette"></use></svg> <span class="nav-label">Store</span>
         </div>
         <div class="nav-item" id="group-setting" onclick="openNavGroupSheet('setting')">
-            <svg class="ui-icon"><use href="#icon-gear"></use></svg> <span class="nav-label">Setting</span>
+            <svg class="ui-icon"><use href="#icon-grid"></use></svg> <span class="nav-label">More</span>
             <span class="nav-item-low-balance-dot" id="api-nav-low-dot"></span>
         </div>
     </nav>
@@ -7108,7 +7109,7 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
             'payment-list': 'group-wallet', 'topup-list': 'group-wallet', 'payin-list': 'group-wallet',
             'user-list': 'group-wallet', 'tier-list': 'group-wallet',
             'game-list': 'group-game', 'user-detail-page': 'group-wallet',
-            'events-page': 'group-store', 'festival-page': 'group-store', 'usage-page': 'group-setting', 'settings': 'group-setting', 'notify-list': 'group-setting', 'ticker-list': 'group-setting'
+            'events-page': 'group-setting', 'festival-page': 'group-setting', 'usage-page': 'group-setting', 'settings': 'group-setting', 'notify-list': 'group-setting', 'ticker-list': 'group-setting'
         };
         function showPage(pageId) {
             const previousPageId = document.querySelector('.page-section.active')?.id || null;
@@ -7208,7 +7209,8 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
                          { label: 'API Keys', page: 'api-docs' },
                          { label: 'Usage', page: 'usage-page' },
                          { label: 'Ticker', page: 'ticker-list' },
-                         { label: 'Notify', page: 'notify-list' } ]
+                         { label: 'Notify', page: 'notify-list' },
+                         { label: 'Event', page: 'events-page', pref: 'pref-hide-events' }, { label: 'Theme', page: 'festival-page', pref: 'pref-hide-theme' } ]
         };
         const NAV_HOME_PAGE = { dashboard: 'dashboard', wallet: 'user-list', store: 'events-page', setting: 'settings' };
         const NAV_LAST_PAGE = {};
@@ -10891,6 +10893,46 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
             bar.style.display = 'flex';
         }
 
+
+        // ---------- Redesign helpers: order timeline + Activity sheet ----------
+        window.lgOrderTimeline = function (st) {
+            const fail = st === 'Fail' || st === 'Rejected', done = st === 'Success' || st === 'Completed';
+            const steps = [['Placed', 'done'], [st === 'Pending' ? 'Review' : 'Processing', (done || fail) ? 'done' : 'cur'], [fail ? 'Failed' : 'Delivered', done ? 'done' : (fail ? 'bad' : 'todo')]];
+            const ck = '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
+            const x = '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round"><path d="M7 7l10 10M17 7L7 17"/></svg>';
+            return '<div class="ord-tl">' + steps.map((t, i) =>
+                (i ? '<div class="ord-tl-line' + (steps[i - 1][1] === 'done' ? ' on' : '') + '"></div>' : '') +
+                '<div class="ord-tl-step ' + t[1] + '"><i>' + (t[1] === 'done' ? ck : t[1] === 'bad' ? x : '') + '</i><span>' + t[0] + '</span></div>').join('') + '</div>';
+        };
+        (function () {
+            function ms(o) { try { return o.timestamp.toMillis(); } catch (e) { return 0; } }
+            function ago(t) { const m = Math.max(0, Math.round((Date.now() - t) / 60000)); return m < 1 ? 'now' : m < 60 ? m + 'm' : m < 1440 ? Math.floor(m / 60) + 'h' : Math.floor(m / 1440) + 'd'; }
+            const IC = { ord: '<path d="M6 6h15l-1.5 9h-12z"/><path d="M6 6L5 3H2"/><circle cx="9" cy="20" r="1.3"/><circle cx="18" cy="20" r="1.3"/>', wal: '<path d="M20 8V6a2 2 0 00-2-2H5a2 2 0 000 4h15v12H5a2 2 0 01-2-2V6"/>' };
+            function collect() {
+                const out = [];
+                try { Object.values(ORDERS || {}).forEach(o => { const st = o.status; out.push({ t: ms(o), k: 'ord', cls: st === 'Pending' ? 'wa' : st === 'Success' ? 'ok' : st === 'Fail' ? 'er' : 'in', title: (st === 'Pending' ? 'New order' : 'Order ' + String(orderStatusLabel ? orderStatusLabel(st) : st).toLowerCase()) + ' #' + String(o.id || '').substring(0, 8), sub: (o.game || '') + ' · ' + Number(o.price || 0).toLocaleString() + ' MMK' }); }); } catch (e) {}
+                try { Object.values(WALLET_TOPUPS || {}).forEach(o => { const st = o.status; out.push({ t: ms(o), k: 'wal', cls: st === 'Completed' ? 'ok' : st === 'Rejected' ? 'er' : 'wa', title: st === 'Completed' ? 'Top-up credited' : st === 'Rejected' ? 'Top-up rejected' : 'Top-up request', sub: (o.userName || o.userId || '') + ' · +' + Number(o.amount || 0).toLocaleString() }); }); } catch (e) {}
+                return out.filter(x => x.t).sort((a, b) => b.t - a.t).slice(0, 40);
+            }
+            function pendingCount() { let n = 0; try { Object.values(ORDERS || {}).forEach(o => { if (o.status === 'Pending') n++; }); Object.values(WALLET_TOPUPS || {}).forEach(o => { if (o.status === 'Pending') n++; }); } catch (e) {} return n; }
+            function dot() { const b = document.getElementById('activity-btn'); if (b) b.classList.toggle('has-dot', pendingCount() > 0); }
+            window.openActivitySheet = function () {
+                let ov = document.getElementById('activity-sheet-overlay');
+                if (!ov) {
+                    ov = document.createElement('div'); ov.className = 'modal-overlay'; ov.id = 'activity-sheet-overlay';
+                    ov.onclick = function (e) { if (e.target === ov) ov.classList.remove('show'); };
+                    ov.innerHTML = '<div class="modal-box" style="max-width:520px;"><div class="modal-header"><h3>Activity</h3><div class="modal-close" onclick="document.getElementById(\'activity-sheet-overlay\').classList.remove(\'show\')"><svg class="ui-icon" style="width:16px;"><use href="#icon-close"></use></svg></div></div><div class="modal-body"><div id="activity-list"></div></div></div>';
+                    document.body.appendChild(ov);
+                }
+                const items = collect(), today = new Date().setHours(0, 0, 0, 0);
+                const row = x => '<div class="act-it"><div class="act-ico ' + x.cls + '"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' + IC[x.k] + '</svg></div><div class="act-tx"><div class="act-a">' + escapeHtml(x.title) + '</div><div class="act-b">' + escapeHtml(x.sub) + '</div></div><div class="act-t">' + ago(x.t) + '</div></div>';
+                const a = items.filter(x => x.t >= today), b = items.filter(x => x.t < today);
+                document.getElementById('activity-list').innerHTML = items.length ? (a.length ? '<div class="act-grp">Today</div><div class="act-card">' + a.map(row).join('') + '</div>' : '') + (b.length ? '<div class="act-grp">Earlier</div><div class="act-card">' + b.map(row).join('') + '</div>' : '') : '<p class="empty-msg">No recent activity.</p>';
+                ov.classList.add('show');
+            };
+            setInterval(dot, 15000); setTimeout(dot, 4000);
+        })();
+
         function renderOrdersList() {
             clearTimeout(ordersRenderScheduled);
             attachScrollTouchGuard(ordersContainer);
@@ -11132,6 +11174,7 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
                                 <svg class="ui-icon" id="chevron-${orderId}" style="width:16px;height:16px;color:var(--text-muted);transition:transform 0.2s;transform:rotate(${isOpen ? '180' : '0'}deg);"><use href="#icon-chevron-down"></use></svg>
                             </div>
                         </div>
+                        ${data.status === 'Pending' ? `<div class="oc-quick"><span class="oc-quick-id">#${orderId.substring(0, 8)}${openMin === null ? '' : ' &middot; ' + fmtWaitMin(openMin) + ' ago'}</span><span class="oc-quick-btns"><button class="btn btn-primary btn-sm" onclick="startProcessing('${orderId}', this)">Confirm</button><button class="btn btn-danger btn-sm" onclick="markFail('${orderId}', this)">Reject</button></span></div>` : ''}
                         <div class="od-overlay" id="body-${orderId}" onclick="if(event.target===this) toggleOrderCard('${orderId}')">
                             <div class="od-card" onclick="event.stopPropagation()">
                                 <div class="od-card-header">
@@ -11146,6 +11189,7 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
                                         <svg class="ui-icon" style="width:16px;height:16px;"><use href="#icon-close"></use></svg>
                                     </div>
                                 </div>
+                                ${window.lgOrderTimeline(data.status)}
                                 <div class="od-grid">
                                     <div class="od-cell span-2">
                                         <div class="od-label">Customer</div>
@@ -13065,6 +13109,7 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
                                 <svg class="ui-icon" id="topup-chevron-${t.id}" style="width:16px;height:16px;color:var(--text-muted);transition:transform 0.2s;transform:rotate(${isOpen ? '180' : '0'}deg);"><use href="#icon-chevron-down"></use></svg>
                             </div>
                         </div>
+                        ${t.status === 'Pending' || t.status === 'Processing' ? `<div class="oc-quick"><span class="oc-quick-id">${t.status}</span><span class="oc-quick-btns"><button class="btn btn-primary btn-sm" onclick="confirmTopup('${t.id}', this)">Approve</button><button class="btn btn-danger btn-sm" onclick="rejectTopup('${t.id}', this)">Reject</button></span></div>` : ''}
                         <div class="od-overlay" id="topup-body-${t.id}" onclick="if(event.target===this) toggleTopupCard('${t.id}')">
                             <div class="od-card" onclick="event.stopPropagation()">
                                 <div class="od-card-header">
@@ -13080,6 +13125,7 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
                                     </div>
                                 </div>
                                 <div style="display:flex;gap:10px;align-items:stretch;">
+                                    ${window.lgOrderTimeline(t.status)}
                                     <div class="od-grid" style="flex:1;grid-template-columns:1fr;">
                                         <div class="od-cell"><div class="od-label">UID</div><div class="od-value highlight-id">${escapeHtml(t.userId || 'N/A')}</div></div>
                                         ${t.userPhone ? `<div class="od-cell"><div class="od-label">Phone</div><div class="od-value"><a href="tel:${escapeHtml(t.userPhone)}">${escapeHtml(t.userPhone)}</a></div></div>` : ''}
@@ -14375,22 +14421,26 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
                 });
             })();
 
-            container.innerHTML = `<div class="game-image-grid">` + visibleIds.map(id => {
+            container.innerHTML = `<div class="game-row-list">` + visibleIds.map(id => {
                 const g = GAMES[id];
                 const variantCount = nameCounts[g.name] || 1;
-                const countBadge = variantCount > 1
-                    ? `<span class="game-variant-count-badge" title="${variantCount} server/region variants">${variantCount}</span>`
-                    : '';
+                const countBadge = (variantCount > 1 && !gameListEditMode)
+                    ? `<span class="game-variant-pill" title="${variantCount} server/region variants">${variantCount} servers</span>` : '';
+                const pk = g.packages || [];
+                let minM = null;
+                pk.forEach(p => { const c = Number(p.cost) || 0, pr = Number(p.price) || 0; if (c > 0 && pr > 0) { const m = ((pr - c) / c) * 100; if (minM === null || m < minM) minM = m; } });
+                const mCls = minM === null ? '' : (minM < MIN_PROFIT_MARGIN_PCT ? 'gm-bad' : (minM < LOW_MARGIN_THRESHOLD_PCT ? 'gm-warn' : 'gm-ok'));
+                const mTxt = minM === null ? '—' : minM.toFixed(1) + '%';
                 return `
-                    <div class="game-tile-wrap">
-                    <div class="game-image-tile" id="game-card-${id}" onclick="openGameActionSheet('${id}')">
-                        ${countBadge}
-                        ${providerChipsHTML(gameListEditMode ? [PROVIDER_CODE[g.fulfillProvider]] : provByName[g.name])}
-                        <img src="${g.image}" loading="lazy" decoding="async" alt="${escapeHtml(g.name)}">
-                    </div>
-                    <div class="game-tile-name" onclick="openGameActionSheet('${id}')">${escapeHtml(g.name)}</div>
-                    </div>
-                `;
+                    <div class="game-row" id="game-card-${id}" onclick="openGameActionSheet('${id}')">
+                        <div class="game-row-thumb"><img src="${g.image}" loading="lazy" decoding="async" alt="${escapeHtml(g.name)}"></div>
+                        <div class="game-row-info">
+                            <div class="game-row-name">${escapeHtml(g.name)}${countBadge}<span class="game-margin-dot" id="game-margin-dot-${id}" style="display:none"></span></div>
+                            <div class="game-row-sub">${pk.length} package${pk.length === 1 ? '' : 's'} &middot; margin <b class="${mCls}">${mTxt}</b></div>
+                            <div class="game-row-tags">${providerChipsHTML(gameListEditMode ? [PROVIDER_CODE[g.fulfillProvider]] : provByName[g.name])}<span class="game-cost-badge" id="game-cost-badge-${id}" style="display:none"></span><span class="game-stockout-badge" id="game-stockout-badge-${id}" style="display:none"></span></div>
+                        </div>
+                        <svg class="ui-icon game-row-chev"><use href="#icon-chevron-right"></use></svg>
+                    </div>`;
             }).join('') + `</div>`;
             initScrollReveal(container);
             visibleIds.forEach(id => { updateGameCostBadge(id); updateGameStockBadge(id); updateGameMarginDot(id); queueGameCostScan(id); });
@@ -28494,5 +28544,234 @@ html body main.content-area .page-section .admin-card{border-left-color:var(--bo
 html body .modal-header h3{background:none!important;border:0!important;box-shadow:none!important;padding:0!important;font-size:16px;font-weight:700;color:var(--text-primary)!important}
 </style>
 
+
+<style id="lg-redesign-2026">
+/* ===== LINN admin — clean redesign (tokens) ===== */
+:root,html[data-theme="light"]{--bg-app:#F5F6FA;--surface:#fff;--surface-strong:#fff;--bg-subtle:#F1F3F8;--bg-subtle-2:#F7F8FC;--fill-soft:rgba(15,23,42,.06);--border-glass:#EAECF3;--text-primary:#0F172A;--text-strong:#0F172A;--text-secondary:#475569;--text-muted:#94A3B8;--accent:#4F46E5;--accent-rgb:79,70,229;--accent-soft:#EEF0FF;--danger:#E11D48;--danger-soft:#FFECF0;--shadow-soft:0 1px 2px rgba(15,23,42,.05);--glass-blur:0px;--hdr-a:#4338CA;--hdr-b:#6366F1}
+html body{font-family:Inter,"SF Pro Text","Segoe UI",Roboto,"Noto Sans Myanmar","Myanmar Text",Arial,sans-serif;-webkit-font-smoothing:antialiased}
+html body::before{display:none!important}
+html body *{-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
+/* header */
+html body .header{min-height:61px;padding:10px 16px!important;background:var(--surface)!important;box-shadow:none!important;border-bottom:1px solid var(--border-glass)!important}
+html body .header-icon{width:40px;height:40px;border-radius:14px;background:var(--surface);border:1px solid var(--border-glass)}
+/* layout */
+html body .app-layout{display:block!important}
+html body .content-area{max-width:760px!important;margin:0 auto!important;padding:12px 16px calc(104px + env(safe-area-inset-bottom))!important}
+/* bottom tab bar (was top pill nav) */
+html body .top-nav-wrap{display:contents!important}
+html body .top-nav-wrap .top-nav{position:fixed!important;left:0!important;right:0!important;bottom:0!important;top:auto!important;width:100%!important;max-width:none!important;height:auto!important;flex-direction:row!important;justify-content:space-around!important;align-items:stretch!important;gap:0!important;padding:8px 6px calc(8px + env(safe-area-inset-bottom))!important;border:0!important;border-top:1px solid var(--border-glass)!important;border-radius:0!important;background:var(--surface-strong)!important;box-shadow:0 -8px 24px -16px rgba(15,23,42,.18)!important;overflow:visible!important;z-index:120!important}
+html body .top-nav-wrap .top-nav .nav-item{flex:1!important;flex-direction:column!important;gap:3px!important;padding:6px 0 2px!important;margin:0!important;border:0!important;border-radius:0!important;background:none!important;box-shadow:none!important;color:var(--text-muted)!important;font-size:11px!important;font-weight:500!important;min-width:0!important;transform:none!important}
+html body .top-nav-wrap .top-nav .nav-item .ui-icon{width:24px!important;height:24px!important;stroke:currentColor!important}
+html body .top-nav-wrap .top-nav .nav-item .nav-label{display:block!important;font-size:11px!important}
+html body .top-nav-wrap .top-nav .nav-item.active{color:var(--accent)!important;font-weight:600!important}
+html body .top-nav-wrap .top-nav .nav-item.active::before{content:"";position:absolute;top:-8px;left:50%;transform:translateX(-50%);width:24px;height:3px;border-radius:0 0 3px 3px;background:var(--accent)}
+html body #group-store{display:none!important}
+html body .top-nav .nav-item-count-badge{position:absolute!important;top:0!important;left:calc(50% + 6px)!important;right:auto!important}
+html body .top-nav .nav-item .nav-item-low-balance-dot{top:4px!important;left:calc(50% + 8px)!important;right:auto!important}
+/* sub-nav chips */
+html body .sub-nav{position:sticky;top:61px;z-index:90;gap:8px;padding:10px 16px;overflow-x:auto;scrollbar-width:none;background:var(--bg-app);border:0}
+html body .sub-nav::-webkit-scrollbar{display:none}
+html body .sub-nav.show{display:flex}
+html body .sub-nav-item{white-space:nowrap;flex-shrink:0;padding:8px 14px;border-radius:999px;background:var(--surface);border:1px solid var(--border-glass);color:var(--text-secondary);font-size:13px;font-weight:600;box-shadow:none}
+html body .sub-nav-item.active{background:var(--text-primary);border-color:var(--text-primary);color:var(--bg-app)}
+/* titles */
+html body .title-header{font-size:22px;font-weight:700;letter-spacing:-.4px;color:var(--text-primary);margin:4px 0 14px}
+/* period segmented control */
+html body #ov-period-bar{display:flex!important;gap:0!important;background:var(--fill-soft);border-radius:12px;padding:3px;margin:0 0 14px!important}
+html body #ov-period-bar button{flex:1;border:0!important;background:transparent!important;border-radius:9px!important;padding:8px 0!important;font-size:13px;font-weight:600;color:var(--text-secondary)!important;box-shadow:none!important}
+html body #ov-period-bar button.active{background:var(--surface)!important;color:var(--text-primary)!important;box-shadow:0 1px 3px rgba(15,23,42,.12)!important}
+/* KPI cards */
+html body .stat-grid{display:grid!important;grid-template-columns:1fr 1fr!important;gap:12px!important;margin-bottom:12px}
+html body .stat-card{background:var(--surface)!important;border:1px solid var(--border-glass)!important;border-radius:20px!important;padding:14px 16px!important;box-shadow:var(--shadow-soft)!important;min-width:0}
+html body .stat-card-label{font-size:12.5px!important;font-weight:500!important;color:var(--text-secondary)!important}
+html body .stat-card-value{font-size:20px!important;font-weight:700!important;letter-spacing:-.5px;color:var(--text-primary)!important;margin:8px 0 4px!important}
+html body .stat-card-sub,html body .stat-card-sub-text{font-size:12px!important;color:var(--text-muted)}
+html body .stat-card.kpi-hero{grid-column:1/-1;background:linear-gradient(135deg,#4338CA,#6366F1 60%,#818CF8)!important;border:0!important;position:relative;overflow:hidden;box-shadow:0 12px 24px -12px rgba(79,70,229,.55)!important}
+html body .stat-card.kpi-hero::after{content:"";position:absolute;right:-50px;top:-60px;width:190px;height:190px;border-radius:50%;background:rgba(255,255,255,.1);pointer-events:none}
+html body .stat-card.kpi-hero *{color:#fff!important}
+html body .stat-card.kpi-hero .stat-card-value{font-size:34px!important;letter-spacing:-1px;margin:2px 0 8px!important}
+/* cards */
+html body .chart-card,html body .admin-card,html body .ft-card,html body .od-card,html body .api-doc-card,html body .user-grid-card{background:var(--surface)!important;border:1px solid var(--border-glass)!important;border-radius:20px!important;box-shadow:var(--shadow-soft)!important}
+html body .details-grid-item{background:var(--surface);border:1px solid var(--border-glass);border-radius:16px}
+html body .dashboard-alert-banner{background:#FFF4E0;color:#92400E;border:0;border-radius:16px;padding:12px 14px;font-weight:500}
+html body .dash-section-label{font-size:12px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--text-muted)}
+/* tabs / chips */
+html body .seg-tabs,html body .game-list-tabs,html body .pkg-type-tabs{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;background:none!important;border:0!important;padding:0!important;margin:12px 0}
+html body .seg-tab,html body .game-list-tab-btn,html body .pkg-type-tab{white-space:nowrap;flex-shrink:0;padding:8px 14px!important;border-radius:999px!important;background:var(--surface)!important;border:1px solid var(--border-glass)!important;color:var(--text-secondary)!important;font-size:13px;font-weight:600;box-shadow:none!important}
+html body .seg-tab b{color:var(--text-muted);margin-left:4px;font-weight:600}
+html body .seg-tab.active,html body .game-list-tab-btn.active,html body .pkg-type-tab.active{background:var(--text-primary)!important;border-color:var(--text-primary)!important;color:var(--bg-app)!important}
+/* buttons */
+html body .btn{border-radius:12px;font-weight:600;letter-spacing:0}
+html body .btn-primary{background:var(--accent)!important;color:#fff!important;border:0!important;box-shadow:0 6px 14px -6px rgba(var(--accent-rgb),.55)!important}
+html body .btn-outline{background:var(--surface)!important;border:1px solid rgba(15,23,42,.12)!important;color:var(--text-secondary)!important;box-shadow:none!important}
+html body .btn-danger{background:var(--danger-soft)!important;color:var(--danger)!important;border:0!important;box-shadow:none!important}
+html body .dialog-box .btn-danger{background:var(--danger)!important;color:#fff!important}
+/* inputs */
+html body .content-area input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=file]):not([type=color]),html body .content-area select,html body .content-area textarea,html body .modal-box input:not([type=checkbox]):not([type=radio]),html body .modal-box textarea{border-radius:14px!important;background:var(--surface)!important;border:1px solid rgba(15,23,42,.1)!important;box-shadow:none!important}
+html body .content-area .admin-search-wrap input{border-radius:14px!important;min-height:46px}
+html body .toggle-switch input:checked+.toggle-slider{background:var(--accent)!important}
+/* dialogs & sheets */
+html body .modal-overlay,html body .dialog-overlay{background:rgba(15,23,42,.45)!important}
+html body .modal-box,html body .dialog-box{background:var(--surface-strong)!important;border:0!important;border-radius:28px!important;box-shadow:0 30px 60px rgba(15,23,42,.28)!important}
+html body .modal-header h3{font-size:18px;font-weight:700}
+html body .dialog-title{font-size:19px;font-weight:700}
+/* login */
+html body #login-screen{background:linear-gradient(180deg,#4338CA,#6366F1 45%,var(--bg-app) 45%)!important}
+html body .login-card{background:var(--surface-strong)!important;border:0!important;border-radius:28px!important;box-shadow:0 20px 40px rgba(30,41,90,.2)!important}
+@media (min-width:900px){html body .top-nav-wrap .top-nav{left:50%!important;right:auto!important;width:560px!important;transform:translateX(-50%);bottom:14px!important;border:1px solid var(--border-glass)!important;border-radius:22px!important}}
+</style>
+
+<style id="lg-redesign-orders">
+/* ===== Orders page ===== */
+html body #orders-container .admin-card{border:1px solid var(--border-glass)!important;border-left:1px solid var(--border-glass)!important;border-radius:18px!important;padding:14px!important;margin-bottom:10px!important;position:relative;overflow:hidden}
+html body #orders-container .admin-card::before{content:"";position:absolute;left:0;top:14px;bottom:14px;width:3px;border-radius:0 3px 3px 0;background:var(--st,transparent)}
+html body #orders-container .admin-card[style*="#"]::before{background:currentColor;opacity:.0}
+html body .oc-top{gap:12px;align-items:center}
+html body .oc-thumb{width:46px!important;height:46px!important;border-radius:14px!important;border:0!important}
+html body .oc-game-name{font-size:15px!important;font-weight:600!important;color:var(--text-primary)!important}
+html body .oc-meta{font-size:12.5px!important;white-space:normal!important;line-height:1.45;color:var(--text-secondary)}
+html body .oc-meta b{font-weight:700;color:var(--text-primary)}
+html body .oc-status{gap:8px}
+/* status pills */
+html body .badge{padding:4px 10px!important;border:0!important;box-shadow:none!important;font-size:11.5px!important;font-weight:600!important}
+html body .badge-pending,html body .badge-warning{background:#FFF4E0!important;color:#D97706!important}
+html body .badge-processing{background:#E6F4FD!important;color:#0284C7!important}
+html body .badge-success{background:#E8F8EE!important;color:#16A34A!important}
+html body .badge-danger{background:#FFECF0!important;color:#E11D48!important}
+html body .wl-tag{background:var(--fill-soft);border-radius:99px;font-weight:600}
+/* order detail → bottom sheet */
+html body .od-overlay{background:rgba(15,23,42,.45)!important;align-items:flex-end!important;justify-content:center!important;padding:0!important}
+html body .od-card{max-width:520px!important;width:100%!important;max-height:88vh!important;border-radius:28px 28px 0 0!important;padding:22px 20px calc(22px + env(safe-area-inset-bottom))!important;position:relative;box-shadow:0 -20px 50px rgba(15,23,42,.25)!important}
+html body .od-card::before{content:"";position:absolute;top:8px;left:50%;width:40px;height:5px;margin-left:-20px;border-radius:3px;background:rgba(15,23,42,.15)}
+html body .od-card-header{border-bottom:0!important;padding:6px 0 8px!important}
+html body .od-card-title .oc-thumb{width:52px!important;height:52px!important;border-radius:16px!important}
+html body .od-card-title-text .oc-game-name{font-size:18px!important;font-weight:700!important}
+html body .od-card-title-text .oc-meta{font-size:13px!important}
+html body .od-card-close{width:36px!important;height:36px!important;border-radius:12px!important}
+html body .od-grid{grid-template-columns:1fr!important;gap:0!important;margin:6px 0 14px!important}
+html body .od-cell,html body .od-cell.span-2{display:flex;justify-content:space-between;align-items:center;gap:16px;grid-column:auto!important;background:none!important;border:0!important;border-bottom:1px solid var(--border-glass)!important;border-radius:0!important;padding:12px 0!important}
+html body .od-cell:last-child{border-bottom:0!important}
+html body .od-label{font-size:14px!important;font-weight:400!important;text-transform:none!important;letter-spacing:0!important;color:var(--text-secondary)!important;margin:0!important;flex-shrink:0}
+html body .od-value{font-size:14px!important;font-weight:600!important;text-align:right}
+html body .od-value.mono{font-size:13.5px!important}
+html body .od-card-footer{gap:10px!important;margin-top:8px!important}
+html body .od-card-footer .btn{min-height:46px!important;border-radius:14px!important;flex:1 1 calc(50% - 10px)!important}
+html body .od-card-footer .btn-primary{flex:2 1 100%!important}
+html body .od-done-label{font-size:13px;font-weight:600;color:var(--text-secondary);align-self:center}
+/* bulk bar, toggles, filters */
+html body .order-bulk-bar{background:var(--surface)!important;border:1px solid var(--border-glass)!important;border-radius:16px!important;box-shadow:0 10px 24px -14px rgba(15,23,42,.3)!important}
+html body #order-list .switch-row{background:var(--surface);border:1px solid var(--border-glass);border-radius:16px;padding:12px 14px;margin:10px 0}
+html body #order-list .dw-filters{display:flex;gap:10px;align-items:center}
+html body #order-list .dw-filters .admin-search-wrap{flex:1}
+html body .date-filter-trigger{height:46px;border-radius:14px!important;background:var(--surface)!important;border:1px solid rgba(15,23,42,.1)!important}
+</style>
+
+<style id="lg-redesign-games">
+/* ===== Games page ===== */
+html body #game-list .game-list-tabs{margin:6px 0 10px}
+html body #game-list .game-list-subtabs:empty{display:none}
+html body #game-list .pkg-actions-row{flex-wrap:nowrap!important;overflow-x:auto;scrollbar-width:none;gap:8px!important;margin:0 0 14px!important;padding-bottom:2px}
+html body #game-list .pkg-actions-row::-webkit-scrollbar{display:none}
+html body #game-list .pkg-actions-row .btn{flex:0 0 auto!important;height:36px;padding:0 14px!important;font-size:13px!important;border-radius:12px!important;overflow:visible!important}
+html body #game-list .search-go-btn{width:46px;height:46px;border-radius:14px!important;background:var(--accent)!important;box-shadow:0 6px 14px -6px rgba(var(--accent-rgb),.55)!important;border:0!important}
+html body .game-image-grid{grid-template-columns:repeat(3,1fr)!important;gap:16px 12px!important}
+html body .game-tile-wrap{display:flex;flex-direction:column;gap:8px;min-width:0}
+html body .game-image-tile{border-radius:20px!important;border:1px solid var(--border-glass)!important;box-shadow:0 6px 16px -8px rgba(15,23,42,.28)!important;transition:transform .15s ease}
+html body .game-image-tile:active{transform:scale(.96)}
+html body .game-tile-name{font-size:12.5px!important;font-weight:600!important;line-height:1.3;text-align:center;color:var(--text-primary)!important;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;padding:0 2px}
+html body .game-variant-count-badge{background:var(--text-primary)!important;color:var(--bg-app)!important;border:2px solid var(--surface)!important;font-weight:700;box-shadow:none!important}
+@media (min-width:560px){html body .game-image-grid{grid-template-columns:repeat(4,1fr)!important}}
+/* game action sheet → bottom sheet look */
+html body #game-action-sheet-overlay .modal-box{max-width:520px!important;border-radius:28px 28px 0 0!important}
+html body #game-action-sheet-overlay .modal-body .btn-block{height:48px;margin-top:10px;border-radius:14px}
+html body #game-action-sheet-overlay img{border-radius:16px}
+</style>
+
+<style id="lg-redesign-games-2">
+html body .game-row-list{background:var(--surface);border:1px solid var(--border-glass);border-radius:20px;padding:2px 14px;box-shadow:var(--shadow-soft)}
+html body .game-row{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border-glass);cursor:pointer}
+html body .game-row:last-child{border-bottom:0}
+html body .game-row:active{opacity:.7}
+html body .game-row-thumb{width:48px;height:48px;border-radius:14px;overflow:hidden;flex-shrink:0;background:var(--bg-subtle)}
+html body .game-row-thumb img{width:100%;height:100%;object-fit:cover;display:block}
+html body .game-row-info{flex:1;min-width:0}
+html body .game-row-name{display:flex;align-items:center;gap:8px;font-size:15px;font-weight:600;color:var(--text-primary)}
+html body .game-variant-pill{font-size:11px;font-weight:600;padding:2px 8px;border-radius:99px;background:var(--accent-soft);color:var(--accent);white-space:nowrap}
+html body .game-row-sub{font-size:12.5px;color:var(--text-secondary);margin-top:2px}
+html body .game-row-sub b{font-weight:700}
+html body .gm-ok{color:#16A34A}html body .gm-warn{color:#D97706}html body .gm-bad{color:#E11D48}
+html body .game-row-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+html body .game-row-tags:empty{display:none}
+html body .game-row-tags .game-cost-badge,html body .game-row-tags .game-stockout-badge{position:static!important;font-size:11px;font-weight:600;padding:3px 9px;border-radius:99px;background:#FFF4E0;color:#D97706;border:0}
+html body .game-row-tags .game-stockout-badge{background:#FFECF0;color:#E11D48}
+html body .game-row-chev{width:18px;height:18px;color:var(--text-muted);flex-shrink:0}
+html body .game-row .game-margin-dot{position:static!important}
+/* game editor */
+html body #game-editor-page .package-row{background:var(--surface)!important;border:1px solid var(--border-glass)!important;border-radius:16px!important;box-shadow:none!important}
+html body #game-editor-page .ge-sec{font-size:12px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--text-muted)}
+html body #game-editor-page .field label{font-size:12.5px;font-weight:600;color:var(--text-secondary)}
+html body #game-editor-page .udp-back{width:42px;height:42px;border-radius:14px;background:var(--surface);border:1px solid var(--border-glass)}
+</style>
+
+<style id="lg-redesign-users-topups">
+/* ===== Top-ups: same card look as Orders ===== */
+html body #topups-container .admin-card{border:1px solid var(--border-glass)!important;border-left:1px solid var(--border-glass)!important;border-radius:18px!important;padding:14px!important;margin-bottom:10px!important}
+html body #topup-list .wl-strip{display:flex;gap:10px;overflow-x:auto;scrollbar-width:none;margin:0 0 12px}
+html body #topup-list .wl-strip>*{flex:0 0 auto;background:var(--surface);border:1px solid var(--border-glass);border-radius:16px;padding:10px 14px;box-shadow:var(--shadow-soft)}
+html body .quick-topup-grid{background:var(--surface);border:1px solid var(--border-glass);border-radius:20px;padding:14px;display:flex;flex-direction:column;gap:10px;margin-bottom:14px;box-shadow:var(--shadow-soft)}
+html body .quick-topup-grid input{width:100%;min-height:46px}
+html body .wl-chips{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none}
+html body .wl-chip{flex:0 0 auto;white-space:nowrap;padding:8px 14px;border-radius:99px;border:1px solid var(--border-glass);background:var(--bg-subtle);color:var(--text-secondary);font-size:13px;font-weight:600}
+html body .wl-chip.active,html body .wl-chip:active{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+html body .quick-topup-grid .btn-primary{height:48px;border-radius:14px;font-size:15px}
+html body .topup-user-chip{border-radius:12px;padding:8px 12px;font-size:13px;font-weight:600}
+html body .th-actions{display:flex;gap:8px}
+/* ===== Customers ===== */
+html body #user-list .title-header{flex-wrap:wrap;gap:8px}
+html body #user-list-count-badge{background:var(--accent-soft)!important;color:var(--accent)!important}
+html body .udp-tabs{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;background:none!important;border:0!important;padding:0!important}
+html body .udp-tab{padding:8px 14px!important;border-radius:99px!important;background:var(--surface)!important;border:1px solid var(--border-glass)!important;color:var(--text-secondary)!important;font-size:13px!important;box-shadow:none!important}
+html body .udp-tab.active{background:var(--text-primary)!important;border-color:var(--text-primary)!important;color:var(--bg-app)!important}
+html body .users-grid{grid-template-columns:1fr!important;gap:10px!important}
+html body .user-grid-card{border-radius:18px!important;padding:14px!important;box-shadow:var(--shadow-soft)!important;border:1px solid var(--border-glass)!important}
+html body .ugc-identity h5{font-size:15.5px!important;font-weight:700!important;color:var(--text-primary)}
+html body .ugc-id{font-size:12px;color:var(--text-muted)}
+html body .ugc-meta{display:grid!important;grid-template-columns:1fr 1fr;gap:8px!important}
+html body .ugc-meta-cell{background:var(--bg-subtle)!important;border:0!important;border-radius:14px!important;padding:10px 12px!important}
+html body .ugc-meta-cell span{font-size:11.5px!important;color:var(--text-muted)!important}
+html body .ugc-meta-cell b{font-size:15px!important;font-weight:700!important;color:var(--text-primary)!important}
+html body .ugc-actions{display:flex;gap:8px}
+html body .ugc-actions .btn{flex:1;height:42px;border-radius:12px}
+html body .pres-chip{border-radius:99px}
+</style>
+
+<style id="lg-redesign-extras">
+html body .oc-quick{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:12px;padding-top:12px;border-top:1px dashed var(--border-glass)}
+html body .oc-quick-id{font-size:12px;color:var(--text-muted)}
+html body .oc-quick-btns{display:flex;gap:8px}
+html body .oc-quick-btns .btn{height:34px;min-height:0;padding:0 14px;font-size:13px;border-radius:11px}
+html body .ord-tl{display:flex;align-items:flex-start;margin:6px 0 14px}
+html body .ord-tl-step{display:flex;flex-direction:column;align-items:center;gap:5px;font-size:11.5px;font-weight:600;color:var(--text-muted);min-width:64px}
+html body .ord-tl-step i{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;background:var(--fill-soft);color:#fff}
+html body .ord-tl-step.done{color:#16A34A}html body .ord-tl-step.done i{background:#16A34A}
+html body .ord-tl-step.cur{color:var(--accent)}html body .ord-tl-step.cur i{background:var(--accent-soft);border:2px solid var(--accent)}
+html body .ord-tl-step.bad{color:#E11D48}html body .ord-tl-step.bad i{background:#E11D48}
+html body .ord-tl-line{flex:1;height:2px;background:var(--fill-soft);margin:12px 6px 0}
+html body .ord-tl-line.on{background:#16A34A}
+html body #activity-btn{position:relative}
+html body #activity-btn.has-dot::after{content:"";position:absolute;top:8px;right:9px;width:8px;height:8px;border-radius:50%;background:#E11D48;border:2px solid var(--surface);box-sizing:content-box}
+html body #activity-sheet-overlay{align-items:flex-end}
+html body #activity-sheet-overlay .modal-box{border-radius:28px 28px 0 0!important;max-height:86vh;overflow-y:auto}
+html body .act-grp{font-size:12px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--text-muted);margin:6px 4px 8px}
+html body .act-card{background:var(--surface);border:1px solid var(--border-glass);border-radius:20px;padding:2px 14px;margin-bottom:14px}
+html body .act-it{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border-glass)}
+html body .act-it:last-child{border:0}
+html body .act-ico{width:44px;height:44px;border-radius:14px;display:grid;place-items:center;flex-shrink:0}
+html body .act-ico.wa{background:#FFF4E0;color:#D97706}html body .act-ico.ok{background:#E8F8EE;color:#16A34A}html body .act-ico.er{background:#FFECF0;color:#E11D48}html body .act-ico.in{background:#E6F4FD;color:#0284C7}
+html body .act-tx{flex:1;min-width:0}
+html body .act-a{font-size:14.5px;font-weight:600;color:var(--text-primary)}
+html body .act-b{font-size:12.5px;color:var(--text-secondary);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+html body .act-t{font-size:11.5px;color:var(--text-muted)}
+</style>
 </body>
 </html>
