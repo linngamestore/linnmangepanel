@@ -6117,32 +6117,7 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
                     <textarea id="edit-game-disabled-reason" rows="2" placeholder="e.g. MLBB top-ups are delayed by the provider. Please order again later." style="width:100%;padding:10px;border-radius:12px;border:1px solid var(--border-glass);background:var(--bg-subtle-2);color:var(--text-primary);font-size:14px;font-family:inherit;resize:vertical;box-sizing:border-box;"></textarea>
                 </div>
 
-                                <label style="margin-top:12px;">Price Card Background</label>
-                <select id="edit-game-pcbg" class="field field-full"><option value="">Store default</option><option value="off">No background</option><option value="violet-shards">Violet Shards</option><option value="aurora">Aurora</option><option value="royal-gold">Royal Gold</option><option value="ocean-glass">Ocean Glass</option><option value="sunset-blaze">Sunset Blaze</option><option value="emerald-prism">Emerald Prism</option><option value="crimson-flame">Crimson Flame</option><option value="cyber-grid">Cyber Grid</option><option value="rose-quartz">Rose Quartz</option><option value="frost-ice">Frost Ice</option><option value="midnight-stars">Midnight Stars</option><option value="candy-pop">Candy Pop</option><option value="carbon-neon">Carbon Neon</option><option value="platinum">Platinum</option><option value="dot-halftone">Dot Halftone</option><option value="neon-synthwave">Neon Synthwave</option><option value="galaxy-nebula">Galaxy Nebula</option><option value="lava-magma">Lava Magma</option><option value="jade-dragon">Jade Dragon</option><option value="sapphire-crystal">Sapphire Crystal</option><option value="amethyst-glow">Amethyst Glow</option><option value="mint-fresh">Mint Fresh</option><option value="peach-cream">Peach Cream</option><option value="obsidian-gold">Obsidian Gold</option><option value="holo-chrome">Holo Chrome</option><option value="cherry-blossom">Cherry Blossom</option></select>
-                <p style="font-size:11px;color:var(--text-muted);margin:4px 0 12px;">Store default = Settings ထဲက Price Card Background ကို သုံးမယ်။</p>
-                <div id="game-fx-box" style="margin:0 0 14px;padding:12px;border-radius:14px;border:1px solid var(--border-glass);background:var(--bg-subtle-2);">
-                    <label style="margin:0 0 6px;display:block;font-weight:600;">Price Card Effects (ဒီ game အတွက်သီးသန့်)</label>
-                    <select id="edit-game-pcfx-mode" class="field field-full" onchange="document.getElementById('edit-game-pcfx-list').style.display=this.value==='custom'?'flex':'none'">
-                        <option value="">Store default</option><option value="off">No effects</option><option value="custom">Choose effects…</option>
-                    </select>
-                    <div id="edit-game-pcfx-list" style="display:none;flex-wrap:wrap;gap:8px 14px;margin:10px 0 2px;font-size:13px;">
-                        <label style="display:flex;align-items:center;gap:5px;margin:0;"><input type="checkbox" value="shine"> Shine</label>
-                        <label style="display:flex;align-items:center;gap:5px;margin:0;"><input type="checkbox" value="sparkle"> Sparkle</label>
-                        <label style="display:flex;align-items:center;gap:5px;margin:0;"><input type="checkbox" value="glow"> Glow</label>
-                        <label style="display:flex;align-items:center;gap:5px;margin:0;"><input type="checkbox" value="float"> Float</label>
-                        <label style="display:flex;align-items:center;gap:5px;margin:0;"><input type="checkbox" value="drift"> Drift</label>
-                        <label style="display:flex;align-items:center;gap:5px;margin:0;"><input type="checkbox" value="frame"> Frame</label>
-                    </div>
-                    <p style="font-size:11px;color:var(--text-muted);margin:4px 0 10px;">Effects တွေက Background ရှိမှ ပေါ်ပါမယ် (Background = No background မဖြစ်ရ)။</p>
-                    <label style="margin:0 0 6px;display:block;">Select လုပ်တဲ့ကတ် Glow</label>
-                    <select id="edit-game-pcsel" class="field field-full">
-                        <option value="">Store default (Glow)</option><option value="off">Off</option><option value="glow">Glow</option><option value="pulse">Pulse (တဖျပ်ဖျပ်)</option><option value="ring">Ring</option><option value="rainbow">Rainbow (လည်နေတဲ့ အရောင်စုံ)</option>
-                    </select>
-                    <label style="margin:10px 0 6px;display:block;">TOP / HOT ကတ် ပိုလက်စေခြင်း</label>
-                    <select id="edit-game-pctag" class="field field-full">
-                        <option value="">Store default (On)</option><option value="on">On</option><option value="off">Off</option>
-                    </select>
-                </div>
+                <input type="hidden" id="edit-game-pcbg" value="">
                 <script>
                 window.__gfxLoad = function (g) {
                     g = g || {};
@@ -22682,24 +22657,34 @@ return `
         window.loadCustomGameCategories = loadCustomGameCategories;
 
         function renderGameCategorySelect() {
+            const box = document.getElementById('game-category-select');
             const current = document.getElementById('edit-game-category').value;
-            const noneChip = `<div class="cat-chip${current === '' ? ' active' : ''}" data-cat="" style="--cat-color:var(--text-secondary);">None</div>`;
-            const addChip = `<div class="cat-chip" data-add-cat="1" style="--cat-color:var(--text-muted);border-style:dashed;">+ Add Role</div>`;
-            document.getElementById('game-category-select').innerHTML = noneChip + allGameCategories().map(c => `
-                <div class="cat-chip${current === c.id ? ' active' : ''}" data-cat="${c.id}" style="--cat-color:${c.color};">
-                    ${escapeHtml(c.label)}
-                    ${CUSTOM_GAME_CATEGORIES.some(x => x.id === c.id) ? `<span class="cat-chip-del" data-del-cat="${c.id}" title="Remove this Game Role">&times;</span>` : ''}
-                </div>`).join('') + addChip;
+            const wasOpen = box.classList.contains('open');
+            const cur = findCategory(current);
+            const dot = (c) => `<i class="cat-dd-dot" style="background:${c}"></i>`;
+            const item = (id, label, color, del) => `<div class="cat-dd-item${current === id ? ' active' : ''}" data-cat="${id}">${dot(color)}<span>${escapeHtml(label)}</span>${del ? `<span class="cat-chip-del" data-del-cat="${id}" title="Remove this Game Role">&times;</span>` : ''}${current === id ? '<b class="cat-dd-ck">&#10003;</b>' : ''}</div>`;
+            box.innerHTML = `<button type="button" class="cat-dd-trigger" data-dd-toggle="1" data-no-busy>${cur ? dot(cur.color) : ''}<span class="cat-dd-val">${cur ? escapeHtml(cur.label) : 'None'}</span><i class="cat-dd-caret"></i></button>`
+                + `<div class="cat-dd-list">` + item('', 'None', '#94A3B8', false)
+                + allGameCategories().map(c => item(c.id, c.label, c.color, CUSTOM_GAME_CATEGORIES.some(x => x.id === c.id))).join('')
+                + `<div class="cat-dd-item cat-dd-add" data-add-cat="1"><span>+ Add Role</span></div></div>`;
+            box.classList.toggle('open', wasOpen);
         }
 
         document.getElementById('game-category-select').addEventListener('click', (e) => {
+            const box = document.getElementById('game-category-select');
             const delBtn = e.target.closest('[data-del-cat]');
-            if (delBtn) { removeCustomGameCategory(delBtn.dataset.delCat); return; }
-            if (e.target.closest('[data-add-cat]')) { openAddCategoryModal(); return; }
-            const chip = e.target.closest('.cat-chip');
-            if (!chip) return;
-            document.getElementById('edit-game-category').value = chip.dataset.cat;
+            if (delBtn) { e.stopPropagation(); removeCustomGameCategory(delBtn.dataset.delCat); return; }
+            if (e.target.closest('[data-add-cat]')) { box.classList.remove('open'); openAddCategoryModal(); return; }
+            if (e.target.closest('[data-dd-toggle]')) { box.classList.toggle('open'); return; }
+            const it = e.target.closest('.cat-dd-item');
+            if (!it) return;
+            document.getElementById('edit-game-category').value = it.dataset.cat;
+            box.classList.remove('open');
             renderGameCategorySelect();
+        });
+        document.addEventListener('click', (e) => {
+            const box = document.getElementById('game-category-select');
+            if (box && !box.contains(e.target)) box.classList.remove('open');
         });
 
         // "+ Add Role" modal - lets the admin add a brand-new Game Role tab
@@ -28773,5 +28758,310 @@ html body .act-a{font-size:14.5px;font-weight:600;color:var(--text-primary)}
 html body .act-b{font-size:12.5px;color:var(--text-secondary);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 html body .act-t{font-size:11.5px;color:var(--text-muted)}
 </style>
+<style id="lg-preview-v5">
+/* ===== Preview match: indigo tokens ===== */
+html body{--accent:#4F46E5;--accent-dark:#4338CA;--accent-rgb:79,70,229;--accent-soft:#EEF0FF;--pv-line:#ECEEF6;--pv-mut:#8B93A7;padding-bottom:calc(76px + env(safe-area-inset-bottom,0px))!important}
+
+/* ===== Header: slim ===== */
+html body .header{padding:8px 14px!important;min-height:0!important}
+html body #header-clock .hc-ring,html body #header-clock .hc-date{display:none!important}
+html body #header-clock .hc-time{font-size:15px!important;font-weight:700}
+html body .header .header-icon{width:34px!important;height:34px!important;min-width:34px!important;border-radius:11px!important}
+html body .header .header-icon .ui-icon{width:17px!important;height:17px!important}
+html body .header .conn-label{display:none!important}
+
+/* ===== Bottom nav (5 items) ===== */
+html body .top-nav-wrap,html body .top-nav-wrap.nav-hidden{position:fixed!important;left:0!important;right:0!important;bottom:0!important;top:auto!important;z-index:300!important;transform:none!important;opacity:1!important;padding:0!important;margin:0!important;background:var(--surface,#fff)!important;border:0!important;border-top:1px solid var(--pv-line)!important;box-shadow:0 -6px 20px -14px rgba(15,23,42,.25)!important;border-radius:0!important}
+html body .top-nav-wrap.nav-hidden .top-nav{pointer-events:auto!important}
+html body .top-nav-wrap .nav-arrow,html body #sub-nav{display:none!important}
+html body .top-nav-wrap .top-nav{display:grid!important;grid-template-columns:repeat(5,1fr)!important;width:100%!important;max-width:560px;margin:0 auto!important;padding:6px 6px calc(6px + env(safe-area-inset-bottom,0px))!important;gap:0!important;overflow:visible!important;border:0!important;background:none!important;box-shadow:none!important;border-radius:0!important;-webkit-mask-image:none!important;mask-image:none!important;position:relative!important;height:auto!important}
+html body .top-nav-wrap .top-nav::before,html body .top-nav-wrap .top-nav::after{display:none!important}
+html body #group-store{display:none!important}
+html body .top-nav-wrap .top-nav .nav-item{flex-direction:column!important;justify-content:center!important;align-items:center!important;gap:3px!important;min-height:46px!important;padding:4px 0!important;border:0!important;border-radius:0!important;background:none!important;background-image:none!important;box-shadow:none!important;color:var(--pv-mut)!important;font-size:10px!important;font-weight:600!important;position:relative!important}
+html body .top-nav-wrap .top-nav .nav-item .nav-label{font-size:10px!important;color:inherit!important}
+html body .top-nav-wrap .top-nav .nav-item .ui-icon{width:21px!important;height:21px!important;stroke:currentColor!important}
+html body .top-nav-wrap .top-nav .nav-item.active{color:var(--accent)!important;background:none!important;box-shadow:none!important}
+html body .top-nav-wrap .top-nav .nav-item.active .ui-icon{stroke:var(--accent)!important}
+html body .top-nav-wrap .top-nav .nav-item.active::after{display:block!important;content:"";position:absolute;top:-6px;left:50%;width:22px;height:3px;border-radius:0 0 4px 4px;background:var(--accent);transform:translateX(-50%)}
+html body .top-nav-wrap .top-nav .nav-item .nav-item-count-badge{top:0!important;right:calc(50% - 18px)!important}
+
+/* ===== Page title + content ===== */
+html body .content-area{padding:12px 14px!important}
+html body .title-header{font-size:20px!important;font-weight:800!important;letter-spacing:-.3px;margin:2px 0 12px!important}
+
+/* ===== Buttons: smaller ===== */
+html body .btn{min-height:32px!important;padding:0 12px!important;font-size:12.5px!important;font-weight:600!important;border-radius:10px!important;line-height:1.2}
+html body .btn-sm,html body .btn-xs{min-height:30px!important;padding:0 11px!important;font-size:12px!important;border-radius:9px!important}
+html body .btn svg{width:14px!important;height:14px!important}
+html body .btn-primary{background:var(--accent)!important;background-image:none!important;box-shadow:none!important}
+html body .btn-outline{background:#fff!important;border:1px solid var(--pv-line)!important}
+
+/* ===== Tabs / chips: slim pills ===== */
+html body :is(.seg-tabs,.game-list-tabs,.pkg-type-tabs,.udp-tabs){display:flex!important;gap:6px!important;overflow-x:auto!important;padding:2px 0 6px!important;background:none!important;border:0!important;box-shadow:none!important;border-radius:0!important;scrollbar-width:none}
+html body :is(.seg-tabs,.game-list-tabs,.pkg-type-tabs,.udp-tabs)::-webkit-scrollbar{display:none}
+html body :is(.seg-tab,.game-list-tab-btn,.pkg-type-tab,.udp-tab,.odb-chip,.ge-idx button,.sub-nav-item){flex:0 0 auto!important;min-height:30px!important;height:30px!important;padding:0 12px!important;font-size:12px!important;font-weight:600!important;border-radius:999px!important;border:1px solid var(--pv-line)!important;background:var(--surface,#fff)!important;color:var(--text-secondary)!important;box-shadow:none!important;display:inline-flex!important;align-items:center;gap:6px;white-space:nowrap;transform:none!important}
+html body :is(.seg-tab,.game-list-tab-btn,.pkg-type-tab,.udp-tab,.odb-chip,.ge-idx button).active,html body .ge-idx button.on{background:#0F172A!important;border-color:#0F172A!important;color:#fff!important;background-image:none!important}
+html body .odb-chip.active,html body .ge-idx button.on{background:var(--accent)!important;border-color:var(--accent)!important}
+html body .seg-tab b{font-size:10.5px!important;min-width:18px;padding:1px 6px;border-radius:999px;background:var(--accent-soft);color:var(--accent);font-weight:700}
+html body .seg-tab.active b{background:rgba(255,255,255,.18);color:#fff}
+
+/* ===== Cards / inputs ===== */
+html body :is(.order-card,.admin-card,.stat-card,.chart-card,.pm-card,.user-grid-card){border-radius:16px!important;border:1px solid var(--pv-line)!important;box-shadow:0 1px 2px rgba(15,23,42,.04)!important;background:var(--surface,#fff)!important}
+html body :is(input[type=text],input[type=search],input[type=number],input[type=password],input[type=email],select,textarea){border-radius:12px!important;min-height:40px;font-size:14px!important}
+html body .admin-search-wrap input,html body .date-filter-trigger{min-height:40px!important;border-radius:12px!important;font-size:13.5px!important}
+
+/* ===== Game editor: no overlap, clean accordion ===== */
+html body #game-editor-page .ge-idx{position:static!important;top:auto!important;margin:0 0 8px!important;padding:2px 0 6px!important;background:none!important;z-index:1!important;display:flex!important;gap:6px;overflow-x:auto}
+html body #game-editor-page .ge-sec{margin:10px 0 0!important;scroll-margin-top:70px!important;min-height:44px!important;z-index:1;position:relative;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+html body #game-editor-page .ge-sec *{pointer-events:none}
+html body #game-editor-page .modal-footer{position:sticky!important;bottom:calc(66px + env(safe-area-inset-bottom,0px))!important;z-index:20!important;margin:10px 0 0!important;border-radius:16px!important}
+html body #game-editor-page .modal-footer .btn{height:44px!important;min-height:44px!important;font-size:14px!important}
+
+/* ===== More sheet ===== */
+#pv-more{position:fixed;inset:0;z-index:500;display:none;align-items:flex-end;background:rgba(15,23,42,.45)}
+#pv-more.show{display:flex}
+#pv-more .pv-box{width:100%;max-height:82vh;overflow-y:auto;background:var(--bg-app,#F4F5FB);border-radius:24px 24px 0 0;padding:10px 14px calc(78px + env(safe-area-inset-bottom,0px))}
+#pv-more .pv-grab{width:36px;height:4px;border-radius:4px;background:#CBD0DE;margin:2px auto 10px}
+#pv-more h4{margin:14px 4px 6px;font-size:11px;letter-spacing:.8px;text-transform:uppercase;color:var(--pv-mut);font-weight:700}
+#pv-more .pv-grp{background:var(--surface,#fff);border:1px solid var(--pv-line);border-radius:16px;overflow:hidden}
+#pv-more button{display:flex;align-items:center;justify-content:space-between;width:100%;min-height:46px;padding:0 14px;border:0;background:none;color:var(--text-primary);font-size:14px;font-weight:600;text-align:left;border-bottom:1px solid var(--pv-line)}
+#pv-more button:last-child{border-bottom:0}
+#pv-more button:active{background:var(--accent-soft)}
+#pv-more button::after{content:"";width:7px;height:7px;border-right:2px solid #B4BACB;border-top:2px solid #B4BACB;transform:rotate(45deg)}
+
+/* ===== Category dropdown ===== */
+html body #game-category-select{position:relative;display:block!important}
+html body .cat-dd-trigger{width:100%;height:42px;display:flex;align-items:center;gap:8px;padding:0 12px;border-radius:12px;border:1px solid var(--pv-line,#ECEEF6);background:var(--surface,#fff);color:var(--text-primary);font-size:14px;font-weight:500;text-align:left}
+html body .cat-dd-val{flex:1}
+html body .cat-dd-dot{width:10px;height:10px;border-radius:50%;flex:0 0 10px;display:inline-block}
+html body .cat-dd-caret{width:7px;height:7px;border-right:2px solid #8B93A7;border-bottom:2px solid #8B93A7;transform:rotate(45deg);margin-bottom:3px;transition:transform .15s}
+html body #game-category-select.open .cat-dd-caret{transform:rotate(-135deg);margin-bottom:-3px}
+html body #game-category-select.open .cat-dd-trigger{border-color:var(--accent);box-shadow:0 0 0 3px rgba(79,70,229,.14)}
+html body .cat-dd-list{display:none;position:absolute;left:0;right:0;top:calc(100% + 6px);z-index:60;max-height:260px;overflow-y:auto;background:var(--surface,#fff);border:1px solid var(--pv-line,#ECEEF6);border-radius:14px;box-shadow:0 14px 30px -12px rgba(15,23,42,.35);padding:4px}
+html body #game-category-select.open .cat-dd-list{display:block}
+html body .cat-dd-item{display:flex;align-items:center;gap:9px;min-height:40px;padding:0 10px;border-radius:10px;font-size:13.5px;font-weight:500;color:var(--text-primary);cursor:pointer}
+html body .cat-dd-item:active,html body .cat-dd-item.active{background:var(--accent-soft)}
+html body .cat-dd-item span:not(.cat-chip-del){flex:1}
+html body .cat-dd-ck{color:var(--accent);font-size:13px}
+html body .cat-dd-add{color:var(--accent);border-top:1px solid var(--pv-line,#ECEEF6);border-radius:0 0 10px 10px;margin-top:4px}
+html body .cat-dd-item .cat-chip-del{width:22px;height:22px;display:grid;place-items:center;border-radius:50%;color:#E11D48}
+/* Orders page polish */
+html body #order-list .title-header{margin-bottom:10px!important}
+html body #order-list .title-header .btn{min-height:30px!important}
+html body .dw-filters{display:flex;flex-direction:column;gap:8px}
+html body .odb-row,html body [class*="odb-"]:not(.odb-chip){gap:6px}
+
+/* ===== Preview match v2: every page ===== */
+/* Dashboard */
+html body #ov-period-bar{display:flex!important;gap:2px!important;padding:3px;background:var(--fill-soft,#EEF0F6);border-radius:12px;margin:0 0 12px!important}
+html body #ov-period-bar button{flex:1;height:30px;border:0!important;border-radius:9px!important;background:none!important;font-size:12px;font-weight:600;color:var(--text-secondary)!important;box-shadow:none!important}
+html body #ov-period-bar button.active{background:var(--surface,#fff)!important;color:var(--text-primary)!important;box-shadow:0 1px 3px rgba(15,23,42,.12)!important}
+html body .stat-grid{display:grid!important;grid-template-columns:1fr 1fr!important;gap:10px!important}
+html body .stat-card{padding:12px!important;min-height:0!important}
+html body .stat-card-label{font-size:12px!important;font-weight:500!important;color:var(--text-secondary)!important}
+html body .stat-card-value{font-size:20px!important;font-weight:700!important;letter-spacing:-.3px}
+html body .stat-card-sub,html body .stat-card-sub-text{font-size:11px!important;color:var(--text-muted)!important}
+html body .stat-card.kpi-hero{grid-column:1/-1;border:0!important;padding:16px!important;background:linear-gradient(135deg,#4F46E5,#7C73F2)!important;color:#fff!important}
+html body .stat-card.kpi-hero *{color:#fff!important}
+html body .stat-card.kpi-hero .stat-card-value{font-size:30px!important}
+html body .dashboard-alert-banner{border-radius:14px!important;background:#FFF4E0!important;border:0!important;color:#92400E!important;font-size:12.5px!important;padding:10px 12px!important}
+/* Order list rows */
+html body #orders-container .admin-card{padding:0!important;border-radius:16px!important;margin-bottom:10px!important;overflow:hidden}
+html body .oc-top{display:flex;align-items:center;gap:10px;padding:12px!important}
+html body .oc-thumb{width:40px!important;height:40px!important;border-radius:12px!important;overflow:hidden;flex:0 0 40px}
+html body .oc-thumb img{width:100%;height:100%;object-fit:cover}
+html body .oc-game-name{font-size:14px!important;font-weight:700!important}
+html body .oc-meta{font-size:12px!important;color:var(--text-secondary)!important;margin:2px 0 0!important}
+html body .oc-status .badge{font-size:10.5px!important;padding:2px 9px!important;border-radius:99px!important;font-weight:600}
+html body .oc-quick{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 12px 12px!important;border-top:1px dashed var(--pv-line,#ECEEF6)}
+html body .oc-quick-id{font-size:11px;color:var(--text-muted)}
+html body .oc-quick .btn{min-height:30px!important;padding:0 14px!important;font-size:12px!important;border-radius:9px!important}
+/* Order detail = bottom sheet */
+html body .od-overlay{align-items:flex-end!important;padding:0!important}
+html body .od-overlay .od-card{width:100%!important;max-width:560px!important;margin:0 auto!important;max-height:86vh;overflow-y:auto;border-radius:24px 24px 0 0!important;padding:16px 16px calc(20px + env(safe-area-inset-bottom,0px))!important}
+html body .od-overlay .od-card::before{content:"";display:block;width:36px;height:4px;border-radius:4px;background:#CBD0DE;margin:-6px auto 10px}
+html body .od-label{font-size:12px!important;color:var(--text-secondary)!important}
+html body .od-value{font-size:13.5px!important;font-weight:600!important}
+/* Games list */
+html body .game-row-list{display:flex;flex-direction:column;gap:0;background:var(--surface,#fff);border:1px solid var(--pv-line,#ECEEF6);border-radius:16px;overflow:hidden}
+html body .game-row{display:flex!important;align-items:center;gap:12px;padding:10px 12px!important;border:0!important;border-bottom:1px solid var(--pv-line,#ECEEF6)!important;border-radius:0!important;background:none!important;box-shadow:none!important}
+html body .game-row:last-child{border-bottom:0!important}
+html body .game-row-thumb{width:44px!important;height:44px!important;border-radius:13px!important;overflow:hidden;flex:0 0 44px}
+html body .game-row-thumb img{width:100%;height:100%;object-fit:cover}
+html body .game-row-name{font-size:14px!important;font-weight:700!important}
+html body .game-row-sub{font-size:12px!important;color:var(--text-secondary)!important}
+html body .game-row-sub b{color:#16A34A;font-weight:600}
+html body .game-row-chev{width:16px!important;height:16px!important;color:#B4BACB!important}
+html body .pkg-actions-row{display:flex;gap:6px;flex-wrap:wrap}
+/* Customers */
+html body .users-grid{display:flex!important;flex-direction:column;gap:8px;grid-template-columns:none!important}
+html body .user-grid-card{padding:12px!important}
+html body .ugc-identity h5{font-size:14px;font-weight:700;margin:0}
+html body .ugc-id,html body .ugc-contact,html body .ugc-meta-cell span{font-size:11.5px;color:var(--text-secondary)}
+html body .ugc-meta-cell b{font-size:13px;font-weight:600}
+/* Wallet / top-up */
+html body .wl-tile{border-radius:14px!important;padding:12px!important}
+html body .wl-k{font-size:12px!important;color:var(--text-secondary)!important}
+html body .wl-v{font-size:19px!important;font-weight:700!important}
+html body .wl-chip{height:30px!important;min-height:30px!important;padding:0 12px!important;font-size:12px!important;border-radius:99px!important}
+html body .quick-topup-grid{padding:12px!important;gap:8px!important}
+/* API providers, settings cards */
+html body #g2bulk .admin-card,html body #jcplays .admin-card,html body #settings .admin-card{padding:14px!important;margin-bottom:10px!important}
+html body .toggle-switch{transform:scale(.9)}
+/* Switch rows / badges */
+html body .badge{font-size:10.5px;border-radius:99px;font-weight:600}
+/* Modals as sheets (reject dialog stays centered like preview) */
+html body .modal-box,html body .dialog-box{border-radius:22px!important}
+html body .modal-box .modal-header h3,html body .dialog-box h3{font-size:17px!important;font-weight:700!important}
+/* Login */
+html body #login-screen{background:linear-gradient(180deg,#4F46E5 0,#5B52EA 45%,var(--bg-app,#F4F5FB) 45%)!important}
+html body #login-screen .login-card{border-radius:22px!important;max-width:380px;margin:0 auto;box-shadow:0 18px 40px -20px rgba(15,23,42,.45)!important}
+html body #login-screen input{height:44px!important;border-radius:12px!important}
+html body #login-screen .btn-primary,html body #login-screen button[type=submit]{height:46px!important;border-radius:12px!important;font-size:14px!important;font-weight:700!important;background:var(--accent)!important}
+/* Activity sheet matches preview */
+html body .act-card{border-radius:16px!important}
+html body .act-ico{width:40px!important;height:40px!important;border-radius:12px!important}
+
+/* ===== Preview match v3: dark mode, top-ups, dialogs, subtitles ===== */
+html body{background:var(--bg-app)!important}
+html:is([data-theme="dark"],[data-theme="dark-blue"],[data-theme="midnight-purple"]) body{--bg-app:#0B1020;--surface:#131A2E;--pv-line:rgba(255,255,255,.08);--pv-mut:#7D86A3;--text-primary:#F1F3FA;--text-secondary:#9AA3BA;--text-muted:#6B7491;--fill-soft:rgba(255,255,255,.06);--accent:#6366F1;--accent-soft:rgba(99,102,241,.2);--surface-strong:#131A2E}
+html body .btn-outline{background:var(--surface)!important;color:var(--text-primary)!important}
+html body :is(.seg-tab,.game-list-tab-btn,.pkg-type-tab,.udp-tab,.odb-chip,.sub-nav-item){background:var(--surface)!important}
+html body :is(.seg-tab,.game-list-tab-btn,.pkg-type-tab,.udp-tab,.odb-chip).active{background:#0F172A!important}
+html:is([data-theme="dark"],[data-theme="dark-blue"],[data-theme="midnight-purple"]) body :is(.seg-tab,.game-list-tab-btn,.pkg-type-tab,.udp-tab).active{background:var(--accent)!important;border-color:var(--accent)!important}
+html body .header{background:var(--surface)!important;border-bottom:1px solid var(--pv-line)!important}
+html body .header .header-icon{background:var(--fill-soft)!important;color:var(--text-secondary)!important}
+html body .stat-card.kpi-hero{background:linear-gradient(135deg,#4F46E5,#7C73F2)!important}
+html body #ov-period-bar button.active{background:var(--surface)!important}
+html body .top-nav-wrap,html body .top-nav-wrap.nav-hidden{background:var(--surface)!important}
+
+/* page subtitle line (injected by JS) */
+html body .pv-sub{display:block;font-size:12px;font-weight:500;color:var(--text-secondary);margin:0 0 2px;letter-spacing:0}
+
+/* Top-ups / payments rows use the same card as orders */
+html body :is(#topups-container,#payin-container,#payment-container) .admin-card{padding:0!important;border-radius:16px!important;margin-bottom:10px!important;overflow:hidden}
+html body :is(#topups-container,#payin-container) .oc-meta{font-size:12px!important}
+html body #topups-container .oc-game-name{font-size:15px!important;font-weight:700!important;color:var(--text-primary)}
+html body .badge-success,html body .status-success{background:#E8F8EE;color:#16A34A}
+html body .wl-tag{display:inline-flex;align-items:center;height:20px;padding:0 8px;border-radius:99px;font-size:10.5px;font-weight:600;background:#FFF4E0;color:#B45309}
+html body .wl-tag.late,html body .wl-tag.dup{background:#FFECF0;color:#E11D48}
+html body .od-done-label{font-size:12px;color:var(--text-muted)}
+html body .od-overlay .od-card .btn-primary,html body .od-overlay .od-card .btn-danger{min-height:42px!important;border-radius:12px!important;font-size:13.5px!important;font-weight:700!important}
+html body .od-overlay .od-card .btn-danger{background:#FFECF0!important;color:#E11D48!important;box-shadow:none!important}
+
+/* Reject / confirm dialog = centered card like preview */
+html body .dialog-overlay{align-items:center!important;padding:20px!important}
+html body .dialog-overlay .dialog-box{width:100%!important;max-width:340px!important;padding:20px 18px 16px!important;text-align:center;border-radius:22px!important}
+html body .dialog-icon{width:48px!important;height:48px!important;margin:0 auto 10px!important;border-radius:50%!important;display:grid!important;place-items:center}
+html body .dialog-title{font-size:17px!important;font-weight:700!important;margin-bottom:4px}
+html body .dialog-message{font-size:12.5px!important;color:var(--text-secondary)!important;margin-bottom:12px}
+html body #action-dialog-templates{justify-content:center}
+html body #action-dialog-templates>*{height:28px;padding:0 11px;border-radius:99px;border:0;background:var(--fill-soft);color:var(--text-secondary);font-size:11.5px;font-weight:600;display:inline-flex;align-items:center}
+html body #action-dialog-note{border-radius:12px!important;font-size:13px!important;text-align:left}
+html body #action-dialog-cancel,html body #action-dialog-confirm{min-height:42px!important;border-radius:12px!important;font-size:14px!important;font-weight:700!important}
+html body #action-dialog-confirm{background:#E11D48!important}
+</style>
+<script id="lg-preview-v5-js">
+(function(){
+  var MORE=[
+    ['Finance',[['Top-up requests','topup-list'],['Phone payments','payin-list'],['Payment methods','payment-list'],['Tiers','tier-list'],['Analytics','analytics']]],
+    ['Store',[['Theme & banners','festival-page'],['Events & festivals','events-page'],['Notifications','notify-list'],['Ticker','ticker-list']]],
+    ['Settings',[['General','settings'],['G2Bulk','g2bulk'],['JCPlays','jcplays'],['API keys','api-docs'],['Usage','usage-page']]]
+  ];
+  var MORE_PAGES={};MORE.forEach(function(g){g[1].forEach(function(i){MORE_PAGES[i[1]]=1;});});
+  var ov=null;
+  function build(){
+    if(ov) return;
+    ov=document.createElement('div');ov.id='pv-more';
+    var h='<div class="pv-box"><div class="pv-grab"></div>';
+    MORE.forEach(function(g){h+='<h4>'+g[0]+'</h4><div class="pv-grp">';
+      g[1].forEach(function(i){h+='<button type="button" data-no-busy data-p="'+i[1]+'">'+i[0].replace(/&/g,'&amp;')+'</button>';});
+      h+='</div>';});
+    ov.innerHTML=h+'</div>';
+    ov.addEventListener('click',function(e){
+      var b=e.target.closest&&e.target.closest('button[data-p]');
+      if(b){close();window.showPage(b.getAttribute('data-p'));return;}
+      if(e.target===ov) close();
+    });
+    document.body.appendChild(ov);
+  }
+  function open(){build();ov.classList.add('show');}
+  function close(){if(ov)ov.classList.remove('show');}
+  function mark(pid){
+    var more=document.getElementById('group-setting'),cust=document.getElementById('group-wallet');
+    if(!more) return;
+    if(MORE_PAGES[pid]){
+      document.querySelectorAll('.nav-item').forEach(function(n){n.classList.remove('active');});
+      more.classList.add('active');
+    }
+  }
+  /* nav taps: capture so older handlers / pointer-events can't swallow them */
+  document.addEventListener('click',function(e){
+    var it=e.target.closest&&e.target.closest('#admin-top-nav .nav-item');
+    if(!it) return;
+    var id=it.id;
+    if(id==='group-setting'||id==='group-store'){e.stopImmediatePropagation();e.preventDefault();open();}
+    else if(id==='group-wallet'){e.stopImmediatePropagation();e.preventDefault();close();window.showPage('user-list');}
+    else if(id==='group-dashboard'){e.stopImmediatePropagation();e.preventDefault();close();window.showPage('dashboard');}
+    else close();
+  },true);
+  var orig=window.showPage;
+  if(typeof orig==='function'){
+    window.showPage=function(p){var r=orig.apply(this,arguments);try{mark(p);}catch(e){}return r;};
+  }
+  /* never hide the bottom bar on scroll */
+  setInterval(function(){var w=document.querySelector('.top-nav-wrap');if(w&&w.classList.contains('nav-hidden'))w.classList.remove('nav-hidden');},400);
+
+  /* Game editor: rebind accordion + index chips so every tab opens */
+  function fixGE(){
+    var p=document.getElementById('game-editor-page');if(!p||p.__pv)return;
+    var secs=p.querySelectorAll('.ge-sec');if(!secs.length)return;
+    p.__pv=1;
+    var list=[].slice.call(secs).map(function(s){var c=s.cloneNode(true);s.parentNode.replaceChild(c,s);return c;});
+    function tog(s,f){var c=f===undefined?!s.classList.contains('ge-closed'):!f;s.classList.toggle('ge-closed',c);s.setAttribute('aria-expanded',String(!c));}
+    list.forEach(function(s){s.addEventListener('click',function(){tog(s);});});
+    var idx=p.querySelector('.ge-idx');
+    if(idx){[].slice.call(idx.children).forEach(function(b,i){
+      var nb=b.cloneNode(true);idx.replaceChild(nb,b);
+      nb.addEventListener('click',function(){
+        tog(list[i],true);
+        [].forEach.call(idx.children,function(x){x.classList.toggle('on',x===nb);});
+        list[i].scrollIntoView({behavior:'smooth',block:'start'});
+      });
+    });}
+  }
+  function boot(){fixGE();setTimeout(fixGE,300);setTimeout(fixGE,1200);}
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
+})();
+</script>
+
+<script id="lg-preview-v5-sub">
+(function(){
+  function txt(id){var e=document.getElementById(id);return e?(e.textContent||'').trim():'';}
+  function num(s){var m=String(s||'').match(/[\d,]+/);return m?parseInt(m[0].replace(/,/g,''),10)||0:0;}
+  function hr(){var h=new Date().getHours();return h<12?'Good morning':h<18?'Good afternoon':'Good evening';}
+  function pending(){var b=document.querySelector('#order-status-tabs [data-s="Pending"] b');var p=document.querySelector('#order-status-tabs [data-s="Processing"] b');return (b?num(b.textContent):0)+(p?num(p.textContent):0);}
+  var MAP={
+    'dashboard':function(){return hr()+', Linn';},
+    'order-list':function(){var n=pending();return n+' need action';},
+    'game-list':function(){var n=document.querySelectorAll('#game-list .game-row').length;return n+' games';},
+    'user-list':function(){var n=txt('user-list-count-badge');return (n||'0')+' total';},
+    'topup-list':function(){var n=document.querySelectorAll('#topups-container [id^="topup-card-"]').length;return n+' requests';}
+  };
+  function tick(){
+    Object.keys(MAP).forEach(function(id){
+      var pg=document.getElementById(id);if(!pg)return;
+      var h=pg.querySelector('.title-header');if(!h)return;
+      var s=pg.querySelector('.pv-sub');
+      if(!s){s=document.createElement('span');s.className='pv-sub';pg.insertBefore(s,h);}
+      var t;try{t=MAP[id]();}catch(e){t='';}
+      if(s.textContent!==t)s.textContent=t;
+    });
+  }
+  setInterval(tick,1500);
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',tick);else tick();
+})();
+</script>
+
 </body>
 </html>
