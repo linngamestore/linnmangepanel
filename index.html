@@ -29351,6 +29351,25 @@ html body .pkg-summary-actions{grid-area:actions;order:0!important;justify-self:
 html body .pkg-summary-profit{white-space:nowrap}
 html body .pkg-summary-remove{width:26px;height:26px;padding:0!important;border-radius:8px;background:var(--danger-soft);opacity:1!important}
 html body .pkg-summary-remove svg{width:14px;height:14px}
+/* ===== Skeleton loading ===== */
+@keyframes skSweep{0%{background-position:150% 0}100%{background-position:-50% 0}}
+html body .sk,html body img.sk-img{background:linear-gradient(100deg,var(--fill-soft,rgba(120,130,160,.14)) 30%,rgba(255,255,255,.55) 50%,var(--fill-soft,rgba(120,130,160,.14)) 70%)!important;background-size:200% 100%!important;animation:skSweep 1.25s ease-in-out infinite}
+html[data-theme="dark"] body .sk,html[data-theme="dark"] body img.sk-img{background:linear-gradient(100deg,rgba(255,255,255,.06) 30%,rgba(255,255,255,.14) 50%,rgba(255,255,255,.06) 70%)!important;background-size:200% 100%!important}
+html body img.sk-img{color:transparent;min-height:1px}
+html body .sk-wrap{display:flex;flex-direction:column;gap:10px;padding:2px 0;text-align:left}
+html body .sk-row{display:flex;align-items:center;gap:12px;padding:12px;border-radius:14px;background:var(--surface);border:1px solid var(--border-glass)}
+html body .sk{display:block;border-radius:8px}
+html body .sk-av{flex:0 0 44px;width:44px;height:44px;border-radius:12px}
+html body .sk-col{flex:1;min-width:0;display:flex;flex-direction:column;gap:8px}
+html body .sk-l1{height:12px;width:62%}
+html body .sk-l2{height:10px;width:38%}
+html body .sk-pill{flex:0 0 52px;height:22px;border-radius:99px}
+@media (prefers-reduced-motion:reduce){html body .sk,html body img.sk-img{animation:none}}
+/* ===== Dashboard skeleton: numbers + chart before data arrives ===== */
+html body .sk-val{display:inline-block!important;min-width:84px;height:1em;line-height:1;color:transparent!important;-webkit-text-fill-color:transparent;border-radius:8px;vertical-align:middle;background:linear-gradient(100deg,var(--fill-soft,rgba(120,130,160,.14)) 30%,rgba(255,255,255,.55) 50%,var(--fill-soft,rgba(120,130,160,.14)) 70%)!important;background-size:200% 100%!important;animation:skSweep 1.25s ease-in-out infinite;text-shadow:none!important}
+html[data-theme="dark"] body .sk-val{background:linear-gradient(100deg,rgba(255,255,255,.06) 30%,rgba(255,255,255,.14) 50%,rgba(255,255,255,.06) 70%)!important;background-size:200% 100%!important}
+html body #revenue-bars:empty{min-height:90px;border-radius:12px;background:repeating-linear-gradient(90deg,var(--fill-soft,rgba(120,130,160,.14)) 0 9%,transparent 9% 14.28%),linear-gradient(0deg,transparent 0,transparent 0);-webkit-mask-image:linear-gradient(0deg,#000 40%,rgba(0,0,0,.5));animation:skPulse 1.3s ease-in-out infinite}
+@keyframes skPulse{0%,100%{opacity:.55}50%{opacity:1}}
 </style>
 <script id="linn-polish-js">
 (function(){
@@ -29403,14 +29422,35 @@ document.addEventListener('pointerdown',function(e){
 })();
 </script>
 <script>
-/* Old image-host URLs (ibb.co / imgbb.com) are dead: show a neutral placeholder instead of their "service unavailable" picture. Uploads use the R2 bucket. */
+/* 1) Images that fail to load get a neutral placeholder (images that load are never touched).
+   2) Skeleton shimmer: "Loading..." placeholders become skeleton rows, and images shimmer until they load. */
 (function(){
   var PH='data:image/svg+xml;utf8,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120"><rect width="120" height="120" rx="26" fill="#E5E7EB"/><path d="M34 82l20-24 14 16 10-12 18 20z" fill="#9CA3AF"/><circle cx="46" cy="44" r="8" fill="#9CA3AF"/></svg>');
-  var RE=/^(https?:)?\/\/([a-z0-9-]+\.)*(ibb\.co|imgbb\.com)(\/|$)/i;
-  function fix(img){try{var s=img.getAttribute('src')||'';if(RE.test(s)){img.removeAttribute('srcset');img.setAttribute('src',PH);}}catch(e){}}
-  function scan(root){if(!root||!root.querySelectorAll)return;if(root.tagName==='IMG')fix(root);root.querySelectorAll('img').forEach(fix);}
-  new MutationObserver(function(m){m.forEach(function(r){if(r.type==='attributes')fix(r.target);else r.addedNodes.forEach(scan);});}).observe(document.documentElement,{childList:true,subtree:true,attributes:true,attributeFilter:['src']});
-  scan(document);
+  document.addEventListener('error',function(e){
+    var t=e.target;
+    if(t&&t.tagName==='IMG'){t.classList.remove('sk-img');if(!t.dataset.phd&&t.src!==PH){t.dataset.phd='1';t.removeAttribute('srcset');t.src=PH;t.style.display='';}}
+  },true);
+  document.addEventListener('load',function(e){var t=e.target;if(t&&t.tagName==='IMG')t.classList.remove('sk-img');},true);
+  function imgPending(img){if(!img.complete&&img.getAttribute('src')&&!img.dataset.skd){img.dataset.skd='1';img.classList.add('sk-img');}}
+  var ROW='<div class="sk-row"><i class="sk sk-av"></i><div class="sk-col"><i class="sk sk-l1"></i><i class="sk sk-l2"></i></div><i class="sk sk-pill"></i></div>';
+  function skify(el){
+    if(!el||el.dataset.sk)return;
+    var t=(el.textContent||'').trim();
+    if(!/^Loading/i.test(t))return;
+    el.dataset.sk='1';el.className='sk-wrap';el.setAttribute('aria-busy','true');
+    el.innerHTML=ROW+ROW+ROW+ROW+ROW;
+  }
+  function scan(root){
+    if(!root||root.nodeType!==1)return;
+    if(root.classList&&root.classList.contains('empty-msg'))skify(root);
+    if(root.tagName==='IMG')imgPending(root);
+    if(root.querySelectorAll){root.querySelectorAll('.empty-msg').forEach(skify);root.querySelectorAll('img').forEach(imgPending);}
+  }
+  function start(){
+    scan(document.body);
+    new MutationObserver(function(ms){ms.forEach(function(r){r.addedNodes.forEach(scan);});}).observe(document.body,{childList:true,subtree:true});
+  }
+  if(document.body)start();else document.addEventListener('DOMContentLoaded',start);
 })();
 </script>
 <script>
@@ -29433,6 +29473,49 @@ document.addEventListener('pointerdown',function(e){
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
   setTimeout(init,1500);setTimeout(init,4000);
+})();
+</script>
+<script>
+/* Dashboard numbers show a shimmer while they still hold the "..." / "?" placeholder. */
+(function(){
+  var SEL='#dashboard .stat-card-value,#dashboard .chart-card-total,#dash-g2bulk-balance-display,#dash-jcplays-balance-display';
+  var RE=/^(\.{3}|\u2026|\?|--|-)?$/;
+  function mark(el){var t=(el.textContent||'').trim();el.classList.toggle('sk-val',RE.test(t)||t==='...');}
+  function init(){
+    document.querySelectorAll(SEL).forEach(function(el){
+      mark(el);
+      new MutationObserver(function(){mark(el);}).observe(el,{childList:true,characterData:true,subtree:true});
+    });
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+})();
+</script>
+<script>
+/* Skeleton for every remaining "Loading..." text: list-like blocks get skeleton rows, inline values get a shimmer. */
+(function(){
+  var ROW='<div class="sk-row"><i class="sk sk-av"></i><div class="sk-col"><i class="sk sk-l1"></i><i class="sk sk-l2"></i></div><i class="sk sk-pill"></i></div>';
+  var RE=/^Loading/i;
+  function isBlockHost(el){return el.id==='evA-claims'||el.classList.contains('evA-note')||el.classList.contains('game-picker-loading')||el.classList.contains('empty-msg');}
+  function check(el){
+    if(!el||el.nodeType!==1||el.dataset.sk||el.tagName==='BUTTON'||el.id==='bc-txt'||el.closest('#boot-cover'))return;
+    if(el.children.length)return;
+    var t=(el.textContent||'').trim();
+    if(RE.test(t)){
+      if(isBlockHost(el)){el.dataset.sk='1';el.className='sk-wrap';el.setAttribute('aria-busy','true');el.innerHTML=ROW+ROW+ROW;}
+      else el.classList.add('sk-val');
+    }else if(el.classList.contains('sk-val')&&!/^(\.{3}|\u2026|\?|--|-)?$/.test(t)){el.classList.remove('sk-val');}
+  }
+  function run(){
+    new MutationObserver(function(ms){
+      ms.forEach(function(r){
+        var el=r.target.nodeType===1?r.target:r.target.parentElement;
+        check(el);
+        r.addedNodes.forEach(function(n){if(n.nodeType===1){check(n);if(n.querySelectorAll)n.querySelectorAll('*').forEach(function(x){if(!x.children.length)check(x);});}});
+      });
+    }).observe(document.body,{childList:true,characterData:true,subtree:true});
+    document.querySelectorAll('#evA-claims,.game-picker-loading,.evA-note').forEach(check);
+  }
+  if(document.body)run();else document.addEventListener('DOMContentLoaded',run);
 })();
 </script>
 </body>
