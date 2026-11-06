@@ -7333,6 +7333,7 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
             el.addEventListener('touchcancel', clearTouching, { passive: true });
         }
         function initScrollReveal(container, selector = ':scope > .admin-card, :scope > .package-row') {
+            return; /* disabled (scroll perf): items render visible immediately */
             if (!container) return;
             const cs = getComputedStyle(container);
             const isScrollRoot = cs.overflowY === 'auto' || cs.overflowY === 'scroll';
@@ -14367,6 +14368,23 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
             renderAdminGamesList();
         }
         window.showGameListTab = showGameListTab;
+        window.pagerSentinel = function (container, key, more, onMore) {
+            let s = document.getElementById('pager-' + key);
+            if (!more) { if (s) s.remove(); return; }
+            if (!s) {
+                s = document.createElement('div'); s.id = 'pager-' + key;
+                s.style.cssText = 'height:56px;text-align:center;color:var(--text-muted);font-size:12px;padding:16px 0;';
+                s.textContent = 'Loading more…';
+                container.insertAdjacentElement('afterend', s);
+                s._io = new IntersectionObserver(es => {
+                    if (!es.some(e => e.isIntersecting) || !s._cb) return;
+                    s._cb(); setTimeout(() => { if (s.isConnected) { s._io.unobserve(s); s._io.observe(s); } }, 80);
+                }, { rootMargin: '700px' });
+                s._io.observe(s);
+            }
+            s._cb = onMore;
+        };
+
         function renderAdminGamesList() {
             clearTimeout(gamesRenderScheduled);
             const gamesContainerEl = document.getElementById('admin-games-container');
@@ -14474,6 +14492,7 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
                 return (ga.name || '').localeCompare(gb.name || '') || (ga.serverName || '').localeCompare(gb.serverName || '');
             });
             if (ids.length === 0) {
+                window.pagerSentinel(container, 'games', false);
                 container.innerHTML = searchTerm
                     ? '<p class="empty-msg">No games match your search.</p>'
                     : `<p class="empty-msg">No ${gameListTab === 'software' ? 'Software' : (gameListTab === 'voucher' ? 'Gift Card & Voucher' : 'Direct') + ' ' + ((GAME_SUBS[gameListTab] || []).find(s => s[0] === gameListSub) || ['', ''])[1]} games yet. Tap + Add to create one.</p>`;
@@ -14490,7 +14509,7 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
             // first (alphabetically-first server/region) entry so the list
             // reads as one card per game — the other variants only reappear
             // as their own cards once Edit Mode is switched on.
-            const visibleIds = gameListEditMode ? ids : (() => {
+            const visibleAll = gameListEditMode ? ids : (() => {
                 const seenNames = new Set();
                 return ids.filter(id => {
                     const n = GAMES[id].name;
@@ -14500,6 +14519,10 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
                 });
             })();
 
+            const _gk = gameListTab + '|' + gameListSub + '|' + searchTerm + '|' + gameListEditMode;
+            if (window.__glKey !== _gk) { window.__glKey = _gk; window.__glLimit = 40; }
+            const visibleIds = visibleAll.slice(0, window.__glLimit || 40);
+            window.pagerSentinel(container, 'games', visibleAll.length > visibleIds.length, () => { window.__glLimit = (window.__glLimit || 40) + 40; renderAdminGamesListImpl(); });
             container.innerHTML = `<div class="game-row-list">` + visibleIds.map(id => {
                 const g = GAMES[id];
                 const variantCount = nameCounts[g.name] || 1;
@@ -19157,6 +19180,7 @@ return `
                 });
             }
             if (ids.length === 0) {
+                window.pagerSentinel(container, 'users', false);
                 container.innerHTML = searchTerm
                     ? '<p class="empty-msg">No users match your search.</p>'
                     : userListTab === 'admin'
@@ -19171,6 +19195,11 @@ return `
                 const tb = USERS[b].lastSeen ? USERS[b].lastSeen.toMillis() : 0;
                 return tb - ta;
             });
+            const _uk = userListTab + '|' + searchTerm + '|' + userOnlineOnly;
+            if (window.__ulKey !== _uk) { window.__ulKey = _uk; window.__ulLimit = 40; }
+            const _uTotal = ids.length;
+            ids = ids.slice(0, window.__ulLimit || 40);
+            window.pagerSentinel(container, 'users', _uTotal > ids.length, () => { window.__ulLimit = (window.__ulLimit || 40) + 40; renderAdminUsersListImpl(); });
             // One pass over ORDERS instead of filtering the whole orders list
             // again for every single user (that was O(users × orders) on every
             // render - with a few hundred users and a few thousand orders this
@@ -26024,7 +26053,7 @@ return `
 /* Admin motion layer (see #motion-css). Adds entrance animation to cards / rows as they are rendered,
    counts numbers up when they change, bumps badges. Never touches the tab switch. */
 (function () {
-  if (window.__moInit) return; window.__moInit = true;
+  return; /* motion layer disabled (scroll perf) */
   var reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
   if (reduce) return;
 
@@ -30342,6 +30371,10 @@ html body .header{will-change:auto}
 <style id="no-glass-final">
 html body *,html body *::before,html body *::after{-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
 html body .header,html body .top-nav{will-change:auto!important}
+html body .page-section,html body .page-section.active{animation:none!important}
+html body .page-section.active :is(.card-title,.section-title){animation:none!important}
+html body .scroll-reveal{opacity:1!important;transform:none!important;transition:none!important}
+html body .game-row{contain:content}
 /* PERF: remove layer explosion + scroll-jumpy content-visibility */
 html body :is(.nav-item,.header-icon,.btn,.package-row,.admin-card){backface-visibility:visible!important;-webkit-backface-visibility:visible!important}
 html body :is(.tx-row,.wtx-row,.user-card,.tier-row),html body img{content-visibility:visible!important;contain-intrinsic-size:none!important}
