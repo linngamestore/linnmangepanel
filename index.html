@@ -11119,7 +11119,8 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
                             <div class="oc-thumb">${gameImg ? `<img src="${gameImg}" alt="" loading="lazy" decoding="async" onerror="this.style.display='none'">` : ''}</div>
                             <div class="oc-info">
                                 <span class="oc-game-name">${escapeHtml(data.game)}${data.serverRegion ? ` <span style="font-weight:400;color:var(--accent);">(${escapeHtml(data.serverRegion)})</span>` : ''}</span>
-                                <p class="oc-meta">ID: ${orderId.substring(0, 8)} &middot; ${escapeHtml(data.itemAmount)} &middot; <b>${Number(data.price).toLocaleString()} MMK</b>${data.userName ? ` &middot; ${escapeHtml(data.userName)}` : ''}</p>
+                                <p class="oc-meta">ID: ${orderId.substring(0, 8)} &middot; ${escapeHtml(data.itemAmount)} &middot; <b>${Number(data.price).toLocaleString()} MMK</b>${data.userName ? ` &middot; ${escapeHtml(data.userName)}` : ''}${data.botOrder ? ` &middot; <span style="color:var(--accent);">🤖 Bot${data.botSource ? ' · ' + escapeHtml(data.botSource) : ''}</span>` : ''}</p>
+                                ${data.botOrder && data.statusNote && data.status === 'Processing' ? `<p class="oc-meta" style="color:var(--text-secondary);">${escapeHtml(data.statusNote)}</p>` : ''}
                                 ${openTag}
                             </div>
                             <div class="oc-status">
