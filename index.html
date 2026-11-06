@@ -3463,7 +3463,7 @@ html.perf-low [data-pcbg] *,html.perf-low [data-pcbg] *::before,html.perf-low [d
         <i class="bc-blob b1"></i><i class="bc-blob b2"></i>
         <div class="bc-main">
             <div class="bc-logo-wrap"><i class="bc-ring"></i><i class="bc-ring r2"></i>
-                <div class="bc-logo"><svg viewBox="0 0 24 24"><path d="M6 11h4M8 9v4"></path><circle cx="15.5" cy="10.5" r=".6"></circle><circle cx="17.5" cy="12.5" r=".6"></circle><path d="M17.3 6H6.7a4 4 0 0 0-3.9 3.2l-1 5.3a2.6 2.6 0 0 0 4.4 2.3L8 14.8h8l1.8 2a2.6 2.6 0 0 0 4.4-2.3l-1-5.3A4 4 0 0 0 17.3 6z"></path></svg></div>
+                <div class="bc-logo" id="bc-logo"><img id="bc-logo-img" alt="" decoding="async" style="display:none"></div>
             </div>
             <div class="bc-brand">Manage Panel</div>
             <div class="bc-sub">Game Store Control Center</div>
@@ -3473,6 +3473,23 @@ html.perf-low [data-pcbg] *,html.perf-low [data-pcbg] *::before,html.perf-low [d
         </div>
         <div class="bc-skel" aria-hidden="true"><span></span><span></span><span></span></div>
     </div>
+<script>
+/* Boot cover logo: skeleton until the real logo is known. The last known logo URL is cached so later
+   loads show it at once; renderHeaderLogo() refreshes it whenever branding data arrives. */
+(function(){
+  var KEY='lgBootLogo';
+  function set(url){
+    var box=document.getElementById('bc-logo'),img=document.getElementById('bc-logo-img');
+    if(!box||!img)return;
+    if(!url){box.classList.remove('has-img');img.style.display='none';return;}
+    img.onload=function(){img.style.display='block';box.classList.add('has-img');};
+    img.onerror=function(){box.classList.remove('has-img');img.style.display='none';};
+    if(img.getAttribute('src')!==url)img.src=url;
+  }
+  window.__setBootLogo=function(url){try{if(url)localStorage.setItem(KEY,url);else localStorage.removeItem(KEY);}catch(e){}set(url);};
+  try{var c=localStorage.getItem(KEY);if(c)set(c);}catch(e){}
+})();
+</script>
     <script>
     /* If Firebase is slow or blocked, say so instead of leaving a blank screen. */
     (function () {
@@ -4155,8 +4172,8 @@ html.perf-low [data-pcbg] *,html.perf-low [data-pcbg] *::before,html.perf-low [d
 <p class="st-empty" id="st-empty" hidden>No settings match your search.</p>
 
 <div class="admin-card" id="settings-card-appearance" style="margin-top:0;margin-bottom:14px;">
-<div class="sc-head" style="cursor:default;"><span class="sc-title">Appearance <span class="pp-badge">Theme</span></span></div>
-<div style="margin-top:12px;"><div id="theme-swatch-grid" style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;"></div></div>
+<div class="sc-head" onclick="toggleAppearanceSettings()"><span class="sc-title">Appearance <span class="pp-badge">Theme</span></span><svg class="ui-icon sc-chevron" id="appearance-chevron"><use href="#icon-chevron-down"></use></svg></div>
+<div id="appearance-body" style="display:none;margin-top:12px;"><div id="theme-swatch-grid" style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;"></div></div>
 </div>
 
 <div class="admin-card" id="settings-card-panelprefs" style="margin-top:0;">
@@ -4165,7 +4182,7 @@ html.perf-low [data-pcbg] *,html.perf-low [data-pcbg] *::before,html.perf-low [d
 <svg class="ui-icon sc-chevron" id="panel-prefs-chevron"><use href="#icon-chevron-down"></use></svg>
 </div>
 <div id="panel-prefs-body" style="display:none;margin-top:12px;">
-<div class="pp-row"><div class="pp-txt"><b>Animations</b><small>Turn motion off for a faster, calmer panel</small></div><button type="button" class="pp-switch" role="switch" aria-checked="false" data-pref="calm"><i></i></button></div><div class="pp-row"><div class="pp-txt"><b>Compact layout</b><small>Tighter cards and spacing, more on screen</small></div><button type="button" class="pp-switch" role="switch" aria-checked="false" data-pref="compact"><i></i></button></div><div class="pp-row"><div class="pp-txt"><b>Tap feedback</b><small>Short vibration when you press buttons</small></div><button type="button" class="pp-switch" role="switch" aria-checked="false" data-pref="haptic"><i></i></button></div><div class="pp-row"><div class="pp-txt"><b>Back-to-top button</b><small>Floating button after you scroll down</small></div><button type="button" class="pp-switch" role="switch" aria-checked="false" data-pref="totop"><i></i></button></div><div class="pp-row"><div class="pp-txt"><b>Esc closes pop-ups</b><small>Keyboard / hardware-key shortcut</small></div><button type="button" class="pp-switch" role="switch" aria-checked="false" data-pref="esc"><i></i></button></div><div class="pp-row"><div class="pp-txt"><b>Event tab</b><small>အပေါ်ဆုံး menu မှာ Event tab ပြ / ဖျောက်</small></div><button type="button" class="pp-switch" role="switch" aria-checked="true" data-pref="showEvent"><i></i></button></div><div class="pp-row"><div class="pp-txt"><b>Theme tab</b><small>အပေါ်ဆုံး menu မှာ Theme tab ပြ / ဖျောက်</small></div><button type="button" class="pp-switch" role="switch" aria-checked="true" data-pref="showTheme"><i></i></button></div>
+<div class="pp-row"><div class="pp-txt"><b>Animations</b><small>Turn motion off for a faster, calmer panel</small></div><button type="button" class="pp-switch" role="switch" aria-checked="false" data-pref="calm"><i></i></button></div><div class="pp-row"><div class="pp-txt"><b>Compact layout</b><small>Tighter cards and spacing, more on screen</small></div><button type="button" class="pp-switch" role="switch" aria-checked="false" data-pref="compact"><i></i></button></div><div class="pp-row"><div class="pp-txt"><b>Tap feedback</b><small>Short vibration when you press buttons</small></div><button type="button" class="pp-switch" role="switch" aria-checked="false" data-pref="haptic"><i></i></button></div><div class="pp-row"><div class="pp-txt"><b>Back-to-top button</b><small>Floating button after you scroll down</small></div><button type="button" class="pp-switch" role="switch" aria-checked="false" data-pref="totop"><i></i></button></div><div class="pp-row"><div class="pp-txt"><b>Esc closes pop-ups</b><small>Keyboard / hardware-key shortcut</small></div><button type="button" class="pp-switch" role="switch" aria-checked="false" data-pref="esc"><i></i></button></div><div class="pp-row"><div class="pp-txt"><b>Events &amp; festivals</b><small>Menu (More) မှာ ပြ / ဖျောက်</small></div><button type="button" class="pp-switch" role="switch" aria-checked="true" data-pref="showEvent"><i></i></button></div><div class="pp-row"><div class="pp-txt"><b>Theme &amp; banners</b><small>Menu (More) မှာ ပြ / ဖျောက်</small></div><button type="button" class="pp-switch" role="switch" aria-checked="true" data-pref="showTheme"><i></i></button></div>
 <div class="pp-foot"><span>Saved on this device only.</span><button type="button" class="pp-reset" id="pp-reset">Reset</button></div>
 </div>
 </div>
@@ -4505,7 +4522,7 @@ html.perf-low [data-pcbg] *,html.perf-low [data-pcbg] *::before,html.perf-low [d
             </div>
 
 
-            <div class="admin-card" style="margin-top:14px;">
+            <div class="admin-card" id="settings-card-push" hidden style="display:none!important;margin-top:14px;">
                 <div class="sc-head" onclick="togglePushNotificationSettings()">
                     <span class="sc-title">Push Notifications</span>
                     <svg class="ui-icon sc-chevron" id="push-notif-chevron"><use href="#icon-chevron-down"></use></svg>
@@ -4595,7 +4612,7 @@ html.perf-low [data-pcbg] *,html.perf-low [data-pcbg] *::before,html.perf-low [d
                 </div>
             </div>
 
-            <div class="admin-card" id="settings-card-adminlogin" style="margin-top:14px;">
+            <div class="admin-card" id="settings-card-adminlogin" hidden style="display:none!important;margin-top:14px;">
                 <div class="sc-head" onclick="toggleAdminLoginSettings()">
                     <span class="sc-title">Admin Login</span>
                     <svg class="ui-icon sc-chevron" id="admin-login-chevron"><use href="#icon-chevron-down"></use></svg>
@@ -7235,9 +7252,8 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
                 const delta = y - lastY;
                 if (document.querySelector('.modal-overlay.show')) { lastY = y; return; }
                 if (y < 40) wrap.classList.remove('nav-hidden');
-                else if (delta > 6) wrap.classList.add('nav-hidden');
-                else if (delta < -6) wrap.classList.remove('nav-hidden');
-                if (Math.abs(delta) > 6) lastY = y;
+                else if (delta < -14) wrap.classList.remove('nav-hidden'); /* never hide on scroll-down (was fought by a 400ms timer = jumping) */
+                if (Math.abs(delta) > 14) lastY = y;
             }
             window.addEventListener('scroll', function () {
                 if (!ticking) { ticking = true; requestAnimationFrame(update); }
@@ -9902,6 +9918,7 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
             const data = await res.json().catch(() => null);
             return { status: res.status, data: data || { ok: false, error: 'Worker returned HTTP ' + res.status } };
         }
+        window.adminPinCall = adminPinCall;
         function adminPinPaintStatus(hasPin) {
             const badge = document.getElementById('apin-status-badge');
             if (badge) {
@@ -12920,6 +12937,16 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
             chevron.style.transform = isOpen ? 'rotate(0deg)' : 'rotate(180deg)';
         }
         window.togglePushNotificationSettings = togglePushNotificationSettings;
+
+        function toggleAppearanceSettings() {
+            const body = document.getElementById('appearance-body');
+            const chevron = document.getElementById('appearance-chevron');
+            if (!body) return;
+            const isOpen = body.style.display === 'block';
+            body.style.display = isOpen ? 'none' : 'block';
+            if (chevron) chevron.style.transform = isOpen ? 'rotate(0deg)' : 'rotate(180deg)';
+        }
+        window.toggleAppearanceSettings = toggleAppearanceSettings;
 
         function toggleAutoPriceSettings() {
             const body = document.getElementById('autoprice-body');
@@ -16025,6 +16052,20 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
         }
         window.refreshPackageRowProviderVisibility = refreshPackageRowProviderVisibility;
 
+        // Auto-Fulfill is now a button group per package row. The hidden
+        // <select class="pkg-provider"> stays as the single value store so
+        // saveGame(), price-check and import code keep reading it unchanged.
+        function setPkgProvider(btn) {
+            const row = btn.closest('.package-row');
+            if (!row) return;
+            const sel = row.querySelector('.pkg-provider');
+            if (!sel) return;
+            sel.value = btn.dataset.v;
+            row.querySelectorAll('.pkg-prov-btn').forEach(b => b.classList.toggle('active', b === btn));
+            refreshPackageRowProviderVisibility();
+        }
+        window.setPkgProvider = setPkgProvider;
+
         // Uploads a package's card image to R2 the moment it's picked, showing
         // an instant local preview while the real upload happens in the
         // background. The final hosted URL lands in the preview box's
@@ -16052,6 +16093,7 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
                 || (g2bulkName ? 'g2bulk' : jcplaysProductId ? 'jcplays' : fazercardOfferId ? 'fazercard'
                     : (['g2bulk', 'jcplays', 'fazercard'].includes(currentFulfillProvider) ? currentFulfillProvider : 'manual'));
             const resolvedTab = tab || currentPkgTab;
+            const __pv = ['manual', 'g2bulk', 'fazercard', 'jcplays'].includes(resolvedProvider) ? resolvedProvider : 'manual';
             // A tab we haven't seen yet on this game (e.g. loaded from saved
             // data) gets auto-registered as a custom tab so it shows in the bar.
             if (!['package', 'currency'].includes(resolvedTab) && !customPkgTabs.includes(resolvedTab)) {
@@ -16155,12 +16197,18 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
                                 <div class="pkg-profit-badge" title="Profit margin = (Price − Cost) / Cost">--</div>
                             </div>
                             <div class="pkg-provider-row row-center">
-                                <label style="margin:0;font-size:11px;color:var(--text-muted);white-space:nowrap;">Auto-Fulfill</label>
-                                <select class="pkg-provider" onchange="refreshPackageRowProviderVisibility()" style="flex:1;box-sizing:border-box;padding:8px;border:1px solid var(--border-glass);border-radius:8px;font-size:13px;background:var(--bg-subtle-2);color:var(--text-primary);font-family:inherit;">
-                                    <option value="manual" ${resolvedProvider === 'manual' ? 'selected' : ''}>Manual (no auto-fulfill)</option>
-                                    <option value="g2bulk" ${resolvedProvider === 'g2bulk' ? 'selected' : ''}>G2Bulk</option>
-                                    <option value="jcplays" ${resolvedProvider === 'jcplays' ? 'selected' : ''}>JCPlays (Redeem Code)</option>
-                                    <option value="fazercard" ${resolvedProvider === 'fazercard' ? 'selected' : ''}>FazerCards</option>
+                                <label>Auto-Fulfill</label>
+                                <div class="pkg-prov-seg" role="group" aria-label="Auto-Fulfill">
+                                    <button type="button" data-no-busy class="pkg-prov-btn ${__pv === 'manual' ? 'active' : ''}" data-v="manual" onclick="setPkgProvider(this)">Manual</button>
+                                    <button type="button" data-no-busy class="pkg-prov-btn ${__pv === 'g2bulk' ? 'active' : ''}" data-v="g2bulk" onclick="setPkgProvider(this)">P1 G2Bulk</button>
+                                    <button type="button" data-no-busy class="pkg-prov-btn ${__pv === 'fazercard' ? 'active' : ''}" data-v="fazercard" onclick="setPkgProvider(this)">P2 FazerCards</button>
+                                    <button type="button" data-no-busy class="pkg-prov-btn ${__pv === 'jcplays' ? 'active' : ''}" data-v="jcplays" onclick="setPkgProvider(this)">P3 JCPlays</button>
+                                </div>
+                                <select class="pkg-provider" onchange="refreshPackageRowProviderVisibility()" style="display:none;" tabindex="-1" aria-hidden="true">
+                                    <option value="manual" ${__pv === 'manual' ? 'selected' : ''}>Manual (no auto-fulfill)</option>
+                                    <option value="g2bulk" ${__pv === 'g2bulk' ? 'selected' : ''}>G2Bulk</option>
+                                    <option value="jcplays" ${__pv === 'jcplays' ? 'selected' : ''}>JCPlays (Redeem Code)</option>
+                                    <option value="fazercard" ${__pv === 'fazercard' ? 'selected' : ''}>FazerCards</option>
                                 </select>
                             </div>
                             <input type="text" class="pkg-g2bulk" placeholder="Enter Catalogue Name" value="${g2bulkName}" style="padding:7px 8px;border:1px solid var(--border-glass);background:var(--bg-subtle-2);color:var(--text-secondary);border-radius:8px;font-size:12px;font-family:inherit;box-sizing:border-box;display:none;">
@@ -20396,6 +20444,7 @@ return `
             }
             setLogoScalePreviewImage(url);
             applyLogoScale(data && data.logoScale);
+            try { if (window.__setBootLogo) window.__setBootLogo(url || ''); } catch (e) {}
         }
 
         // Re-picks the header logo when the panel's theme changes (e.g. Auto
@@ -26591,7 +26640,7 @@ button > svg.ic-i:only-child { margin-right: 0; }
 <style id="lg-upgrade-v2">
 /* ===== UI polish ===== */
 html body { font-family: "Inter","Noto Sans Myanmar","Padauk","Myanmar Text",system-ui,-apple-system,"Segoe UI",sans-serif; -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
-html { scroll-behavior: smooth; scroll-padding-top: 76px; }
+html { scroll-behavior: auto; scroll-padding-top: 76px; }
 :focus-visible { outline: 2px solid var(--accent, #4F46E5); outline-offset: 2px; border-radius: 8px; }
 .stat-card, .chart-card { transition: transform .18s ease, box-shadow .18s ease; }
 .stat-card:active { transform: scale(.985); }
@@ -27089,7 +27138,7 @@ body.lg-scrolled .top-nav-wrap { box-shadow: 0 12px 26px -18px rgba(15,23,42,.5)
       var y = window.scrollY || 0, sheet = document.getElementById('nav-group-sheet-overlay');
       document.body.classList.toggle('lg-scrolled', y > 8);
       if (nav) {
-        if (y > 140 && y > lastY + 6 && !(sheet && sheet.classList.contains('show'))) nav.classList.add('lg-hide');
+        if (y > 140 && y > lastY + 6 && !(sheet && sheet.classList.contains('show'))) nav.classList.remove('lg-hide'); /* disabled: duplicate of nav-hidden, caused double hide/show jumping */
         else if (y < lastY - 6 || y <= 140) nav.classList.remove('lg-hide');
       }
       lastY = y; tick = false;
@@ -28189,7 +28238,7 @@ html[data-theme]:not([data-theme="light"]) .lv-pill.has{ color:#FCD34D; }
     var h=document.querySelector('.header'),n=document.querySelector('.top-nav-wrap');
     var top=h?Math.max(0,h.getBoundingClientRect().bottom):0;
     if(n){var r=n.getBoundingClientRect(); if(r.bottom>top&&r.top<window.innerHeight) top=Math.max(top,r.bottom);}
-    document.documentElement.style.setProperty('--ge-stick',Math.round(top)+'px');
+    var v=Math.round(top); if(window.__geStick!==v){window.__geStick=v; document.documentElement.style.setProperty('--ge-stick',v+'px');}
   }
   function loop(){upd(); if(performance.now()<until) raf=requestAnimationFrame(loop); else raf=0;}
   function kick(ms){until=performance.now()+(ms||450); if(!raf) raf=requestAnimationFrame(loop);}
@@ -28252,7 +28301,7 @@ html[data-theme]:not([data-theme="light"]) .lv-pill.has{ color:#FCD34D; }
   function boot(){
     var list=document.getElementById('sub-nav');
     if(list) new MutationObserver(function(){ setRows(counts()); }).observe(list,{childList:true});
-    update(); setInterval(update, 1500);
+    update(); setInterval(update, 3000);
   }
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',boot); else boot();
 })();
@@ -29302,7 +29351,7 @@ html body .pkg-summary-name{font-size:13px!important}
 <script id="lg-preview-v5-js">
 (function(){
   var MORE=[
-    ['Money',[['API Balance','analytics'],['Top-up requests','topup-list'],['Phone payments','payin-list'],['Payment methods','payment-list']]],
+    ['Money',[['Top-up requests','topup-list'],['Phone payments','payin-list'],['Payment methods','payment-list']]],
     ['Store',[['Notify & Ticker','notify-list'],['Theme & banners','festival-page'],['Events & festivals','events-page']]],
     ['Settings',[['General','settings'],['API keys','api-docs'],['Usage','usage-page']]]
   ];
@@ -29324,7 +29373,15 @@ var MORE_PAGES={};MORE.forEach(function(g){g[1].forEach(function(i){MORE_PAGES[i
     });
     document.body.appendChild(ov);
   }
-  function open(){build();ov.classList.add('show');}
+  function open(){build();syncMoreHide();ov.classList.add('show');}
+  function syncMoreHide(){
+    var r=document.documentElement,hide={'festival-page':r.classList.contains('pref-hide-theme'),'events-page':r.classList.contains('pref-hide-events')};
+    ov.querySelectorAll('button[data-p]').forEach(function(b){b.style.display=hide[b.getAttribute('data-p')]?'none':'';});
+    ov.querySelectorAll('.pv-grp').forEach(function(g){
+      var any=[].some.call(g.querySelectorAll('button[data-p]'),function(b){return b.style.display!=='none';});
+      g.style.display=any?'':'none';var h=g.previousElementSibling;if(h&&h.tagName==='H4')h.style.display=any?'':'none';
+    });
+  }
   function close(){if(ov)ov.classList.remove('show');}
   function mark(pid){
     var more=document.getElementById('group-setting'),cust=document.getElementById('group-wallet');
@@ -29349,7 +29406,7 @@ var MORE_PAGES={};MORE.forEach(function(g){g[1].forEach(function(i){MORE_PAGES[i
     window.showPage=function(p){var r=orig.apply(this,arguments);try{mark(p);}catch(e){}return r;};
   }
   /* never hide the bottom bar on scroll */
-  setInterval(function(){var w=document.querySelector('.top-nav-wrap');if(w&&w.classList.contains('nav-hidden'))w.classList.remove('nav-hidden');},400);
+  /* removed: 400ms timer that fought the scroll handler */
 
   /* Game editor: rebind accordion + index chips so every tab opens */
   function fixGE(){
@@ -29397,7 +29454,7 @@ var MORE_PAGES={};MORE.forEach(function(g){g[1].forEach(function(i){MORE_PAGES[i
       if(s.textContent!==t)s.textContent=t;
     });
   }
-  setInterval(tick,1500);
+  setInterval(tick,4000);
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',tick);else tick();
 })();
 </script>
@@ -29659,8 +29716,8 @@ window.uiConfirm=function(message,opt){opt=opt||{};return dlg({title:opt.title||
 window.uiPrompt=function(message,def,opt){opt=opt||{};return dlg({title:opt.title||'Enter a value',message:String(message==null?'':message),prompt:true,password:opt.password,value:def==null?'':String(def),placeholder:opt.placeholder,confirmText:opt.confirmText||'Save'});};
 window.lsScanTab=function(b){var w=b.closest('#scans-body');w.querySelectorAll('.ls-seg button').forEach(function(x){x.classList.toggle('on',x===b);});w.querySelectorAll('.ls-pane').forEach(function(x){x.classList.toggle('on',x.id===b.getAttribute('data-p'));});};
 /* keep the Settings jump bar just under the sticky sub-nav instead of on top of it */
-function place(){var n=document.getElementById('sub-nav');var t=0;if(n){var cs=getComputedStyle(n);if(cs.position==='sticky'||cs.position==='fixed'){t=Math.max(0,Math.round(n.getBoundingClientRect().bottom));}}document.documentElement.style.setProperty('--set-top',t+'px');}
-window.addEventListener('scroll',place,{passive:true});window.addEventListener('resize',place);setTimeout(place,400);setInterval(place,2000);
+function place(){var n=document.getElementById('sub-nav');var t=0;if(n){var cs=getComputedStyle(n);if(cs.position==='sticky'||cs.position==='fixed'){t=Math.max(0,Math.round(n.getBoundingClientRect().bottom));}}if(window.__setTop!==t){window.__setTop=t;document.documentElement.style.setProperty('--set-top',t+'px');}}
+window.addEventListener('scroll',place,{passive:true});window.addEventListener('resize',place);setTimeout(place,400);setInterval(place,5000);
 })();
 
 </script>
@@ -29769,7 +29826,7 @@ document.addEventListener('pointerdown',function(e){
       ms.forEach(function(r){
         var el=r.target.nodeType===1?r.target:r.target.parentElement;
         check(el);
-        r.addedNodes.forEach(function(n){if(n.nodeType===1){check(n);if(n.querySelectorAll)n.querySelectorAll('*').forEach(function(x){if(!x.children.length)check(x);});}});
+        r.addedNodes.forEach(function(n){if(n.nodeType===1){check(n);if(n.querySelectorAll&&(n.textContent||'').length<400)n.querySelectorAll('*').forEach(function(x){if(!x.children.length)check(x);});}});
       });
     }).observe(document.body,{childList:true,characterData:true,subtree:true});
     document.querySelectorAll('#evA-claims,.game-picker-loading,.evA-note').forEach(check);
@@ -30083,7 +30140,7 @@ html body .pkg-tab-add-btn{flex:0 0 auto !important;width:30px !important;height
       var isVoucher=a?VOUCHER.indexOf(a.getAttribute('data-provider'))>-1:false;
       var d=isVoucher?'':'none';if(w.style.display!==d)w.style.display=d;}
   }
-  setInterval(function(){var p=el('game-editor-page');if(p&&p.classList.contains('active'))sync();},700);
+  setInterval(function(){var p=el('game-editor-page');if(p&&p.classList.contains('active'))sync();},1500);
 })();
 </script>
 <style id="perf-fix-v1">
@@ -30156,5 +30213,138 @@ html:root body:not(#_a):not(#_b):not(#_c):not(#_d):not(#_e) #edit-packages-list 
 html:root body:not(#_a):not(#_b):not(#_c):not(#_d):not(#_e) #edit-packages-list .package-row .pkg-summary-price-text{font-size:13px!important}
 }
 </style>
+
+<style id="ge-clean-v1">
+/* Game editor clean-up: (1) Auto-Fulfill as buttons, (2) provider buttons and package tabs look clearly different,
+   (3) price list = compact one-line rows instead of a 2-column card grid, (4) no wrapping text. */
+@layer soft-glass{
+/* ---- Provider colours (same everywhere): P1 blue · P2 orange · P3 green · Software purple · Manual grey ---- */
+html:root body:not(#_1):not(#_2):not(#_3):not(#_4):not(#_5):not(#_6):not(#_7) #fulfill-provider-tabs .pkg-type-tabs{display:flex!important;gap:6px!important;padding:0!important;background:none!important;border:0!important;box-shadow:none!important;border-radius:0!important;overflow-x:auto!important;scrollbar-width:none}
+html:root body:not(#_1):not(#_2):not(#_3):not(#_4):not(#_5):not(#_6):not(#_7) #fulfill-provider-tabs .pkg-type-tabs::-webkit-scrollbar{display:none}
+html:root body:not(#_1):not(#_2):not(#_3):not(#_4):not(#_5):not(#_6):not(#_7) #fulfill-provider-tabs .pkg-type-tab{--t:100,116,139;flex:1 0 auto!important;height:34px!important;min-height:0!important;padding:0 10px!important;border-radius:10px!important;border:1px solid var(--border-glass)!important;background:var(--bg-subtle-2)!important;color:var(--text-secondary)!important;box-shadow:none!important;font-size:12px!important;font-weight:600!important;white-space:nowrap!important;animation:none!important}
+html:root body:not(#_1):not(#_2):not(#_3):not(#_4):not(#_5):not(#_6):not(#_7) #fulfill-provider-tabs .pkg-type-tab:is([data-provider="g2bulk"],[data-provider="g2bulk_voucher"]){--t:37,99,235}
+html:root body:not(#_1):not(#_2):not(#_3):not(#_4):not(#_5):not(#_6):not(#_7) #fulfill-provider-tabs .pkg-type-tab:is([data-provider="fazercard"],[data-provider="fazercard_giftcard"]){--t:234,88,12}
+html:root body:not(#_1):not(#_2):not(#_3):not(#_4):not(#_5):not(#_6):not(#_7) #fulfill-provider-tabs .pkg-type-tab[data-provider="jcplays"]{--t:5,150,105}
+html:root body:not(#_1):not(#_2):not(#_3):not(#_4):not(#_5):not(#_6):not(#_7) #fulfill-provider-tabs .pkg-type-tab[data-provider="software"]{--t:124,58,237}
+html:root body:not(#_1):not(#_2):not(#_3):not(#_4):not(#_5):not(#_6):not(#_7) #fulfill-provider-tabs .pkg-type-tab.active{background:rgb(var(--t))!important;border-color:rgb(var(--t))!important;color:#fff!important}
+html:root body:not(#_1):not(#_2):not(#_3):not(#_4):not(#_5):not(#_6):not(#_7) .fulfill-group-label{white-space:nowrap!important}
+
+/* ---- Package tabs (Currency / Package / custom): underline text tabs, no fill, neutral ink colour ---- */
+html:root body:not(#_1):not(#_2):not(#_3):not(#_4):not(#_5):not(#_6):not(#_7) #pkg-tab-bar{display:flex!important;align-items:center!important;gap:18px!important;flex-wrap:nowrap!important;overflow-x:auto!important;padding:0!important;margin:0 0 10px!important;background:none!important;border:0!important;border-bottom:1px solid var(--border-glass)!important;scrollbar-width:none}
+html:root body:not(#_1):not(#_2):not(#_3):not(#_4):not(#_5):not(#_6):not(#_7) #pkg-tab-bar::-webkit-scrollbar{display:none}
+html:root body:not(#_1):not(#_2):not(#_3):not(#_4):not(#_5):not(#_6):not(#_7) #pkg-tab-bar .pkg-tab-btn{flex:0 0 auto!important;position:relative;display:inline-flex!important;align-items:center;gap:6px;height:36px!important;min-height:0!important;padding:0 2px!important;border:0!important;border-radius:0!important;background:none!important;box-shadow:none!important;color:var(--text-muted)!important;font-size:13px!important;font-weight:600!important;white-space:nowrap!important;animation:none!important}
+html:root body:not(#_1):not(#_2):not(#_3):not(#_4):not(#_5):not(#_6):not(#_7) #pkg-tab-bar .pkg-tab-btn.active{color:var(--text-strong)!important;background:none!important}
+html:root body:not(#_1):not(#_2):not(#_3):not(#_4):not(#_5):not(#_6):not(#_7) #pkg-tab-bar .pkg-tab-btn.active::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:2px;border-radius:2px;background:var(--text-strong)}
+html:root body:not(#_1):not(#_2):not(#_3):not(#_4):not(#_5):not(#_6):not(#_7) #pkg-tab-bar .pkg-tab-count{font-size:10.5px!important;font-weight:600;padding:1px 6px;border-radius:999px;background:var(--fill-soft);color:var(--text-secondary);opacity:1!important}
+html:root body:not(#_1):not(#_2):not(#_3):not(#_4):not(#_5):not(#_6):not(#_7) #pkg-tab-bar .pkg-tab-add-btn{flex:0 0 auto!important;width:26px!important;height:26px!important;border-radius:999px!important;border:1px dashed var(--border-glass)!important;background:none!important;color:var(--text-muted)!important;box-shadow:none!important}
+
+/* ---- Price list: one compact row per package ---- */
+html:root body:not(#_1):not(#_2):not(#_3):not(#_4):not(#_5):not(#_6):not(#_7) #edit-packages-list{display:flex!important;flex-direction:column!important;grid-template-columns:none!important;gap:4px!important;align-content:normal!important}
+html:root body:not(#_1):not(#_2):not(#_3):not(#_4):not(#_5):not(#_6):not(#_7) #edit-packages-list .package-row{flex:0 0 auto!important;width:100%!important;min-width:0!important;min-height:36px!important;margin:0!important;grid-column:auto!important;align-items:center!important;border-radius:10px!important;box-shadow:none!important}
+html:root body:not(#_1):not(#_2):not(#_3):not(#_4):not(#_5):not(#_6):not(#_7) #edit-packages-list .package-row:has(.pkg-dot-package){grid-column:auto!important}
+html:root body:not(#_1):not(#_2):not(#_3):not(#_4):not(#_5):not(#_6):not(#_7) #edit-packages-list .package-row .pkg-row-fields{flex:1 1 auto!important;min-width:0!important}
+html:root body:not(#_1):not(#_2):not(#_3):not(#_4):not(#_5):not(#_6):not(#_7) #edit-packages-list .package-row .pkg-summary{display:flex!important;flex-direction:row!important;flex-wrap:nowrap!important;align-items:center!important;gap:8px!important;grid-template-columns:none!important;grid-template-areas:none!important;padding:5px 8px 5px 2px!important;min-height:34px!important}
+html:root body:not(#_1):not(#_2):not(#_3):not(#_4):not(#_5):not(#_6):not(#_7) #edit-packages-list .package-row :is(.pkg-summary-head,.pkg-summary-body){display:contents!important}
+html:root body:not(#_1):not(#_2):not(#_3):not(#_4):not(#_5):not(#_6):not(#_7) #edit-packages-list .package-row .pkg-summary-label{grid-area:auto!important;order:1!important;flex:1 1 auto!important;min-width:0!important}
+html:root body:not(#_1):not(#_2):not(#_3):not(#_4):not(#_5):not(#_6):not(#_7) #edit-packages-list .package-row .pkg-summary-name{white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;font-size:12.5px!important}
+html:root body:not(#_1):not(#_2):not(#_3):not(#_4):not(#_5):not(#_6):not(#_7) #edit-packages-list .package-row .pkg-summary-value{grid-area:auto!important;order:2!important;flex:0 0 auto!important;padding:0!important;white-space:nowrap!important}
+html:root body:not(#_1):not(#_2):not(#_3):not(#_4):not(#_5):not(#_6):not(#_7) #edit-packages-list .package-row :is(.pkg-summary-price-text,.pkg-summary-price-unit){white-space:nowrap!important;font-size:12.5px!important}
+html:root body:not(#_1):not(#_2):not(#_3):not(#_4):not(#_5):not(#_6):not(#_7) #edit-packages-list .package-row .pkg-summary-price-unit{font-size:10px!important}
+html:root body:not(#_1):not(#_2):not(#_3):not(#_4):not(#_5):not(#_6):not(#_7) #edit-packages-list .package-row .pkg-summary-actions{display:flex!important;align-items:center!important;order:3!important;flex:0 0 auto!important;gap:6px!important}
+html:root body:not(#_1):not(#_2):not(#_3):not(#_4):not(#_5):not(#_6):not(#_7) #edit-packages-list .package-row :is(.pkg-summary-profit,.pkg-summary-remove){grid-area:auto!important;justify-self:auto!important;white-space:nowrap!important}
+
+/* ---- Package details popup: name full width, Auto-Fulfill buttons on one line below ---- */
+html:root body:not(#_1):not(#_2):not(#_3):not(#_4):not(#_5):not(#_6):not(#_7) .pkg-card .pkg-row-top{grid-column:1/-1!important}
+html:root body:not(#_1):not(#_2):not(#_3):not(#_4):not(#_5):not(#_6):not(#_7) .pkg-card .pkg-provider-row{grid-column:1/-1!important;display:flex!important;align-items:center!important;gap:8px!important;order:2}
+html:root body:not(#_1):not(#_2):not(#_3):not(#_4):not(#_5):not(#_6):not(#_7) .pkg-card .pkg-provider-row label{display:block!important;margin:0!important;font-size:11px!important;color:var(--text-muted)!important;white-space:nowrap!important;flex:0 0 auto}
+html:root body:not(#_1):not(#_2):not(#_3):not(#_4):not(#_5):not(#_6):not(#_7) .pkg-prov-seg{flex:1 1 auto;min-width:0;display:flex;gap:6px;overflow-x:auto;scrollbar-width:none}
+html:root body:not(#_1):not(#_2):not(#_3):not(#_4):not(#_5):not(#_6):not(#_7) .pkg-prov-seg::-webkit-scrollbar{display:none}
+html:root body:not(#_1):not(#_2):not(#_3):not(#_4):not(#_5):not(#_6):not(#_7) .pkg-prov-btn{--t:100,116,139;flex:1 0 auto;height:34px;padding:0 10px;border-radius:10px;border:1px solid var(--border-glass);background:var(--bg-subtle-2);color:var(--text-secondary);font-family:inherit;font-size:12px;font-weight:600;line-height:1;white-space:nowrap;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;transition:background-color .15s ease,color .15s ease,border-color .15s ease}
+html:root body:not(#_1):not(#_2):not(#_3):not(#_4):not(#_5):not(#_6):not(#_7) .pkg-prov-btn[data-v="g2bulk"]{--t:37,99,235}
+html:root body:not(#_1):not(#_2):not(#_3):not(#_4):not(#_5):not(#_6):not(#_7) .pkg-prov-btn[data-v="fazercard"]{--t:234,88,12}
+html:root body:not(#_1):not(#_2):not(#_3):not(#_4):not(#_5):not(#_6):not(#_7) .pkg-prov-btn[data-v="jcplays"]{--t:5,150,105}
+html:root body:not(#_1):not(#_2):not(#_3):not(#_4):not(#_5):not(#_6):not(#_7) .pkg-prov-btn.active{background:rgb(var(--t));border-color:rgb(var(--t));color:#fff}
+html:root body:not(#_1):not(#_2):not(#_3):not(#_4):not(#_5):not(#_6):not(#_7) .pkg-prov-btn:active{transform:scale(.97)}
+html:root body:not(#_1):not(#_2):not(#_3):not(#_4):not(#_5):not(#_6):not(#_7) .pkg-card :is(label,.pkg-picker-chip-label,.pkg-picker-chip-text,.pkg-card-header span){white-space:nowrap!important}
+}
+</style>
+<style id="boot-logo-skel-v1">
+#boot-cover .bc-logo{background:rgba(99,102,241,.14)!important;box-shadow:none!important;overflow:hidden;animation:bcSkelPulse 1.4s ease-in-out infinite!important}
+#boot-cover .bc-logo::after{display:none!important}
+#boot-cover .bc-logo.has-img{background:transparent!important;animation:none!important}
+#boot-cover .bc-logo img{width:100%;height:100%;object-fit:cover;border-radius:inherit}
+@keyframes bcSkelPulse{0%,100%{opacity:1}50%{opacity:.5}}
+@media (prefers-reduced-motion:reduce){#boot-cover .bc-logo{animation:none!important}}
+</style>
+<style id="secret-copy-v1">
+#settings-card-push,#settings-card-adminlogin{display:none!important}
+.secret-field-wrap input.secret-input{padding-right:78px!important}
+.secret-copy-btn{position:absolute;right:38px;top:50%;transform:translateY(-50%);width:32px;height:32px;border:none;background:transparent;color:var(--text-secondary);display:flex;align-items:center;justify-content:center;cursor:pointer;border-radius:8px}
+.secret-copy-btn:active{background:var(--fill-soft)}
+.secret-copy-btn svg{width:17px;height:17px}
+#sc-pin-ov{position:fixed;inset:0;z-index:100000;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(15,23,42,.55)}
+#sc-pin-ov .sc-pin-box{width:100%;max-width:340px;background:var(--surface-strong,#fff);color:var(--text-primary);border-radius:18px;padding:18px;box-shadow:0 24px 60px rgba(0,0,0,.3)}
+#sc-pin-ov h4{margin:0 0 4px;font-size:16px}
+#sc-pin-ov p{margin:0 0 12px;font-size:12.5px;color:var(--text-secondary)}
+#sc-pin-ov input{width:100%;box-sizing:border-box;text-align:center;letter-spacing:8px;font-size:20px;padding:10px;border-radius:12px;border:1px solid var(--border-glass);background:var(--bg-subtle-2);color:var(--text-primary)}
+#sc-pin-ov .sc-pin-err{color:#dc2626;font-size:12px;margin:8px 0 0;min-height:16px}
+#sc-pin-ov .sc-pin-row{display:flex;gap:8px;margin-top:12px}
+#sc-pin-ov .sc-pin-row button{flex:1;height:42px;border-radius:12px;border:0;font-weight:700;font-size:14px;cursor:pointer;white-space:nowrap}
+#sc-pin-ov .sc-pin-cancel{background:var(--fill-soft);color:var(--text-secondary)}
+#sc-pin-ov .sc-pin-ok{background:var(--accent,#6366f1);color:#fff}
+</style>
+<script id="secret-copy-js">
+(function(){
+  var ICON='<svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/></svg>';
+  function toast(m,t){try{window.showToast(m,t||'success');}catch(e){}}
+  function writeClip(text){
+    if(navigator.clipboard&&navigator.clipboard.writeText){return navigator.clipboard.writeText(text);}
+    return new Promise(function(res,rej){try{var t=document.createElement('textarea');t.value=text;t.style.cssText='position:fixed;opacity:0;top:0;left:0';document.body.appendChild(t);t.select();var ok=document.execCommand('copy');t.remove();ok?res():rej();}catch(e){rej(e);}});
+  }
+  function askPin(){
+    return new Promise(function(resolve){
+      var ov=document.createElement('div');ov.id='sc-pin-ov';
+      ov.innerHTML='<div class="sc-pin-box"><h4>Admin PIN</h4><p>Copy ယူဖို့ Admin PIN (၆ လုံး) ထည့်ပါ။</p><input type="password" inputmode="numeric" maxlength="6" autocomplete="off" id="sc-pin-in"><div class="sc-pin-err" id="sc-pin-err"></div><div class="sc-pin-row"><button type="button" class="sc-pin-cancel">Cancel</button><button type="button" class="sc-pin-ok">Copy</button></div></div>';
+      document.body.appendChild(ov);
+      var inp=ov.querySelector('#sc-pin-in'),err=ov.querySelector('#sc-pin-err'),ok=ov.querySelector('.sc-pin-ok');
+      function done(v){ov.remove();resolve(v);}
+      ov.querySelector('.sc-pin-cancel').onclick=function(){done(false);};
+      ov.addEventListener('click',function(e){if(e.target===ov)done(false);});
+      async function submit(){
+        if(!/^\d{6}$/.test(inp.value)){err.textContent='PIN ၆ လုံး ထည့်ပါ။';return;}
+        ok.disabled=true;ok.textContent='Checking...';
+        try{
+          var r=await window.adminPinCall({op:'verify',pin:inp.value});
+          if(r&&r.data&&r.data.ok){done(true);return;}
+          err.textContent=(r&&r.data&&r.data.error)||'PIN မှားနေပါတယ်။';inp.value='';inp.focus();
+        }catch(e){err.textContent='Server ကို မချိတ်နိုင်ပါ။ ထပ်ကြိုးစားပါ။';}
+        ok.disabled=false;ok.textContent='Copy';
+      }
+      ok.onclick=submit;inp.addEventListener('keydown',function(e){if(e.key==='Enter')submit();});
+      setTimeout(function(){inp.focus();},50);
+    });
+  }
+  window.copySecretWithPin=async function(id){
+    var el=document.getElementById(id),val=el&&el.value?String(el.value):'';
+    if(!val){toast('Copy ယူစရာ မရှိသေးပါ။','warning');return;}
+    var hasPin=true;
+    try{var st=await window.adminPinCall({op:'status'});hasPin=!!(st&&st.data&&st.data.hasPin);}catch(e){toast('Server ကို မချိတ်နိုင်ပါ။','fail');return;}
+    if(!hasPin){toast('Copy ယူဖို့ Admin PIN အရင်သတ်မှတ်ပါ (Settings → Admin PIN)။','warning');return;}
+    if(!(await askPin()))return;
+    try{await writeClip(val);toast('Copied','success');}catch(e){toast('Copy မရပါ။','fail');}
+  };
+  function inject(){
+    document.querySelectorAll('.secret-field-wrap').forEach(function(w){
+      if(w.querySelector('.secret-copy-btn'))return;
+      var inp=w.querySelector('input.secret-input'),eye=w.querySelector('.secret-toggle-btn');
+      if(!inp||!inp.id||!eye)return;
+      var b=document.createElement('button');b.type='button';b.className='secret-copy-btn';b.setAttribute('data-no-busy','');b.tabIndex=-1;b.setAttribute('aria-label','Copy');b.innerHTML=ICON;
+      b.addEventListener('click',function(){window.copySecretWithPin(inp.id);});
+      w.insertBefore(b,eye);
+    });
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',inject);else inject();
+})();
+</script>
 </body>
 </html>
