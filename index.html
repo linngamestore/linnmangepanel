@@ -7358,83 +7358,80 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
         }
         window.dismissToast = dismissToast;
 
-        // ---------- Scroll-reveal (fade + slide up) ----------
-        // Applies to a list container right after its cards are (re)rendered
-        // via innerHTML. Each direct card fades/slides in as it scrolls into
-        // view. Cards are deduped by their `id` attribute (via revealedCardIds)
-        // so a live re-render (Firestore onSnapshot) doesn't replay the
-        // entrance animation on cards the user has already seen - only
-        // genuinely new cards animate in.
-        const revealedCardIds = new Set();
-        // Keyed by root element (or null for the page viewport) — a container
-        // that scrolls internally (Game List / Order List / Top Ups) gets its
-        // own observer rooted on itself instead of the viewport. Without this,
-        // the browser has to re-check every card's intersection against the
-        // whole document on every drag frame while scrolling that inner box,
-        // which is what was causing the stutter/catching feel while scrolling.
-        const scrollRevealObservers = new Map();
-        function getScrollRevealObserver(root) {
-            const key = root || null;
-            if (scrollRevealObservers.has(key)) return scrollRevealObservers.get(key);
-            const observer = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    if (!entry.isIntersecting) return;
-                    entry.target.classList.add('revealed');
-                    if (entry.target.id) revealedCardIds.add(entry.target.id);
-                    observer.unobserve(entry.target);
-                });
-            }, { root, threshold: 0.08, rootMargin: '0px 0px -30px 0px' });
-            scrollRevealObservers.set(key, observer);
-            return observer;
+        // Keep list updates out of active touch, wheel, and momentum scrolling.
+        // A single queued callback per list coalesces frequent Firestore events;
+        // it runs once after scrolling settles instead of polling every 150ms.
+        const scrollGuardContainers = new Set();
+        let scrollGuardListenersReady = false;
+        function releaseScrollGuard(el) {
+            clearTimeout(el._touchGuardStuckTimer);
+            el._isTouching = false;
+            const pending = el._scrollIdleRender;
+            el._scrollIdleRender = null;
+            if (typeof pending === 'function') pending();
         }
-        // Marks a scrollable container as "being touched" between touchstart and
-        // touchend/cancel, so a live re-render (Firestore onSnapshot) can wait
-        // until the admin's finger lifts instead of rebuilding the list mid-drag
-        // - rebuilding while dragging is what causes the list to visibly jump/
-        // catch under the finger, since the total scroll height can shift the
-        // instant the DOM is replaced.
+        function holdScrollGuard(el, delay) {
+            el._isTouching = true;
+            clearTimeout(el._touchGuardStuckTimer);
+            el._touchGuardStuckTimer = setTimeout(() => releaseScrollGuard(el), delay);
+        }
+        function noteListScroll(event) {
+            const target = event && event.target;
+            const pageScroll = !target || target === window || target === document
+                || target === document.documentElement || target === document.body;
+            scrollGuardContainers.forEach(el => {
+                const page = el.closest('.page-section');
+                if (page && !page.classList.contains('active')) return;
+                if (pageScroll || (target && target.nodeType === 1
+                    && (el.contains(target) || (page && page.contains(target))))) {
+                    holdScrollGuard(el, 280);
+                }
+            });
+        }
         function attachScrollTouchGuard(el) {
             if (!el || el._touchGuardAttached) return;
             el._touchGuardAttached = true;
             el._isTouching = false;
-            // Safety net: touchend/touchcancel can be missed by the browser
-            // (a swipe-back/navigation gesture interrupting mid-drag, the
-            // app being backgrounded mid-touch, etc). If that happens,
-            // _isTouching gets stuck true forever, and every future
-            // re-render for this container (Orders/Games/Top-ups/Users all
-            // use this same guard) defers indefinitely — the list just
-            // stays blank until some later touch happens to land on this
-            // exact container and finally fires touchend, "unsticking" it.
-            // That's the "blank until I scroll a little" symptom. Auto-clear
-            // the flag a fixed time after touchstart so a render can never
-            // be blocked longer than that, no matter what happens to the
-            // real touchend/touchcancel.
-            const clearTouching = () => { clearTimeout(el._touchGuardStuckTimer); el._isTouching = false; };
+            scrollGuardContainers.add(el);
+            if (!scrollGuardListenersReady) {
+                scrollGuardListenersReady = true;
+                document.addEventListener('scroll', noteListScroll, { capture: true, passive: true });
+                window.addEventListener('scroll', noteListScroll, { passive: true });
+            }
             el.addEventListener('touchstart', () => {
-                el._isTouching = true;
-                clearTimeout(el._touchGuardStuckTimer);
-                el._touchGuardStuckTimer = setTimeout(clearTouching, 1500);
+                holdScrollGuard(el, 1500);
             }, { passive: true });
-            el.addEventListener('touchend', clearTouching, { passive: true });
-            el.addEventListener('touchcancel', clearTouching, { passive: true });
+            el.addEventListener('touchend', () => holdScrollGuard(el, 300), { passive: true });
+            el.addEventListener('touchcancel', () => holdScrollGuard(el, 300), { passive: true });
+        }
+        function scheduleScrollSafeRender(el, key, render, delay = 60) {
+            const host = el || document.body;
+            const timerKey = '__lgRenderTimer_' + key;
+            const generationKey = '__lgRenderGeneration_' + key;
+            const generation = (host[generationKey] || 0) + 1;
+            host[generationKey] = generation;
+            clearTimeout(host[timerKey]);
+            const run = () => {
+                if (host[generationKey] !== generation) return;
+                host[timerKey] = 0;
+                if (el && el._isTouching) {
+                    el._scrollIdleRender = run;
+                    return;
+                }
+                if (el) el._scrollIdleRender = null;
+                render();
+            };
+            if (el && el._isTouching) {
+                host[timerKey] = 0;
+                el._scrollIdleRender = run;
+                return;
+            }
+            if (el) el._scrollIdleRender = null;
+            host[timerKey] = setTimeout(run, delay);
         }
         function initScrollReveal(container, selector = ':scope > .admin-card, :scope > .package-row') {
             if (!container) return;
-            const cs = getComputedStyle(container);
-            const isScrollRoot = cs.overflowY === 'auto' || cs.overflowY === 'scroll';
-            const observer = getScrollRevealObserver(isScrollRoot ? container : null);
-            const items = container.querySelectorAll(selector);
-            items.forEach((el, i) => {
-                if (el.id && revealedCardIds.has(el.id)) {
-                    // Already seen this card before (by id) - show it immediately,
-                    // no replay animation on re-render.
-                    el.classList.add('scroll-reveal', 'revealed');
-                    return;
-                }
-                el.classList.add('scroll-reveal');
-                el.style.transitionDelay = (Math.min(i, 8) * 40) + 'ms';
-                observer.observe(el);
-            });
+            container.querySelectorAll(selector).forEach(el => el.classList.add('scroll-reveal', 'revealed'));
         }
         window.initScrollReveal = initScrollReveal;
         // Reusable Delete / Warning / Information dialog — replaces window.confirm() / alert().
@@ -10979,13 +10976,8 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
         })();
 
         function renderOrdersList() {
-            clearTimeout(ordersRenderScheduled);
             attachScrollTouchGuard(ordersContainer);
-            const runWhenSettled = () => {
-                if (ordersContainer._isTouching) { ordersRenderScheduled = setTimeout(runWhenSettled, 150); return; }
-                renderOrdersListImpl();
-            };
-            ordersRenderScheduled = setTimeout(runWhenSettled, 60);
+            scheduleScrollSafeRender(ordersContainer, 'orders', renderOrdersListImpl, 60);
         }
         window.renderOrdersList = renderOrdersList;
 
@@ -13091,13 +13083,8 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
         let topupsRenderScheduled = null;
         function renderTopupsList() {
             const container = document.getElementById('topups-container');
-            clearTimeout(topupsRenderScheduled);
             attachScrollTouchGuard(container);
-            const runWhenSettled = () => {
-                if (container && container._isTouching) { topupsRenderScheduled = setTimeout(runWhenSettled, 150); return; }
-                renderTopupsListImpl();
-            };
-            topupsRenderScheduled = setTimeout(runWhenSettled, 60);
+            scheduleScrollSafeRender(container, 'topups', renderTopupsListImpl, 60);
         }
         function renderTopupsListImpl() {
             const container = document.getElementById('topups-container');
@@ -14454,14 +14441,9 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
         }
         window.showGameListTab = showGameListTab;
         function renderAdminGamesList() {
-            clearTimeout(gamesRenderScheduled);
             const gamesContainerEl = document.getElementById('admin-games-container');
             attachScrollTouchGuard(gamesContainerEl);
-            const runWhenSettled = () => {
-                if (gamesContainerEl && gamesContainerEl._isTouching) { gamesRenderScheduled = setTimeout(runWhenSettled, 150); return; }
-                renderAdminGamesListImpl();
-            };
-            gamesRenderScheduled = setTimeout(runWhenSettled, 60);
+            scheduleScrollSafeRender(gamesContainerEl, 'games', renderAdminGamesListImpl, 60);
         }
         window.renderAdminGamesList = renderAdminGamesList;
 
@@ -19011,17 +18993,10 @@ return `
         // Also touch-guarded like Orders/Games/Topups now, so a live Firestore
         // update (which fires very often - every order/status change re-renders
         // this list to refresh order counts) can't rebuild the grid mid-scroll.
-        let usersRenderScheduled = false;
         function renderAdminUsersList() {
-            if (usersRenderScheduled) return;
-            usersRenderScheduled = true;
             const container = document.getElementById('admin-users-container');
             attachScrollTouchGuard(container);
-            requestAnimationFrame(() => {
-                usersRenderScheduled = false;
-                if (container && container._isTouching) { renderAdminUsersList(); return; }
-                renderAdminUsersListImpl();
-            });
+            scheduleScrollSafeRender(container, 'users', renderAdminUsersListImpl, 40);
         }
         window.renderAdminUsersList = renderAdminUsersList;
         // Keyed cache of already-rendered card nodes, so a Firestore update
@@ -30400,5 +30375,32 @@ html:root body:not(#_1):not(#_2):not(#_3):not(#_4):not(#_5):not(#_6):not(#_7) .p
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',inject);else inject();
 })();
 </script>
+<style id="perf-fix-v4">
+/* Keep only the data and controls animated; list entrance effects are decorative and
+   were retriggered across every card whenever a live snapshot rebuilt the list. */
+html body #orders-container>*,html body #edit-packages-list>.package-row{animation:none!important}
+html body #orders-container .scroll-reveal,html body #topups-container .scroll-reveal,
+html body #edit-packages-list .scroll-reveal{opacity:1!important;transform:none!important;transition:none!important;transition-delay:0ms!important}
+</style>
+<style id="boot-logo-bounds-fix-v2">
+/* Keep the cached branding image inside a small, fixed splash tile on every viewport. */
+html body #boot-cover .bc-logo-wrap{
+  box-sizing:border-box!important;flex:0 0 76px!important;
+  width:76px!important;height:76px!important;min-width:76px!important;max-width:76px!important;
+  min-height:76px!important;max-height:76px!important;overflow:visible!important
+}
+html body #boot-cover .bc-logo{
+  box-sizing:border-box!important;position:relative!important;flex:0 0 64px!important;
+  width:64px!important;height:64px!important;min-width:64px!important;max-width:64px!important;
+  min-height:64px!important;max-height:64px!important;overflow:hidden!important;
+  contain:layout paint!important
+}
+html body #boot-cover #bc-logo-img{
+  position:absolute!important;inset:0!important;width:100%!important;height:100%!important;
+  min-width:0!important;max-width:100%!important;min-height:0!important;max-height:100%!important;
+  object-fit:contain!important;object-position:center!important;border-radius:inherit!important;
+  content-visibility:visible!important;contain:none!important;transform:none!important
+}
+</style>
 </body>
 </html>
