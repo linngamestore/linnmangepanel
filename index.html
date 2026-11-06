@@ -28237,6 +28237,7 @@ html[data-theme]:not([data-theme="light"]) .lv-pill.has{ color:#FCD34D; }
   /* keep the Game Editor jump bar glued just under the (sometimes hidden) header + nav */
   var raf=0,until=0;
   function upd(){
+    var ge=document.getElementById('game-editor-page'); if(!ge||!ge.classList.contains('active'))return;
     var h=document.querySelector('.header'),n=document.querySelector('.top-nav-wrap');
     var top=h?Math.max(0,h.getBoundingClientRect().bottom):0;
     if(n){var r=n.getBoundingClientRect(); if(r.bottom>top&&r.top<window.innerHeight) top=Math.max(top,r.bottom);}
@@ -29718,8 +29719,9 @@ window.uiConfirm=function(message,opt){opt=opt||{};return dlg({title:opt.title||
 window.uiPrompt=function(message,def,opt){opt=opt||{};return dlg({title:opt.title||'Enter a value',message:String(message==null?'':message),prompt:true,password:opt.password,value:def==null?'':String(def),placeholder:opt.placeholder,confirmText:opt.confirmText||'Save'});};
 window.lsScanTab=function(b){var w=b.closest('#scans-body');w.querySelectorAll('.ls-seg button').forEach(function(x){x.classList.toggle('on',x===b);});w.querySelectorAll('.ls-pane').forEach(function(x){x.classList.toggle('on',x.id===b.getAttribute('data-p'));});};
 /* keep the Settings jump bar just under the sticky sub-nav instead of on top of it */
-function place(){var n=document.getElementById('sub-nav');var t=0;if(n){var cs=getComputedStyle(n);if(cs.position==='sticky'||cs.position==='fixed'){t=Math.max(0,Math.round(n.getBoundingClientRect().bottom));}}if(window.__setTop!==t){window.__setTop=t;document.documentElement.style.setProperty('--set-top',t+'px');}}
-window.addEventListener('scroll',place,{passive:true});window.addEventListener('resize',place);setTimeout(place,400);setInterval(place,5000);
+function place(){var sp=document.getElementById('settings');if(!sp||!sp.classList.contains('active'))return;var n=document.getElementById('sub-nav');var t=0;if(n){var cs=getComputedStyle(n);if(cs.position==='sticky'||cs.position==='fixed'){t=Math.max(0,Math.round(n.getBoundingClientRect().bottom));}}if(window.__setTop!==t){window.__setTop=t;document.documentElement.style.setProperty('--set-top',t+'px');}}
+var __placeRaf=0;function placeSoon(){if(__placeRaf)return;__placeRaf=requestAnimationFrame(function(){__placeRaf=0;place();});}
+window.addEventListener('scroll',placeSoon,{passive:true});window.addEventListener('resize',place);setTimeout(place,400);setInterval(place,5000);
 })();
 
 </script>
@@ -30164,9 +30166,7 @@ html body .pkg-cost-update-btn,html body .pkg-summary-warn-dot,html body .live-d
 #boot-cover.is-slow .bc-bar i{animation:none!important}
 #boot-cover.bc-out{filter:none!important}
 /* while the boot cover is up, the dashboard underneath is invisible - don't animate/paint it */
-body:has(#boot-cover:not(.bc-out)) > *:not(#boot-cover) *,
-body:has(#boot-cover:not(.bc-out)) > *:not(#boot-cover) *::before,
-body:has(#boot-cover:not(.bc-out)) > *:not(#boot-cover) *::after{animation-play-state:paused!important}
+
 /* boot cover: keep a single light motion (logo pulse + progress bar), drop the expanding rings */
 #boot-cover .bc-ring{display:none!important}
 /* the scaling logo (with its big blurred shadow) was re-rasterised every frame: ~12ms/frame */
@@ -30347,6 +30347,56 @@ html:root body:not(#_1):not(#_2):not(#_3):not(#_4):not(#_5):not(#_6):not(#_7) .p
     });
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',inject);else inject();
+})();
+</script>
+<style id="login-lock-v1">
+/* Login gate: the screen must not drag, bounce or chain scrolling to the page behind it. */
+html body #login-screen{touch-action:none;overscroll-behavior:contain;-webkit-overflow-scrolling:auto}
+html body #login-screen input,html body #login-screen button,html body #login-screen a{touch-action:manipulation}
+html.lg-login-lock,html.lg-login-lock body{overflow:hidden!important;height:100%!important;overscroll-behavior:none!important}
+</style>
+<script id="login-lock-js">
+(function(){
+  function sync(){
+    var el=document.getElementById('login-screen'); if(!el)return;
+    var on=!el.classList.contains('hidden');
+    var h=document.documentElement; if(h.classList.contains('lg-login-lock')!==on)h.classList.toggle('lg-login-lock',on);
+  }
+  function init(){
+    var el=document.getElementById('login-screen'); if(!el)return;
+    sync(); new MutationObserver(sync).observe(el,{attributes:true,attributeFilter:['class']});
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+})();
+</script>
+<style id="nav-autohide-v1">
+/* Header stays put (sticky, no transform). The bottom nav slides down + fades on scroll-down and comes back on scroll-up.
+   Only transform/opacity change, so it runs on the compositor and never re-lays-out the page. */
+html body .top-nav-wrap{transition:transform .26s cubic-bezier(.2,.8,.25,1),opacity .2s ease!important;will-change:transform,opacity}
+html:root body:not(#_nav) .top-nav-wrap.lg-navaway{transform:translate3d(0,calc(100% + 28px),0)!important;opacity:0!important;pointer-events:none!important}
+html body .header{will-change:auto}
+</style>
+<script id="nav-autohide-js">
+(function(){
+  var AUTOHIDE=true; /* set to false to keep the nav always visible */
+  var nav=null,lastY=0,acc=0,hidden=false,raf=0;
+  function setHidden(h){ if(h===hidden||!nav)return; hidden=h; nav.classList.toggle('lg-navaway',h); }
+  function busy(){
+    if(document.querySelector('.modal-overlay.show,.dialog-overlay.show,#nav-group-sheet-overlay.show'))return true;
+    var a=document.activeElement; return !!(a&&/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName));
+  }
+  function step(){
+    raf=0; if(!nav)nav=document.querySelector('.top-nav-wrap'); if(!nav)return;
+    var y=Math.max(0,window.scrollY||0), d=y-lastY; lastY=y;
+    if(y<60||busy()){acc=0;setHidden(false);return;}
+    if((d>0)!==(acc>0))acc=0;        /* direction changed: restart the distance count */
+    acc+=d;
+    if(acc>16)setHidden(true);        /* scrolled down ~16px: tuck away */
+    else if(acc<-8)setHidden(false);  /* scrolled up ~8px: bring back */
+    if(y+window.innerHeight>=document.documentElement.scrollHeight-40)setHidden(false); /* at the very bottom */
+  }
+  if(!AUTOHIDE)return;
+  window.addEventListener('scroll',function(){ if(!raf)raf=requestAnimationFrame(step); },{passive:true});
 })();
 </script>
 </body>
