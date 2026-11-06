@@ -3986,7 +3986,26 @@ html.perf-low [data-pcbg] *,html.perf-low [data-pcbg] *::before,html.perf-low [d
                     <div class="stat-card-value" id="an-fazercard-balance-display" style="color:var(--accent);font-size:28px;line-height:1.2;">—</div>
                     <div class="stat-card-sub"><span class="stat-card-sub-text" id="an-fazercard-rate-note" onclick="openFazerCardModal()" style="cursor:pointer;text-decoration:underline dotted;"></span></div>
                 </div>
-                
+
+            </div>
+
+            <div class="admin-card api-tx-card" style="margin-top:14px;">
+                <div class="sc-head" style="cursor:default;"><span class="sc-title">Transactions</span></div>
+                <div class="nt-seg" id="api-tx-seg" style="margin:10px 0 12px;">
+                    <button type="button" class="on" data-tx="g2bulk" onclick="apiTxTab('g2bulk')">G2Bulk</button>
+                    <button type="button" data-tx="jcplays" onclick="apiTxTab('jcplays')">JCPlays</button>
+                </div>
+                <div id="api-tx-g2bulk">
+                    <input type="hidden" id="g2bulk-tx-chevron-dummy">
+                    <div id="g2bulk-tx-body" style="display:block;">
+                        <button class="btn btn-outline" id="g2bulk-tx-refresh-btn" onclick="loadG2BulkTransactions()" style="margin-bottom:10px;">Load / Refresh</button>
+                        <div id="g2bulk-tx-list"></div>
+                    </div>
+                </div>
+                <div id="api-tx-jcplays" style="display:none;">
+                    <button class="btn btn-outline" id="jcplays-tx-refresh-btn" onclick="loadJCPlaysTransactions()" style="margin-bottom:10px;">Refresh</button>
+                    <div id="jcplays-tx-list"></div>
+                </div>
             </div>
         </div>
 
@@ -4663,6 +4682,8 @@ html.perf-low [data-pcbg] *,html.perf-low [data-pcbg] *::before,html.perf-low [d
                     <button class="btn btn-primary" id="create-admin-btn" onclick="createNewAdmin()">Create Admin</button>
                 </div>
             </div>
+                
+            </div>
         </div>
 
         <!-- Telegram Link Modal: shows a short-lived 6-digit code the admin
@@ -4692,49 +4713,6 @@ html.perf-low [data-pcbg] *,html.perf-low [data-pcbg] *::before,html.perf-low [d
                     <button type="button" id="telegram-link-copy-btn" class="btn btn-outline" style="display:block;width:100%;margin-top:8px;" onclick="copyTelegramLinkCommand(this)">Copy /link</button>
                     <p id="telegram-link-nobot" style="display:none;font-size:11.5px;color:var(--text-muted);text-align:center;margin-top:10px;">Bot username မထည့်ရသေးလို့ Open ခလုတ်မပေါ်ပါ — Telegram ထဲက bot ကို ကိုယ်တိုင်ဖွင့်ပြီး အပေါ်က code ကို ပို့ပါ။ (Settings → Telegram → Bot Username ထည့်ရင် ခလုတ်ပေါ်ပါမယ်)</p>
                     <p id="telegram-link-status" style="font-size:12.5px;color:var(--text-secondary);text-align:center;margin-top:14px;">Waiting for code · expires in <span id="telegram-link-countdown">5:00</span></p>
-                </div>
-            </div>
-        </div>
-
-        <!-- JCPLAYS PAGE (SmileCoin-compatible reseller — same pattern as G2Bulk above) -->
-        <div id="jcplays" class="page-section">
-            <h2 class="title-header">JCPlays</h2>
-
-            <div class="admin-card" style="display:flex;justify-content:space-between;align-items:center;">
-                <div>
-                    <span style="font-size:15px;font-weight: 600;display:block;">JCPlays Balance</span>
-                    <span style="font-size:20px;font-weight: 600;color:var(--accent);" id="jcplays-balance-display">—</span>
-                </div>
-                <button class="btn btn-outline" style="flex:unset;padding:8px 14px;" id="jcplays-balance-refresh-btn" onclick="refreshJCPlaysBalance()">Refresh</button>
-            </div>
-
-            <div class="admin-card" style="margin-top:14px;">
-                <span style="font-size:13px;color:var(--text-secondary);background:var(--bg-subtle);padding:8px 10px;border-radius:8px;display:block;">
-                    Games linked with a JCPlays Product Code (in the game editor) and packages linked with a JCPlays Product ID will auto-fulfill from the Orders page, the same way G2Bulk-linked ones do. API credentials are managed from the <b>API</b> tab.
-                </span>
-            </div>
-        </div>
-
-        <!-- G2BULK PAGE (own sidebar tab, kept separate from Dashboard) -->
-        <div id="g2bulk" class="page-section">
-            <h2 class="title-header">G2Bulk</h2>
-
-            <div class="admin-card" style="display:flex;justify-content:space-between;align-items:center;">
-                <div>
-                    <span style="font-size:15px;font-weight: 600;display:block;">G2Bulk Wallet Balance</span>
-                    <span style="font-size:20px;font-weight: 600;color:var(--accent);" id="g2bulk-balance-display">—</span>
-                </div>
-                <button class="btn btn-outline" style="flex:unset;padding:8px 14px;" id="g2bulk-balance-refresh-btn" onclick="refreshG2BulkBalance()">Refresh</button>
-            </div>
-
-            <div class="admin-card" style="margin-top:14px;">
-                <div class="sc-head" onclick="toggleG2BulkTransactions()">
-                    <span class="sc-title">G2Bulk Transactions</span>
-                    <svg class="ui-icon sc-chevron" id="g2bulk-tx-chevron"><use href="#icon-chevron-down"></use></svg>
-                </div>
-                <div id="g2bulk-tx-body" style="display:none;margin-top:12px;">
-                    <button class="btn btn-outline" id="g2bulk-tx-refresh-btn" onclick="loadG2BulkTransactions()" style="margin-bottom:10px;">Load / Refresh</button>
-                    <div id="g2bulk-tx-list"></div>
                 </div>
             </div>
         </div>
@@ -5079,7 +5057,13 @@ html.perf-low [data-pcbg] *,html.perf-low [data-pcbg] *::before,html.perf-low [d
 
         <!-- NOTIFICATIONS PAGE (Firebase Connected) -->
         <div id="notify-list" class="page-section">
-            <h2 class="title-header">Send Notification</h2>
+            <h2 class="title-header">Notify &amp; Ticker</h2>
+            <div class="nt-seg" id="nt-seg">
+                <button type="button" class="on" data-nt="notify" onclick="ntTab('notify')">Notify</button>
+                <button type="button" data-nt="ticker" onclick="ntTab('ticker')">Ticker</button>
+            </div>
+            <div id="nt-pane-notify">
+            <h2 class="title-header nt-sub">Send Notification</h2>
             <div class="admin-card">
                 <label class="u-label">Send to</label>
                 <select id="notif-audience" onchange="onNotifAudienceChange()" style="width:100%;box-sizing:border-box;padding:10px;border:1px solid var(--border-glass);background:var(--bg-subtle-2);color:var(--text-primary);border-radius:12px;font-size:14px;font-family:inherit;margin:6px 0 12px;">
@@ -5125,6 +5109,21 @@ html.perf-low [data-pcbg] *,html.perf-low [data-pcbg] *::before,html.perf-low [d
             <h2 class="title-header" style="margin-top:20px;">Sent History</h2>
             <div id="notif-history-container">
                 <p class="empty-msg">Loading notifications...</p>
+            </div>
+            </div>
+            <div id="nt-pane-ticker" style="display:none;">
+            <div id="ticker-list">
+            <h2 class="title-header">Store Ticker</h2>
+            <div class="admin-card">
+                <label class="u-label">New message</label>
+                <input class="field field-full" type="text" id="ticker-text" placeholder="Enter Ticker Text" maxlength="120">
+                <button class="btn btn-primary" id="add-ticker-btn" onclick="addAnnouncement()">Add to Ticker</button>
+            </div>
+            <h2 class="title-header" style="margin-top:20px;">Current Messages</h2>
+            <div id="ticker-list-container">
+                <p class="empty-msg">Loading ticker messages...</p>
+            </div>
+            </div>
             </div>
         </div>
 
@@ -5831,19 +5830,6 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
 
         <!-- STORE TICKER PAGE (Firebase Connected) — short messages that scroll
              across the Store app's ticker bar, alongside real order activity. -->
-        <div id="ticker-list" class="page-section">
-            <h2 class="title-header">Store Ticker</h2>
-            <div class="admin-card">
-                <label class="u-label">New message</label>
-                <input class="field field-full" type="text" id="ticker-text" placeholder="Enter Ticker Text" maxlength="120">
-                <button class="btn btn-primary" id="add-ticker-btn" onclick="addAnnouncement()">Add to Ticker</button>
-            </div>
-            <h2 class="title-header" style="margin-top:20px;">Current Messages</h2>
-            <div id="ticker-list-container">
-                <p class="empty-msg">Loading ticker messages...</p>
-            </div>
-        </div>
-
         <!-- PAYMENT METHODS PAGE (Firebase Connected) -->
         <div id="payment-list" class="page-section">
             <h2 class="title-header"><span>Payment Methods</span> <button class="btn btn-primary btn-sm" onclick="openPaymentEditor()">+ Add</button></h2>
@@ -6051,27 +6037,57 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
                 <input type="hidden" id="edit-game-id">
 
                 <div class="ge-sec"><span class="ge-sec-dot"></span><b>Basic info</b><small>အမည် · အမျိုးအစား · ဖော်ပြချက်</small></div>
-                <div class="field-lock-row">
-                    <label>Game Name</label>
-                    <button type="button" class="field-lock-btn" id="edit-game-name-unlock-btn" onclick="unlockGameNameField()">
-                        <svg class="ui-icon"><use href="#icon-lock"></use></svg> Unlock to edit
-                    </button>
+                <div class="ge-trio">
+                    <div class="ge-f">
+                        <div class="field-lock-row">
+                            <label>Game Name</label>
+                            <button type="button" class="field-lock-btn" id="edit-game-name-unlock-btn" onclick="unlockGameNameField()">
+                                <svg class="ui-icon"><use href="#icon-lock"></use></svg> Unlock
+                            </button>
+                        </div>
+                        <input type="text" id="edit-game-name" placeholder="Game Name">
+                    </div>
+                    <div class="ge-f">
+                        <label>Server</label>
+                        <input type="text" id="edit-game-server-name" placeholder="Server Name">
+                    </div>
+                    <div class="ge-f">
+                        <label>Category</label>
+                        <input type="hidden" id="edit-game-category" value="">
+                        <div class="category-chip-select" id="game-category-select"></div>
+                    </div>
                 </div>
-                <input type="text" id="edit-game-name" placeholder="Enter Game Name">
-
-                <label>Server / Region <span class="u-muted">(optional)</span></label>
-                <input type="text" id="edit-game-server-name" placeholder="Enter Server Name">
                 <div id="server-variant-thumbs" style="display:none;"></div>
 
-                <label>Game Category</label>
-                <input type="hidden" id="edit-game-category" value="">
-                <div class="category-chip-select" id="game-category-select"></div>
+                <button type="button" class="ge-desc-btn" id="ge-desc-btn" onclick="geDescOpen()">
+                    <span class="ge-desc-ttl">Description</span>
+                    <span class="ge-desc-prev" id="ge-desc-prev">Tap to write</span>
+                    <svg class="ui-icon" style="width:14px;height:14px;"><use href="#icon-chevron-right"></use></svg>
+                </button>
+                <div class="ge-desc-pop" id="ge-desc-pop" onclick="if(event.target===this)geDescClose()">
+                    <div class="ge-desc-card">
+                        <div class="ge-desc-head"><b>Description</b><button type="button" class="btn btn-primary" onclick="geDescClose()">Done</button></div>
+                        <p class="u-muted" style="font-size:11px;margin:0 0 6px;">Customer တွေ game banner အောက်မှာ မြင်ရမယ့် စာ (optional)</p>
+                        <textarea id="edit-game-description" rows="4" placeholder="Enter Description" style="width:100%;padding:10px;border-radius:12px;border:1px solid var(--border-glass);background:var(--bg-subtle-2);color:var(--text-primary);font-size:14px;font-family:inherit;resize:vertical;box-sizing:border-box;"></textarea>
+                    </div>
+                </div>
 
-                <label>Description <span class="u-muted">(optional — shown to customers under the game banner)</span></label>
-                <textarea id="edit-game-description" rows="4" placeholder="Enter Description" style="width:100%;padding:10px;border-radius:12px;border:1px solid var(--border-glass);background:var(--bg-subtle-2);color:var(--text-primary);font-size:14px;font-family:inherit;resize:vertical;box-sizing:border-box;"></textarea>
+                <div class="ge-tgl-grid ge-tgl-list" id="ge-tgl-grid">
+                    <div class="ge-tgl ge-tgl-danger" title="Disable this game (delay / maintenance)"><span>Disable</span><label class="toggle-switch"><input type="checkbox" id="edit-game-disabled" onchange="onGameDisabledToggle()"><span class="toggle-slider"></span></label></div>
+                    <div class="ge-tgl" title="Mark as Popular"><span>Popular</span><label class="toggle-switch"><input type="checkbox" id="edit-game-popular"><span class="toggle-slider"></span></label></div>
+                    <div class="ge-tgl" id="ge-tgl-playerid" title="Requires Player ID"><span>Player ID</span><label class="toggle-switch"><input type="checkbox" id="edit-game-playerid" onchange="onPlayerIdRequiredToggle()"><span class="toggle-slider"></span></label></div>
+                    <div class="ge-tgl" id="requires-serverid-row" title="Requires Server ID"><span>Server ID</span><label class="toggle-switch"><input type="checkbox" id="edit-game-serverid" checked><span class="toggle-slider"></span></label></div>
+                </div>
+                <div id="edit-game-disabled-wrap" style="display:none;margin-bottom:12px;">
+                    <label>Reason shown to customers (top of the game's Description)</label>
+                    <textarea id="edit-game-disabled-reason" rows="2" style="width:100%;padding:10px;border-radius:12px;border:1px solid var(--border-glass);background:var(--bg-subtle-2);color:var(--text-primary);font-size:14px;font-family:inherit;resize:vertical;box-sizing:border-box;"></textarea>
+                </div>
 
+
+                <div id="ge-redeem-wrap">
                 <label>Redeem Link <span class="u-muted">(optional — "Redeem Now" button under the Description opens this link)</span></label>
                 <input type="text" id="edit-game-redeem-link" inputmode="url" autocapitalize="off" autocomplete="off" spellcheck="false" style="width:100%;padding:10px;border-radius:12px;border:1px solid var(--border-glass);background:var(--bg-subtle-2);color:var(--text-primary);font-size:14px;font-family:inherit;box-sizing:border-box;">
+                </div>
 
                 <!-- App deep-link fields: purely optional. When set, Store.html
                      shows a "Game ဖွင့်မယ်" button on the game detail page and
@@ -6094,18 +6110,6 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
                     <input type="text" id="edit-game-app-ios-scheme" placeholder="Enter iOS Scheme">
                     <label>iOS Store URL</label>
                     <input type="text" id="edit-game-app-ios-store-url" placeholder="Enter App Store URL">
-                </div>
-
-                <div class="ge-sec"><span class="ge-sec-dot"></span><b>Status &amp; visibility</b></div>
-                <div class="ge-tgl-grid" id="ge-tgl-grid">
-                    <div class="ge-tgl" title="Disable this game (delay / maintenance)"><span>Disable</span><label class="toggle-switch"><input type="checkbox" id="edit-game-disabled" onchange="onGameDisabledToggle()"><span class="toggle-slider"></span></label></div>
-                    <div class="ge-tgl" title="Mark as Popular"><span>Popular</span><label class="toggle-switch"><input type="checkbox" id="edit-game-popular"><span class="toggle-slider"></span></label></div>
-                    <div class="ge-tgl" id="ge-tgl-playerid" title="Requires Player ID"><span>Player ID</span><label class="toggle-switch"><input type="checkbox" id="edit-game-playerid" onchange="onPlayerIdRequiredToggle()"><span class="toggle-slider"></span></label></div>
-                    <div class="ge-tgl" id="requires-serverid-row" title="Requires Server ID"><span>Server ID</span><label class="toggle-switch"><input type="checkbox" id="edit-game-serverid" checked><span class="toggle-slider"></span></label></div>
-                </div>
-                <div id="edit-game-disabled-wrap" style="display:none;margin-bottom:12px;">
-                    <label>Reason shown to customers (top of the game's Description)</label>
-                    <textarea id="edit-game-disabled-reason" rows="2" style="width:100%;padding:10px;border-radius:12px;border:1px solid var(--border-glass);background:var(--bg-subtle-2);color:var(--text-primary);font-size:14px;font-family:inherit;resize:vertical;box-sizing:border-box;"></textarea>
                 </div>
 
                 <input type="hidden" id="edit-game-pcbg" value="">
@@ -7051,6 +7055,10 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
             'events-page': 'group-setting', 'festival-page': 'group-setting', 'usage-page': 'group-setting', 'settings': 'group-setting', 'notify-list': 'group-setting', 'ticker-list': 'group-setting'
         };
         function showPage(pageId) {
+            // Merged pages: G2Bulk / JCPlays now live inside API Balance, Ticker inside Notify.
+            let __ntTab = null;
+            if (pageId === 'g2bulk' || pageId === 'jcplays') pageId = 'analytics';
+            if (pageId === 'ticker-list') { pageId = 'notify-list'; __ntTab = 'ticker'; }
             const previousPageId = document.querySelector('.page-section.active')?.id || null;
             document.querySelectorAll('.page-section').forEach(p => p.classList.remove('active'));
             document.querySelectorAll('.nav-item').forEach(m => m.classList.remove('active'));
@@ -7068,6 +7076,7 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
             if (['dashboard', 'overview-analytics', 'order-list'].includes(pageId) && window.loadDashboardStats) window.loadDashboardStats();
             if (pageId === 'payin-list' && window.loadPayins) window.loadPayins();
             if (pageId === 'analytics' && window.renderAnalytics) window.renderAnalytics();
+            if (pageId === 'analytics' && window.apiTxTab) { const __on = document.querySelector('#api-tx-seg button.on'); window.apiTxTab(__on ? __on.dataset.tx : 'g2bulk'); }
             if (pageId === 'usage-page' && window.LinnUsage) window.LinnUsage.render();
             // Cloudflare/Firestore usage no longer auto-loads (saves Worker requests); use the Refresh buttons.
             if (pageId === 'g2bulk' && window.refreshG2BulkBalance) window.refreshG2BulkBalance();
@@ -7075,6 +7084,7 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
             unsubscribeTabListeners(previousPageId, pageId);
             subscribeTabListeners(pageId);
             syncSubNav(pageId);
+            if (__ntTab && window.ntTab) window.ntTab(__ntTab);
         }
 
         // ---------- Lazy tab listeners ----------
@@ -7126,7 +7136,7 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
             // window.closeTabListener(key) instead; each call is isolated so one failure can't
             // stop the page switch.
             const close = (key) => { try { if (window.closeTabListener) window.closeTabListener(key); } catch (e) { console.error('closeTabListener', key, e); } };
-            if (prevPageId === 'ticker-list' && nextPageId !== 'ticker-list') close('ticker');
+            if (prevPageId === 'notify-list' && nextPageId !== 'notify-list') close('ticker');
             if (prevPageId === 'payment-list' && nextPageId !== 'payment-list') close('payment');
             if (prevPageId === 'topup-list' && nextPageId !== 'topup-list') close('topups');
             if (prevPageId === 'settings' && nextPageId !== 'settings') close('social');
@@ -7138,17 +7148,14 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
         // one visited, else its first). The pages inside the group show as a
         // second row (#sub-nav) - no pop-up picker, so every page is 1-2 taps.
         const NAV_SUBPAGES = {
-            dashboard: [ { label: 'Dashboard', page: 'dashboard' }, { label: 'Analytics', page: 'overview-analytics' }, { label: 'API Balance', page: 'analytics' } ],
+            dashboard: [ { label: 'Dashboard', page: 'dashboard' }, { label: 'Analytics', page: 'overview-analytics' }, { label: 'API Balance', page: 'analytics', dotId: 'g2bulk-nav-low-dot' } ],
             wallet:    [ { label: 'Users', page: 'user-list' }, { label: 'Tiers', page: 'tier-list' },
                          { label: 'Payment', page: 'payment-list' }, { label: 'Top Up', page: 'topup-list' }, { label: 'Phone Pay', page: 'payin-list' } ],
             store:     [ { label: 'Event', page: 'events-page', pref: 'pref-hide-events' }, { label: 'Theme', page: 'festival-page', pref: 'pref-hide-theme' } ],
             setting:   [ { label: 'General', page: 'settings' },
-                         { label: 'G2Bulk', page: 'g2bulk', dotId: 'g2bulk-nav-low-dot' },
-                         { label: 'JCPlays', page: 'jcplays', dotId: 'jcplays-nav-low-dot' },
+                         { label: 'Notify & Ticker', page: 'notify-list' },
                          { label: 'API Keys', page: 'api-docs' },
                          { label: 'Usage', page: 'usage-page' },
-                         { label: 'Ticker', page: 'ticker-list' },
-                         { label: 'Notify', page: 'notify-list' },
                          { label: 'Event', page: 'events-page', pref: 'pref-hide-events' }, { label: 'Theme', page: 'festival-page', pref: 'pref-hide-theme' } ]
         };
         const NAV_HOME_PAGE = { dashboard: 'dashboard', wallet: 'user-list', store: 'events-page', setting: 'settings' };
@@ -14498,7 +14505,7 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
                 const mCls = minM === null ? '' : (minM < MIN_PROFIT_MARGIN_PCT ? 'gm-bad' : (minM < LOW_MARGIN_THRESHOLD_PCT ? 'gm-warn' : 'gm-ok'));
                 const mTxt = minM === null ? '—' : minM.toFixed(1) + '%';
                 return `
-                    <div class="game-row" id="game-card-${id}" onclick="openGameActionSheet('${id}')">
+                    <div class="game-row" id="game-card-${id}" onclick="openGameEditor('${id}')">
                         <div class="game-row-thumb"><img src="${g.image}" loading="lazy" decoding="async" alt="${escapeHtml(g.name)}"></div>
                         <div class="game-row-info">
                             <div class="game-row-name">${escapeHtml(g.name)}${countBadge}<span class="game-margin-dot" id="game-margin-dot-${id}" style="display:none"></span></div>
@@ -14518,6 +14525,7 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
         function openGameActionSheet(gameId) {
             const g = GAMES[gameId];
             if (!g) return;
+            if (typeof openGameEditor === 'function') { openGameEditor(gameId); return; } // go straight into the editor (Delete lives there)
             gameActionSheetId = gameId;
             document.getElementById('game-action-sheet-title').innerText = g.name;
             document.getElementById('game-action-sheet-img').src = g.image;
@@ -15878,7 +15886,8 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
 
         function renderPkgTabBar() {
             const bar = document.getElementById('pkg-tab-bar');
-            if (bar) { bar.innerHTML = ''; bar.style.display = 'none'; return; } // tabs merged: one combined package list
+            if (!bar) return;
+            bar.style.display = '';
             const rows = Array.from(document.querySelectorAll('#edit-packages-list .package-row'));
             const countFor = (tabId) => rows.filter(r => r.dataset.tab === tabId).length;
             const allTabs = ['currency', 'package', ...customPkgTabs];
@@ -15903,8 +15912,10 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
             const rows = Array.from(document.querySelectorAll('#edit-packages-list .package-row'));
             let visibleCount = 0;
             rows.forEach(row => {
-                row.style.display = ''; // all tabs merged into one list
-                visibleCount++;
+                const inTab = row.dataset.tab === currentPkgTab;
+                // a row whose details card is open stays in the DOM flow so its overlay isn't hidden with it
+                row.style.display = (inTab || row.classList.contains('editing')) ? '' : 'none';
+                if (inTab) visibleCount++;
             });
             document.getElementById('pkg-tab-empty-msg').style.display = visibleCount === 0 ? 'block' : 'none';
             renumberPackageRows();
@@ -17326,7 +17337,12 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
                         null, p.badge || '', p.costUsd || ''
                     );
                 });
+                {   // open on the first tab that actually has packages
+                    const __rows = Array.from(document.querySelectorAll('#edit-packages-list .package-row'));
+                    if (__rows.length && !__rows.some(r => r.dataset.tab === currentPkgTab)) currentPkgTab = __rows[0].dataset.tab;
+                }
                 renderPkgTabBar();
+                applyPackageTabFilter();
                 // If this game name has more than one server variant, show
                 // which one is currently open right in the title — makes it
                 // obvious you're editing Malaysia's prices and not Global's
@@ -22442,6 +22458,45 @@ return `
             }
         }
         window.loadG2BulkTransactions = loadG2BulkTransactions;
+
+        // ---------- API Balance: Transactions (G2Bulk API + JCPlays from this store's own orders) ----------
+        function apiTxTab(which) {
+            document.querySelectorAll('#api-tx-seg button').forEach(b => b.classList.toggle('on', b.dataset.tx === which));
+            const g = document.getElementById('api-tx-g2bulk'), j = document.getElementById('api-tx-jcplays');
+            if (g) g.style.display = which === 'g2bulk' ? '' : 'none';
+            if (j) j.style.display = which === 'jcplays' ? '' : 'none';
+            if (which === 'g2bulk' && !g2bulkTxLoaded && G2BULK_SETTINGS.apiKey) loadG2BulkTransactions();
+            if (which === 'jcplays') loadJCPlaysTransactions();
+        }
+        window.apiTxTab = apiTxTab;
+
+        async function loadJCPlaysTransactions() {
+            const listEl = document.getElementById('jcplays-tx-list');
+            if (!listEl) return;
+            try { if (window.ensureOrdersLoaded) await window.ensureOrdersLoaded(); } catch (e) {}
+            const rows = Object.values(ORDERS || {}).filter(o => o && o.jcplaysOrderId)
+                .sort((a, b) => ((b.confirmedAt && b.confirmedAt.seconds) || 0) - ((a.confirmedAt && a.confirmedAt.seconds) || 0)).slice(0, 30);
+            if (!rows.length) { listEl.innerHTML = '<p class="empty-msg">No JCPlays orders yet.</p>'; return; }
+            listEl.innerHTML = rows.map(o => {
+                const d = o.confirmedAt && o.confirmedAt.seconds ? new Date(o.confirmedAt.seconds * 1000).toLocaleString() : '';
+                const title = escapeHtml(String(o.gameName || o.game || o.jcplaysProduct || 'JCPlays order'));
+                const sub = escapeHtml(String(o.packageName || o.package || o.jcplaysProductId || ''));
+                return `<div class="tx-row"><div class="tx-row-icon" style="background:var(--danger-soft);"><svg class="ui-icon" style="stroke:var(--danger-strong);"><use href="#icon-trending-up"></use></svg></div>
+                    <div class="tx-row-info"><span class="tx-row-title">${title}</span><span class="tx-row-sub">${d}${d && sub ? ' · ' : ''}${sub} · #${escapeHtml(String(o.jcplaysOrderId))}</span></div></div>`;
+            }).join('');
+        }
+        window.loadJCPlaysTransactions = loadJCPlaysTransactions;
+
+        // ---------- Notify & Ticker merged page ----------
+        function ntTab(which) {
+            document.querySelectorAll('#nt-seg button').forEach(b => b.classList.toggle('on', b.dataset.nt === which));
+            const n = document.getElementById('nt-pane-notify'), t = document.getElementById('nt-pane-ticker');
+            if (n) n.style.display = which === 'notify' ? '' : 'none';
+            if (t) t.style.display = which === 'ticker' ? '' : 'none';
+            if (which === 'ticker') { if (window.listenAnnouncementsAdmin) window.listenAnnouncementsAdmin(); }
+            else { try { if (window.closeTabListener) window.closeTabListener('ticker'); } catch (e) {} }
+        }
+        window.ntTab = ntTab;
 
         // ---------- G2Bulk game catalogue import ----------
 
@@ -29224,9 +29279,9 @@ html body .pkg-summary-name{font-size:13px!important}
 <script id="lg-preview-v5-js">
 (function(){
   var MORE=[
-    ['Finance',[['Top-up requests','topup-list'],['Phone payments','payin-list'],['Payment methods','payment-list'],['Tiers','tier-list'],['API Balance','analytics']]],
-    ['Store',[['Theme & banners','festival-page'],['Events & festivals','events-page'],['Notifications','notify-list'],['Ticker','ticker-list']]],
-    ['Settings',[['General','settings'],['G2Bulk','g2bulk'],['JCPlays','jcplays'],['API keys','api-docs'],['Usage','usage-page']]]
+    ['Money',[['API Balance','analytics'],['Top-up requests','topup-list'],['Phone payments','payin-list'],['Payment methods','payment-list']]],
+    ['Store',[['Notify & Ticker','notify-list'],['Theme & banners','festival-page'],['Events & festivals','events-page']]],
+    ['Settings',[['General','settings'],['API keys','api-docs'],['Usage','usage-page']]]
   ];
   var PV_IC={'topup-list':'<path d="M12 3v12M7 10l5 5 5-5"/><path d="M5 20h14"/>','payin-list':'<rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/>','payment-list':'<rect x="2" y="5" width="20" height="14" rx="3"/><path d="M2 10h20"/>','tier-list':'<path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/>','analytics':'<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>','festival-page':'<circle cx="13.5" cy="6.5" r="2"/><circle cx="17.5" cy="10.5" r="2"/><circle cx="8.5" cy="7.5" r="2"/><path d="M12 22a10 10 0 1 1 10-10c0 2.5-2 3-4 3h-2a2 2 0 0 0-1 3.7c.6.4.5 1.4-.2 1.9-.9.9-1.8 1.4-2.8 1.4z"/>','events-page':'<rect x="3" y="4" width="18" height="17" rx="3"/><path d="M8 2v4M16 2v4M3 10h18"/>','notify-list':'<path d="M6 16v-5a6 6 0 1 1 12 0v5l1.5 2h-15z"/><path d="M10 21h4"/>','ticker-list':'<path d="M3 11v3a1 1 0 0 0 1 1h3l8 4V6L7 10H4a1 1 0 0 0-1 1z"/><path d="M19 9a4 4 0 0 1 0 6"/>','settings':'<path d="M4 6h10M18 6h2M4 12h2M10 12h10M4 18h12M20 18h0"/><circle cx="16" cy="6" r="2"/><circle cx="8" cy="12" r="2"/><circle cx="18" cy="18" r="2"/>','g2bulk':'<path d="M13 2L4 14h7l-1 8 9-12h-7z"/>','jcplays':'<rect x="2" y="7" width="20" height="12" rx="5"/><path d="M7 11v4M5 13h4M16 12h.01M18 14h.01"/>','api-docs':'<circle cx="8" cy="15" r="4"/><path d="M11 12l9-9M16 7l3 3"/>','usage-page':'<path d="M5 20V11M12 20V4M19 20v-7"/>'};
 var MORE_PAGES={};MORE.forEach(function(g){g[1].forEach(function(i){MORE_PAGES[i[1]]=1;});});
@@ -29806,5 +29861,207 @@ html body #dashboard #stat-orders-delta-wrap{display:none !important}
 html body #overview-analytics .dashboard-charts-row{display:block !important}
 html body #overview-analytics .pulse-card{margin-top:0}
 </style>
+<style id="soft-glass-final">
+@layer soft-glass{
+
+
+html body{--sf-bg:rgba(255,255,255,.58) !important;--sf-bg2:rgba(255,255,255,.42) !important;--sf-bd:rgba(255,255,255,.7) !important;--sf-sh:0 8px 28px rgba(60,72,120,.10),0 1px 0 rgba(255,255,255,.8) inset !important;--sf-blur:18px !important}
+
+html[data-theme]:not([data-theme="light"]) body{--sf-bg:rgba(255,255,255,.07) !important;--sf-bg2:rgba(255,255,255,.05) !important;--sf-bd:rgba(255,255,255,.13) !important;--sf-sh:0 8px 28px rgba(0,0,0,.28),0 1px 0 rgba(255,255,255,.08) inset !important}
+
+html body{background:radial-gradient(60% 40% at 12% 0%,rgba(124,92,255,.16),transparent 70%),radial-gradient(50% 40% at 100% 20%,rgba(56,189,248,.14),transparent 70%),var(--bg-app)!important;background-attachment:fixed!important}
+
+html body :is(.admin-card,.stat-card,.api-doc-card,.tx-row):not(.kpi-hero){background:var(--sf-bg)!important;border:1px solid var(--sf-bd)!important;box-shadow:var(--sf-sh)!important;-webkit-backdrop-filter:blur(var(--sf-blur)) saturate(1.4) !important;backdrop-filter:blur(var(--sf-blur)) saturate(1.4) !important;border-radius:20px !important}
+
+html body .tx-row{border-radius:14px !important;box-shadow:none!important}
+
+html body :is(.top-nav-wrap,.sub-nav){-webkit-backdrop-filter:blur(22px) saturate(1.5) !important;backdrop-filter:blur(22px) saturate(1.5) !important}
+
+html body #sub-nav .sub-nav-item:not(.active){background:var(--sf-bg2)!important;border:1px solid var(--sf-bd)!important;-webkit-backdrop-filter:blur(12px) !important;backdrop-filter:blur(12px) !important}
+
+html body #sub-nav .sub-nav-item.active{box-shadow:0 6px 16px rgba(var(--accent-rgb,79,70,229),.28) !important}
+
+html body .modal-box{background:var(--sf-bg)!important;border:1px solid var(--sf-bd)!important;box-shadow:0 20px 60px rgba(30,40,90,.22)!important;-webkit-backdrop-filter:blur(26px) saturate(1.5) !important;backdrop-filter:blur(26px) saturate(1.5) !important}
+
+html body .modal-overlay{-webkit-backdrop-filter:blur(6px) !important;backdrop-filter:blur(6px) !important}
+
+html body :is(input.field,select,textarea){background:var(--sf-bg2)!important;border:1px solid var(--sf-bd)!important;border-radius:14px!important;transition:box-shadow .2s,border-color .2s !important}
+
+html body :is(input.field,select,textarea):focus{outline:0 !important;border-color:var(--accent)!important;box-shadow:0 0 0 3px rgba(var(--accent-rgb,79,70,229),.15) !important}
+
+
+#pv-more{background:rgba(20,26,50,.28)!important;-webkit-backdrop-filter:blur(8px) !important;backdrop-filter:blur(8px) !important}
+
+#pv-more .pv-box{background:var(--sf-bg)!important;border:1px solid var(--sf-bd) !important;border-bottom:0 !important;box-shadow:0 -12px 40px rgba(30,40,90,.18) !important;-webkit-backdrop-filter:blur(28px) saturate(1.6) !important;backdrop-filter:blur(28px) saturate(1.6) !important}
+
+#pv-more .pv-grp{background:var(--sf-bg2)!important;border:1px solid var(--sf-bd)!important;border-radius:18px !important;box-shadow:var(--sf-sh) !important}
+
+#pv-more h4{margin:12px 6px 6px !important}
+
+
+.nt-seg{display:flex !important;gap:4px !important;padding:4px !important;margin:0 0 14px !important;border-radius:999px !important;background:var(--sf-bg2) !important;border:1px solid var(--sf-bd) !important;-webkit-backdrop-filter:blur(14px) !important;backdrop-filter:blur(14px) !important}
+
+.nt-seg button{flex:1 !important;border:0 !important;background:transparent !important;color:var(--text-secondary) !important;font:600 13px/1 inherit !important;font-family:inherit !important;padding:10px 12px !important;border-radius:999px !important;cursor:pointer !important;transition:background .2s,color .2s,box-shadow .2s !important}
+
+.nt-seg button.on{background:var(--accent) !important;color:#fff !important;box-shadow:0 6px 16px rgba(var(--accent-rgb,79,70,229),.3) !important}
+
+.title-header.nt-sub{margin-top:4px !important}
+
+
+
+
+html:root body:not(#_sg):not(#_sf):not(#_sf2) .stat-card.kpi-hero{background:linear-gradient(135deg,#4F46E5,#7C73F2)!important;border:0!important;color:#fff!important;box-shadow:0 12px 26px -12px rgba(79,70,229,.55)!important}
+
+html:root body:not(#_sg):not(#_sf):not(#_sf2) .stat-card.kpi-hero *{color:#fff!important}
+
+
+html body :is(.dash-section-label,.detail-section-title,.chart-card-head h4,.an-head,.od-card-title,.od-card-title-text,.pcbg-sec-cap,.fulfill-group-label,.pkg-actions-label,.qj-sec,.tuc-title,.wtx-title,.pulse-head,.od-day-head,.api-doc-title,.sc-title,.dialog-title,.svt-label,.hb-pick-label,.cal2-month-title,.u-label,.stat-card-label,.pkg-summary-label){background:none!important;border:0!important;border-left:0!important;border-radius:0!important;padding:0!important;box-shadow:none!important;color:var(--text-muted)!important;font-size:11.5px!important;font-weight:600!important;letter-spacing:.4px !important}
+
+html body .dash-section-label{margin:16px 2px 8px!important}
+
+html body .title-header{border-left:0!important;background:none!important;padding-left:0!important;font-size:19px!important;color:var(--text-primary)!important}
+
+html body .title-header.nt-sub{font-size:14px!important}
+
+html body .stat-card-value{font-size:20px!important}
+
+
+html body #game-editor-page :is(.ge-idx,.tab-fold-row){display:none!important}
+
+html body #game-editor-page .ge-sec{pointer-events:none !important;cursor:default !important;min-height:0!important;margin:18px 2px 6px!important;padding:0!important;background:none!important;border:0!important;border-radius:0!important;box-shadow:none!important}
+
+html body #game-editor-page .ge-sec::after{display:none!important}
+
+html body #game-editor-page .ge-sec b{font-size:12px!important;font-weight:700!important;text-transform:uppercase!important;letter-spacing:.6px!important;color:var(--text-muted)!important;background:none!important;border:0!important;padding:0!important}
+
+html body #game-editor-page .ge-sec small{display:none!important}
+
+html body #game-editor-page .ge-sec.ge-closed+.ge-body{display:flex!important}
+
+html body #game-editor-page .ge-body{padding:12px!important;border-radius:16px!important;background:var(--sf-bg)!important;border:1px solid var(--sf-bd)!important;box-shadow:var(--sf-sh) !important;-webkit-backdrop-filter:blur(16px) !important;backdrop-filter:blur(16px) !important}
+
+html body #game-editor-page :is(.ge-body label,.ge-body input,.ge-body select,.ge-body textarea,.ge-body .btn,.picker-btn-label){font-size:12.5px!important}
+
+html body #game-editor-page .modal-header h3{font-size:18px!important}
+
+
+html:root body:not(#_sg):not(#_sf):not(#_sf2) .package-row{border-radius:10px!important;box-shadow:none!important;border:1px solid var(--sf-bd)!important;background:var(--sf-bg)!important;margin:0 0 5px!important;min-height:0!important;align-items:center!important}
+
+html body .package-row .pkg-order-col{flex:0 0 auto!important;width:auto!important;flex-direction:row!important;padding:0 2px 0 4px!important;background:none!important;border:0!important}
+
+html body .package-row .pkg-move-btn{display:none!important}
+
+html body .package-row .pkg-drag-handle{flex-direction:row!important;gap:2px !important;padding:0 4px!important;min-height:0!important}
+
+html body .package-row .pkg-drag-handle svg{width:11px!important;height:11px!important}
+
+html body .package-row .pkg-order-num{font-size:10px!important}
+
+html body .package-row .pkg-summary{display:flex!important;flex-direction:row!important;align-items:center!important;flex-wrap:nowrap!important;gap:6px!important;padding:6px 8px 6px 2px!important;min-height:34px!important}
+
+html body .package-row :is(.pkg-summary-head,.pkg-summary-body){display:contents!important;border:0!important;padding:0!important}
+
+html body .package-row .pkg-summary-label{order:1 !important;flex:1 1 auto!important;min-width:0!important;gap:4px!important;font-size:12px!important}
+
+html body .package-row :is(.pkg-summary-thumb,.pkg-summary-dot){display:none!important}
+
+html body .package-row .pkg-summary-name{display:block!important;-webkit-line-clamp:unset!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis !important;font-size:12px!important;font-weight:600!important}
+
+html body .package-row .pkg-summary-badge-tag{font-size:8px!important;padding:0 4px!important}
+
+html body .package-row .pkg-summary-value{order:2 !important;flex:0 0 auto!important;max-width:none!important;padding:2px 6px!important;border-radius:6px!important;background:none!important}
+
+html body .package-row :is(.pkg-summary-price-text){font-size:11.5px!important}
+
+html body .package-row .pkg-summary-price-unit{font-size:9px!important}
+
+html body .package-row .pkg-summary-actions{order:3 !important;flex:0 0 auto!important;gap:4px!important}
+
+html body .package-row .pkg-summary-profit{font-size:10px!important;padding:1px 5px!important;border-radius:6px!important}
+
+html body .package-row .pkg-summary-remove{padding:0 2px!important}
+
+html body .package-row .pkg-summary-remove svg{width:13px!important;height:13px!important}
+
+html:root body:not(#_sg):not(#_sf):not(#_sf2) .stat-card.kpi-hero{background:linear-gradient(135deg,#4F46E5,#7C73F2)!important;color:#fff!important;border:0!important}
+
+html:root body:not(#_sg):not(#_sf):not(#_sf2) .package-row :is(.pkg-summary){background:none!important}
+
+
+html:root body:not(#_sg):not(#_sf):not(#_sf2) .package-row{border:1px solid var(--sf-bd) !important;background:var(--sf-bg) !important;margin:0 0 5px !important}
+html body .package-row .pkg-summary-label{font-size:12px !important;color:var(--text-primary) !important}
+
+/* ---- performance: no scroll-fixed background, blur only on the two fixed bars ---- */
+html body{background-attachment:scroll !important}
+html body *,html body *::before,html body *::after{-webkit-backdrop-filter:none !important;backdrop-filter:none !important}
+html body .top-nav-wrap,html body .header{-webkit-backdrop-filter:blur(12px) !important;backdrop-filter:blur(12px) !important}
+html body .page-section.active{animation:none !important}
+/* ---- package details popup: solid, and name + auto-fulfill side by side at the top ---- */
+html body .pkg-card-overlay{background:rgba(15,23,42,.5) !important}
+html body .pkg-card{background:var(--surface-strong,#fff) !important;opacity:1 !important;display:grid !important;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px !important;align-content:start;padding:14px !important}
+html body .pkg-card > *{grid-column:1/-1;min-width:0}
+html body .pkg-card .pkg-card-header{order:0;font-size:13px !important}
+html body .pkg-card .pkg-row-top{order:1;grid-column:1 !important}
+html body .pkg-card .pkg-provider-row{order:2;grid-column:2 !important}
+html body .pkg-card .pkg-provider-row label{display:none !important}
+html body .pkg-card :is(.pkg-g2bulk,.pkg-jcplays,.pkg-voucher-id,.pkg-fazercard,.pkg-fazercard-giftcard-id){order:3;grid-column:1/-1 !important}
+html body .pkg-card .pkg-row-media{order:4}
+html body .pkg-card .pkg-row-pricing{order:5}
+html body .pkg-card .pkg-stock-badge{order:6}
+html body .pkg-card .pkg-card-footer{order:7}
+html body .pkg-card :is(input,select){font-size:12.5px !important;min-height:36px;padding:6px 8px !important}
+html body .pkg-card .pkg-row-top input{width:100%}
+
+html:root body:not(#_sg) .header{top:6px !important;margin-top:6px !important}
+html body #game-editor-page .ge-trio{display:grid !important;grid-template-columns:1fr 1fr 1fr !important;gap:8px !important;align-items:start !important}
+html body #game-editor-page .ge-trio .ge-f{min-width:0 !important}
+html body #game-editor-page .ge-trio label{font-size:11px !important;margin:0 0 4px !important;white-space:nowrap !important}
+html body #game-editor-page .ge-trio input[type=text]{width:100% !important;min-width:0 !important;box-sizing:border-box !important;padding:8px 8px !important;font-size:12.5px !important}
+html body #game-editor-page .ge-trio .field-lock-row{display:flex !important;align-items:center !important;justify-content:space-between !important;gap:4px !important;margin:0 0 4px !important}
+html body #game-editor-page .ge-trio .field-lock-btn{font-size:9.5px !important;padding:2px 5px !important;gap:2px !important}
+html body #game-editor-page .ge-trio .field-lock-btn svg{width:10px !important;height:10px !important}
+html body #game-editor-page .ge-trio .category-chip-select{min-width:0 !important;font-size:12px !important}
+html body #game-editor-page .ge-desc-btn{display:flex !important;align-items:center !important;gap:8px !important;width:100% !important;padding:10px 12px !important;border-radius:12px !important;border:1px solid var(--sf-bd) !important;background:var(--sf-bg2) !important;color:var(--text-primary) !important;font:inherit !important;font-size:12.5px !important;cursor:pointer !important;text-align:left !important}
+html body #game-editor-page .ge-desc-ttl{font-weight:700 !important;flex:0 0 auto !important}
+html body #game-editor-page .ge-desc-prev{flex:1 !important;min-width:0 !important;color:var(--text-muted) !important;white-space:nowrap !important;overflow:hidden !important;text-overflow:ellipsis !important;font-size:12px !important}
+html body #game-editor-page .ge-desc-prev.has{color:var(--text-secondary) !important}
+html body .ge-desc-pop{display:none !important;position:fixed !important;inset:0 !important;z-index:400 !important;align-items:center !important;justify-content:center !important;padding:16px !important;background:rgba(15,23,42,.5) !important}
+html body .ge-desc-pop.open{display:flex !important}
+html body .ge-desc-card{width:100% !important;max-width:440px !important;background:var(--surface-strong,#fff) !important;border-radius:20px !important;padding:14px !important;box-shadow:0 24px 60px rgba(0,0,0,.3) !important}
+html body .ge-desc-head{display:flex !important;align-items:center !important;justify-content:space-between !important;margin-bottom:6px !important}
+html body .ge-desc-head .btn{flex:unset !important;padding:6px 14px !important;min-height:0 !important;font-size:12.5px !important}
+html body .ge-desc-card textarea{width:100% !important;min-height:160px !important;box-sizing:border-box !important;font-size:14px !important}
+html body #game-editor-page .udp-back{white-space:nowrap !important;width:fit-content !important}
+html body #game-editor-page .ge-tgl-list{display:flex !important;flex-direction:column;gap:0;grid-template-columns:none !important;margin:6px 0 !important}
+html body #game-editor-page .ge-tgl-list .ge-tgl{flex-direction:row !important;justify-content:space-between !important;align-items:center;padding:10px 2px !important;border:0 !important;border-bottom:1px solid var(--sf-bd) !important;border-radius:0 !important;background:none !important;box-shadow:none !important;gap:10px}
+html body #game-editor-page .ge-tgl-list .ge-tgl:last-child{border-bottom:0 !important}
+html body #game-editor-page .ge-tgl-list .ge-tgl > span{font-size:13px !important;max-width:none !important;color:var(--text-primary) !important}
+html body #game-editor-page .ge-tgl-danger > span{color:#dc2626 !important}
+html body #game-editor-page #edit-game-disabled:checked + .toggle-slider{background:#ef4444 !important}
+html body #game-editor-page #edit-game-disabled + .toggle-slider{box-shadow:0 0 0 1px rgba(239,68,68,.35) !important}
+html body .pkg-tab-bar{display:flex !important;gap:6px !important;flex-wrap:nowrap !important;overflow-x:auto;padding:4px 0 8px !important;margin:0 0 8px !important;background:none !important;border:0 !important;scrollbar-width:none}
+html body .pkg-tab-bar:empty{display:none !important}
+html body .pkg-tab-btn{flex:0 0 auto !important;height:30px !important;min-height:0 !important;padding:0 12px !important;font-size:12px !important;border-radius:999px !important}
+html body .pkg-tab-add-btn{flex:0 0 auto !important;width:30px !important;height:30px !important;border-radius:999px !important}
+}
+</style>
+
+<script id="ge-desc-redeem-js">
+(function(){
+  function el(i){return document.getElementById(i);}
+  window.geDescOpen=function(){var p=el('ge-desc-pop');if(!p)return;p.classList.add('open');var t=el('edit-game-description');if(t)setTimeout(function(){try{t.focus();}catch(e){}},50);};
+  window.geDescClose=function(){var p=el('ge-desc-pop');if(p)p.classList.remove('open');sync();};
+  var VOUCHER=['g2bulk_voucher','jcplays','fazercard_giftcard','voucher_manual'];
+  function sync(){
+    var t=el('edit-game-description'),pv=el('ge-desc-prev');
+    if(t&&pv){var v=(t.value||'').trim().replace(/\s+/g,' ');var txt=v?v.slice(0,70):'Tap to write';if(pv.textContent!==txt)pv.textContent=txt;pv.classList.toggle('has',!!v);}
+    var w=el('ge-redeem-wrap');
+    if(w){var a=document.querySelector('#game-editor-page .pkg-type-tab.active[data-provider]');
+      var isVoucher=a?VOUCHER.indexOf(a.getAttribute('data-provider'))>-1:false;
+      var d=isVoucher?'':'none';if(w.style.display!==d)w.style.display=d;}
+  }
+  setInterval(function(){var p=el('game-editor-page');if(p&&p.classList.contains('active'))sync();},700);
+})();
+</script>
 </body>
 </html>
