@@ -3651,6 +3651,9 @@ html.perf-low [data-pcbg] *,html.perf-low [data-pcbg] *::before,html.perf-low [d
             <span id="header-clock-date" hidden>--</span>
         </div>
         <div class="row-center">
+            <span id="hdr-cost-dot" title="Cost updating…" hidden></span>
+            <div id="hdr-batt" title="Battery" hidden><svg viewBox="0 0 24 12" aria-hidden="true"><rect x="0.8" y="0.8" width="19" height="10.4" rx="2.4" fill="none" stroke="currentColor" stroke-width="1.4"/><rect id="hdr-batt-fill" x="2.4" y="2.4" width="0" height="7.2" rx="1.2" fill="currentColor"/><rect x="21" y="3.8" width="2" height="4.4" rx="1" fill="currentColor"/></svg><span id="hdr-batt-pct">--</span><i id="hdr-batt-bolt" hidden>⚡</i></div>
+            <div id="hdr-net" title="Network" hidden><span id="hdr-net-type">--</span><b id="hdr-net-ping">--</b></div>
             <div class="conn-status" id="conn-status" title="Connecting">
                 <span class="conn-dot conn-connecting" id="conn-dot"></span>
                 <span class="conn-label" id="conn-label">Connecting</span>
@@ -4857,7 +4860,7 @@ html.perf-low [data-pcbg] *,html.perf-low [data-pcbg] *::before,html.perf-low [d
             <!-- Status tabs: filter the list below; counts follow the day / search / game filters -->
             <div class="seg-tabs" id="order-status-tabs" role="tablist">
                 <button type="button" class="seg-tab active" data-s="all" data-no-busy onclick="setOrderStatus('all')">All <b>0</b></button>
-                <button type="button" class="seg-tab" data-s="Pending" data-no-busy onclick="setOrderStatus('Pending')">Pending <b>0</b></button>
+                <button type="button" class="seg-tab" data-s="Pending" data-no-busy onclick="setOrderStatus('Pending')">Waiting <b>0</b></button>
                 <button type="button" class="seg-tab" data-s="Processing" data-no-busy onclick="setOrderStatus('Processing')">Processing <b>0</b></button>
                 <button type="button" class="seg-tab" data-s="late" data-no-busy onclick="setOrderStatus('late')">Late <b>0</b></button>
                 <button type="button" class="seg-tab" data-s="Success" data-no-busy onclick="setOrderStatus('Success')">Completed <b>0</b></button>
@@ -4971,7 +4974,7 @@ html.perf-low [data-pcbg] *,html.perf-low [data-pcbg] *::before,html.perf-low [d
 
             <div class="seg-tabs" id="topup-status-tabs" role="tablist">
                 <button type="button" class="seg-tab active" data-s="All" data-no-busy onclick="switchTopupTab('All')">All <b>0</b></button>
-                <button type="button" class="seg-tab" data-s="Pending" data-no-busy onclick="switchTopupTab('Pending')">Pending <b>0</b></button>
+                <button type="button" class="seg-tab" data-s="Pending" data-no-busy onclick="switchTopupTab('Pending')">Waiting <b>0</b></button>
                 <button type="button" class="seg-tab" data-s="Processing" data-no-busy onclick="switchTopupTab('Processing')">Processing <b>0</b></button>
                 <button type="button" class="seg-tab" data-s="Completed" data-no-busy onclick="switchTopupTab('Completed')">Completed <b>0</b></button>
                 <button type="button" class="seg-tab" data-s="Rejected" data-no-busy onclick="switchTopupTab('Rejected')">Rejected <b>0</b></button>
@@ -5888,18 +5891,16 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
                     <div class="details-grid-item"><span>Total Orders</span><b id="ud-order-count-h">0</b></div>
                     <div class="details-grid-item"><span>Total Spent</span><b id="ud-total-spent-h">0 MMK</b></div>
                     <div class="details-grid-item"><span>Wallet Balance</span><b id="ud-wallet-balance-h" style="color:var(--accent);">0 MMK</b></div>
-                    <div class="details-grid-item"><span>Last Seen</span><b id="ud-last-seen-h">N/A</b></div>
+                    <div class="details-grid-item"><span>Last Seen <em id="ud-presence-chip" class="ud-pchip">--</em></span><b id="ud-last-seen-h">N/A</b></div>
                 </div>
             </div>
 
             <div class="udp-tabs">
                 <button type="button" class="udp-tab active" data-tab="info" onclick="switchUserDetailTab('info')">User Info</button>
                 <button type="button" class="udp-tab" data-tab="registered" onclick="switchUserDetailTab('registered')">User Registered</button>
-                <button type="button" class="udp-tab" data-tab="loginlist" onclick="switchUserDetailTab('loginlist')">Login List</button>
-                <button type="button" class="udp-tab" data-tab="orders" onclick="switchUserDetailTab('orders')">Order List</button>
-                <button type="button" class="udp-tab" data-tab="topup" onclick="switchUserDetailTab('topup')">Top Up List</button>
-                <button type="button" class="udp-tab" data-tab="txns" onclick="switchUserDetailTab('txns')">Transactions</button>
-                <button type="button" class="udp-tab" data-tab="logintime" onclick="switchUserDetailTab('logintime')">Login Time</button>
+                <button type="button" class="udp-tab" data-tab="txns" onclick="switchUserDetailTab('txns')">Orders &amp; Txns</button>
+                                                <button type="button" class="udp-tab" data-tab="topup" onclick="switchUserDetailTab('topup')">Top Up List</button>
+                <button type="button" class="udp-tab" data-tab="logintime" onclick="switchUserDetailTab('logintime')">Login</button>
             </div>
 
             <!-- User Info -->
@@ -5908,6 +5909,7 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
                     <div class="details-grid-item"><span>Phone</span><b id="ud-phone">N/A</b></div>
                     <div class="details-grid-item"><span>Telegram ID</span><b id="ud-telegram-id" style="word-break:break-all;">N/A</b></div>
                     <div class="details-grid-item"><span>Telegram Username</span><b id="ud-telegram-username">N/A</b></div>
+                    <div class="details-grid-item"><span>Telegram Bot</span><b id="ud-telegram-bot">N/A</b></div>
                     <div class="details-grid-item"><span>Favorite Game</span><b id="ud-fav-game">N/A</b></div>
                 </div>
 
@@ -5918,7 +5920,7 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
                 </div>
 
                 <div class="details-grid" style="grid-template-columns:repeat(4,1fr);margin-top:12px;">
-                    <div class="details-grid-item" style="padding:8px;"><span>Pending</span><b id="ud-count-pending">0</b></div>
+                    <div class="details-grid-item" style="padding:8px;"><span>Waiting</span><b id="ud-count-pending">0</b></div>
                     <div class="details-grid-item" style="padding:8px;"><span>Processing</span><b id="ud-count-processing">0</b></div>
                     <div class="details-grid-item" style="padding:8px;"><span>Success</span><b id="ud-count-success">0</b></div>
                     <div class="details-grid-item" style="padding:8px;"><span>Fail</span><b id="ud-count-fail">0</b></div>
@@ -5936,7 +5938,7 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
                         <div class="details-grid-item"><span>Authenticator</span><b id="ud-sec-totp">...</b></div>
                         <div class="details-grid-item" style="grid-column:1/-1;"><span>Wrong-try lock</span><b id="ud-sec-lock">...</b></div>
                     </div>
-                    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;">
+                    <div class="ud-act3" style="margin-top:8px;">
                         <button type="button" class="btn btn-outline" id="ud-sec-btn-pin" onclick="adminResetSecurity('pin')">Reset PIN</button>
                         <button type="button" class="btn btn-outline" id="ud-sec-btn-totp" onclick="adminResetSecurity('totp')">Reset Authenticator</button>
                         <button type="button" class="btn btn-danger" id="ud-sec-btn-both" onclick="adminResetSecurity('both')">Reset Both</button>
@@ -5949,7 +5951,7 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
                 <button class="btn btn-outline" style="margin-top:8px;padding:7px 14px;font-size:12px;" onclick="saveUserAdminNote()">Save Note</button>
 
                 <button class="btn btn-primary" style="width:100%;margin-top:20px;" onclick="messageCurrentUser()">Send Message (Store + Telegram)</button>
-                <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;">
+                <div class="ud-act3" style="margin-top:10px;">
                     <button class="btn btn-outline" id="ud-admin-btn" onclick="toggleStoreAdminCurrentUser()">Set as Admin</button>
                     <button class="btn btn-outline" id="ud-ban-btn" onclick="toggleBanCurrentUser()">Ban User</button>
                     <button class="btn btn-danger" onclick="deleteCurrentUser()">Delete User</button>
@@ -5969,19 +5971,6 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
                 </div>
             </div>
 
-            <!-- Login List -->
-            <div class="udp-tab-content" id="udp-tab-loginlist">
-                <div id="ud-loginlist-container">
-                    <p class="empty-msg">No login records yet.</p>
-                </div>
-            </div>
-
-            <!-- Order List -->
-            <div class="udp-tab-content" id="udp-tab-orders">
-                <div id="ud-orders-container">
-                    <p class="empty-msg">No orders yet.</p>
-                </div>
-            </div>
 
             <!-- Transactions (deposits / withdrawals / purchases) -->
             <div class="udp-tab-content" id="udp-tab-txns">
@@ -5992,7 +5981,11 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
                     <button type="button" class="wtx-chip" data-f="buy" onclick="setUserTxnFilter('buy')">Purchases</button>
                     <button type="button" class="wtx-chip" onclick="refreshUserTxnsIfOpen()"><svg class="ui-icon ic-i" viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-refresh"></use></svg>Refresh</button>
                 </div>
+                <p class="ud-note">Last 7 days only &middot; older entries are cleared from this view automatically.</p>
+                <h3 class="detail-section-title ud-sub">Transactions</h3>
                 <div id="ud-txn-container"><p class="empty-msg">No transactions yet.</p></div>
+                <h3 class="detail-section-title ud-sub">Orders</h3>
+                <div id="ud-orders-container"><p class="empty-msg">No orders yet.</p></div>
             </div>
 
             <!-- Top Up List -->
@@ -6007,6 +6000,9 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
                 <div class="details-grid">
                     <div class="details-grid-item"><span>Last Login</span><b id="ud-lt-last-login">N/A</b></div>
                     <div class="details-grid-item"><span>Joined</span><b id="ud-lt-joined">N/A</b></div>
+                </div>
+                <div id="ud-loginlist-container" style="margin-top:10px;">
+                    <p class="empty-msg">No login records yet.</p>
                 </div>
             </div>
         </div>
@@ -6178,7 +6174,7 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
                     </div>
                 </div>
 
-                <div class="ge-sec"><span class="ge-sec-dot"></span><b>Fulfillment</b><small>Provider ချိတ်ဆက်မှု</small></div>
+                <div class="ge-sec ge-fulfill-sec"><span class="ge-sec-dot"></span><b>Fulfillment</b><small>Provider ချိတ်ဆက်မှု</small></div>
                 <div style="margin:4px 0 2px;padding:12px;background:var(--fill-soft);border-radius:12px;border:1px solid var(--fill-soft);">
                     <p style="font-size:11px;font-weight: 600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.3px;margin-bottom:8px;">Auto-Fulfillment (optional)</p>
 
@@ -13749,7 +13745,7 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
             const rc = rate >= 80 ? '#10B981' : '#F59E0B';
             host.innerHTML =
                 card('Orders · ' + OV.label, '<button type="button" class="btn btn-outline btn-xs" onclick="openOrderSheet()">Sheet Image</button>',
-                    `<div class="ov-tiles">${tile('Orders', total.toLocaleString())}${tile('Success rate', rate + '%', rc)}${tile('Pending / Processing', st.Pending + ' / ' + st.Processing)}${tile('Failed', st.Fail.toLocaleString(), st.Fail ? '#EF4444' : '')}</div><div class="ov-track ov-rate"><div style="width:${rate}%;background:${rc};"></div></div>`) +
+                    `<div class="ov-tiles">${tile('Orders', total.toLocaleString())}${tile('Success rate', rate + '%', rc)}${tile('Waiting / Processing', st.Pending + ' / ' + st.Processing)}${tile('Failed', st.Fail.toLocaleString(), st.Fail ? '#EF4444' : '')}</div><div class="ov-track ov-rate"><div style="width:${rate}%;background:${rc};"></div></div>`) +
                 card('By payment method', '<small>Success revenue</small>', bars(pay, 5)) +
                 card('By provider', '', bars(prov, 4)) +
                 card('By game', '<small>Top 8</small>', bars(games, 8)) +
@@ -13880,7 +13876,7 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
             m.innerHTML = `<div style="flex:1;min-height:0;display:flex;flex-direction:column;background:var(--surface);border:1px solid var(--border-glass);border-radius:20px;overflow:hidden;">
                 <div style="display:flex;align-items:center;gap:8px;padding:12px;flex-wrap:wrap;">
                     <span id="os-seg" style="display:flex;gap:4px;"><button type="button" data-r="today" onclick="osSetRange('today')">Today</button><button type="button" data-r="weekly" onclick="osSetRange('weekly')">Weekly</button></span>
-                    <select id="os-status" onchange="osSetStatus(this.value)" style="padding:7px 8px;border:1px solid var(--border-glass);border-radius:10px;background:var(--bg-subtle-2);color:var(--text-primary);font-size:12px;"><option>All</option><option>Success</option><option>Pending</option><option>Processing</option><option>Fail</option></select>
+                    <select id="os-status" onchange="osSetStatus(this.value)" style="padding:7px 8px;border:1px solid var(--border-glass);border-radius:10px;background:var(--bg-subtle-2);color:var(--text-primary);font-size:12px;"><option>All</option><option>Success</option><option value="Pending">Waiting</option><option>Processing</option><option>Fail</option></select>
                     <span style="flex:1;"></span>
                     <button class="btn btn-primary" style="flex:unset;padding:7px 14px;font-size:12px;" onclick="osDownload()">Download</button>
                     <button class="btn btn-outline" style="flex:unset;padding:7px 12px;font-size:12px;" onclick="document.getElementById('os-modal').remove()" aria-label="Close"><svg class="ui-icon ic-i" viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-close"></use></svg></button>
@@ -17344,6 +17340,7 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
             editingBannerImageUrls = [];
             editingImageRemoteUrl = null;
             document.getElementById('edit-game-id').value = gameId || '';
+            { const _gp = document.getElementById('game-editor-page'); if (_gp) _gp.classList.toggle('ge-editing', !!gameId); }
             unlockGameNameField();
             document.getElementById('edit-packages-list').innerHTML = '';
             resetPackageTabs();
@@ -19036,8 +19033,11 @@ return `
             if (!currentUserDetailsId) return;
             const u = USERS[currentUserDetailsId]; const el = document.getElementById('ud-last-seen-h');
             if (!u || !el) return;
-            el.innerText = presenceTextFull(u);
-            el.style.color = isUserOnline(u) ? '#16A34A' : '';
+            const on = isUserOnline(u), ms = lastSeenMs(u);
+            const chip = document.getElementById('ud-presence-chip');
+            if (chip) { chip.textContent = on ? 'Online' : 'Offline'; chip.classList.toggle('on', on); }
+            el.innerText = on ? 'Active now' : (ms ? `${new Date(ms).toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })} (${agoText(ms)})` : 'N/A');
+            el.style.color = on ? '#16A34A' : '';
         }
         function toggleUserOnlineOnly() { userOnlineOnly = !userOnlineOnly; userCardNodes.clear(); const c = document.getElementById('admin-users-container'); if (c) c.innerHTML = ''; renderAdminUsersList(); }
         window.toggleUserOnlineOnly = toggleUserOnlineOnly;
@@ -19115,40 +19115,26 @@ return `
 
         function buildUserCardInnerHtml(id, u, agg) {
             const displayName = (u.name && u.name.trim()) ? u.name.trim() : (u.guestId || id);
-            const orderCount = agg.count;
-            const spend = agg.spend;
-            const tier = tierForSpendAdmin(spend);
+            const tier = tierForSpendAdmin(agg.spend);
             return `
-                <div class="ugc-top">
-                    ${presenceChipHtml(u)}
-                    <span class="badge ${u.banned ? 'badge-danger' : 'badge-success'}">${statusBadgeHtml(u.banned ? 'badge-danger' : 'badge-success', u.banned ? 'Banned' : 'Active')}</span>
-                    ${u.storeAdmin === true ? '<span class="badge badge-warning" style="margin-left:6px;" title="Sees package cost in the Store">Admin</span>' : ''}
-                </div>
-                <div class="ugc-identity">
-                    <div class="user-avatar" style="width:48px;height:48px;flex-shrink:0;">
+                <div class="ugc2">
+                    <div class="user-avatar ugc2-av">
                         ${u.photo ? `<img src="${escapeHtml(u.photo)}" loading="lazy" decoding="async">` : `<svg class="ui-icon" style="width:20px;height:20px;"><use href="#icon-users"></use></svg>`}
                     </div>
-                    <div style="min-width:0;">
+                    <div class="ugc2-main">
                         <h5>${escapeHtml(displayName)} ${googleVerifiedBadgeHTML(u)}</h5>
                         <div class="ugc-id">ID: ${u.guestId || id} <svg class="ui-icon copy-id-btn" style="width:12px;height:12px;cursor:pointer;" onclick="copyUserId(event, '${u.guestId || id}')"><use href="#icon-copy"></use></svg></div>
-                        ${adminTierBadgeHTML(tier)}
+                        <div class="ugc2-tags">
+                            ${presenceChipHtml(u)}
+                            <span class="badge ${u.banned ? 'badge-danger' : 'badge-success'}">${statusBadgeHtml(u.banned ? 'badge-danger' : 'badge-success', u.banned ? 'Banned' : 'Active')}</span>
+                            ${u.storeAdmin === true ? '<span class="badge badge-warning" title="Sees package cost in the Store">Admin</span>' : ''}
+                            ${adminTierBadgeHTML(tier)}
+                        </div>
                     </div>
-                </div>
-                <div class="ugc-meta">
-                    <div class="ugc-meta-cell"><span>Orders</span><b>${orderCount}</b></div>
-                    <div class="ugc-meta-cell"><span>Wallet</span><b>${fmtMoney(u.walletBalance || 0)}</b></div>
-                </div>
-                <div class="ugc-contact">
-                    <svg class="ui-icon" style="width:14px;height:14px;color:var(--text-muted);"><use href="#icon-phone"></use></svg>
-                    ${escapeHtml(u.phone || 'No phone on file')}
-                </div>
-                <div class="ugc-contact">
-                    <svg class="ui-icon" style="width:14px;height:14px;color:var(--text-muted);"><use href="#icon-telegram"></use></svg>
-                    ${u.telegramId ? 'TG: ' + escapeHtml(String(u.telegramId)) + (u.telegramUsername ? ' (@' + escapeHtml(u.telegramUsername) + ')' : '') + (BOT_USERS[String(u.telegramId)] ? ' \u00b7 Bot \u2713' : '') : 'No Telegram linked'}
-                </div>
-                <div class="ugc-actions">
-                    <button type="button" class="btn btn-primary" onclick="openUserDetails('${id}')">Visit</button>
-                    <button type="button" class="btn btn-danger-outline" onclick="quickDeleteUser('${id}')">Delete</button>
+                    <div class="ugc2-side">
+                        <b>${fmtMoney(u.walletBalance || 0)}</b>
+                        <svg class="ui-icon" style="width:16px;height:16px;transform:rotate(-90deg);color:var(--text-muted);"><use href="#icon-chevron-down"></use></svg>
+                    </div>
                 </div>
             `;
         }
@@ -19231,6 +19217,7 @@ return `
                 if (!entry) {
                     const el = document.createElement('div');
                     el.className = 'user-grid-card';
+                    el.dataset.uid = id;
                     el.innerHTML = html;
                     entry = { el, html };
                     userCardNodes.set(id, entry);
@@ -19345,14 +19332,16 @@ return `
             const favGame = Object.keys(gameFreq).sort((a, b) => gameFreq[b] - gameFreq[a])[0];
             document.getElementById('ud-fav-game').innerText = favGame ? `${favGame} (${gameFreq[favGame]}x)` : 'N/A';
 
-            if (userOrders.length === 0) {
-                container.innerHTML = '<p class="empty-msg">No orders yet.</p>';
+            const _cut7 = Date.now() - 7 * 86400000;
+            const shownOrders = userOrders.filter(o => (o.timestamp && o.timestamp.toMillis ? o.timestamp.toMillis() : 0) >= _cut7);
+            if (shownOrders.length === 0) {
+                container.innerHTML = '<p class="empty-msg">No orders in the last 7 days.</p>';
                 return;
             }
 
             const badgeClassByStatus = { Pending: 'badge-pending', Processing: 'badge-processing', Success: 'badge-success', Fail: 'badge-danger' };
             const receiptHashCounts = buildReceiptHashCounts();
-            container.innerHTML = userOrders.map(o => {
+            container.innerHTML = shownOrders.map(o => {
                 const orderId = o.id;
                 const riskInfo = computeOrderRiskInfo(o, receiptHashCounts);
                 const dateStr = o.timestamp ? o.timestamp.toDate().toLocaleString() : 'Just now';
@@ -19437,6 +19426,7 @@ return `
             document.getElementById('ud-phone').innerText = u.phone || 'N/A';
             document.getElementById('ud-telegram-id').innerText = u.telegramId ? String(u.telegramId) : 'N/A';
             document.getElementById('ud-telegram-username').innerText = u.telegramUsername ? '@' + u.telegramUsername : 'N/A';
+            { const bEl = document.getElementById('ud-telegram-bot'); if (bEl) bEl.innerText = u.telegramId ? (BOT_USERS[String(u.telegramId)] ? 'Started \u2713' : 'Not started') : 'N/A'; }
             updateUserDetailPresence();
             document.getElementById('ud-join-date').innerText = joinDateStr;
             document.getElementById('ud-admin-note').value = u.adminNote || '';
@@ -19643,8 +19633,9 @@ return `
         function renderUserTxns() {
             const box = document.getElementById('ud-txn-container');
             if (!box) return;
-            const rows = _userTxnFilter === 'all' ? _userTxnRows : _userTxnRows.filter(r => r.type === _userTxnFilter);
-            if (!rows.length) { box.innerHTML = '<p class="empty-msg">No transactions yet.</p>'; return; }
+            const _c7 = Date.now() - 7 * 86400000;
+            const rows = (_userTxnFilter === 'all' ? _userTxnRows : _userTxnRows.filter(r => r.type === _userTxnFilter)).filter(r => r.at >= _c7);
+            if (!rows.length) { box.innerHTML = '<p class="empty-msg">No transactions in the last 7 days.</p>'; return; }
             const sign = { in: '+', out: '−', buy: '−' }, glyph = { in: '↓', out: '↑', buy: '•' };
             box.innerHTML = rows.map(r => `
                 <div class="wtx-row">
@@ -23038,7 +23029,7 @@ return `
         // (Success/Approved/Completed)→Completed, danger-class
         // (Fail/Rejected)→Failed.
         const ORDER_STATUS_DISPLAY_LABELS = {
-            Pending: 'Draft',
+            Pending: 'Waiting',
             Processing: 'In-progress',
             Success: 'Completed',
             Approved: 'Completed',
@@ -30395,6 +30386,331 @@ html:root:root[data-theme="dark-blue"] body:not(#_z):not(#_z):not(#_z){--surface
 html:root:root[data-theme="midnight-purple"] body:not(#_z):not(#_z):not(#_z){--surface:#171126!important;--surface-strong:#1D1631!important;--sf-bg:#171126!important;--sf-bg2:#1D1631!important;--sg-bg:#171126!important;--sg-bg-2:#1D1631!important}
 html:root:root[data-theme="ocean"] body:not(#_z):not(#_z):not(#_z){--surface:#0C1B22!important;--surface-strong:#10232C!important;--sf-bg:#0C1B22!important;--sf-bg2:#10232C!important;--sg-bg:#0C1B22!important;--sg-bg-2:#10232C!important}
 html:root body:not(#_z):not(#_z):not(#_z):not(#_z):not(#_z):not(#_z):not(#_z):not(#_z):not(#_z):not(#_z) .header,html:root body:not(#_z):not(#_z):not(#_z):not(#_z):not(#_z):not(#_z):not(#_z):not(#_z):not(#_z):not(#_z) .top-nav-wrap,html:root body:not(#_z):not(#_z):not(#_z):not(#_z):not(#_z):not(#_z):not(#_z):not(#_z):not(#_z):not(#_z) .top-nav-wrap .top-nav,html:root body:not(#_z):not(#_z):not(#_z):not(#_z):not(#_z):not(#_z):not(#_z):not(#_z):not(#_z):not(#_z) .modal-box,html:root body:not(#_z):not(#_z):not(#_z):not(#_z):not(#_z):not(#_z):not(#_z):not(#_z):not(#_z):not(#_z) .dialog-box,html:root body:not(#_z):not(#_z):not(#_z):not(#_z):not(#_z):not(#_z):not(#_z):not(#_z):not(#_z):not(#_z) .od-card,html:root body:not(#_z):not(#_z):not(#_z):not(#_z):not(#_z):not(#_z):not(#_z):not(#_z):not(#_z):not(#_z) .od-card-header,html:root body:not(#_z):not(#_z):not(#_z):not(#_z):not(#_z):not(#_z):not(#_z):not(#_z):not(#_z):not(#_z) .od-card-footer,html:root body:not(#_z):not(#_z):not(#_z):not(#_z):not(#_z):not(#_z):not(#_z):not(#_z):not(#_z):not(#_z) #game-editor-page .modal-footer,html:root body:not(#_z):not(#_z):not(#_z):not(#_z):not(#_z):not(#_z):not(#_z):not(#_z):not(#_z):not(#_z) .pkg-card,html:root body:not(#_z):not(#_z):not(#_z):not(#_z):not(#_z):not(#_z):not(#_z):not(#_z):not(#_z):not(#_z) .sub-nav,html:root body:not(#_z):not(#_z):not(#_z):not(#_z):not(#_z):not(#_z):not(#_z):not(#_z):not(#_z):not(#_z) .title-header{background-color:var(--surface-strong)!important}
+}
+</style>
+
+<style id="pkg-align-v1">
+/* Price list rows: fixed columns so index / name / price / profit / delete line up on every row */
+@layer soft-glass{
+html:root body:not(#_a):not(#_b):not(#_c):not(#_d):not(#_e):not(#_f):not(#_g):not(#_h):not(#_i) #edit-packages-list .package-row{padding-right:4px!important}
+html:root body:not(#_a):not(#_b):not(#_c):not(#_d):not(#_e):not(#_f):not(#_g):not(#_h):not(#_i) #edit-packages-list .package-row .pkg-order-col{flex:0 0 44px!important;width:44px!important;padding:0 0 0 6px!important;justify-content:flex-start!important}
+html:root body:not(#_a):not(#_b):not(#_c):not(#_d):not(#_e):not(#_f):not(#_g):not(#_h):not(#_i) #edit-packages-list .package-row .pkg-drag-handle{width:100%!important;justify-content:flex-start!important;align-items:center!important;gap:4px!important;padding:0!important}
+html:root body:not(#_a):not(#_b):not(#_c):not(#_d):not(#_e):not(#_f):not(#_g):not(#_h):not(#_i) #edit-packages-list .package-row .pkg-order-num{min-width:16px!important;text-align:right!important;font-size:11px!important;font-variant-numeric:tabular-nums!important}
+html:root body:not(#_a):not(#_b):not(#_c):not(#_d):not(#_e):not(#_f):not(#_g):not(#_h):not(#_i) #edit-packages-list .package-row .pkg-summary{gap:6px!important;padding:8px 6px 8px 4px!important}
+html:root body:not(#_a):not(#_b):not(#_c):not(#_d):not(#_e):not(#_f):not(#_g):not(#_h):not(#_i) #edit-packages-list .package-row .pkg-summary-name{text-align:left!important;font-weight:700!important}
+html:root body:not(#_a):not(#_b):not(#_c):not(#_d):not(#_e):not(#_f):not(#_g):not(#_h):not(#_i) #edit-packages-list .package-row .pkg-summary-value{display:inline-flex!important;align-items:baseline!important;justify-content:flex-end!important;gap:4px!important;min-width:104px!important;text-align:right!important}
+html:root body:not(#_a):not(#_b):not(#_c):not(#_d):not(#_e):not(#_f):not(#_g):not(#_h):not(#_i) #edit-packages-list .package-row .pkg-summary-price-text{font-variant-numeric:tabular-nums!important;text-align:right!important}
+html:root body:not(#_a):not(#_b):not(#_c):not(#_d):not(#_e):not(#_f):not(#_g):not(#_h):not(#_i) #edit-packages-list .package-row .pkg-summary-price-unit{display:inline-block!important;width:26px!important;text-align:left!important}
+html:root body:not(#_a):not(#_b):not(#_c):not(#_d):not(#_e):not(#_f):not(#_g):not(#_h):not(#_i) #edit-packages-list .package-row .pkg-summary-actions{gap:8px!important}
+html:root body:not(#_a):not(#_b):not(#_c):not(#_d):not(#_e):not(#_f):not(#_g):not(#_h):not(#_i) #edit-packages-list .package-row .pkg-summary-profit{display:inline-flex!important;align-items:center!important;justify-content:center!important;box-sizing:border-box!important;width:60px!important;padding:3px 0!important;font-variant-numeric:tabular-nums!important}
+html:root body:not(#_a):not(#_b):not(#_c):not(#_d):not(#_e):not(#_f):not(#_g):not(#_h):not(#_i) #edit-packages-list .package-row .pkg-summary-remove{display:inline-flex!important;align-items:center!important;justify-content:center!important;width:34px!important;height:34px!important;padding:0!important;box-sizing:border-box!important}
+
+/* Package popup: compact, name + catalogue side by side, no Auto-Fulfill row */
+html:root body:not(#_a):not(#_b):not(#_c):not(#_d):not(#_e):not(#_f):not(#_g):not(#_h):not(#_i) .pkg-card{padding:12px!important;gap:6px 8px!important}
+html:root body:not(#_a):not(#_b):not(#_c):not(#_d):not(#_e):not(#_f):not(#_g):not(#_h):not(#_i) .pkg-card .pkg-card-header{margin:0 0 2px!important;padding:0!important}
+html:root body:not(#_a):not(#_b):not(#_c):not(#_d):not(#_e):not(#_f):not(#_g):not(#_h):not(#_i) .pkg-card .pkg-provider-row{display:none!important}
+html:root body:not(#_a):not(#_b):not(#_c):not(#_d):not(#_e):not(#_f):not(#_g):not(#_h):not(#_i) .pkg-card .pkg-row-top{grid-column:1!important;order:1!important}
+html:root body:not(#_a):not(#_b):not(#_c):not(#_d):not(#_e):not(#_f):not(#_g):not(#_h):not(#_i) .pkg-card :is(.pkg-g2bulk,.pkg-jcplays,.pkg-voucher-id,.pkg-fazercard,.pkg-fazercard-giftcard-id){grid-column:2!important;order:2!important;width:100%!important;min-width:0!important;box-sizing:border-box!important}
+html:root body:not(#_a):not(#_b):not(#_c):not(#_d):not(#_e):not(#_f):not(#_g):not(#_h):not(#_i) .pkg-card .pkg-row-top input,html:root body:not(#_a):not(#_b):not(#_c):not(#_d):not(#_e):not(#_f):not(#_g):not(#_h):not(#_i) .pkg-card .pkg-row-top{min-width:0!important}
+html:root body:not(#_a):not(#_b):not(#_c):not(#_d):not(#_e):not(#_f):not(#_g):not(#_h):not(#_i) .pkg-card .pkg-row-media{order:4!important;gap:6px!important}
+html:root body:not(#_a):not(#_b):not(#_c):not(#_d):not(#_e):not(#_f):not(#_g):not(#_h):not(#_i) .pkg-card .pkg-row-pricing{order:5!important;gap:6px!important}
+html:root body:not(#_a):not(#_b):not(#_c):not(#_d):not(#_e):not(#_f):not(#_g):not(#_h):not(#_i) .pkg-card .pkg-card-footer{margin:0!important;padding:0!important}
+html:root body:not(#_a):not(#_b):not(#_c):not(#_d):not(#_e):not(#_f):not(#_g):not(#_h):not(#_i) .pkg-card :is(input,select){min-height:34px!important;padding:5px 8px!important}
+}
+
+/* header battery */
+#hdr-batt{display:inline-flex;align-items:center;gap:4px;font-size:11.5px;font-weight:700;color:var(--text-secondary);font-variant-numeric:tabular-nums;white-space:nowrap;flex-shrink:0}
+#hdr-batt[hidden]{display:none}
+#hdr-batt svg{width:20px;height:10px}
+#hdr-batt i{font-style:normal;font-size:10px}
+#hdr-batt.low{color:#e11d48}
+#hdr-batt.chg{color:#059669}
+
+/* header network type + ping */
+#hdr-net{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;color:var(--text-secondary);white-space:nowrap;flex-shrink:0;font-variant-numeric:tabular-nums}
+#hdr-net[hidden]{display:none}
+#hdr-net b{font-weight:700;padding:1px 5px;border-radius:6px;background:var(--fill-soft);color:#059669}
+#hdr-net.mid b{color:#d97706}
+#hdr-net.bad b{color:#e11d48}
+</style>
+
+<script id="hdr-batt-js">
+(function(){try{
+ if(!navigator.getBattery)return;
+ navigator.getBattery().then(function(b){
+  var box=document.getElementById('hdr-batt'),pct=document.getElementById('hdr-batt-pct'),fill=document.getElementById('hdr-batt-fill'),bolt=document.getElementById('hdr-batt-bolt');
+  if(!box)return;
+  function up(){var p=Math.round(b.level*100);pct.textContent=p+'%';fill.setAttribute('width',(16.2*b.level).toFixed(1));
+   box.classList.toggle('low',p<=20&&!b.charging);box.classList.toggle('chg',!!b.charging);bolt.hidden=!b.charging;box.hidden=false;}
+  up();['levelchange','chargingchange'].forEach(function(e){b.addEventListener(e,up)});
+ }).catch(function(){});
+}catch(e){}})();
+</script>
+
+<script id="hdr-net-js">
+(function(){
+ var box=document.getElementById('hdr-net'),tEl=document.getElementById('hdr-net-type'),pEl=document.getElementById('hdr-net-ping');
+ if(!box)return;
+ function typ(){var c=navigator.connection||navigator.mozConnection||navigator.webkitConnection;
+  if(!c)return '';
+  if(c.type==='wifi')return 'Wi-Fi';
+  if(c.type==='cellular')return 'Data '+(c.effectiveType?c.effectiveType.toUpperCase():'');
+  if(c.type==='ethernet')return 'LAN';
+  return c.effectiveType?c.effectiveType.toUpperCase():'';}
+ function ping(){
+  if(document.hidden)return;
+  tEl.textContent=typ();box.hidden=false;
+  var t0=performance.now();
+  fetch(location.pathname+'?_p='+Date.now(),{method:'HEAD',cache:'no-store'}).then(function(){
+   var ms=Math.round(performance.now()-t0);
+   pEl.textContent=ms+'ms';box.classList.toggle('mid',ms>=150&&ms<400);box.classList.toggle('bad',ms>=400);
+  }).catch(function(){pEl.textContent='off';box.classList.remove('mid');box.classList.add('bad');});
+ }
+ ping();setInterval(ping,5000);
+ document.addEventListener('visibilitychange',ping);
+ var c=navigator.connection;if(c&&c.addEventListener)c.addEventListener('change',ping);
+})();
+</script>
+
+<style id="ux-v4-css">
+@layer soft-glass{
+/* ---- compact user card ---- */
+html body .users-grid{gap:12px!important}
+html body .users-grid .user-grid-card{padding:14px 16px!important;border-top:1px solid rgba(var(--accent-rgb),.22)!important;background:var(--surface)!important;cursor:pointer;display:block!important;border-radius:18px!important}
+html body .user-grid-card .ugc2{display:flex;align-items:center;gap:14px}
+html body .user-grid-card .ugc2-av{width:46px!important;height:46px!important;flex-shrink:0}
+html body .user-grid-card .ugc2-main{flex:1;min-width:0}
+html body .user-grid-card .ugc2-main h5{font-size:15px!important;font-weight:600!important;margin:0!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+html body .user-grid-card .ugc2-main .ugc-id{margin-top:2px!important}
+html body .user-grid-card .ugc2-tags{display:flex;flex-wrap:wrap;align-items:center;gap:5px;margin-top:7px}
+html body .user-grid-card .ugc2-tags .badge{margin:0!important}
+html body .user-grid-card .ugc2-side{display:flex;flex-direction:column;align-items:flex-end;justify-content:space-between;align-self:stretch;gap:8px;flex-shrink:0}
+html body .user-grid-card .ugc2-side b{font-size:13px;font-weight:600;color:var(--text-strong);white-space:nowrap;font-variant-numeric:tabular-nums}
+html body .user-grid-card:active{transform:scale(.985)}
+
+/* ---- roomier layout ---- */
+html body .details-grid{gap:10px!important}
+html body .details-grid-item{padding:12px 14px!important}
+html body .udp-stat-grid{gap:10px!important}
+html body .udp-profile-card{padding:18px!important}
+html body .admin-card{padding:18px!important}
+html body .tx-row{padding-top:13px!important;padding-bottom:13px!important}
+html body .ud-act3{display:grid;grid-template-columns:repeat(auto-fit,minmax(104px,1fr));gap:10px}
+html body .ud-act3 > .btn{width:100%!important;min-width:0;height:44px;padding:0 10px!important;font-size:13px!important;white-space:nowrap}
+
+/* ---- every dialog / popup footer: same height, same width, same corner ---- */
+html body :is(.modal-footer,.dialog-actions,.od-card-footer,.pkg-card-footer,.ac-footer,.maint-actions,.th-actions,.cal2-actions,.wl-actions){display:flex!important;gap:10px!important;align-items:stretch!important}
+html body :is(.modal-footer,.dialog-actions,.od-card-footer,.pkg-card-footer,.ac-footer,.maint-actions,.th-actions,.cal2-actions,.wl-actions) > :is(.btn,button){flex:1 1 0!important;min-width:0!important;width:auto!important;height:46px!important;min-height:46px!important;padding:0 12px!important;font-size:14px!important;font-weight:600!important;border-radius:12px!important;white-space:nowrap;display:inline-flex!important;align-items:center;justify-content:center}
+html body .dialog-actions > .btn:only-child,html body .dialog-actions > .btn[style*="display: none"] ~ .btn{flex-basis:100%!important}
+html body .dialog-box{padding:22px 20px 18px!important}
+
+/* ---- scroll reveal ---- */
+@media (prefers-reduced-motion:reduce){html body .user-grid-card:active{transform:none}}
+
+/* ---- custom option sheet (replaces Chrome's native select popup) ---- */
+#cs-ov{position:fixed;inset:0;z-index:100000;background:rgba(15,23,42,.45);display:none;align-items:flex-end;justify-content:center;opacity:0;transition:opacity .2s ease}
+#cs-ov.show{display:flex}
+#cs-ov.in{opacity:1}
+#cs-sheet{width:100%;max-width:520px;max-height:72vh;display:flex;flex-direction:column;background:var(--surface-strong,#fff);color:var(--text-primary);border-radius:22px 22px 0 0;padding:8px 14px calc(14px + env(safe-area-inset-bottom));transform:translateY(100%);transition:transform .28s cubic-bezier(.2,.8,.25,1);box-shadow:0 -12px 40px rgba(0,0,0,.2)}
+#cs-ov.in #cs-sheet{transform:none}
+#cs-grab{width:38px;height:4px;border-radius:4px;background:var(--border-glass);margin:4px auto 10px}
+#cs-title{font-size:14px;font-weight:700;color:var(--text-strong);padding:0 4px 10px}
+#cs-list{overflow-y:auto;display:flex;flex-direction:column;gap:6px;-webkit-overflow-scrolling:touch}
+#cs-list button{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;min-height:46px;padding:0 14px;border:1px solid var(--border-glass);background:var(--bg-subtle-2);color:var(--text-primary);border-radius:12px;font:inherit;font-size:14px;text-align:left;cursor:pointer}
+#cs-list button.on{border-color:var(--accent);background:rgba(var(--accent-rgb),.1);color:var(--accent);font-weight:700}
+#cs-list button:active{transform:scale(.985)}
+#cs-list button[disabled]{opacity:.45}
+#cs-cancel{margin-top:10px;height:46px;border-radius:12px;border:1px solid var(--border-glass);background:none;color:var(--text-secondary);font:inherit;font-size:14px;font-weight:600;cursor:pointer}
+}
+</style>
+<script id="ux-v4-js">
+(function(){
+ /* 1) tap a user card -> details */
+ document.addEventListener('click',function(e){
+  var c=e.target.closest&&e.target.closest('.user-grid-card[data-uid]');
+  if(!c||e.target.closest('.copy-id-btn,a,button'))return;
+  if(window.openUserDetails)window.openUserDetails(c.dataset.uid);
+ });
+
+ /* 2) browser alert() -> toast (confirm/prompt are not used by this app) */
+ try{window.alert=function(m){if(window.showToast)window.showToast(String(m));else console.log(m);};}catch(e){}
+
+ /* 3) native <select> popup -> own bottom sheet */
+ var ov,sheet,list,title,cur;
+ function build(){
+  if(ov)return;
+  ov=document.createElement('div');ov.id='cs-ov';
+  ov.innerHTML='<div id="cs-sheet" role="dialog"><div id="cs-grab"></div><div id="cs-title"></div><div id="cs-list"></div><button type="button" id="cs-cancel">Cancel</button></div>';
+  document.body.appendChild(ov);
+  list=ov.querySelector('#cs-list');title=ov.querySelector('#cs-title');
+  ov.addEventListener('click',function(e){if(e.target===ov||e.target.id==='cs-cancel')close();});
+ }
+ function close(){if(!ov)return;ov.classList.remove('in');setTimeout(function(){ov.classList.remove('show');},230);cur=null;}
+ function open(sel){
+  build();cur=sel;
+  var lab=sel.id&&document.querySelector('label[for="'+sel.id+'"]');
+  var l=lab?lab.textContent.trim():(sel.closest('div')&&sel.closest('div').querySelector('label')?sel.closest('div').querySelector('label').textContent.trim():'');
+  title.textContent=l||'Select';title.style.display=l?'':'none';
+  list.innerHTML='';
+  Array.prototype.forEach.call(sel.options,function(o,i){
+   var b=document.createElement('button');b.type='button';b.disabled=o.disabled;
+   if(i===sel.selectedIndex)b.className='on';
+   b.innerHTML='<span></span><span>'+(i===sel.selectedIndex?'\u2713':'')+'</span>';
+   b.firstChild.textContent=o.textContent;
+   b.onclick=function(){sel.selectedIndex=i;sel.dispatchEvent(new Event('input',{bubbles:true}));sel.dispatchEvent(new Event('change',{bubbles:true}));close();};
+   list.appendChild(b);
+  });
+  ov.classList.add('show');requestAnimationFrame(function(){requestAnimationFrame(function(){ov.classList.add('in');var on=list.querySelector('.on');if(on)on.scrollIntoView({block:'center'});});});
+ }
+ function eligible(t){
+  var s=t&&t.closest&&t.closest('select');
+  if(!s||s.disabled||s.multiple||s.size>1||s.hasAttribute('data-native'))return null;
+  if(s.offsetParent===null&&getComputedStyle(s).position!=='fixed')return null;
+  return s;
+ }
+ ['mousedown','touchstart'].forEach(function(ev){document.addEventListener(ev,function(e){var s=eligible(e.target);if(s&&ev==='mousedown')e.preventDefault();},{capture:true,passive:false});});
+ document.addEventListener('click',function(e){var s=eligible(e.target);if(!s)return;e.preventDefault();e.stopPropagation();s.blur();open(s);},true);
+ document.addEventListener('keydown',function(e){if((e.key==='Enter'||e.key===' ')&&e.target.tagName==='SELECT'){var s=eligible(e.target);if(s){e.preventDefault();open(s);}}},true);
+
+ /* 4) scroll motion: cards rise in from the direction you scroll */
+ if(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+ if(!('IntersectionObserver' in window)||!Element.prototype.animate)return;
+ var SEL='.user-grid-card,.stat-card,.admin-card,.tx-row,.wtx-row,.tier-row,.package-row,.game-picker-card,.api-doc-card,.details-grid-item,.udp-profile-card,.switch-row,.od-row,.order-card';
+ var lastY=window.pageYOffset,dir=1,seen=new WeakSet();
+ window.addEventListener('scroll',function(){var y=window.pageYOffset;if(Math.abs(y-lastY)>1){dir=y>lastY?1:-1;lastY=y;}},{passive:true});
+ var io=new IntersectionObserver(function(es){
+  var n=0;
+  es.forEach(function(en){
+   var el=en.target;
+   if(!seen.has(el)){seen.add(el);el.__srIn=en.isIntersecting;return;}
+   if(en.isIntersecting&&!el.__srIn){
+    el.__srIn=true;
+    if(n<8)el.animate([{opacity:0,transform:'translateY('+(dir*18)+'px) scale(.985)'},{opacity:1,transform:'none'}],{duration:380,delay:n*35,easing:'cubic-bezier(.2,.8,.25,1)',fill:'backwards'});
+    n++;
+   }else if(!en.isIntersecting){el.__srIn=false;}
+  });
+ },{rootMargin:'0px 0px -4% 0px',threshold:0.06});
+ function scan(root){
+  if(!root||root.nodeType!==1)return;
+  if(root.matches&&root.matches(SEL))io.observe(root);
+  if(root.querySelectorAll)root.querySelectorAll(SEL).forEach(function(x){io.observe(x);});
+ }
+ scan(document.body);
+ new MutationObserver(function(ms){ms.forEach(function(m){m.addedNodes.forEach(scan);});}).observe(document.body,{childList:true,subtree:true});
+})();
+</script>
+
+<style id="input-vis-v1">
+@layer soft-glass{
+/* inputs: visible edge + soft fill so they never melt into the card behind them */
+html:root body :is(input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=file]):not([type=hidden]):not([type=color]):not([type=submit]):not([type=button]):not([type=image]),textarea,select){
+  background:color-mix(in srgb,var(--text-muted,#64748b) 9%,var(--surface-strong,#fff))!important;
+  border:1.5px solid color-mix(in srgb,var(--text-muted,#64748b) 38%,transparent)!important;
+  border-radius:12px!important;
+  color:var(--text-primary)!important;
+  box-sizing:border-box;
+  font-size:14px!important;
+  min-height:42px;
+  height:auto!important;
+  max-height:none;
+  padding-top:9px!important;padding-bottom:9px!important;
+  line-height:1.35!important;
+  box-shadow:inset 0 1px 2px rgba(15,23,42,.05)!important;
+  transition:border-color .15s ease,box-shadow .15s ease,background .15s ease;
+}
+html:root body textarea{min-height:76px;max-height:200px;resize:vertical}
+html:root body :is(input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=file]):not([type=hidden]):not([type=color]):not([type=submit]):not([type=button]):not([type=image]),textarea,select)::placeholder{color:var(--text-muted)!important;opacity:.85}
+html:root body :is(input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=file]):not([type=hidden]):not([type=color]):not([type=submit]):not([type=button]):not([type=image]),textarea,select):focus{border-color:var(--accent)!important;box-shadow:0 0 0 4px rgba(var(--accent-rgb),.16)!important;outline:none!important}
+html:root body :is(input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=file]):not([type=hidden]):not([type=color]):not([type=submit]):not([type=button]):not([type=image]),textarea,select)[readonly]:not(:focus){opacity:.78}
+html:root body :is(input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=file]):not([type=hidden]):not([type=color]):not([type=submit]):not([type=button]):not([type=image]),textarea,select):disabled{opacity:.55}
+/* keep the compact price-list / package popup sizes */
+html:root body .pkg-card :is(input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=file]):not([type=hidden]):not([type=color]):not([type=submit]):not([type=button]):not([type=image]),textarea,select){min-height:36px}
+html:root body #edit-packages-list :is(input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=file]):not([type=hidden]):not([type=color]):not([type=submit]):not([type=button]):not([type=image]),textarea,select){min-height:0}
+}
+</style>
+
+<style id="ud-compact-v1">
+@layer soft-glass{
+html body .udp-stat-grid{display:grid!important;grid-template-columns:1fr 1fr!important;gap:8px!important}
+html body :is(.udp-stat-grid,#udp-tab-info .details-grid,#udp-tab-logintime .details-grid) .details-grid-item{padding:8px 11px!important;border-radius:11px!important;min-height:0!important}
+html body :is(.udp-stat-grid,#udp-tab-info .details-grid,#udp-tab-logintime .details-grid) .details-grid-item span{font-size:9.5px!important;letter-spacing:.35px!important;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+html body :is(.udp-stat-grid,#udp-tab-info .details-grid,#udp-tab-logintime .details-grid) .details-grid-item b{font-size:12.5px!important;font-weight:600!important;line-height:1.3!important;margin-top:2px!important;display:block}
+html body .ud-pchip{font-style:normal;font-size:9px;font-weight:700;letter-spacing:.3px;padding:1px 6px;border-radius:999px;background:var(--fill-soft);color:var(--text-muted);text-transform:none}
+html body .ud-pchip.on{background:rgba(22,163,74,.14);color:#16A34A}
+html body .ud-note{font-size:11px;color:var(--text-muted);margin:0 0 8px}
+html body .ud-sub{margin:14px 0 8px!important;font-size:12px!important}
+}
+</style>
+
+<style id="square-tgl-v1">
+@layer soft-glass{
+/* Fulfillment is only for Add Game */
+html body #game-editor-page.ge-editing .ge-fulfill-sec,
+html body #game-editor-page.ge-editing .ge-fulfill-sec + .ge-body{display:none!important}
+
+/* square toggles everywhere */
+html body .toggle-slider{border-radius:6px!important}
+html body .toggle-slider:before{border-radius:4px!important}
+html body .pp-switch{border-radius:6px!important}
+html body .pp-switch i{border-radius:4px!important}
+html body #events-page .ea-sw i{border-radius:6px!important}
+html body #events-page .ea-sw i::after{border-radius:4px!important}
+html body input[type=checkbox][switch]{-webkit-appearance:none!important;appearance:none!important;position:relative;width:44px;height:24px;border-radius:6px!important;background:var(--fill-soft);border:1px solid var(--border-glass);cursor:pointer;transition:background .2s;flex-shrink:0;margin:0}
+html body input[type=checkbox][switch]::before{content:"";position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:4px;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.25);transition:transform .2s}
+html body input[type=checkbox][switch]:checked{background:var(--accent);border-color:var(--accent)}
+html body input[type=checkbox][switch]:checked::before{transform:translateX(20px)}
+}
+</style>
+
+<style id="cost-dot-v1">
+#hdr-cost-dot{width:10px;height:10px;border-radius:50%;background:#FACC15;box-shadow:0 0 0 3px rgba(250,204,21,.28);flex-shrink:0;animation:costDotPulse 1.1s ease-in-out infinite}
+#hdr-cost-dot[hidden]{display:none}
+@keyframes costDotPulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.45;transform:scale(.8)}}
+</style>
+<script id="cost-dot-js">
+(function(){
+ var dot=document.getElementById('hdr-cost-dot');if(!dot)return;
+ function sync(b){dot.hidden=!(b&&b.disabled);}
+ function hook(){
+  var b=document.getElementById('pkg-check-prices-btn');
+  if(!b||b.__costDot)return;b.__costDot=1;
+  new MutationObserver(function(){sync(b);}).observe(b,{attributes:true,attributeFilter:['disabled']});
+  sync(b);
+ }
+ hook();
+ new MutationObserver(hook).observe(document.body,{childList:true,subtree:true});
+})();
+</script>
+
+<style id="dots-loader-v1">
+@keyframes cdHop{0%,80%,100%{box-shadow:8px 0px 0 2px #EF4444,16px 0px 0 2px #22C55E,24px 0px 0 2px #3B82F6,32px 0px 0 2px #FACC15}15%{box-shadow:8px -6px 0 2px #EF4444,16px 0px 0 2px #22C55E,24px 0px 0 2px #3B82F6,32px 0px 0 2px #FACC15}30%{box-shadow:8px 0px 0 2px #EF4444,16px -6px 0 2px #22C55E,24px 0px 0 2px #3B82F6,32px 0px 0 2px #FACC15}45%{box-shadow:8px 0px 0 2px #EF4444,16px 0px 0 2px #22C55E,24px -6px 0 2px #3B82F6,32px 0px 0 2px #FACC15}60%{box-shadow:8px 0px 0 2px #EF4444,16px 0px 0 2px #22C55E,24px 0px 0 2px #3B82F6,32px -6px 0 2px #FACC15}}
+@keyframes cdHopS{0%,80%,100%{box-shadow:5px 0px 0 1px #EF4444,10px 0px 0 1px #22C55E,15px 0px 0 1px #3B82F6,20px 0px 0 1px #FACC15}15%{box-shadow:5px -3.5px 0 1px #EF4444,10px 0px 0 1px #22C55E,15px 0px 0 1px #3B82F6,20px 0px 0 1px #FACC15}30%{box-shadow:5px 0px 0 1px #EF4444,10px -3.5px 0 1px #22C55E,15px 0px 0 1px #3B82F6,20px 0px 0 1px #FACC15}45%{box-shadow:5px 0px 0 1px #EF4444,10px 0px 0 1px #22C55E,15px -3.5px 0 1px #3B82F6,20px 0px 0 1px #FACC15}60%{box-shadow:5px 0px 0 1px #EF4444,10px 0px 0 1px #22C55E,15px 0px 0 1px #3B82F6,20px -3.5px 0 1px #FACC15}}
+@layer soft-glass{
+/* red / green / blue / yellow hopping dots instead of spinning rings */
+html body :is(.lg-busy,.btn.busy,.btn.loading,.udp-update-btn.busy)::before{
+  content:""!important;display:inline-block!important;flex:0 0 auto!important;box-sizing:content-box!important;
+  width:1px!important;height:1px!important;border:0!important;border-radius:100px!important;background:none!important;
+  margin:0 38px 0 0!important;box-shadow:8px 0 0 2px #EF4444,16px 0 0 2px #22C55E,24px 0 0 2px #3B82F6,32px 0 0 2px #FACC15;
+  animation:cdHop .95s ease-in-out infinite!important}
+html body .lg-busy.lg-busy-ov::before{position:absolute!important;left:50%!important;top:50%!important;margin:0 0 0 -18px!important}
+html body .badge-spinner{display:inline-block!important;width:1px!important;height:1px!important;border:0!important;border-radius:100px!important;
+  margin:0 24px 0 0!important;box-shadow:5px 0 0 1px #EF4444,10px 0 0 1px #22C55E,15px 0 0 1px #3B82F6,20px 0 0 1px #FACC15;animation:cdHopS .95s ease-in-out infinite!important}
+html body #lg-ptr i{display:inline-block!important;width:1px!important;height:1px!important;border:0!important;border-radius:100px!important;
+  margin:0 36px 0 0!important;box-shadow:8px 0 0 2px #EF4444,16px 0 0 2px #22C55E,24px 0 0 2px #3B82F6,32px 0 0 2px #FACC15;animation:none!important}
+html body #lg-ptr.spin i{animation:cdHop .95s ease-in-out infinite!important}
+}
+@media (prefers-reduced-motion:reduce){
+ .lg-busy::before,.btn.busy::before,.btn.loading::before,.badge-spinner,#lg-ptr.spin i{animation:none!important}
+}
+</style>
+
+<style id="gl-fix-v1">
+@layer soft-glass{
+/* provider chip in list rows was absolutely positioned and jumped to the page corner: keep it inline in the row */
+html body #game-list .game-row-tags .prov-chips{position:static!important;display:inline-flex!important;flex-direction:row!important;flex-wrap:wrap!important;gap:4px!important;inset:auto!important;pointer-events:none}
+html body #game-list .game-row-tags .prov-chip{background:var(--fill-soft)!important;color:var(--text-secondary)!important}
+/* bottom nav room is already added by .content-area, so don't pad twice */
+html body .page-section{padding-bottom:12px!important}
 }
 </style>
 </body>
