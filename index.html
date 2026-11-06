@@ -1,6 +1,29 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<script id="perf-observer-batch">
+/* PERF v3: five page-wide MutationObservers each re-walked the whole list every time orders/users were re-rendered.
+   Page-wide ones now get their records merged and run once per ~80ms, skipping nodes that are already gone. */
+(function(){var N=window.MutationObserver;if(!N||N.__pb)return;
+function B(cb){var self=this,q=[],t=0,wide=false;
+ var o=new N(function(recs){
+  if(!wide){cb.call(self,recs,self);return;}
+  for(var i=0;i<recs.length;i++)q.push(recs[i]);
+  if(t)return;
+  t=setTimeout(function(){t=0;var r=q.filter(function(m){return m.target&&m.target.isConnected});q=[];if(r.length)cb.call(self,r,self);},80);
+ });
+ this.observe=function(el,opt){if((el===document.body||el===document.documentElement)&&opt&&opt.subtree)wide=true;return o.observe(el,opt);};
+ this.disconnect=function(){clearTimeout(t);t=0;q=[];o.disconnect();};
+ this.takeRecords=function(){var r=q.concat(o.takeRecords());q=[];return r;};
+}
+B.__pb=1;window.MutationObserver=B;
+/* background timers do nothing in a hidden tab (was only for >=5s timers) */
+var SI=window.setInterval;window.setInterval=function(fn,ms){
+ if(typeof fn==='function'&&ms>=1400){var a=[].slice.call(arguments,2);return SI.call(window,function(){if(!document.hidden)fn.apply(this,a);},ms);}
+ return SI.apply(window,arguments);};
+})();
+</script>
+
 <script id="lg-btn-js">
 (function () {
   'use strict';
@@ -30063,5 +30086,75 @@ html body .pkg-tab-add-btn{flex:0 0 auto !important;width:30px !important;height
   setInterval(function(){var p=el('game-editor-page');if(p&&p.classList.contains('active'))sync();},700);
 })();
 </script>
+<style id="perf-fix-v1">
+/* PERF: shimmer effects animated background-position, which forces a full repaint every frame
+   (main thread). Replaced with a cheap opacity pulse that runs on the GPU compositor. */
+@keyframes perfPulse{0%,100%{opacity:1}50%{opacity:.55}}
+html body .sk,html body img.sk-img,html body .sk-val,.lg-skel{
+  background:var(--fill-soft,rgba(120,130,160,.2))!important;background-size:auto!important;
+  animation:none!important}
+.logo-icon.is-loading::after{animation:none!important;background:none!important}
+.logo-icon.is-loading{animation:none}
+/* boot cover: no animated blur / background-position, keep only transform+opacity motion */
+#boot-cover .bc-blob{filter:none!important;animation:none!important;will-change:auto;
+  background:radial-gradient(circle,var(--a) 0,transparent 68%)!important}
+#boot-cover .bc-blob.b2{background:radial-gradient(circle,#ec4899 0,transparent 68%)!important}
+#boot-cover .bc-logo::after,#boot-cover .bc-skel span::after{animation:none!important}
+#boot-cover .bc-bar i{background-size:auto!important}
+#boot-cover.is-slow .bc-bar i{animation:none!important}
+#boot-cover.bc-out{filter:none!important}
+/* while the boot cover is up, the dashboard underneath is invisible - don't animate/paint it */
+body:has(#boot-cover:not(.bc-out)) > *:not(#boot-cover) *,
+body:has(#boot-cover:not(.bc-out)) > *:not(#boot-cover) *::before,
+body:has(#boot-cover:not(.bc-out)) > *:not(#boot-cover) *::after{animation-play-state:paused!important}
+/* boot cover: keep a single light motion (logo pulse + progress bar), drop the expanding rings */
+#boot-cover .bc-ring{display:none!important}
+/* the scaling logo (with its big blurred shadow) was re-rasterised every frame: ~12ms/frame */
+#boot-cover .bc-logo{animation:none!important}
+</style>
+<style id="perf-fix-v2">
+/* PERF v2: scroll lag. An earlier "performance" rule meant to switch backdrop-filter off was overridden by
+   higher-specificity rules, so ~22 invisible full-screen modal overlays, every sub-nav chip, the header and the
+   bottom nav were each blurring the page behind them on every scrolled frame. */
+/* must live inside the same @layer as the rules it overrides (layered !important beats unlayered !important) */
+@layer soft-glass{
+html:root body:not(#_a):not(#_b):not(#_c):not(#_d):not(#_e):not(#_f):not(#_g):not(#_h) *,
+html:root body:not(#_a):not(#_b):not(#_c):not(#_d):not(#_e):not(#_f):not(#_g):not(#_h) *::before,
+html:root body:not(#_a):not(#_b):not(#_c):not(#_d):not(#_e):not(#_f):not(#_g):not(#_h) *::after{-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
+}
+/* closed pop-ups: take them out of rendering entirely (they only faded to opacity:0 before) */
+html body .modal-overlay:not(.show),html body .dialog-overlay:not(.show){visibility:hidden!important;transition:opacity .25s ease,visibility 0s linear .3s!important}
+</style>
+<style id="ux-fade-grid-v1">
+/* ===== Fades on open / close / enter / exit ===== */
+@keyframes uxFadeIn{from{opacity:0}to{opacity:1}}
+@keyframes uxFadeUp{from{opacity:0;transform:translate3d(0,8px,0)}to{opacity:1;transform:none}}
+/* pop-up sheets/dialogs: fade (with the existing slide) on open AND on close */
+.modal-box,.dialog-box{opacity:0;transition:transform .32s cubic-bezier(.2,.8,.25,1),opacity .24s ease}
+.modal-overlay.show .modal-box,.dialog-overlay.show .dialog-box{opacity:1}
+.dialog-box{transform:translateY(10px) scale(.97)}
+.dialog-overlay.show .dialog-box{transform:none}
+/* toasts */
+#toast{transition:opacity .25s ease,transform .3s cubic-bezier(.2,.8,.25,1)}
+/* new list items fade in */
+#orders-container>*,#edit-packages-list>.package-row{animation:uxFadeUp .28s ease both}
+@media (prefers-reduced-motion:reduce){#orders-container>*,#edit-packages-list>.package-row{animation:none}.modal-box,.dialog-box{transition:none;opacity:1}}
+@layer soft-glass{
+/* page change: fade the new page in (opacity only, cheap) */
+html body .page-section.active{animation:uxFadeIn .22s ease-out both!important}
+/* ===== Price list: 2-column grid of small cards ===== */
+html:root body:not(#_a):not(#_b):not(#_c):not(#_d):not(#_e) #edit-packages-list{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important;align-content:start!important;align-items:stretch}
+html:root body:not(#_a):not(#_b):not(#_c):not(#_d):not(#_e) #edit-packages-list .package-row{margin:0!important;min-width:0!important;align-items:stretch!important;border-radius:14px!important;border:1px solid var(--sf-bd,var(--fill-soft))!important;background:var(--sf-bg,var(--surface-strong))!important;box-shadow:0 1px 2px rgba(15,23,42,.05)!important}
+html:root body:not(#_a):not(#_b):not(#_c):not(#_d):not(#_e) #edit-packages-list .package-row:has(.pkg-dot-package){grid-column:1/-1!important}
+html:root body:not(#_a):not(#_b):not(#_c):not(#_d):not(#_e) #edit-packages-list .package-row .pkg-summary{display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;grid-template-areas:"n n" "v v" "p x"!important;gap:4px 6px!important;align-items:center!important;padding:8px 8px 8px 2px!important}
+html:root body:not(#_a):not(#_b):not(#_c):not(#_d):not(#_e) #edit-packages-list .package-row .pkg-summary-label{grid-area:n!important}
+html:root body:not(#_a):not(#_b):not(#_c):not(#_d):not(#_e) #edit-packages-list .package-row .pkg-summary-value{grid-area:v!important;padding:0!important}
+html:root body:not(#_a):not(#_b):not(#_c):not(#_d):not(#_e) #edit-packages-list .package-row .pkg-summary-actions{display:contents!important}
+html:root body:not(#_a):not(#_b):not(#_c):not(#_d):not(#_e) #edit-packages-list .package-row .pkg-summary-profit{grid-area:p!important;justify-self:start!important}
+html:root body:not(#_a):not(#_b):not(#_c):not(#_d):not(#_e) #edit-packages-list .package-row .pkg-summary-remove{grid-area:x!important;justify-self:end!important}
+html:root body:not(#_a):not(#_b):not(#_c):not(#_d):not(#_e) #edit-packages-list .package-row .pkg-summary-name{font-size:12.5px!important}
+html:root body:not(#_a):not(#_b):not(#_c):not(#_d):not(#_e) #edit-packages-list .package-row .pkg-summary-price-text{font-size:13px!important}
+}
+</style>
 </body>
 </html>
