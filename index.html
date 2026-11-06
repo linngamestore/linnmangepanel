@@ -7211,9 +7211,7 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
                 else if (delta < -14) wrap.classList.remove('nav-hidden'); /* never hide on scroll-down (was fought by a 400ms timer = jumping) */
                 if (Math.abs(delta) > 14) lastY = y;
             }
-            window.addEventListener('scroll', function () {
-                if (!ticking) { ticking = true; requestAnimationFrame(update); }
-            }, { passive: true });
+            /* scroll handler removed (auto-hide disabled) */
         })();
 
 
@@ -27117,18 +27115,7 @@ body.lg-scrolled .top-nav-wrap { box-shadow: 0 12px 26px -18px rgba(15,23,42,.5)
 
   /* ----- smart header + scrolled shadow ----- */
   var lastY = 0, tick = false;
-  window.addEventListener('scroll', function () {
-    if (tick) return; tick = true;
-    requestAnimationFrame(function () {
-      var y = window.scrollY || 0, sheet = document.getElementById('nav-group-sheet-overlay');
-      document.body.classList.toggle('lg-scrolled', y > 8);
-      if (nav) {
-        if (y > 140 && y > lastY + 6 && !(sheet && sheet.classList.contains('show'))) nav.classList.remove('lg-hide'); /* disabled: duplicate of nav-hidden, caused double hide/show jumping */
-        else if (y < lastY - 6 || y <= 140) nav.classList.remove('lg-hide');
-      }
-      lastY = y; tick = false;
-    });
-  }, { passive: true });
+  /* scroll handler removed (auto-hide disabled) */
 
   /* ----- light haptics ----- */
   document.addEventListener('click', function (e) {
@@ -30347,7 +30334,7 @@ html body .header{will-change:auto}
 </style>
 <script id="nav-autohide-js">
 (function(){
-  var AUTOHIDE=true; /* set to false to keep the nav always visible */
+  var AUTOHIDE=false; /* set to false to keep the nav always visible */
   var nav=null,lastY=0,acc=0,hidden=false,raf=0;
   function setHidden(h){ if(h===hidden||!nav)return; hidden=h; nav.classList.toggle('lg-navaway',h); }
   function busy(){
@@ -30392,7 +30379,23 @@ window.addEventListener('scroll',function(){if(!on){on=true;h.classList.add('is-
 })();
 </script>
 <style id="no-glass-final2">
+html body .top-nav-wrap{transition:none!important;will-change:auto!important;opacity:1!important}
 html body .bc-blob,html body .login-blob,html body [class*="blob"]{filter:none!important;animation:none!important}
+</style>
+<style id="opaque-final">
+@layer soft-glass{
+#orders-container>*,#edit-packages-list>.package-row{animation:none!important}
+html body .package-row.editing .pkg-card-overlay{z-index:2000!important}
+html body #game-editor-page{animation:none!important}
+html:root body#_x,html body #edit-packages-list,html body #edit-packages-list .package-row{transform:none!important;contain:none!important;filter:none!important;will-change:auto!important}
+html:root body:not(#_z):not(#_z):not(#_z):not(#_z):not(#_z):not(#_z):not(#_z):not(#_z):not(#_z):not(#_z){background-image:none!important;background-attachment:scroll!important;background-color:var(--bg-app)!important}
+html:root:root body:not(#_z):not(#_z):not(#_z){--surface:#FFFFFF!important;--surface-strong:#FFFFFF!important;--sf-bg:#FFFFFF!important;--sf-bg2:#F5F7FB!important;--sg-bg:#FFFFFF!important;--sg-bg-2:#F5F7FB!important}
+html:root:root[data-theme="dark"] body:not(#_z):not(#_z):not(#_z){--surface:#121826!important;--surface-strong:#171F31!important;--sf-bg:#121826!important;--sf-bg2:#171F31!important;--sg-bg:#121826!important;--sg-bg-2:#171F31!important}
+html:root:root[data-theme="dark-blue"] body:not(#_z):not(#_z):not(#_z){--surface:#121826!important;--surface-strong:#171F31!important;--sf-bg:#121826!important;--sf-bg2:#171F31!important;--sg-bg:#121826!important;--sg-bg-2:#171F31!important}
+html:root:root[data-theme="midnight-purple"] body:not(#_z):not(#_z):not(#_z){--surface:#171126!important;--surface-strong:#1D1631!important;--sf-bg:#171126!important;--sf-bg2:#1D1631!important;--sg-bg:#171126!important;--sg-bg-2:#1D1631!important}
+html:root:root[data-theme="ocean"] body:not(#_z):not(#_z):not(#_z){--surface:#0C1B22!important;--surface-strong:#10232C!important;--sf-bg:#0C1B22!important;--sf-bg2:#10232C!important;--sg-bg:#0C1B22!important;--sg-bg-2:#10232C!important}
+html:root body:not(#_z):not(#_z):not(#_z):not(#_z):not(#_z):not(#_z):not(#_z):not(#_z):not(#_z):not(#_z) .header,html:root body:not(#_z):not(#_z):not(#_z):not(#_z):not(#_z):not(#_z):not(#_z):not(#_z):not(#_z):not(#_z) .top-nav-wrap,html:root body:not(#_z):not(#_z):not(#_z):not(#_z):not(#_z):not(#_z):not(#_z):not(#_z):not(#_z):not(#_z) .top-nav-wrap .top-nav,html:root body:not(#_z):not(#_z):not(#_z):not(#_z):not(#_z):not(#_z):not(#_z):not(#_z):not(#_z):not(#_z) .modal-box,html:root body:not(#_z):not(#_z):not(#_z):not(#_z):not(#_z):not(#_z):not(#_z):not(#_z):not(#_z):not(#_z) .dialog-box,html:root body:not(#_z):not(#_z):not(#_z):not(#_z):not(#_z):not(#_z):not(#_z):not(#_z):not(#_z):not(#_z) .od-card,html:root body:not(#_z):not(#_z):not(#_z):not(#_z):not(#_z):not(#_z):not(#_z):not(#_z):not(#_z):not(#_z) .od-card-header,html:root body:not(#_z):not(#_z):not(#_z):not(#_z):not(#_z):not(#_z):not(#_z):not(#_z):not(#_z):not(#_z) .od-card-footer,html:root body:not(#_z):not(#_z):not(#_z):not(#_z):not(#_z):not(#_z):not(#_z):not(#_z):not(#_z):not(#_z) #game-editor-page .modal-footer,html:root body:not(#_z):not(#_z):not(#_z):not(#_z):not(#_z):not(#_z):not(#_z):not(#_z):not(#_z):not(#_z) .pkg-card,html:root body:not(#_z):not(#_z):not(#_z):not(#_z):not(#_z):not(#_z):not(#_z):not(#_z):not(#_z):not(#_z) .sub-nav,html:root body:not(#_z):not(#_z):not(#_z):not(#_z):not(#_z):not(#_z):not(#_z):not(#_z):not(#_z):not(#_z) .title-header{background-color:var(--surface-strong)!important}
+}
 </style>
 </body>
 </html>
