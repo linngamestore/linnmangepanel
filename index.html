@@ -245,19 +245,53 @@ html[data-theme]:not([data-theme="light"]) #boot-cover{--bg1:#0A0E1A;--bg2:#0F12
     <script>
         // Debug console (eruda) - OFF by default. SECURITY: it can no longer be switched on from the
         // URL (#debug): a crafted link opened by a logged-in admin would load third-party JS into the
-        // admin session. It now needs a deliberate local flag - run
-        // localStorage.setItem('linn_debug','1') once on that device. Version is pinned (was the
-        // floating "eruda@3"), so a new upstream release can never run in the admin panel unreviewed.
+        // admin session. It now needs a deliberate switch in Settings on this device. The
+        // local-only flag is kept as linn_debug, and the Eruda version is pinned so an unreviewed
+        // upstream release can never run in the admin panel.
         (function () {
-            try {
-                if (localStorage.getItem('linn_debug') === '1') {
-                    var s = document.createElement('script');
-                    s.src = 'https://cdn.jsdelivr.net/npm/eruda@3.0.1/eruda.js';
-                    s.crossOrigin = 'anonymous';
-                    s.onload = function () { if (window.eruda) eruda.init(); };
-                    document.head.appendChild(s);
+            'use strict';
+            var KEY = 'linn_debug', SRC = 'https://cdn.jsdelivr.net/npm/eruda@3.0.1/eruda.js', SCRIPT_ID = 'linn-eruda-script';
+            function isEnabled() { try { return localStorage.getItem(KEY) === '1'; } catch (e) { return false; } }
+            function stopEruda() {
+                try {
+                    if (window.eruda && typeof window.eruda.destroy === 'function') window.eruda.destroy();
+                    else if (window.eruda && typeof window.eruda.hide === 'function') window.eruda.hide();
+                } catch (e) { /* ignore */ }
+                window.__linnErudaInitialized = false;
+            }
+            function startEruda() {
+                if (!isEnabled()) return;
+                if (window.eruda) {
+                    if (!window.__linnErudaInitialized && typeof window.eruda.init === 'function') {
+                        window.eruda.init();
+                        window.__linnErudaInitialized = true;
+                    }
+                    return;
                 }
-            } catch (e) { /* ignore */ }
+                if (document.getElementById(SCRIPT_ID)) return;
+                var s = document.createElement('script');
+                s.id = SCRIPT_ID;
+                s.src = SRC;
+                s.crossOrigin = 'anonymous';
+                s.onload = function () {
+                    if (!isEnabled()) { stopEruda(); return; }
+                    if (window.eruda && typeof window.eruda.init === 'function') {
+                        window.eruda.init();
+                        window.__linnErudaInitialized = true;
+                    }
+                };
+                s.onerror = function () { s.remove(); };
+                document.head.appendChild(s);
+            }
+            window.setLinnErudaEnabled = function (enabled) {
+                try {
+                    if (enabled) localStorage.setItem(KEY, '1');
+                    else localStorage.removeItem(KEY);
+                } catch (e) { return false; }
+                if (enabled) startEruda(); else stopEruda();
+                return true;
+            };
+            if (isEnabled()) startEruda();
         })();
     </script>
     <script>
@@ -4174,6 +4208,14 @@ html.perf-low [data-pcbg] *,html.perf-low [data-pcbg] *::before,html.perf-low [d
 <div class="admin-card" id="settings-card-appearance" style="margin-top:0;margin-bottom:14px;">
 <div class="sc-head" onclick="toggleAppearanceSettings()"><span class="sc-title">Appearance <span class="pp-badge">Theme</span></span><svg class="ui-icon sc-chevron" id="appearance-chevron"><use href="#icon-chevron-down"></use></svg></div>
 <div id="appearance-body" style="display:none;margin-top:12px;"><div id="theme-swatch-grid" style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;"></div></div>
+</div>
+
+<div class="admin-card" id="settings-card-debugtools" style="margin-top:0;">
+<div class="sc-head" onclick="toggleDebugToolsSettings()"><span class="sc-title">Developer Tools <span class="pp-badge">this device</span></span><svg class="ui-icon sc-chevron" id="debug-tools-chevron"><use href="#icon-chevron-down"></use></svg></div>
+<div id="debug-tools-body" style="display:none;margin-top:12px;">
+<div class="pp-row"><div class="pp-txt"><b>Eruda mobile console</b><small>ဖုန်း browser ထဲမှာ Console / Network ကို စစ်ရန်</small></div><button type="button" class="pp-switch" id="eruda-toggle" role="switch" aria-label="Enable Eruda mobile console" aria-checked="false"><i></i></button></div>
+<p style="font-size:11.5px;color:var(--text-muted);line-height:1.55;margin:10px 0 0;">ဖွင့်သည့်အခါ pinned Eruda script ကို jsDelivr မှ တင်ပါမည်။ ပိတ်လိုက်လျှင် console ကို ချက်ချင်းပိတ်ပြီး ဤ browser စက်တွင်သာ setting ကို သိမ်းပါမည်။</p>
+</div>
 </div>
 
 <div class="admin-card" id="settings-card-panelprefs" style="margin-top:0;">
@@ -26225,18 +26267,29 @@ a, button, [role="button"], .nav-item, .header-icon, .btn, .picker-btn, label { 
     root.classList.toggle('pref-compact', !!prefs.compact);
     root.classList.toggle('pref-hide-events', prefs.showEvent === false);
     root.classList.toggle('pref-hide-theme', prefs.showTheme === false);
-    document.querySelectorAll('.pp-switch').forEach(function (b) { b.setAttribute('aria-checked', prefs[b.dataset.pref] ? 'true' : 'false'); });
+    document.querySelectorAll('.pp-switch').forEach(function (b) { if (b.id !== 'eruda-toggle') b.setAttribute('aria-checked', prefs[b.dataset.pref] ? 'true' : 'false'); });
     if (topBtn && !prefs.totop) topBtn.classList.remove('show');
   }
   var $ = function (id) { return document.getElementById(id); };
+  var erudaSwitch = $('eruda-toggle');
+  if (erudaSwitch) { try { erudaSwitch.setAttribute('aria-checked', localStorage.getItem('linn_debug') === '1' ? 'true' : 'false'); } catch (e) {} }
 
   /* ---------- Panel Preferences card ---------- */
   window.togglePanelPrefs = function () {
     var b = $('panel-prefs-body'), c = $('panel-prefs-chevron'); if (!b) return;
     var open = b.style.display === 'none'; b.style.display = open ? 'block' : 'none'; if (c) c.style.transform = open ? 'rotate(180deg)' : '';
   };
+  window.toggleDebugToolsSettings = function () {
+    var b = $('debug-tools-body'), c = $('debug-tools-chevron'); if (!b) return;
+    var open = b.style.display === 'none'; b.style.display = open ? 'block' : 'none'; if (c) c.style.transform = open ? 'rotate(180deg)' : '';
+  };
   document.addEventListener('click', function (e) {
     var sw = e.target.closest && e.target.closest('.pp-switch');
+    if (sw && sw.id === 'eruda-toggle') {
+      var enabled = sw.getAttribute('aria-checked') !== 'true';
+      if (typeof window.setLinnErudaEnabled !== 'function' || window.setLinnErudaEnabled(enabled) === false) return;
+      sw.setAttribute('aria-checked', enabled ? 'true' : 'false'); buzz(12); return;
+    }
     if (sw) { prefs[sw.dataset.pref] = !prefs[sw.dataset.pref]; save(); apply(); buzz(12); return; }
     if (e.target.closest && e.target.closest('#pp-reset')) { prefs = Object.assign({}, DEF); save(); apply(); if (window.showToast) window.showToast('Preferences reset', 'success'); }
   });
@@ -26248,7 +26301,7 @@ a, button, [role="button"], .nav-item, .header-icon, .btn, .picker-btn, label { 
   }, true);
 
   /* ---------- Settings: icons, groups, search, collapse all ---------- */
-  var ICONS = { sociallinks: 'send', homebanner: 'camera', branding: 'palette', panelprefs: 'gear', maintenance: 'gear', orderrouting: 'refresh', adminbroadcastsecret: 'key',
+  var ICONS = { sociallinks: 'send', homebanner: 'camera', branding: 'palette', panelprefs: 'gear', debugtools: 'gear', maintenance: 'gear', orderrouting: 'refresh', adminbroadcastsecret: 'key',
     push: 'bell', walletcleanup: 'trash', walletdebit: 'shield', costmigrate: 'shield', autoprice: 'trending-up', 'autoprice-sell': 'tag', adminlogin: 'lock', '2fa': 'shield', adminpin: 'key', accounts: 'users', danger: 'warning' };
   function sym(name) { return '<svg class="ui-icon"><use href="#icon-' + name + '"></use></svg>'; }
   function cardKey(card) {
@@ -26271,7 +26324,7 @@ a, button, [role="button"], .nav-item, .header-icon, .btn, .picker-btn, label { 
         head.insertBefore(span, head.firstChild);
       });
       var GROUPS = [
-        ['General', ['panelprefs', 'sociallinks', 'homebanner', 'branding']],
+        ['General', ['panelprefs', 'debugtools', 'sociallinks', 'homebanner', 'branding']],
         ['Operations', ['maintenance', 'orderrouting', 'push', 'autoprice', 'autoprice-sell', 'walletcleanup', 'walletdebit', 'costmigrate']],
         ['Security', ['adminlogin', '2fa', 'adminpin', 'adminbroadcastsecret', 'accounts']],
         ['Danger zone', ['danger']]
@@ -28232,26 +28285,27 @@ html[data-theme]:not([data-theme="light"]) .lv-pill.has{ color:#FCD34D; }
 </style>
 <script id="blue-glass-ge-js">
 (function(){
-  /* keep the Game Editor jump bar glued just under the (sometimes hidden) header + nav */
-  var raf=0,until=0;
+  /* Keep the Game Editor jump bar aligned without polling layout between scroll events. */
+  var raf=0;
+  function editorActive(){var p=document.getElementById('game-editor-page');return !!(p&&p.classList.contains('active'));}
   function upd(){
+    if(!editorActive()) return;
     var h=document.querySelector('.header'),n=document.querySelector('.top-nav-wrap');
     var top=h?Math.max(0,h.getBoundingClientRect().bottom):0;
-    if(n){var r=n.getBoundingClientRect(); if(r.bottom>top&&r.top<window.innerHeight) top=Math.max(top,r.bottom);}
-    var v=Math.round(top); if(window.__geStick!==v){window.__geStick=v; document.documentElement.style.setProperty('--ge-stick',v+'px');}
+    if(n){var r=n.getBoundingClientRect();if(r.bottom>top&&r.top<window.innerHeight)top=Math.max(top,r.bottom);}
+    var v=Math.round(top);if(window.__geStick!==v){window.__geStick=v;document.documentElement.style.setProperty('--ge-stick',v+'px');}
   }
-  function loop(){upd(); if(performance.now()<until) raf=requestAnimationFrame(loop); else raf=0;}
-  function kick(ms){until=performance.now()+(ms||450); if(!raf) raf=requestAnimationFrame(loop);}
+  function schedule(){if(raf)return;raf=requestAnimationFrame(function(){raf=0;upd();});}
   function boot(){
-    window.addEventListener('scroll',function(){kick(120);},{passive:true});
-    window.addEventListener('resize',function(){kick(200);});
+    window.addEventListener('scroll',function(){if(editorActive())schedule();},{passive:true});
+    window.addEventListener('resize',schedule,{passive:true});
     var n=document.querySelector('.top-nav-wrap');
-    if(n) new MutationObserver(function(){kick(450);}).observe(n,{attributes:true,attributeFilter:['class','style']});
+    if(n)new MutationObserver(function(){if(editorActive())schedule();}).observe(n,{attributes:true,attributeFilter:['class','style']});
     var p=document.getElementById('game-editor-page');
-    if(p) new MutationObserver(function(){kick(300);}).observe(p,{attributes:true,attributeFilter:['class']});
-    kick(600);
+    if(p)new MutationObserver(schedule).observe(p,{attributes:true,attributeFilter:['class']});
+    schedule();
   }
-  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',boot); else boot();
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
 })();
 </script>
 <script id="blue-glass-live-js">
@@ -29717,7 +29771,7 @@ window.uiPrompt=function(message,def,opt){opt=opt||{};return dlg({title:opt.titl
 window.lsScanTab=function(b){var w=b.closest('#scans-body');w.querySelectorAll('.ls-seg button').forEach(function(x){x.classList.toggle('on',x===b);});w.querySelectorAll('.ls-pane').forEach(function(x){x.classList.toggle('on',x.id===b.getAttribute('data-p'));});};
 /* keep the Settings jump bar just under the sticky sub-nav instead of on top of it */
 function place(){var n=document.getElementById('sub-nav');var t=0;if(n){var cs=getComputedStyle(n);if(cs.position==='sticky'||cs.position==='fixed'){t=Math.max(0,Math.round(n.getBoundingClientRect().bottom));}}if(window.__setTop!==t){window.__setTop=t;document.documentElement.style.setProperty('--set-top',t+'px');}}
-window.addEventListener('scroll',place,{passive:true});window.addEventListener('resize',place);setTimeout(place,400);setInterval(place,5000);
+var placeRaf=0;function schedulePlace(){if(placeRaf)return;placeRaf=requestAnimationFrame(function(){placeRaf=0;place();});}window.addEventListener('scroll',schedulePlace,{passive:true});window.addEventListener('resize',schedulePlace,{passive:true});setTimeout(place,400);setInterval(schedulePlace,5000);
 })();
 
 </script>
