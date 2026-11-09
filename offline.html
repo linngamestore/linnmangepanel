@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="my">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#050813">
+<title>LINN Admin — Offline</title>
+<style>
+  :root { color-scheme: dark; }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+  body {
+    display: flex; align-items: center; justify-content: center; text-align: center;
+    padding: calc(env(safe-area-inset-top, 0px) + 24px) 24px calc(env(safe-area-inset-bottom, 0px) + 24px);
+    background: radial-gradient(120% 80% at 50% 0%, #11204a 0%, #050813 60%);
+    color: #e8ecf8; font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans Myanmar", sans-serif;
+  }
+  .card { width: 100%; max-width: 340px; }
+  .ico {
+    width: 92px; height: 92px; margin: 0 auto 22px; border-radius: 28px;
+    display: flex; align-items: center; justify-content: center;
+    background: linear-gradient(145deg, #2f6bff, #7a4dff);
+    box-shadow: 0 14px 40px rgba(47, 107, 255, .35);
+  }
+  .ico svg { width: 46px; height: 46px; stroke: #fff; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+  h1 { margin: 0 0 8px; font-size: 22px; font-weight: 600; }
+  p { margin: 0 0 24px; font-size: 14px; line-height: 1.7; color: #9aa4c4; }
+  button {
+    border: 0; border-radius: 14px; padding: 13px 28px; font-size: 15px; font-weight: 600;
+    color: #fff; background: #2f6bff; cursor: pointer; font-family: inherit;
+  }
+  button:active { transform: scale(.97); }
+  .st { margin-top: 18px; font-size: 12px; color: #6c7699; min-height: 16px; }
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="ico">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M2 8.8a15 15 0 0 1 20 0"/><path d="M5.5 12.4a10 10 0 0 1 13 0"/><path d="M9 16a5 5 0 0 1 6 0"/><circle cx="12" cy="19.5" r=".6"/><path d="M3 3l18 18"/>
+      </svg>
+    </div>
+    <h1>Internet မရှိပါ</h1>
+    <p>LINN Admin ကို ဆက်သုံးဖို့ Internet လိုပါတယ်။<br>Wi-Fi / Mobile Data ကို စစ်ပြီး ပြန်ကြိုးစားပါ။</p>
+    <button type="button" id="retry">ပြန်ကြိုးစားမယ်</button>
+    <div class="st" id="st"></div>
+  </div>
+<script>
+  var st = document.getElementById('st');
+  function go() { st.textContent = 'စစ်နေပါတယ်...'; location.replace('/'); }
+  document.getElementById('retry').addEventListener('click', function () {
+    st.textContent = 'စစ်နေပါတယ်...';
+    fetch('/manifest.json', { cache: 'no-store' }).then(function () { go(); }).catch(function () { st.textContent = 'Internet မရသေးပါ'; });
+  });
+  window.addEventListener('online', go);
+</script>
+</body>
+</html>

@@ -480,6 +480,13 @@ html[data-theme]:not([data-theme="light"]) #boot-cover{--bg1:#0A0E1A;--bg2:#0F12
     </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>LINN GAME STORE - Admin</title>
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#050813">
+    <link rel="apple-touch-icon" href="/admin-apple-touch.png">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="LINN Admin">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+Myanmar:wght@400;500;600;700&family=Poppins:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap');
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; -webkit-tap-highlight-color: transparent; }
@@ -4476,6 +4483,28 @@ html.perf-low [data-pcbg] *,html.perf-low [data-pcbg] *::before,html.perf-low [d
                         </label>
                     </div>
                     <p id="admin-push-status" style="font-size:12px;color:var(--text-secondary);margin-top:8px;"></p>
+                    <button type="button" id="admin-install-btn" class="btn btn-primary" onclick="installAdminApp()" style="display:none;margin-top:10px;">Install Admin App</button>
+                    <div id="admin-push-extra" style="display:none;margin-top:16px;">
+                        <div style="font-size:12.5px;font-weight:600;margin-bottom:4px;">Noti အမျိုးအစား (ဒီ device အတွက်)</div>
+                        <label style="display:flex;align-items:center;gap:8px;font-size:13px;margin:7px 0;"><input type="checkbox" id="apx-order" onchange="saveAdminPushPrefs()"> Order အသစ်</label>
+                        <label style="display:flex;align-items:center;gap:8px;font-size:13px;margin:7px 0;"><input type="checkbox" id="apx-topup" onchange="saveAdminPushPrefs()"> Wallet Top Up</label>
+                        <label style="display:flex;align-items:center;gap:8px;font-size:13px;margin:7px 0;"><input type="checkbox" id="apx-chat" onchange="saveAdminPushPrefs()"> Customer Chat / Message</label>
+                        <label style="display:flex;align-items:center;gap:8px;font-size:13px;margin:7px 0;"><input type="checkbox" id="apx-reminder" onchange="saveAdminPushPrefs()"> မကိုင်ရသေးတဲ့ Order သတိပေးချက် (၁၀ / ၃၀ မိနစ်)</label>
+                        <div style="font-size:12.5px;font-weight:600;margin:14px 0 4px;">Quiet hours (မြန်မာအချိန်)</div>
+                        <label style="display:flex;align-items:center;gap:8px;font-size:13px;margin:7px 0;"><input type="checkbox" id="apx-quiet" onchange="saveAdminPushPrefs()"> ဒီအချိန်အတွင်း အသံ/တုန်ခါမှုမပါဘဲ တိတ်တိတ်လာမယ်</label>
+                        <div style="display:flex;align-items:center;gap:8px;font-size:13px;">
+                            <input type="time" id="apx-qfrom" value="23:00" onchange="saveAdminPushPrefs()" style="padding:6px 8px;border-radius:8px;border:1px solid var(--border-glass);background:var(--bg-subtle-2);color:var(--text-primary);">
+                            <span>မှ</span>
+                            <input type="time" id="apx-qto" value="07:00" onchange="saveAdminPushPrefs()" style="padding:6px 8px;border-radius:8px;border:1px solid var(--border-glass);background:var(--bg-subtle-2);color:var(--text-primary);">
+                            <span>အထိ</span>
+                        </div>
+                        <button type="button" class="btn btn-primary" id="apx-test-btn" onclick="sendAdminTestPush()" style="margin-top:14px;">Test Noti ပို့ကြည့်မယ်</button>
+                        <div style="font-size:12.5px;font-weight:600;margin:16px 0 4px;">Register ဖြစ်နေတဲ့ Device များ</div>
+                        <div id="apx-devices" style="font-size:12px;color:var(--text-secondary);">...</div>
+                        <div style="font-size:12.5px;font-weight:600;margin:16px 0 4px;">နောက်ဆုံး ပို့ထားတဲ့ Noti Log</div>
+                        <div id="apx-log" style="font-size:12px;color:var(--text-secondary);">...</div>
+                        <button type="button" class="btn" onclick="loadAdminPushExtras(true)" style="margin-top:8px;">Refresh</button>
+                    </div>
                 </div>
             </div>
 
@@ -5048,6 +5077,10 @@ html.perf-low [data-pcbg] *,html.perf-low [data-pcbg] *::before,html.perf-low [d
                 <input class="field field-full" type="text" id="notif-title" placeholder="Enter Title">
                 <label class="u-label">Intro</label>
                 <input class="field field-full" type="text" id="notif-intro" placeholder="Enter Short Preview">
+                <label class="u-label">Title - Burmese (optional)</label>
+                <input class="field field-full" type="text" id="notif-title-my" placeholder="မြန်မာလို ခေါင်းစဉ် (မြန်မာ app သုံးသူတွေအတွက်)">
+                <label class="u-label">Intro - Burmese (optional)</label>
+                <input class="field field-full" type="text" id="notif-intro-my" placeholder="မြန်မာလို Preview">
                 <label class="u-label">Details</label>
                 <textarea id="notif-details" placeholder="Enter Announcement Details" rows="5" style="width:100%;box-sizing:border-box;padding:10px;border:1px solid var(--border-glass);background:var(--bg-subtle-2);color:var(--text-primary);border-radius:12px;font-size:14px;margin:6px 0 12px;font-family:inherit;resize:vertical;"></textarea>
                 <label class="u-label">Image (optional)</label>
@@ -5058,6 +5091,9 @@ html.perf-low [data-pcbg] *,html.perf-low [data-pcbg] *::before,html.perf-low [d
                 </div>
                 <img id="notif-image-preview" alt="" style="display:none;max-width:100%;max-height:180px;border-radius:10px;margin:0 0 8px;object-fit:cover;">
                 <div id="notif-image-status" style="display:none;font-size:12px;margin:0 0 12px;"></div>
+                <label class="u-label">Send at (optional)</label>
+                <input class="field field-full" type="datetime-local" id="notif-send-at">
+                <div style="font-size:12px;color:var(--text-muted);margin:-4px 0 12px;">အချိန်မရွေးရင် ချက်ချင်းပို့မယ်။ ရွေးထားရင် အဲဒီအချိန်မှာ Push ပို့ပါမယ်။</div>
                 <style>
                 .notif-ch{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:6px 0 14px}
                 .notif-ch-opt{position:relative;cursor:pointer;display:block}
@@ -7324,7 +7360,7 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager, collection, getDocs as _fsGetDocs, getDoc as _fsGetDoc, getCountFromServer as _fsGetCount, addDoc as _fsAddDoc, doc, setDoc as _fsSetDoc, updateDoc as _fsUpdateDoc, deleteDoc as _fsDeleteDoc, deleteField, query, where, orderBy, onSnapshot as _fsOnSnapshot, serverTimestamp, increment, runTransaction as _fsRunTransaction, writeBatch as _fsWriteBatch, arrayUnion, arrayRemove, getAggregateFromServer as _fsGetAggregate, sum as _fsSum } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
         import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signInAnonymously, onAuthStateChanged, signOut, setPersistence, browserLocalPersistence, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getMessaging, getToken, isSupported as isMessagingSupported } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-messaging.js";
+        import { getMessaging, getToken, onMessage, isSupported as isMessagingSupported } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-messaging.js";
 
         // ---------- Request usage meter: Firestore instrumentation ----------
         // The SDK functions above are imported under _fs* aliases; the wrappers
@@ -8274,14 +8310,17 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
             try { return adminPushSupported() && Notification.permission === 'granted' && localStorage.getItem('linn_admin_push_opt_in') === '1'; }
             catch (e) { return false; }
         }
-        function renderAdminPushToggleUI() {
+        function _renderAdminPushToggleUIBase() {
             const toggle = document.getElementById('admin-push-toggle');
             const statusEl = document.getElementById('admin-push-status');
             if (!toggle || !statusEl) return;
             if (!adminPushSupported()) {
                 toggle.checked = false;
                 toggle.disabled = true;
-                statusEl.textContent = 'Not supported on this browser';
+                const _ios = /iPad|iPhone|iPod/.test(navigator.userAgent || '');
+                statusEl.textContent = _ios
+                    ? 'iPhone: Share → Add to Home Screen လုပ်ပြီး Home Screen က app icon ကနေဖွင့်မှ Noti ရပါမယ်'
+                    : 'Not supported on this browser';
                 return;
             }
             toggle.disabled = false;
@@ -8298,25 +8337,46 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
                 statusEl.textContent = 'Off — tap to enable';
             }
         }
+        function renderAdminPushToggleUI() { _renderAdminPushToggleUIBase(); syncAdminPushExtra(); }
         window.renderAdminPushToggleUI = renderAdminPushToggleUI;
 
-        async function registerAdminFcmToken() {
+        async function registerAdminFcmToken(isNewOptIn) {
             try {
                 await messagingReady;
                 if (!messaging) return;
                 const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
                 const token = await getToken(messaging, { vapidKey: FCM_VAPID_KEY, serviceWorkerRegistration: registration });
                 if (!token) return;
-                await setDoc(doc(db, "adminDevices", token), {
-                    token, addedAt: serverTimestamp(), username: currentAdminUsername || 'admin'
-                }, { merge: true });
+                window.__adminFcmToken = token;
+                const rec = { token, updatedAt: serverTimestamp(), device: adminDeviceLabel() };
+                if (isNewOptIn) {
+                    rec.addedAt = serverTimestamp();
+                    rec.prefs = { order: true, topup: true, chat: true, reminder: true };
+                    rec.quietOn = false; rec.quietFrom = '23:00'; rec.quietTo = '07:00';
+                }
+                if (currentAdminUsername) rec.username = currentAdminUsername;
+                else if (isNewOptIn) rec.username = 'admin';
+                await setDoc(doc(db, "adminDevices", token), rec, { merge: true });
             } catch (error) { console.error("Admin FCM token registration error:", error); }
+        }
+
+        // Turning the toggle OFF used to only flip a local flag, so the device
+        // stayed in adminDevices and kept receiving pushes. Remove it for real.
+        async function removeAdminFcmToken() {
+            try {
+                await messagingReady;
+                if (!messaging) return;
+                const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
+                const token = await getToken(messaging, { vapidKey: FCM_VAPID_KEY, serviceWorkerRegistration: registration });
+                if (token) await deleteDoc(doc(db, "adminDevices", token));
+            } catch (error) { console.error("Admin FCM token removal error:", error); }
         }
 
         async function toggleAdminPushNotifications(checked) {
             if (!adminPushSupported()) { renderAdminPushToggleUI(); return; }
             if (!checked) {
                 try { localStorage.setItem('linn_admin_push_opt_in', '0'); } catch (e) {}
+                await removeAdminFcmToken();
                 renderAdminPushToggleUI();
                 return;
             }
@@ -8327,20 +8387,278 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
             }
             if (Notification.permission === 'granted') {
                 try { localStorage.setItem('linn_admin_push_opt_in', '1'); } catch (e) {}
-                await registerAdminFcmToken();
+                await registerAdminFcmToken(true);
                 renderAdminPushToggleUI();
                 return;
             }
             const result = await Notification.requestPermission();
             if (result === 'granted') {
                 try { localStorage.setItem('linn_admin_push_opt_in', '1'); } catch (e) {}
-                await registerAdminFcmToken();
+                await registerAdminFcmToken(true);
             } else {
                 window.showToast('Notifications permission was not granted', 'fail');
             }
             renderAdminPushToggleUI();
         }
         window.toggleAdminPushNotifications = toggleAdminPushNotifications;
+
+        // ---------- PWA: service worker + install button ----------
+        // One service worker (firebase-messaging-sw.js) does everything: it makes
+        // the panel installable AND shows the push notifications.
+        let _adminUpdating = false;
+        function showAdminUpdateBanner(worker) {
+            if (document.getElementById('admin-update-banner')) return;
+            const bar = document.createElement('div');
+            bar.id = 'admin-update-banner';
+            bar.style.cssText = 'position:fixed;left:12px;right:12px;top:calc(env(safe-area-inset-top,0px) + 10px);z-index:99999;display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:14px;background:#2f6bff;color:#fff;font-size:13px;box-shadow:0 8px 24px rgba(0,0,0,.25);';
+            bar.innerHTML = '<span style="flex:1;">App Update အသစ်ရပြီ</span><button type="button" style="border:0;border-radius:9px;padding:7px 12px;font-weight:600;background:#fff;color:#2f6bff;">Update</button>';
+            bar.querySelector('button').onclick = function () { _adminUpdating = true; worker.postMessage({ type: 'SKIP_WAITING' }); };
+            document.body.appendChild(bar);
+        }
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function () {
+                navigator.serviceWorker.register('/firebase-messaging-sw.js').then(function (reg) {
+                    if (reg.waiting && navigator.serviceWorker.controller) showAdminUpdateBanner(reg.waiting);
+                    reg.addEventListener('updatefound', function () {
+                        const nw = reg.installing; if (!nw) return;
+                        nw.addEventListener('statechange', function () {
+                            if (nw.state === 'installed' && navigator.serviceWorker.controller) showAdminUpdateBanner(nw);
+                        });
+                    });
+                    setInterval(function () { reg.update().catch(function () {}); }, 30 * 60 * 1000);
+                }).catch(function (err) { console.warn('Admin SW register error:', err); });
+            });
+            navigator.serviceWorker.addEventListener('controllerchange', function () { if (_adminUpdating) location.reload(); });
+            // Notification tapped while the panel is already open: the SW tells the page where to go.
+            navigator.serviceWorker.addEventListener('message', function (ev) {
+                if (ev.data && ev.data.type === 'LINN_NAV') runAdminDeepLink(ev.data.url);
+            });
+        }
+        let adminInstallEvt = null;
+        window.addEventListener('beforeinstallprompt', function (e) {
+            e.preventDefault();
+            adminInstallEvt = e;
+            const b = document.getElementById('admin-install-btn');
+            if (b) b.style.display = 'inline-block';
+            setTimeout(showAdminInstallBanner, 4000);
+        });
+        window.addEventListener('appinstalled', function () {
+            adminInstallEvt = null;
+            const b = document.getElementById('admin-install-btn');
+            if (b) b.style.display = 'none';
+        });
+        function showAdminInstallBanner() {
+            try {
+                if (!adminInstallEvt || document.getElementById('admin-install-banner')) return;
+                const d = parseInt(localStorage.getItem('linn_admin_install_dismiss') || '0', 10);
+                if (d && Date.now() - d < 7 * 864e5) return;
+                const ls = document.getElementById('login-screen');
+                if (ls && !ls.classList.contains('hidden')) return;
+                const bar = document.createElement('div');
+                bar.id = 'admin-install-banner';
+                bar.style.cssText = 'position:fixed;left:12px;right:12px;bottom:calc(env(safe-area-inset-bottom,0px) + 84px);z-index:99998;display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:14px;background:#0f1b33;color:#fff;font-size:13px;box-shadow:0 8px 24px rgba(0,0,0,.3);';
+                bar.innerHTML = '<span style="flex:1;">Admin ကို Phone App လို Install လုပ်မလား?</span><button type="button" data-i style="border:0;border-radius:9px;padding:7px 12px;font-weight:600;background:#2f6bff;color:#fff;">Install</button><button type="button" data-x style="border:0;background:transparent;color:#9fb0d0;font-size:18px;padding:0 4px;">×</button>';
+                bar.querySelector('[data-i]').onclick = function () { bar.remove(); window.installAdminApp(); };
+                bar.querySelector('[data-x]').onclick = function () { bar.remove(); try { localStorage.setItem('linn_admin_install_dismiss', String(Date.now())); } catch (e) {} };
+                document.body.appendChild(bar);
+            } catch (e) {}
+        }
+        window.installAdminApp = async function () {
+            if (!adminInstallEvt) return;
+            adminInstallEvt.prompt();
+            try { await adminInstallEvt.userChoice; } catch (e) {}
+            adminInstallEvt = null;
+            const b = document.getElementById('admin-install-btn');
+            if (b) b.style.display = 'none';
+        };
+
+        // Panel is open and in the foreground: FCM does NOT draw a system
+        // notification in that case, so show an in-panel toast instead.
+        messagingReady.then(function () {
+            if (!messaging) return;
+            onMessage(messaging, function (p) {
+                const n = p.notification || {}, d = p.data || {};
+                const t = n.title || d.title || '', b = n.body || d.body || '';
+                if (d.kind === 'test') {
+                    navigator.serviceWorker.ready.then(function (r) {
+                        r.showNotification(t || 'LINN Admin', { body: b, icon: '/admin-192.png', badge: '/badge-96.png', tag: 'test', data: { url: '/' } });
+                    }).catch(function () {});
+                    return;
+                }
+                if (window.showToast && (t || b)) window.showToast((t ? t + ' — ' : '') + b, 'success');
+            });
+        });
+
+        // After sign-in: show the real toggle state and refresh this device's
+        // token (tokens rotate; before, it was only saved when the toggle was tapped).
+        onAuthStateChanged(auth, function (u) {
+            if (!u) return;
+            renderAdminPushToggleUI();
+            if (adminPushEnabled()) setTimeout(function () { registerAdminFcmToken(false); }, 3000);
+        });
+
+        // ---------- Push extras: prefs, quiet hours, devices, log, test ----------
+        function adminDeviceLabel() {
+            const ua = navigator.userAgent || '';
+            const os = /iPhone|iPad|iPod/.test(ua) ? 'iPhone' : /Android/.test(ua) ? 'Android' : /Windows/.test(ua) ? 'Windows' : /Mac/.test(ua) ? 'Mac' : 'Device';
+            const pwa = (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true;
+            return os + (pwa ? ' (App)' : ' (Browser)');
+        }
+        function _apxEsc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]; }); }
+        function syncAdminPushExtra() {
+            const box = document.getElementById('admin-push-extra');
+            if (!box) return;
+            const on = adminPushEnabled();
+            box.style.display = on ? 'block' : 'none';
+            if (on) loadAdminPushExtras();
+        }
+        let _apxLoading = false, _apxDevices = [];
+        async function loadAdminPushExtras(force) {
+            if (_apxLoading) return;
+            _apxLoading = true;
+            try {
+                if (!window.__adminFcmToken) await registerAdminFcmToken(false);
+                const tok = window.__adminFcmToken;
+                if (!tok) return;
+                const me = await getDoc(doc(db, 'adminDevices', tok));
+                const f = (me && me.exists && me.exists()) ? (me.data() || {}) : {};
+                const p = f.prefs || {};
+                ['order', 'topup', 'chat', 'reminder'].forEach(function (k) { const el = document.getElementById('apx-' + k); if (el) el.checked = p[k] !== false; });
+                const q = document.getElementById('apx-quiet'); if (q) q.checked = f.quietOn === true;
+                const qf = document.getElementById('apx-qfrom'); if (qf) qf.value = f.quietFrom || '23:00';
+                const qt = document.getElementById('apx-qto'); if (qt) qt.value = f.quietTo || '07:00';
+
+                const devEl = document.getElementById('apx-devices');
+                try {
+                    const ds = await getDocs(collection(db, 'adminDevices'));
+                    _apxDevices = ds.docs.map(function (x) { return { id: x.id, d: x.data() || {} }; });
+                    devEl.innerHTML = _apxDevices.length ? _apxDevices.map(function (x, i) {
+                        let when = ''; try { const t = x.d.updatedAt && x.d.updatedAt.toDate ? x.d.updatedAt.toDate() : null; if (t) when = t.toLocaleString(); } catch (e) {}
+                        const mine = x.id === tok;
+                        return '<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border-glass);">'
+                            + '<div style="flex:1;min-width:0;"><b style="color:var(--text-primary);">' + _apxEsc(x.d.device || 'Device') + '</b>' + (mine ? ' <span style="color:#1E8E4F;">· ဒီ device</span>' : '')
+                            + '<br>' + _apxEsc(x.d.username || '') + (when ? ' · ' + _apxEsc(when) : '') + '</div>'
+                            + '<button type="button" class="btn" onclick="removeAdminDevice(' + i + ')">ဖျက်</button></div>';
+                    }).join('') : 'မရှိပါ';
+                } catch (e) { devEl.textContent = 'ဖတ်မရပါ (Firestore rules စစ်ပါ)'; }
+
+                const logEl = document.getElementById('apx-log');
+                try {
+                    const lg = await getDoc(doc(db, 'settings', 'adminPushLog'));
+                    const items = (lg && lg.exists && lg.exists() && (lg.data() || {}).items) || [];
+                    logEl.innerHTML = items.length ? items.slice(0, 15).map(function (it) {
+                        let when = ''; try { when = new Date(it.ts).toLocaleString(); } catch (e) {}
+                        const ok = (it.failed || 0) === 0;
+                        return '<div style="padding:5px 0;border-bottom:1px solid var(--border-glass);">' + (ok ? '✅' : '⚠️') + ' <b style="color:var(--text-primary);">' + _apxEsc(it.title) + '</b><br>'
+                            + _apxEsc(when) + ' · ရောက် ' + (it.sent || 0) + (it.failed ? ' · မရောက် ' + it.failed : '') + (it.skipped ? ' · ကျော် ' + it.skipped : '') + (it.quiet ? ' · တိတ် ' + it.quiet : '')
+                            + (Array.isArray(it.devs) && it.devs.length ? '<div style="margin-top:3px;font-size:11.5px;color:var(--text-secondary);">' + it.devs.map(function (v) {
+                                const col = v.r === 'fail' ? '#E53935' : (v.r === 'ok' || v.r === 'quiet') ? '#1E8E4F' : '#8A90A2';
+                                const txt = v.r === 'fail' ? 'မရောက်' + (v.e ? ' (' + v.e + ')' : '') : v.r === 'ok' ? 'ရောက်' : v.r === 'quiet' ? 'ရောက် (တိတ်)' : 'ကျော်';
+                                return '<span style="display:inline-block;margin-right:10px;"><span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:' + col + ';margin-right:4px;"></span>' + _apxEsc(v.d || 'Device') + (v.u ? ' · ' + _apxEsc(v.u) : '') + ' — ' + txt + '</span>';
+                            }).join('') + '</div>' : '')
+                            + '</div>';
+                    }).join('') : 'Log မရှိသေးပါ';
+                } catch (e) { logEl.textContent = 'ဖတ်မရပါ'; }
+            } finally { _apxLoading = false; }
+        }
+        window.loadAdminPushExtras = loadAdminPushExtras;
+
+        window.saveAdminPushPrefs = async function () {
+            const tok = window.__adminFcmToken;
+            if (!tok) return;
+            const prefs = {};
+            ['order', 'topup', 'chat', 'reminder'].forEach(function (k) { const el = document.getElementById('apx-' + k); prefs[k] = el ? !!el.checked : true; });
+            try {
+                await setDoc(doc(db, 'adminDevices', tok), {
+                    prefs: prefs,
+                    quietOn: !!document.getElementById('apx-quiet').checked,
+                    quietFrom: document.getElementById('apx-qfrom').value || '23:00',
+                    quietTo: document.getElementById('apx-qto').value || '07:00'
+                }, { merge: true });
+                window.showToast('Saved', 'success');
+            } catch (e) { console.error(e); window.showToast('Save မရပါ', 'fail'); }
+        };
+
+        window.removeAdminDevice = async function (i) {
+            const x = _apxDevices[i];
+            if (!x) return;
+            if (!confirm('ဒီ device ကို noti စာရင်းထဲက ဖျက်မလား?')) return;
+            try {
+                await deleteDoc(doc(db, 'adminDevices', x.id));
+                if (x.id === window.__adminFcmToken) { try { localStorage.setItem('linn_admin_push_opt_in', '0'); } catch (e) {} window.__adminFcmToken = null; renderAdminPushToggleUI(); }
+                else loadAdminPushExtras(true);
+            } catch (e) { window.showToast('ဖျက်မရပါ', 'fail'); }
+        };
+
+        window.sendAdminTestPush = async function () {
+            const btn = document.getElementById('apx-test-btn');
+            try {
+                if (btn) btn.disabled = true;
+                if (!window.__adminFcmToken) await registerAdminFcmToken(false);
+                const tok = window.__adminFcmToken;
+                if (!tok) { window.showToast('Device token မရသေးပါ', 'fail'); return; }
+                const idt = await auth.currentUser.getIdToken();
+                const res = await fetch(ADMIN_SYNC_WORKER_URL + '/admin-test-push', {
+                    method: 'POST',
+                    headers: { 'Authorization': 'Bearer ' + idt, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ token: tok })
+                });
+                const j = await res.json().catch(function () { return null; });
+                if (j && j.ok) window.showToast('Test noti ပို့ပြီးပါပြီ', 'success');
+                else window.showToast('မအောင်မြင်ပါ: ' + ((j && j.error) || res.status), 'fail');
+            } catch (e) { console.error(e); window.showToast('Test မပို့နိုင်ပါ', 'fail'); }
+            finally { if (btn) btn.disabled = false; }
+        };
+
+        // ---------- Deep links: ?order=ID  ?topup=ID  ?tab=orders|topups|users|dashboard|settings ----------
+        let _deepLinkBusy = false;
+        function runAdminDeepLink(href) {
+            let u;
+            try { u = new URL(href || location.href, location.origin); } catch (e) { return; }
+            const order = u.searchParams.get('order'), topup = u.searchParams.get('topup'), tab = u.searchParams.get('tab');
+            if (!order && !topup && !tab) return;
+            if (!href) { try { history.replaceState(null, '', location.pathname); } catch (e) {} }
+            if (_deepLinkBusy) return;
+            _deepLinkBusy = true;
+            const pages = { orders: 'order-list', topups: 'topup-list', users: 'user-list', dashboard: 'dashboard', settings: 'settings' };
+            const t0 = Date.now();
+            let went = false;
+            const iv = setInterval(function () {
+                if (Date.now() - t0 > 20000) { clearInterval(iv); _deepLinkBusy = false; return; }
+                const ls = document.getElementById('login-screen');
+                if (!window.showPage || (ls && !ls.classList.contains('hidden'))) return;
+                try {
+                    if (order) {
+                        if (!went) { window.showPage('order-list'); went = true; }
+                        let o = null; try { o = ORDERS && ORDERS[order]; } catch (e) {}
+                        if (!o) return;
+                        clearInterval(iv); _deepLinkBusy = false;
+                        setTimeout(function () { try { toggleOrderCard(order); } catch (e) {} }, 400);
+                    } else if (topup) {
+                        if (!went) { window.showPage('topup-list'); went = true; }
+                        let o = null; try { o = WALLET_TOPUPS && WALLET_TOPUPS[topup]; } catch (e) {}
+                        if (!o) return;
+                        clearInterval(iv); _deepLinkBusy = false;
+                        setTimeout(function () { try { toggleTopupCard(topup); } catch (e) {} }, 400);
+                    } else {
+                        window.showPage(pages[tab] || 'dashboard');
+                        clearInterval(iv); _deepLinkBusy = false;
+                    }
+                } catch (e) { /* retry on next tick */ }
+            }, 500);
+        }
+        onAuthStateChanged(auth, function (u) { if (u) runAdminDeepLink(); });
+
+        // ---------- App icon badge = number of pending orders + top-ups ----------
+        setInterval(function () {
+            try {
+                if (!navigator.setAppBadge) return;
+                let n = 0;
+                try { Object.values(ORDERS || {}).forEach(function (o) { if (o && o.status === 'Pending') n++; }); } catch (e) {}
+                try { Object.values(WALLET_TOPUPS || {}).forEach(function (o) { if (o && o.status === 'Pending') n++; }); } catch (e) {}
+                if (n > 0) navigator.setAppBadge(n); else navigator.clearAppBadge();
+            } catch (e) {}
+        }, 5000);
 
         // ---------- Authenticator (2FA) — TOTP, RFC 6238 ----------
         // Entirely client-side: the shared secret lives on this admin's own
@@ -9511,6 +9829,7 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
                 confirmText: 'Sign Out',
                 onConfirm: async () => {
                     await logAdminActivity('Logout');
+                    try { await removeAdminFcmToken(); } catch (e) {}
                     await signOut(auth);
                 }
             });
@@ -9617,7 +9936,7 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
                 document.body.appendChild(ov);
                 document.getElementById('admin-pin-gate-btn').addEventListener('click', verifyAdminPinGate);
                 document.getElementById('admin-pin-gate-input').addEventListener('keydown', (e) => { if (e.key === 'Enter') verifyAdminPinGate(); });
-                document.getElementById('admin-pin-gate-out').addEventListener('click', () => { ov.remove(); signOut(auth); });
+                document.getElementById('admin-pin-gate-out').addEventListener('click', async () => { ov.remove(); try { await removeAdminFcmToken(); } catch (e) {} signOut(auth); });
             }
             ov.style.display = 'flex';
             const err = document.getElementById('admin-pin-gate-err');
@@ -12151,6 +12470,7 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
             const isOpen = body.style.display === 'block';
             body.style.display = isOpen ? 'none' : 'block';
             chevron.style.transform = isOpen ? 'rotate(0deg)' : 'rotate(180deg)';
+            if (!isOpen && window.renderAdminPushToggleUI) window.renderAdminPushToggleUI();
         }
         window.togglePushNotificationSettings = togglePushNotificationSettings;
 
@@ -17552,6 +17872,21 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
 
             try {
                 const payload = { title, intro, details, timestamp: serverTimestamp() };
+                // Optional Burmese push text: the Worker sends it to customers whose app language is Burmese.
+                { const tMy = (document.getElementById('notif-title-my') || {}).value, iMy = (document.getElementById('notif-intro-my') || {}).value;
+                  if (tMy && tMy.trim()) payload.titleMy = tMy.trim();
+                  if (iMy && iMy.trim()) payload.introMy = iMy.trim(); }
+                // Optional schedule: the Worker only pushes it once this time has passed (checked every minute).
+                const sendAtEl = document.getElementById('notif-send-at');
+                let scheduledAt = null;
+                if (sendAtEl && sendAtEl.value) {
+                    scheduledAt = new Date(sendAtEl.value);
+                    if (isNaN(scheduledAt.getTime()) || scheduledAt.getTime() < Date.now() + 60000) {
+                        window.showToast('Send time က အနည်းဆုံး ၁ မိနစ်နောက် ဖြစ်ရပါမယ်', 'fail');
+                        return;
+                    }
+                    payload.timestamp = scheduledAt;
+                }
                 // Upload the image FIRST: if it fails nothing is sent, so a notification meant to carry a picture never goes out without it.
                 let imageUrl = '';
                 if (notifImageFile) {
@@ -17589,8 +17924,11 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
                 introEl.value = '';
                 detailsEl.value = '';
                 targetUserEl.value = '';
+                { const a1 = document.getElementById('notif-title-my'), a2 = document.getElementById('notif-intro-my'); if (a1) a1.value = ''; if (a2) a2.value = ''; }
                 clearNotifImage();
-                window.showToast((channel === 'bot' ? (audience === 'user' ? `Bot message to ${resolvedId}` : 'Bot message to all bot users') : (audience === 'user' ? `Notification sent to ${resolvedId}!` : 'Notification sent to all users!')) + tgNote, 'success');
+                if (sendAtEl) sendAtEl.value = '';
+                if (scheduledAt) window.showToast('Schedule လုပ်ပြီးပါပြီ — ' + scheduledAt.toLocaleString(), 'success');
+                else window.showToast((channel === 'bot' ? (audience === 'user' ? `Bot message to ${resolvedId}` : 'Bot message to all bot users') : (audience === 'user' ? `Notification sent to ${resolvedId}!` : 'Notification sent to all users!')) + tgNote, 'success');
             } catch (error) {
                 console.error("Send notification error:", error);
                 window.showToast('Failed to send notification.', 'fail');
@@ -17624,7 +17962,7 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
                                 <p style="font-weight:500;">${escapeHtml(data.intro || '')}</p>
                                 ${data.imageUrl ? `<img loading="lazy" src="${escapeHtml(data.imageUrl)}" alt="" style="max-width:100%;max-height:160px;border-radius:10px;margin:4px 0 8px;object-fit:cover;" onerror="this.style.display='none'">` : ''}
                                 <p>${escapeHtml(data.details || data.message || '')}</p>
-                                <p style="color:var(--text-secondary); font-size:12px;">Sent: ${dateStr}</p>
+                                <p style="color:var(--text-secondary); font-size:12px;">${(data.timestamp && data.timestamp.toDate && data.timestamp.toDate().getTime() > Date.now()) ? 'Scheduled for' : 'Sent'}: ${dateStr}</p>
                             </div>
                             <div class="ac-footer">
                                 <button class="btn btn-danger" onclick="deleteNotification('${docSnap.id}')">Delete</button>
