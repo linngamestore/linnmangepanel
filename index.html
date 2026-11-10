@@ -8294,7 +8294,7 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
         // support-message card to Telegram - so the admin gets a real device
         // notification even with this panel (and Telegram) both closed.
         // Same VAPID key pair as Store.html (same Firebase project).
-        const FCM_VAPID_KEY = "BPEfKUCGbR5lny1p59iD3QnSA-EoPoPTbztAN1mmPtDhYexYvam7JLMd_7J8o1D_xCOtI0YBhWkCNYt7SlIzJlg";
+        const FCM_VAPID_KEY = "BPPxlOXxAoPDVEOnWZNKTZ3Clw6W5o1lBQ5a_3P-CKdRrb8nFX1v9Bp8Edxun7tdBYwrPjtUJ09HaPo91hEFS7Q";
         let messaging = null;
         let messagingReady = (async () => {
             try {
@@ -17919,6 +17919,13 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
                     return;
                 }
                 if (channel !== 'bot') await addDoc(collection(db, "notifications"), payload);
+                // Not scheduled -> tell the Worker to push it to customers right now (fire-and-forget; the cron is the fallback).
+                if (channel !== 'bot' && !scheduledAt) {
+                    try {
+                        const idt = await auth.currentUser.getIdToken();
+                        fetch(ADMIN_SYNC_WORKER_URL + '/admin-broadcast-now', { method: 'POST', headers: { 'Authorization': 'Bearer ' + idt, 'Content-Type': 'application/json' }, body: '{}' }).catch(function () { });
+                    } catch (e) { /* cron will still send it */ }
+                }
                 const tgNote = '';
                 titleEl.value = '';
                 introEl.value = '';
