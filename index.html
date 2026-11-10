@@ -14240,7 +14240,7 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
             // Per-game cost update was replaced by the single "All Game Cost Update" button on the Games page,
             // so the per-game badge stays hidden; the counts still feed the Dashboard alert banner.
             el.style.display = 'none'; el.innerText = '';
-            if (count) updateDashboardAlertBanner();
+            updateDashboardAlertBannerSoon(); // always refresh (also when the count dropped to 0 / was cleared)
         }
         window.updateGameCostBadge = updateGameCostBadge;
 
@@ -14248,10 +14248,10 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
             const el = document.getElementById(`game-stockout-badge-${gameId}`);
             if (!el) return;
             const count = gameStockOutCounts[gameId];
-            if (!count) { el.style.display = 'none'; el.innerText = ''; return; }
+            if (!count) { el.style.display = 'none'; el.innerText = ''; updateDashboardAlertBannerSoon(); return; }
             el.innerText = `${count} out of stock`;
             el.style.display = 'inline-block';
-            updateDashboardAlertBanner();
+            updateDashboardAlertBannerSoon();
         }
         window.updateGameStockBadge = updateGameStockBadge;
 
@@ -14293,12 +14293,18 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
             banner.style.display = 'flex';
         }
         window.updateDashboardAlertBanner = updateDashboardAlertBanner;
+        // Coalesces many badge updates (one per game) into a single banner refresh.
+        function updateDashboardAlertBannerSoon() {
+            clearTimeout(window.__dabTimer);
+            window.__dabTimer = setTimeout(updateDashboardAlertBanner, 60);
+        }
 
         // Clears one game's cached scan result (e.g. after its Cost data
         // changes) so the next list render re-checks it against live prices.
         function invalidateGameCostScan(gameId) {
             delete gameCostUpdateCounts[gameId];
             delete gameStockOutCounts[gameId];
+            updateDashboardAlertBannerSoon();
             updateGameCostBadge(gameId);
             updateGameStockBadge(gameId);
             persistGameScan();
@@ -14672,6 +14678,9 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
             });
             if (changed > 0) {
                 await updateDoc(doc(db, "games", gameId), { packages });
+                // Update the in-memory copy right away: the re-scan that follows must compare against the NEW costs,
+                // not the old ones (the Firestore snapshot may arrive after the re-scan starts -> "still pending").
+                if (GAMES[gameId]) GAMES[gameId].packages = packages;
                 logAdminActivity('Auto price update', `${g.name || gameId}: ${changed} cost(s) updated`);
                 invalidateGameCostScan(gameId);
             }
