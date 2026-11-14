@@ -3414,6 +3414,58 @@ html.perf-low [data-pcbg] *,html.perf-low [data-pcbg] *::before,html.perf-low [d
 .pcbg-slider{margin-top:8px}.pcbg-slider label{font-size:12.5px;color:var(--text-secondary);display:flex;justify-content:space-between}
 .pcbg-slider input{width:100%}
 </style>
+
+<style id="pkg-grid-v1">
+/* Game editor package cards: 2-column grid, smaller text, long names scroll left-right instead of "..." */
+html body #edit-packages-list{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important;align-content:start;grid-auto-rows:min-content}
+@media (min-width:640px){html body #edit-packages-list{grid-template-columns:repeat(3,minmax(0,1fr))!important}}
+html body #edit-packages-list .package-row{flex-direction:column!important;min-width:0}
+html body #edit-packages-list .pkg-order-col{flex-direction:row!important;width:auto!important;border-right:0!important;border-bottom:1px solid var(--fill-soft);height:22px}
+html body #edit-packages-list .pkg-order-col .pkg-move-btn{flex:0 0 30px;padding:0}
+html body #edit-packages-list .pkg-order-col .pkg-move-btn svg{width:11px!important;height:11px!important}
+html body #edit-packages-list .pkg-order-col .pkg-move-btn:first-child svg{transform:rotate(90deg)!important}
+html body #edit-packages-list .pkg-order-col .pkg-move-btn:last-child svg{transform:rotate(-90deg)!important}
+html body #edit-packages-list .pkg-drag-handle{flex:1!important;flex-direction:row!important;gap:4px!important;padding:0!important}
+html body #edit-packages-list .pkg-order-num{font-size:10px}
+html body #edit-packages-list .pkg-summary{padding:7px 7px 6px!important;gap:5px!important;min-height:0!important}
+html body #edit-packages-list .pkg-summary-head{gap:5px!important}
+html body #edit-packages-list .pkg-summary-label{gap:5px!important}
+html body #edit-packages-list .pkg-summary-thumb{width:22px!important;height:22px!important}
+html body #edit-packages-list .pkg-summary-name{font-size:11px!important;font-weight:500;line-height:1.25;white-space:nowrap!important;overflow:hidden!important;text-overflow:clip!important;text-align:center;min-width:0}
+.pkg-nm-in{display:inline-block;white-space:nowrap;will-change:transform}
+.pkg-nm-in.mq{animation:pkgNmMq var(--mq-t,5s) ease-in-out infinite alternate}
+@keyframes pkgNmMq{0%,18%{transform:translate3d(0,0,0)}82%,100%{transform:translate3d(var(--mq-d,0px),0,0)}}
+@media (prefers-reduced-motion:reduce){.pkg-nm-in.mq{animation:none}}
+html body #edit-packages-list .pkg-summary-body{flex-wrap:wrap!important;justify-content:center!important;gap:4px 6px!important;padding-top:5px!important}
+html body #edit-packages-list .pkg-summary-value{padding:3px 6px!important}
+html body #edit-packages-list .pkg-summary-price-text{font-size:11.5px!important;text-overflow:clip!important}
+html body #edit-packages-list .pkg-summary-price-unit{font-size:9.5px!important}
+html body #edit-packages-list .pkg-summary-profit{font-size:10px!important;padding:2px 5px!important}
+
+/* Import from another game sheet */
+.pim-ov{position:fixed;inset:0;z-index:420;display:flex;align-items:flex-end;justify-content:center;background:rgba(0,0,0,.5)}
+.pim-sheet{width:100%;max-width:520px;max-height:82vh;display:flex;flex-direction:column;background:var(--surface-strong,#fff);color:var(--text-primary,#111);border-radius:18px 18px 0 0;box-shadow:0 -10px 40px rgba(0,0,0,.3);overflow:hidden}
+.pim-sheet.solid{background:var(--bg,#fff)}
+.pim-hd{display:flex;align-items:center;gap:8px;padding:12px 14px;border-bottom:1px solid var(--fill-soft)}
+.pim-hd b{flex:1;font-size:14px;font-weight:600}
+.pim-x{border:0;background:var(--fill-soft);color:var(--text-primary);width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:15px;line-height:1}
+.pim-search{margin:10px 14px 4px;padding:9px 11px;border:1px solid var(--border-glass);border-radius:10px;background:var(--surface);color:var(--text-primary);font-size:13px;width:calc(100% - 28px);box-sizing:border-box}
+.pim-list{flex:1;overflow-y:auto;padding:8px 14px 12px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;align-content:start}
+.pim-game{display:flex;flex-direction:column;gap:2px;padding:9px 10px;border:1px solid var(--fill-soft);border-radius:12px;background:var(--surface);cursor:pointer;text-align:left;font:inherit;color:inherit;min-width:0}
+.pim-game:active{background:var(--accent-soft)}
+.pim-game b{font-size:12px;font-weight:500;line-height:1.25;word-break:break-word}
+.pim-game small{font-size:10.5px;color:var(--text-muted)}
+.pim-pk{display:flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid var(--fill-soft);border-radius:10px;background:var(--surface);cursor:pointer;min-width:0}
+.pim-pk input{width:17px;height:17px;accent-color:var(--accent);flex:0 0 auto}
+.pim-pk span{flex:1;min-width:0;font-size:12px;line-height:1.25;word-break:break-word}
+.pim-pk em{font-style:normal;font-size:11px;color:var(--accent);flex:0 0 auto}
+.pim-ft{display:flex;gap:8px;padding:10px 14px calc(10px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--fill-soft)}
+.pim-ft button{flex:1;border:0;border-radius:10px;padding:11px;font-size:13.5px;font-weight:500;cursor:pointer}
+.pim-go{background:var(--accent);color:#fff;flex:2!important}
+.pim-go:disabled{opacity:.5}
+.pim-alt{background:var(--fill-soft);color:var(--text-primary)}
+.pim-empty{grid-column:1/-1;text-align:center;font-size:12px;color:var(--text-muted);padding:18px 0}
+</style>
 </head>
 <body>
 
@@ -5854,6 +5906,7 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
             <div class="admin-search-wrap">
                 <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
                 <input type="text" id="user-search" placeholder="Search Users..." autocomplete="off" oninput="searchDebounce(renderAdminUsersList)">
+                <button type="button" class="btn btn-outline" id="ban-nonlinn-btn" onclick="banNonLinnUsers()" style="margin-top:8px;width:100%;">Ban accounts without LINN ID</button>
             </div>
             <div id="admin-users-container" class="users-grid">
                 <p class="empty-msg">Loading users...</p>
@@ -6001,6 +6054,10 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
                 <div class="details-grid">
                     <div class="details-grid-item"><span>Last Login</span><b id="ud-lt-last-login">N/A</b></div>
                     <div class="details-grid-item"><span>Joined</span><b id="ud-lt-joined">N/A</b></div>
+                </div>
+                <div class="details-grid" style="margin-top:8px;">
+                    <div class="details-grid-item" style="grid-column:1/-1;"><span>Location (GPS)</span><b id="ud-loc-gps" style="font-weight:500;line-height:1.4;">Not shared</b></div>
+                    <div class="details-grid-item" style="grid-column:1/-1;"><span>Location (network, at login)</span><b id="ud-loc-ip" style="font-weight:500;line-height:1.4;">N/A</b></div>
                 </div>
                 <div id="ud-loginlist-container" style="margin-top:10px;">
                     <p class="empty-msg">No login records yet.</p>
@@ -6295,6 +6352,7 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
                         <button class="btn btn-outline" id="pkg-check-prices-btn" onclick="checkLivePriceChanges()" style="display:none !important;"><svg class="ui-icon" style="width:13px;height:13px;"><use href="#icon-refresh"></use></svg> Check Prices</button>
                     </div>
                     <div class="pkg-actions-row pkg-import-row">
+                        <button class="btn btn-outline" type="button" onclick="openImportFromGame()">Import from Game</button>
                         <button class="btn btn-outline" id="g2bulk-import-btn" onclick="importG2BulkCatalogue()" style="display:none;">Import from G2Bulk</button>
                         <button class="btn btn-outline" id="g2bulk-debug-btn" onclick="debugG2BulkServerCheck()" style="display:none;" title="Import မလုပ်ဘဲ G2Bulk ရဲ့ fields/servers raw response ကို စစ်ကြည့်မယ်"><svg class="ui-icon" style="width:13px;height:13px;"><use href="#icon-code"></use></svg> Debug</button>
                     </div>
@@ -18971,6 +19029,21 @@ return `
 
             // Login Time tab
             document.getElementById('ud-lt-last-login').innerText = lastSeenStr;
+            try {
+                const fmtAt = v => { const d = v && (v.toDate ? v.toDate() : new Date(v)); return d && !isNaN(d) ? d.toLocaleString() : ''; };
+                const gEl = document.getElementById('ud-loc-gps'), iEl = document.getElementById('ud-loc-ip');
+                const g = u.lastLocation, n = u.loginGeo;
+                if (g && typeof g.lat === 'number' && typeof g.lng === 'number') {
+                    const q = g.lat.toFixed(6) + ',' + g.lng.toFixed(6);
+                    gEl.innerHTML = escapeHtml(q) + (g.accuracy ? ' (±' + Math.round(g.accuracy) + ' m)' : '') + (g.at ? '<br><small style="opacity:.7">' + escapeHtml(fmtAt(g.at)) + '</small>' : '') +
+                        '<br><a href="https://www.google.com/maps?q=' + encodeURIComponent(q) + '" target="_blank" rel="noopener" style="color:var(--accent);font-weight:600;">Open in Maps</a>';
+                } else gEl.textContent = 'Not shared';
+                if (n && (n.city || n.region || n.country)) {
+                    const place = [n.city, n.region, n.country].filter(Boolean).join(', ');
+                    iEl.innerHTML = escapeHtml(place) + (n.tz ? ' <small style="opacity:.7">' + escapeHtml(n.tz) + '</small>' : '') + (n.isp ? '<br><small style="opacity:.7">' + escapeHtml(n.isp) + '</small>' : '') +
+                        (n.at ? '<br><small style="opacity:.7">' + escapeHtml(fmtAt(n.at)) + '</small>' : '');
+                } else iEl.textContent = 'N/A';
+            } catch (e) { /* location is optional */ }
             document.getElementById('ud-lt-joined').innerText = joinDateStr;
 
             const userOrdersForTier = Object.values(ORDERS).filter(o => o.userId === userId && o.status === 'Success');
@@ -24225,6 +24298,148 @@ return `
         // The banner <input> calls the plural name from its inline onchange, so it must be on window too
         // (only the singular was exposed, which threw a ReferenceError and made the picker do nothing).
         window.previewGameBanners = previewGameBanners;
+
+        // ===== Import packages from another game (Game Editor) + marquee for long package names =====
+        function openImportFromGame() {
+            const curId = (document.getElementById('edit-game-id') || {}).value || '';
+            const games = Object.entries(GAMES || {}).filter(([id, g]) => id !== curId && g && Array.isArray(g.packages) && g.packages.length);
+            games.sort((a, b) => String(a[1].name || '').localeCompare(String(b[1].name || '')));
+            const ov = document.createElement('div');
+            ov.className = 'pim-ov';
+            ov.innerHTML = '<div class="pim-sheet"></div>';
+            document.body.appendChild(ov);
+            const sheet = ov.firstChild;
+            const close = () => ov.remove();
+            ov.addEventListener('click', e => { if (e.target === ov) close(); });
+
+            function labelOf(g) { return (g.name || 'Game') + (g.serverName ? ' - ' + g.serverName : ''); }
+
+            function stepGames() {
+                sheet.innerHTML = '<div class="pim-hd"><b>Import packages from</b><button type="button" class="pim-x" aria-label="Close">x</button></div>' +
+                    '<input class="pim-search" type="search" placeholder="Search game">' +
+                    '<div class="pim-list"></div>';
+                sheet.querySelector('.pim-x').onclick = close;
+                const listEl = sheet.querySelector('.pim-list'), q = sheet.querySelector('.pim-search');
+                function draw() {
+                    const t = q.value.trim().toLowerCase();
+                    const rows = games.filter(([id, g]) => !t || labelOf(g).toLowerCase().includes(t));
+                    listEl.innerHTML = rows.length ? '' : '<div class="pim-empty">No games with packages</div>';
+                    rows.forEach(([id, g]) => {
+                        const b = document.createElement('button');
+                        b.type = 'button'; b.className = 'pim-game';
+                        b.innerHTML = '<b>' + escapeHtml(labelOf(g)) + '</b><small>' + g.packages.length + ' packages</small>';
+                        b.onclick = () => stepPackages(id, g);
+                        listEl.appendChild(b);
+                    });
+                }
+                q.addEventListener('input', draw); draw();
+            }
+
+            function stepPackages(id, g) {
+                const pk = g.packages;
+                sheet.innerHTML = '<div class="pim-hd"><button type="button" class="pim-x pim-back" aria-label="Back">&lsaquo;</button><b>' + escapeHtml(labelOf(g)) + '</b><button type="button" class="pim-x" aria-label="Close">x</button></div>' +
+                    '<div class="pim-list" style="grid-template-columns:1fr"></div>' +
+                    '<div class="pim-ft"><button type="button" class="pim-alt pim-all">Select all</button><button type="button" class="pim-go">Import</button></div>';
+                sheet.querySelector('.pim-back').onclick = stepGames;
+                sheet.querySelector('.pim-x:not(.pim-back)').onclick = close;
+                const listEl = sheet.querySelector('.pim-list'), go = sheet.querySelector('.pim-go'), allBtn = sheet.querySelector('.pim-all');
+                pk.forEach((p, i) => {
+                    const l = document.createElement('label');
+                    l.className = 'pim-pk';
+                    l.innerHTML = '<input type="checkbox" checked data-i="' + i + '"><span>' + escapeHtml(String(p.amount || 'Unnamed')) + '</span><em>' + (p.price ? Number(p.price).toLocaleString() + ' MMK' : '--') + '</em>';
+                    listEl.appendChild(l);
+                });
+                const boxes = () => Array.from(listEl.querySelectorAll('input'));
+                function sync() { const n = boxes().filter(b => b.checked).length; go.disabled = !n; go.textContent = 'Import ' + n; allBtn.textContent = n === pk.length ? 'Select none' : 'Select all'; }
+                listEl.addEventListener('change', sync);
+                allBtn.onclick = () => { const on = boxes().some(b => !b.checked); boxes().forEach(b => b.checked = on); sync(); };
+                sync();
+                go.onclick = () => {
+                    const have = new Set(Array.from(document.querySelectorAll('#edit-packages-list .package-row')).map(r => ((r.querySelector('.pkg-amount') || {}).value || '').trim().toLowerCase() + '|' + r.dataset.tab));
+                    let added = 0, skipped = 0;
+                    boxes().filter(b => b.checked).forEach(b => {
+                        const p = pk[+b.dataset.i];
+                        const tab = p.tab || p.type || 'currency';
+                        const key = String(p.amount || '').trim().toLowerCase() + '|' + tab;
+                        if (have.has(key)) { skipped++; return; }
+                        have.add(key);
+                        addPackageRow(p.amount || '', p.cost || 0, p.price || 0, p.g2bulk || '', p.jcplays || '', p.image || '', p.type || 'currency', tab, false, p.voucherId || '', null, p.badge || '', p.costUsd || '');
+                        added++;
+                    });
+                    try { renumberPackageRows(); renderPkgTabBar(); applyPackageTabFilter(); } catch (e) {}
+                    close();
+                    window.showToast('Imported ' + added + ' packages' + (skipped ? ' (' + skipped + ' already existed)' : '') + ' - tap Save Game to keep them', 'success');
+                };
+            }
+            stepGames();
+        }
+        window.openImportFromGame = openImportFromGame;
+        // Bans every account whose id is not LINN-xxxx (the Worker also refuses them on every call, this just marks the old ones).
+        async function banNonLinnUsers() {
+            if (!confirm('LINN- ID မဟုတ်တဲ့ account အားလုံးကို Ban မလား?')) return;
+            const btn = document.getElementById('ban-nonlinn-btn');
+            if (btn) btn.disabled = true;
+            let total = 0, cursor = '';
+            try {
+                for (let page = 0; page < 500; page++) {
+                    const tok = await auth.currentUser.getIdToken();
+                    const res = await fetch(`${ADMIN_SYNC_WORKER_URL}/admin-users`, {
+                        method: 'POST',
+                        headers: { 'Authorization': `Bearer ${tok}`, 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ op: 'banNonLinn', cursor })
+                    });
+                    const j = await res.json().catch(() => ({}));
+                    if (!res.ok || !j.ok) throw new Error(j.error || ('HTTP ' + res.status));
+                    total += j.banned || 0;
+                    if (!j.next) break;
+                    cursor = j.next;
+                }
+                window.showToast('Banned ' + total + ' accounts without a LINN ID', 'success');
+                if (typeof fetchUsers === 'function') { try { await fetchUsers(); } catch (e) {} }
+            } catch (e) {
+                window.showToast('Failed: ' + e.message, 'fail');
+            } finally { if (btn) btn.disabled = false; }
+        }
+        window.banNonLinnUsers = banNonLinnUsers;
+
+        // Long package names: no "..." - they glide left/right inside the card instead.
+        (function pkgNameMarquee() {
+            let raf = 0, mo = null;
+            function fit() {
+                raf = 0;
+                const list = document.getElementById('edit-packages-list');
+                if (!list) return;
+                if (mo) mo.disconnect();
+                list.querySelectorAll('.pkg-summary-name').forEach(el => {
+                    let inn = el.firstElementChild && el.firstElementChild.classList.contains('pkg-nm-in') ? el.firstElementChild : null;
+                    if (!inn || el.childNodes.length !== 1) {
+                        const t = el.textContent;
+                        el.textContent = '';
+                        inn = document.createElement('i');
+                        inn.className = 'pkg-nm-in';
+                        inn.textContent = t;
+                        el.appendChild(inn);
+                    }
+                    if (!el.clientWidth) return; // hidden tab: measured again when it is shown
+                    const over = inn.scrollWidth - el.clientWidth;
+                    if (over > 2) {
+                        inn.style.setProperty('--mq-d', (-over - 2) + 'px');
+                        inn.style.setProperty('--mq-t', Math.max(3, over / 14 + 2.5).toFixed(1) + 's');
+                        inn.classList.add('mq');
+                    } else { inn.classList.remove('mq'); inn.style.removeProperty('--mq-d'); }
+                });
+                start();
+            }
+            function sched() { if (!raf) raf = requestAnimationFrame(fit); }
+            function start() {
+                const list = document.getElementById('edit-packages-list');
+                if (!list) return;
+                if (!mo) mo = new MutationObserver(sched);
+                mo.observe(list, { childList: true, subtree: true, characterData: true, attributes: true, attributeFilter: ['style', 'class'] });
+            }
+            window.addEventListener('resize', sched);
+            if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', () => { start(); sched(); }); else { start(); sched(); }
+        })();
         window.addPackageRow = addPackageRow;
         // The old "+ New Server" duplicate button/flow inside the Edit Game
         // modal was removed — adding a server now only happens via the
