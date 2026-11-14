@@ -3715,6 +3715,7 @@ html body #edit-packages-list .pkg-summary-profit{font-size:10px!important;paddi
                 <span class="conn-dot conn-connecting" id="conn-dot"></span>
                 <span class="conn-label" id="conn-label">Connecting</span>
             </div>
+            <div class="header-icon" id="hdr-reload" title="Reload" role="button" aria-label="Reload" onclick="adminReload()" style="flex-shrink:0;"><svg class="ui-icon" style="width:20px;"><use href="#icon-refresh"></use></svg></div>
             <div class="header-icon" id="activity-btn" title="Inbox" role="button" aria-label="Inbox" onclick="openActivitySheet()" style="flex-shrink:0;"><svg class="ui-icon" style="width:20px;"><use href="#icon-bell"></use></svg></div>
             <div class="header-icon" id="low-balance-alert-btn" title="Low balance" onclick="openLowBalanceAlert()" style="display:none;position:relative;">
                 <svg class="ui-icon" style="width:20px;"><use href="#icon-bell"></use></svg>
@@ -5901,6 +5902,7 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
             <div class="udp-tabs" id="user-list-tabs" style="margin-bottom:10px;">
                 <button type="button" class="udp-tab active" data-utab="all" onclick="setUserListTab('all')">All Users <span id="ult-count-all">0</span></button>
                 <button type="button" class="udp-tab" data-utab="admin" onclick="setUserListTab('admin')">Admin <span id="ult-count-admin">0</span></button>
+                <button type="button" class="udp-tab" data-utab="banned" onclick="setUserListTab('banned')">Banned <span id="ult-count-banned">0</span></button>
                 <button type="button" class="udp-tab" data-utab="bot" onclick="setUserListTab('bot')">Bot /start <span id="ult-count-bot">0</span></button>
             </div>
             <div class="admin-search-wrap">
@@ -16572,31 +16574,47 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
         // (Price if it's set, otherwise Cost) instead of silently landing in
         // alphabetical order. Only rows with neither a leading number nor any
         // price/cost yet go last, sorted alphabetically among themselves.
-        function sortPackageRows(tabs) {
+        function sortPackageRows(tabs, opts) {
+            opts = (opts && typeof opts === 'object' && !Array.isArray(opts) && !opts.target) ? opts : {};
             const list = document.getElementById('edit-packages-list');
             const tabList = (Array.isArray(tabs) && tabs.length) ? tabs : [currentPkgTab];
+            const natural = (x, y) => String(x).trim().localeCompare(String(y).trim(), undefined, { sensitivity: 'base', numeric: true });
             let sortedAny = false;
             tabList.forEach(tab => {
                 const rows = Array.from(list.querySelectorAll('.package-row')).filter(r => r.dataset.tab === tab);
                 if (rows.length < 2) return;
 
+                // Voucher / gift-card rows (they carry a Voucher Product ID) are
+                // titled "Steam Wallet ($10)", "50 TL Gold" etc. - a number in the
+                // title is NOT comparable across rows, so these always sort by the
+                // real money value: Cost (MMK) first, then Price, then the $ face
+                // value in the title. Direct top-up rows keep the title-number rule.
+                const voucherMode = opts.byValue === true || rows.some(r => {
+                    const v = r.querySelector('.pkg-voucher-id');
+                    return v && v.value.trim();
+                });
+
                 const decorated = rows.map(row => {
                     const amount = row.querySelector('.pkg-amount').value;
-                    const num = parseLeadingNumber(amount);
-                    let sortVal = num;
-                    if (sortVal === null) {
-                        const priceVal = parseFloat(row.querySelector('.pkg-price').value);
-                        const costVal = parseFloat(row.querySelector('.pkg-cost').value);
-                        sortVal = (!isNaN(priceVal) && priceVal > 0) ? priceVal : (!isNaN(costVal) && costVal > 0 ? costVal : null);
+                    const priceVal = parseFloat(row.querySelector('.pkg-price').value);
+                    const costVal = parseFloat(row.querySelector('.pkg-cost').value);
+                    const money = (!isNaN(costVal) && costVal > 0) ? costVal : ((!isNaN(priceVal) && priceVal > 0) ? priceVal : null);
+                    let sortVal;
+                    if (voucherMode) {
+                        const fv = String(amount).match(/\$\s*(\d+(?:\.\d+)?)/);
+                        sortVal = money !== null ? money : (fv ? parseFloat(fv[1]) : parseLeadingNumber(amount));
+                    } else {
+                        sortVal = parseLeadingNumber(amount);
+                        if (sortVal === null) sortVal = money;
                     }
-                    return { row, amount, sortVal };
+                    return { row, amount, sortVal: (sortVal === undefined ? null : sortVal) };
                 });
 
                 decorated.sort((a, b) => {
-                    if (a.sortVal !== null && b.sortVal !== null) return a.sortVal - b.sortVal;
+                    if (a.sortVal !== null && b.sortVal !== null) return (a.sortVal - b.sortVal) || natural(a.amount, b.amount);
                     if (a.sortVal !== null) return -1; // priced/numbered items first
                     if (b.sortVal !== null) return 1;
-                    return a.amount.trim().localeCompare(b.amount.trim(), undefined, { sensitivity: 'base' });
+                    return natural(a.amount, b.amount);
                 });
 
                 decorated.forEach(d => list.appendChild(d.row));
@@ -16604,17 +16622,77 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
             });
             if (!sortedAny) return;
             renumberPackageRows();
-            window.showToast('Packages sorted', 'success');
+            if (!opts.quiet) window.showToast('Packages sorted', 'success');
         }
         // Catalogue imports drop new rows into whichever tab their name belongs to
         // (Currency / Package), which is not always the tab that is open - so sort
         // every tab that just received rows, not only the visible one.
         function pkgRowSnapshot() { return new Set(document.querySelectorAll('#edit-packages-list .package-row')); }
-        function sortImportedTabs(snap) {
+        function sortImportedTabs(snap, opts) {
             const tabs = new Set();
             document.querySelectorAll('#edit-packages-list .package-row').forEach(r => { if (!snap.has(r)) tabs.add(r.dataset.tab); });
-            if (tabs.size) sortPackageRows(Array.from(tabs));
+            if (tabs.size) sortPackageRows(Array.from(tabs), opts);
         }
+        // Voucher imports re-sort EVERY tab (not only tabs that got new rows), so a
+        // re-import that only refreshed costs still leaves the list low -> high.
+        function sortAllPackageTabs(opts) {
+            const tabs = new Set();
+            document.querySelectorAll('#edit-packages-list .package-row').forEach(r => tabs.add(r.dataset.tab));
+            if (tabs.size) sortPackageRows(Array.from(tabs), opts);
+        }
+
+        // ---------- Import result report ----------
+        // Shown (small text) under an Import button after any catalogue import so
+        // the admin can see exactly what changed: new rows, cost changes (old -> new,
+        // difference, % and the resulting profit on the current Price), unchanged
+        // rows and rows the provider no longer lists. rpt = {added, changed, same,
+        // missing, sortedNote}; each entry {label, cost?, oldCost?, newCost?, price?}.
+        function renderImportReport(statusEl, rpt) {
+            if (!statusEl || !statusEl.parentNode) return;
+            const prev = statusEl.nextElementSibling;
+            if (prev && prev.classList && prev.classList.contains('imp-report')) prev.remove();
+            const fmt = n => (Number(n) || 0).toLocaleString();
+            const esc = s => escapeHtml(String(s == null ? '' : s));
+            const box = document.createElement('div');
+            box.className = 'imp-report';
+            let h = '<div class="ir-sum">';
+            if (rpt.added.length) h += `<span class="ir-pill new">+${rpt.added.length} new</span>`;
+            if (rpt.changed.length) h += `<span class="ir-pill chg">${rpt.changed.length} cost changed</span>`;
+            if (rpt.same.length) h += `<span class="ir-pill same">${rpt.same.length} unchanged</span>`;
+            if (rpt.missing.length) h += `<span class="ir-pill warn">${rpt.missing.length} not in provider</span>`;
+            if (!rpt.added.length && !rpt.changed.length && !rpt.same.length && !rpt.missing.length) h += '<span class="ir-pill same">Nothing imported</span>';
+            h += '</div>';
+            if (rpt.note) h += `<div class="ir-note">${esc(rpt.note)}</div>`;
+            if (rpt.changed.length) {
+                h += `<details open><summary>Cost ပြောင်းသွားသည့် ${rpt.changed.length} ခု</summary><ul>`;
+                rpt.changed.forEach(c => {
+                    const d = c.newCost - c.oldCost, up = d > 0;
+                    const pct = c.oldCost ? (d / c.oldCost * 100) : 0;
+                    let sub = '';
+                    if (c.price > 0 && c.newCost > 0) { const pr = (c.price - c.newCost) / c.newCost * 100; sub = `<i>Price ${fmt(c.price)} · profit ${pr >= 0 ? '+' : ''}${pr.toFixed(1)}%</i>`; }
+                    h += `<li><span class="n">${esc(c.label)}${sub}</span><span class="v">${fmt(c.oldCost)} → ${fmt(c.newCost)} Ks<br><b class="${up ? 'up' : 'dn'}">${up ? '▲ +' : '▼ '}${fmt(d)} (${pct >= 0 ? '+' : ''}${pct.toFixed(1)}%)</b></span></li>`;
+                });
+                h += '</ul></details>';
+            }
+            if (rpt.added.length) {
+                h += `<details open><summary>Package အသစ် ${rpt.added.length} ခု</summary><ul>`;
+                rpt.added.forEach(a => { h += `<li><span class="n">${esc(a.label)}</span><span class="v">Cost ${fmt(a.cost)} · Price ${fmt(a.price)} Ks</span></li>`; });
+                h += '</ul></details>';
+            }
+            if (rpt.missing.length) {
+                h += `<details><summary>Provider စာရင်းထဲ မတွေ့တော့တာ ${rpt.missing.length} ခု</summary><ul>`;
+                rpt.missing.forEach(m => { h += `<li><span class="n">${esc(m.label)}<i>Editor ထဲမှာ ကျန်နေပါတယ် — လိုအပ်ရင် ကိုယ်တိုင်ဖျက်ပါ</i></span></li>`; });
+                h += '</ul></details>';
+            }
+            if (rpt.same.length) {
+                h += `<details><summary>မပြောင်းလဲသည့် ${rpt.same.length} ခု</summary><ul>`;
+                rpt.same.forEach(s => { h += `<li><span class="n">${esc(s.label)}</span><span class="v">${fmt(s.newCost)} Ks</span></li>`; });
+                h += '</ul></details>';
+            }
+            box.innerHTML = h;
+            statusEl.insertAdjacentElement('afterend', box);
+        }
+        window.renderImportReport = renderImportReport;
         window.sortPackageRows = sortPackageRows;
 
         // ---------- Bulk % adjust for Price/Cost ----------
@@ -17052,11 +17130,11 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
                 // whatever was last open in the (shared) form, and the
                 // Import/Debug buttons never got told to re-check themselves.
                 document.getElementById('edit-game-g2bulk-code').value = g.g2bulkCode || '';
-                document.getElementById('g2bulk-import-status').innerText = '';
+                document.getElementById('g2bulk-import-status').innerText = ''; (function(e){var n=e&&e.nextElementSibling;if(n&&n.classList.contains('imp-report'))n.remove();})(document.getElementById('g2bulk-import-status'));
                 document.getElementById('edit-game-jcplays-code').value = g.jcplaysProduct || '';
-                document.getElementById('jcplays-denom-status').innerText = '';
+                document.getElementById('jcplays-denom-status').innerText = ''; (function(e){var n=e&&e.nextElementSibling;if(n&&n.classList.contains('imp-report'))n.remove();})(document.getElementById('jcplays-denom-status'));
                 document.getElementById('edit-game-voucher-category').value = g.g2bulkVoucherCategory || '';
-                document.getElementById('voucher-import-status').innerText = '';
+                document.getElementById('voucher-import-status').innerText = ''; (function(e){var n=e&&e.nextElementSibling;if(n&&n.classList.contains('imp-report'))n.remove();})(document.getElementById('voucher-import-status'));
                 setFulfillProvider(g.fulfillProvider || (gameListTab === 'voucher' ? 'voucher_manual' : gameListTab === 'software' ? 'software' : 'manual'));
                 onG2BulkGameChange();
                 onVoucherCategoryChange();
@@ -17092,11 +17170,11 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
                 document.getElementById('edit-game-charname').checked = false;
                 onPlayerIdRequiredToggle();
                 document.getElementById('edit-game-g2bulk-code').value = '';
-                document.getElementById('g2bulk-import-status').innerText = '';
+                document.getElementById('g2bulk-import-status').innerText = ''; (function(e){var n=e&&e.nextElementSibling;if(n&&n.classList.contains('imp-report'))n.remove();})(document.getElementById('g2bulk-import-status'));
                 document.getElementById('edit-game-jcplays-code').value = '';
-                document.getElementById('jcplays-denom-status').innerText = '';
+                document.getElementById('jcplays-denom-status').innerText = ''; (function(e){var n=e&&e.nextElementSibling;if(n&&n.classList.contains('imp-report'))n.remove();})(document.getElementById('jcplays-denom-status'));
                 document.getElementById('edit-game-voucher-category').value = '';
-                document.getElementById('voucher-import-status').innerText = '';
+                document.getElementById('voucher-import-status').innerText = ''; (function(e){var n=e&&e.nextElementSibling;if(n&&n.classList.contains('imp-report'))n.remove();})(document.getElementById('voucher-import-status'));
                 onVoucherCategoryChange();
                 pendingG2BulkServerMode = null;
                 pendingG2BulkServerOptions = null;
@@ -18114,12 +18192,13 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
                 container.innerHTML = snap.docs.map(docSnap => {
                     const data = docSnap.data();
                     return `
-                        <div class="admin-card">
+                        <div class="admin-card tk-card" id="tk-${docSnap.id}">
                             <div class="ac-body">
-                                <p>${escapeHtml(data.text ?? '')}</p>
+                                <p class="tk-text">${escapeHtml(data.text ?? '')}</p>
                             </div>
-                            <div class="ac-footer">
-                                <button class="btn btn-danger" onclick="deleteAnnouncement('${docSnap.id}')">Delete</button>
+                            <div class="ac-footer tk-foot">
+                                <button class="btn btn-outline btn-sm" onclick="editAnnouncement('${docSnap.id}')">Edit</button>
+                                <button class="btn btn-danger btn-sm" onclick="deleteAnnouncement('${docSnap.id}')">Delete</button>
                             </div>
                         </div>
                     `;
@@ -18130,6 +18209,45 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
             });
         }
         window.listenAnnouncementsAdmin = listenAnnouncementsAdmin;
+
+        // Inline edit of a ticker message: the text turns into an input with Save / Cancel.
+        // (A live snapshot while editing re-renders the list and simply drops the edit box.)
+        function editAnnouncement(id) {
+            const card = document.getElementById('tk-' + id);
+            if (!card || card.dataset.editing) return;
+            const p = card.querySelector('.tk-text'), foot = card.querySelector('.tk-foot');
+            const old = p.textContent;
+            card.dataset.editing = '1';
+            const input = document.createElement('input');
+            input.type = 'text'; input.maxLength = 120; input.value = old; input.className = 'field field-full tk-input';
+            p.replaceWith(input);
+            const normal = foot.innerHTML;
+            foot.innerHTML = '<button class="btn btn-primary btn-sm" data-act="save">Save</button><button class="btn btn-outline btn-sm" data-act="cancel">Cancel</button>';
+            input.focus(); input.setSelectionRange(old.length, old.length);
+            const restore = (text) => {
+                const np = document.createElement('p'); np.className = 'tk-text'; np.textContent = text;
+                input.replaceWith(np); foot.innerHTML = normal; delete card.dataset.editing;
+            };
+            foot.querySelector('[data-act="cancel"]').onclick = () => restore(old);
+            const save = async () => {
+                const text = input.value.trim();
+                if (!text) { window.showToast('Text cannot be empty', 'fail'); return; }
+                if (text === old) { restore(old); return; }
+                const b = foot.querySelector('[data-act="save"]'); b.disabled = true; b.innerText = 'Saving...';
+                try {
+                    await updateDoc(doc(db, "announcements", id), { text });
+                    window.showToast('Ticker message updated', 'success');
+                    restore(text);
+                } catch (error) {
+                    console.error('Edit announcement error:', error);
+                    window.showToast('Failed to update ticker.', 'fail');
+                    b.disabled = false; b.innerText = 'Save';
+                }
+            };
+            foot.querySelector('[data-act="save"]').onclick = save;
+            input.addEventListener('keydown', e => { if (e.key === 'Enter') save(); if (e.key === 'Escape') restore(old); });
+        }
+        window.editAnnouncement = editAnnouncement;
 
         function deleteAnnouncement(id) {
             window.showActionDialog({
@@ -18536,7 +18654,7 @@ return `
         // telegramBotUsers/{telegramId} = everyone who pressed /start in linngamestorebot (admin-readable only).
         let BOT_USERS = {};
         function setUserListTab(tab) {
-            userListTab = (tab === 'admin' || tab === 'bot') ? tab : 'all';
+            userListTab = (tab === 'admin' || tab === 'bot' || tab === 'banned') ? tab : 'all';
             document.querySelectorAll('#user-list-tabs .udp-tab').forEach(b => b.classList.toggle('active', b.dataset.utab === userListTab));
             userCardNodes.clear();
             const c = document.getElementById('admin-users-container'); if (c) c.innerHTML = '';
@@ -18696,6 +18814,7 @@ return `
                             ${u.storeAdmin === true ? '<span class="badge badge-warning" title="Sees package cost in the Store">Admin</span>' : ''}
                             ${adminTierBadgeHTML(tier)}
                         </div>
+                        ${u.banned && u.banNote ? `<div class="ugc2-bannote" style="margin-top:6px;font-size:11.5px;color:var(--text-muted);line-height:1.45;white-space:pre-wrap;word-break:break-word;">${escapeHtml(u.banNote)}</div>` : ''}
                     </div>
                     <div class="ugc2-side">
                         <b>${fmtMoney(u.walletBalance || 0)}</b>
@@ -18710,10 +18829,14 @@ return `
             let ids = Object.keys(USERS);
             const adminCount = ids.filter(id => USERS[id].storeAdmin === true).length;
             const cAll = document.getElementById('ult-count-all'), cAdm = document.getElementById('ult-count-admin');
-            if (cAll) cAll.textContent = ids.length;
+            const bannedCount = ids.filter(id => USERS[id].banned === true).length;
+            const cBan = document.getElementById('ult-count-banned'); if (cBan) cBan.textContent = bannedCount;
+            if (cAll) cAll.textContent = ids.length - bannedCount;
             if (cAdm) cAdm.textContent = adminCount;
             if (userListTab === 'bot') { userCardNodes.clear(); renderBotUsersTab(container, searchTerm); return; }
-            if (userListTab === 'admin') ids = ids.filter(id => USERS[id].storeAdmin === true);
+            if (userListTab === 'admin') ids = ids.filter(id => USERS[id].storeAdmin === true && !USERS[id].banned);
+            else if (userListTab === 'banned') ids = ids.filter(id => USERS[id].banned === true);
+            else ids = ids.filter(id => !USERS[id].banned); // banned users live in their own tab
             { const oc = ids.filter(id => isUserOnline(USERS[id])).length; const ce = document.getElementById('user-online-count'); if (ce) ce.textContent = oc;
               const ob = document.getElementById('user-online-btn'); if (ob) ob.classList.toggle('online-filter-on', userOnlineOnly);
               if (userOnlineOnly) ids = ids.filter(id => isUserOnline(USERS[id])); }
@@ -18733,20 +18856,30 @@ return `
                 window.pagerSentinel(container, 'users', false);
                 container.innerHTML = searchTerm
                     ? '<p class="empty-msg">No users match your search.</p>'
+                    : userListTab === 'banned'
+                    ? '<p class="empty-msg">Ban ခံထားရသူ မရှိသေးပါ။</p>'
                     : userListTab === 'admin'
                     ? '<p class="empty-msg">No Admin accounts yet. Open a user and tap "Set as Admin".</p>'
                     : '<p class="empty-msg">No users yet. They\'ll appear here once someone opens the Store app.</p>';
                 userCardNodes.clear();
                 return;
             }
-            // Most recently active first.
-            ids.sort((a, b) => {
-                const ta = USERS[a].lastSeen ? USERS[a].lastSeen.toMillis() : 0;
-                const tb = USERS[b].lastSeen ? USERS[b].lastSeen.toMillis() : 0;
-                return tb - ta;
-            });
+            // Most recently active first - but the order is FROZEN once shown, so cards
+            // no longer jump around while scrolling when presence / lastSeen updates arrive.
+            // It is re-sorted only when the tab / search changes or Refresh is tapped.
+            const lastSeenMs = id => USERS[id].lastSeen && USERS[id].lastSeen.toMillis ? USERS[id].lastSeen.toMillis() : 0;
             const _uk = userListTab + '|' + searchTerm + '|' + userOnlineOnly;
-            if (window.__ulKey !== _uk) { window.__ulKey = _uk; window.__ulLimit = 40; }
+            if (window.__ulKey !== _uk) { window.__ulKey = _uk; window.__ulLimit = 40; window.__ulRank = null; }
+            if (!window.__ulRank) {
+                ids.sort((a, b) => lastSeenMs(b) - lastSeenMs(a));
+                window.__ulRank = new Map(ids.map((id, i) => [id, i]));
+            } else {
+                const rk = window.__ulRank;
+                const fresh = ids.filter(id => !rk.has(id)).sort((a, b) => lastSeenMs(b) - lastSeenMs(a));
+                const known = ids.filter(id => rk.has(id)).sort((a, b) => rk.get(a) - rk.get(b));
+                ids = fresh.concat(known);
+                window.__ulRank = new Map(ids.map((id, i) => [id, i]));
+            }
             const _uTotal = ids.length;
             ids = ids.slice(0, window.__ulLimit || 40);
             window.pagerSentinel(container, 'users', _uTotal > ids.length, () => { window.__ulLimit = (window.__ulLimit || 40) + 40; renderAdminUsersListImpl(); });
@@ -18825,6 +18958,7 @@ return `
 
         function fetchUsers(silent) {
             if (usersLoadPromise) return usersLoadPromise;
+            if (!silent) window.__ulRank = null; // manual Refresh -> sort by latest activity again
             usersLoadPromise = (async () => {
                 try {
                     // Loaded through the Worker (admin token checked server-side); falls back to a direct read if it is unreachable.
@@ -19514,12 +19648,17 @@ return `
                 type: willBan ? 'delete' : 'warning',
                 title: willBan ? 'Ban this user?' : 'Unban this user?',
                 message: willBan
-                    ? 'They won\'t be able to place new orders until unbanned. Past orders are unaffected.'
+                    ? 'They won\'t be able to place new orders until unbanned. Past orders are unaffected. အောက်က Note ကို customer ရဲ့ Profile မှာ admin ရေးတဲ့အတိုင်း ပြပါမယ်။'
                     : 'They will be able to place orders again.',
                 confirmText: willBan ? 'Ban' : 'Unban',
-                onConfirm: async () => {
+                showNote: willBan,
+                notePlaceholder: 'Ban Note — Profile မှာ ပြမယ့်စာ',
+                onConfirm: async (note) => {
                     try {
-                        await updateDoc(doc(db, "users", userId), { banned: willBan });
+                        const banNote = willBan ? String(note || '').trim() : '';
+                        await updateDoc(doc(db, "users", userId), willBan
+                            ? { banned: true, banNote, bannedAt: serverTimestamp() }
+                            : { banned: false, banNote: '' });
                         logAdminActivity(willBan ? 'Banned user' : 'Unbanned user', u.name || userId);
                         window.showToast(willBan ? 'User banned' : 'User unbanned', willBan ? 'fail' : 'success');
                     } catch (error) {
@@ -22763,15 +22902,20 @@ return `
                 });
 
                 const importSnap = pkgRowSnapshot();
-                const picked = await pickImportItems('g2bulk', code, catalogues.map(c => ({ key: c.name, label: c.name, cost: Math.round(c.amount * rate), existing: rowByG2BulkName.has(c.name) })));
+                const picked = await pickImportItems('g2bulk', code, catalogues.map(c => ({ key: c.name, label: c.name, cost: Math.round(c.amount * rate), existing: rowByG2BulkName.has(c.name), oldCost: (rowByG2BulkName.has(c.name) ? (parseFloat(rowByG2BulkName.get(c.name).querySelector('.pkg-cost').value) || 0) : 0) })));
                 if (!picked) { statusEl.style.color = 'var(--text-muted)'; statusEl.innerText = 'Import cancelled.'; return; }
                 let updatedCount = 0, addedCount = 0;
+                const rpt = { added: [], changed: [], same: [], missing: [], note: 'Price / Image / နေရာ မပြောင်းပါ (Cost ကိုသာ update) · အသစ်ထည့်သည့်ထဲမှာ အငယ်→အကြီး စီပြီး' };
+                const seenKeys = new Set(catalogues.map(c => c.name));
+                rowByG2BulkName.forEach((row, key) => { if (!seenKeys.has(key)) rpt.missing.push({ label: row.querySelector('.pkg-amount').value || key }); });
                 catalogues.forEach(c => {
                     if (!picked.has(c.name)) return;
                     const cost = Math.round(c.amount * rate);
                     const existingRow = rowByG2BulkName.get(c.name);
                     if (existingRow) {
                         const costInput = existingRow.querySelector('.pkg-cost');
+                        const oldCost = parseFloat(costInput.value) || 0;
+                        (oldCost !== cost ? rpt.changed : rpt.same).push({ label: c.name, oldCost, newCost: cost, price: parseFloat(existingRow.querySelector('.pkg-price').value) || 0 });
                         costInput.value = cost;
                         setPkgCostUsd(existingRow, c.amount);
                         updatePackageProfit(costInput);
@@ -22779,6 +22923,7 @@ return `
                     } else {
                         addPackageRow(c.name, cost, autoPriceForCost(cost), c.name, '', '', 'currency', null, true);
                         setPkgCostUsd(document.querySelector('#edit-packages-list .package-row:last-child'), c.amount);
+                        rpt.added.push({ label: c.name, cost, price: autoPriceForCost(cost) });
                         addedCount++;
                     }
                 });
@@ -22854,6 +22999,7 @@ return `
 
                 statusEl.innerText = statusMsg;
                 sortImportedTabs(importSnap);
+                renderImportReport(statusEl, rpt);
                 window.showToast('Catalogue imported', 'success');
             } catch (error) {
                 console.error("Import G2Bulk catalogue error:", error);
@@ -23143,9 +23289,12 @@ return `
                 });
 
                 const importSnap = pkgRowSnapshot();
-                const picked = await pickImportItems('g2bulk_voucher', categoryId, products.map(p => ({ key: String(p.id), label: (p.face_value ? `${p.title} ($${p.face_value})` : p.title), cost: Math.round(p.unit_price * rate), existing: rowByVoucherId.has(String(p.id)) })));
+                const picked = await pickImportItems('g2bulk_voucher', categoryId, products.map(p => ({ key: String(p.id), label: (p.face_value ? `${p.title} ($${p.face_value})` : p.title), cost: Math.round(p.unit_price * rate), existing: rowByVoucherId.has(String(p.id)), oldCost: (rowByVoucherId.has(String(p.id)) ? (parseFloat(rowByVoucherId.get(String(p.id)).querySelector('.pkg-cost').value) || 0) : 0) })));
                 if (!picked) { statusEl.style.color = 'var(--text-muted)'; statusEl.innerText = 'Import cancelled.'; return; }
                 let updatedCount = 0, addedCount = 0;
+                const rpt = { added: [], changed: [], same: [], missing: [], note: 'Price / Image မပြောင်းပါ (Cost ကိုသာ update) · Package အားလုံးကို အငယ်→အကြီး (Cost အလိုက်) စီပေးထားပါတယ်' };
+                const seenIds = new Set(products.map(p => String(p.id)));
+                rowByVoucherId.forEach((row, key) => { if (!seenIds.has(key)) rpt.missing.push({ label: row.querySelector('.pkg-amount').value || key }); });
                 products.forEach(p => {
                     if (!picked.has(String(p.id))) return;
                     const cost = Math.round(p.unit_price * rate);
@@ -23153,6 +23302,8 @@ return `
                     const existingRow = rowByVoucherId.get(idStr);
                     if (existingRow) {
                         const costInput = existingRow.querySelector('.pkg-cost');
+                        const oldCost = parseFloat(costInput.value) || 0;
+                        (oldCost !== cost ? rpt.changed : rpt.same).push({ label: existingRow.querySelector('.pkg-amount').value || p.title, oldCost, newCost: cost, price: parseFloat(existingRow.querySelector('.pkg-price').value) || 0 });
                         costInput.value = cost;
                         setPkgCostUsd(existingRow, p.unit_price);
                         updatePackageProfit(costInput);
@@ -23161,6 +23312,7 @@ return `
                         const label = p.face_value ? `${p.title} ($${p.face_value})` : p.title;
                         addPackageRow(label, cost, autoPriceForCost(cost), '', '', p.image_url || '', 'currency', null, false, idStr);
                         setPkgCostUsd(document.querySelector('#edit-packages-list .package-row:last-child'), p.unit_price);
+                        rpt.added.push({ label, cost, price: autoPriceForCost(cost) });
                         addedCount++;
                     }
                 });
@@ -23171,7 +23323,8 @@ return `
                     : `Imported ${addedCount} products — Cost & Price (~${AUTO_PRICE_MARGIN_PCT}% margin) filled in automatically; adjust if needed before saving.`;
                 // Same auto-sort as the direct-games import above, so newly
                 // imported voucher rows land smallest-to-largest right away.
-                sortImportedTabs(importSnap);
+                sortAllPackageTabs({ byValue: true, quiet: true });
+                renderImportReport(statusEl, rpt);
                 window.showToast('Voucher catalogue imported', 'success');
                 refreshVoucherGameStock();
             } catch (error) {
@@ -23953,15 +24106,20 @@ return `
                 });
 
                 const importSnap = pkgRowSnapshot();
-                const picked = await pickImportItems('jcplays', product, rows.map(r => ({ key: String(r.id), label: r.spu, cost: Math.round(Number(r.price) * jcplaysRate()), existing: rowByJcplaysId.has(String(r.id)) })));
+                const picked = await pickImportItems('jcplays', product, rows.map(r => ({ key: String(r.id), label: r.spu, cost: Math.round(Number(r.price) * jcplaysRate()), existing: rowByJcplaysId.has(String(r.id)), oldCost: (rowByJcplaysId.has(String(r.id)) ? (parseFloat(rowByJcplaysId.get(String(r.id)).querySelector('.pkg-cost').value) || 0) : 0) })));
                 if (!picked) { statusEl.style.color = 'var(--text-muted)'; statusEl.innerText = 'Import cancelled.'; return; }
                 let updatedCount = 0, addedCount = 0;
+                const rpt = { added: [], changed: [], same: [], missing: [], note: 'Price / Image / နေရာ မပြောင်းပါ (Cost ကိုသာ update) · အသစ်ထည့်သည့်ထဲမှာ အငယ်→အကြီး စီပြီး' };
+                const seenJc = new Set(rows.map(r => String(r.id)));
+                rowByJcplaysId.forEach((row, key) => { if (!seenJc.has(key)) rpt.missing.push({ label: row.querySelector('.pkg-amount').value || key }); });
                 rows.forEach(r => {
                     if (!picked.has(String(r.id))) return;
                     const cost = Math.round(Number(r.price) * jcplaysRate());
                     const existingRow = rowByJcplaysId.get(String(r.id));
                     if (existingRow) {
                         const costInput = existingRow.querySelector('.pkg-cost');
+                        const oldCost = parseFloat(costInput.value) || 0;
+                        (oldCost !== cost ? rpt.changed : rpt.same).push({ label: r.spu, oldCost, newCost: cost, price: parseFloat(existingRow.querySelector('.pkg-price').value) || 0 });
                         costInput.value = cost;
                         setPkgCostUsd(existingRow, r.price);
                         updatePackageProfit(costInput);
@@ -23969,6 +24127,7 @@ return `
                     } else {
                         addPackageRow(r.spu, cost, autoPriceForCost(cost), '', String(r.id), '', 'currency', null, true);
                         setPkgCostUsd(document.querySelector('#edit-packages-list .package-row:last-child'), r.price);
+                        rpt.added.push({ label: r.spu, cost, price: autoPriceForCost(cost) });
                         addedCount++;
                     }
                 });
@@ -23979,6 +24138,7 @@ return `
                     : `Imported ${addedCount} packages — Cost & Price (~${AUTO_PRICE_MARGIN_PCT}% margin) filled in automatically; adjust if needed before saving.`;
                 // newly-imported denominations land smallest-to-largest too.
                 sortImportedTabs(importSnap);
+                renderImportReport(statusEl, rpt);
                 window.showToast('JCPlays denominations imported', 'success');
             } catch (error) {
                 console.error("JCPlays productlist error:", error);
@@ -26137,12 +26297,13 @@ body.lg-scrolled .top-nav-wrap { box-shadow: 0 12px 26px -18px rgba(15,23,42,.5)
   var ptr = document.createElement('div'); ptr.id = 'lg-ptr'; ptr.innerHTML = '<i></i><span></span>'; document.body.appendChild(ptr);
   var label = ptr.querySelector('span'), sy = 0, sx = 0, pull = 0, tracking = false, busy = false, TH = 72;
   function pageId() { var a = document.querySelector('.page-section.active'); return a && a.id; }
-  function ok() { var p = pageId(); return (p === 'dashboard' || p === 'overview-analytics' || p === 'order-list') && getComputedStyle(document.body).overflow !== 'hidden'; }
+  function isDataPage(p) { return p === 'dashboard' || p === 'overview-analytics' || p === 'order-list'; }
+  function ok() { return getComputedStyle(document.body).overflow !== 'hidden' && !document.querySelector('.modal-overlay.show,.dialog-overlay.show,#rl-overlay.show'); }
   function paint(d) {
     ptr.style.opacity = d > 8 ? 1 : 0;
     ptr.style.transform = 'translate(-50%,' + (Math.min(d, 110) - 70) + 'px)';
     ptr.querySelector('i').style.transform = 'rotate(' + d * 3 + 'deg)';
-    label.textContent = d >= TH ? 'Release to refresh' : 'Pull to refresh';
+    label.textContent = d >= TH ? 'Release to reload' : 'Pull to reload';
   }
   document.addEventListener('touchstart', function (e) {
     if (busy || e.touches.length !== 1 || (window.scrollY || 0) > 0 || !ok() || e.target.closest('input,textarea,select,#admin-top-nav,.date-filter-wrap')) { tracking = false; return; }
@@ -26158,6 +26319,7 @@ body.lg-scrolled .top-nav-wrap { box-shadow: 0 12px 26px -18px rgba(15,23,42,.5)
   document.addEventListener('touchend', function () {
     if (!tracking) return; tracking = false;
     if (pull < TH) { paint(0); return; }
+    if (!isDataPage(pageId())) { paint(0); if (typeof window.adminReload === 'function') window.adminReload(); return; }
     busy = true; ptr.classList.add('spin'); label.textContent = 'Refreshing...'; ptr.style.opacity = 1; ptr.style.transform = 'translate(-50%, 6px)';
     var jobs = [];
     try { if (typeof window.fetchOrders === 'function') jobs.push(window.fetchOrders()); } catch (e) {}
@@ -27545,105 +27707,174 @@ html.perf-low .fzs-sw{opacity:0}
 })();
 </script>
 <style id="import-picker-css">
-#imp-pick-overlay .modal-box{max-width:460px;width:calc(100% - 24px)}
-.imp-tools{display:flex;gap:8px;align-items:center;margin-bottom:10px}
-.imp-tools input{flex:1;min-width:0;margin:0!important}
-.imp-chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
-.imp-chip{border:1px solid var(--border-glass);background:var(--surface);color:var(--text-secondary);border-radius:999px;padding:5px 12px;font:600 12px/1.2 inherit;font-family:inherit;cursor:pointer}
-.imp-chip:hover{color:var(--text-primary)}
-.imp-list{max-height:min(52vh,420px);overflow-y:auto;border:1px solid var(--border-glass);border-radius:12px;background:var(--surface)}
-.imp-row{display:flex;align-items:center;gap:10px;padding:10px 12px;cursor:pointer;border-bottom:1px solid var(--fill-soft);-webkit-tap-highlight-color:transparent}
-.imp-row:last-child{border-bottom:0}
-.imp-row:hover{background:var(--fill-soft)}
-.imp-row input{width:18px;height:18px;flex-shrink:0;margin:0;accent-color:var(--accent)}
-.imp-name{flex:1;min-width:0;font-size:13.5px;font-weight:600;color:var(--text-primary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.imp-cost{font-size:12px;color:var(--text-muted);flex-shrink:0}
-.imp-tag{font-size:10.5px;font-weight:700;padding:2px 8px;border-radius:999px;flex-shrink:0}
-.imp-tag.new{background:rgba(var(--accent-rgb),.14);color:var(--accent)}
-.imp-tag.upd{background:var(--fill-soft);color:var(--text-secondary)}
-.imp-empty{padding:22px;text-align:center;color:var(--text-muted);font-size:13px}
-.imp-foot{display:flex;gap:8px;width:100%}
-.imp-foot .btn{flex:1}
+/* ===== Import picker v2 - bottom sheet, filter tabs, cost delta per row ===== */
+#imp-pick-overlay .modal-box{max-width:480px;width:100%;padding:0;gap:0;overflow:hidden}
+#imp-pick-overlay .ip-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:18px 18px 12px}
+#imp-pick-overlay .ip-title{font-size:17px;font-weight:700;color:var(--text-strong,var(--text-primary));margin:0;line-height:1.25}
+#imp-pick-overlay .ip-sub{font-size:12px;color:var(--text-muted);margin-top:3px}
+#imp-pick-overlay .ip-x{width:32px;height:32px;border-radius:50%;background:var(--fill-soft);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;color:var(--text-secondary)}
+#imp-pick-overlay .ip-tools{padding:0 18px;display:flex;flex-direction:column;gap:10px}
+#imp-pick-overlay .ip-seg{display:flex;gap:4px;padding:4px;border-radius:12px;background:var(--fill-soft)}
+#imp-pick-overlay .ip-seg button{flex:1;border:0;background:transparent;color:var(--text-secondary);font:600 12.5px/1 inherit;font-family:inherit;padding:9px 6px;border-radius:9px;cursor:pointer}
+#imp-pick-overlay .ip-seg button b{font-weight:700;opacity:.65;margin-left:3px}
+#imp-pick-overlay .ip-seg button.on{background:var(--surface-strong,var(--surface));color:var(--text-strong,var(--text-primary));box-shadow:0 1px 4px rgba(0,0,0,.12)}
+#imp-pick-overlay .ip-search{width:100%;box-sizing:border-box;margin:0!important;padding:10px 12px!important;border-radius:12px!important;font-size:14px}
+#imp-pick-overlay .ip-bar{display:flex;align-items:center;justify-content:space-between;padding:10px 18px 6px;font-size:12px;color:var(--text-muted)}
+#imp-pick-overlay .ip-bar button{border:0;background:none;color:var(--accent);font:700 12px/1 inherit;font-family:inherit;padding:4px 2px;cursor:pointer}
+#imp-pick-overlay .ip-bar .sp{display:inline-block;width:12px}
+#imp-pick-overlay .imp-list{flex:1;min-height:80px;max-height:min(50vh,400px);overflow-y:auto;overscroll-behavior:contain;border-top:1px solid var(--fill-soft)}
+#imp-pick-overlay .imp-row{display:flex;align-items:center;gap:12px;padding:11px 18px;cursor:pointer;border-bottom:1px solid var(--fill-soft);-webkit-tap-highlight-color:transparent}
+#imp-pick-overlay .imp-row:active{background:var(--fill-soft)}
+#imp-pick-overlay .imp-row input{position:absolute;opacity:0;pointer-events:none}
+#imp-pick-overlay .imp-ck{width:22px;height:22px;border-radius:50%;border:2px solid var(--border-glass);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:background .15s,border-color .15s}
+#imp-pick-overlay .imp-ck svg{width:12px;height:12px;stroke:#fff;stroke-width:3.2;fill:none;stroke-linecap:round;stroke-linejoin:round;opacity:0;transform:scale(.6);transition:opacity .15s,transform .15s}
+#imp-pick-overlay .imp-row input:checked + .imp-ck{background:var(--accent);border-color:var(--accent)}
+#imp-pick-overlay .imp-row input:checked + .imp-ck svg{opacity:1;transform:scale(1)}
+#imp-pick-overlay .imp-main{flex:1;min-width:0}
+#imp-pick-overlay .imp-name{font-size:13.5px;font-weight:600;color:var(--text-primary);line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;white-space:normal}
+#imp-pick-overlay .imp-meta{display:flex;align-items:center;gap:6px;margin-top:3px;font-size:11px;color:var(--text-muted)}
+#imp-pick-overlay .imp-tag{font-size:10px;font-weight:700;padding:1px 7px;border-radius:999px;letter-spacing:.2px}
+#imp-pick-overlay .imp-tag.new{background:rgba(var(--accent-rgb),.14);color:var(--accent)}
+#imp-pick-overlay .imp-tag.upd{background:var(--fill-soft);color:var(--text-secondary)}
+#imp-pick-overlay .imp-cost{text-align:right;flex-shrink:0;font-size:13px;font-weight:700;color:var(--text-primary);line-height:1.25}
+#imp-pick-overlay .imp-cost small{display:block;font-size:10.5px;font-weight:600;color:var(--text-muted)}
+#imp-pick-overlay .imp-cost small.up{color:#dc2626}
+#imp-pick-overlay .imp-cost small.dn{color:#16a34a}
+#imp-pick-overlay .imp-empty{padding:28px 18px;text-align:center;color:var(--text-muted);font-size:13px}
+#imp-pick-overlay .ip-foot{display:flex;gap:10px;padding:12px 18px calc(14px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--fill-soft)}
+#imp-pick-overlay .ip-foot .btn{flex:1}
+#imp-pick-overlay .ip-foot .btn-primary{flex:2}
+
+/* ===== Import result report (small text, shown under the Import button) ===== */
+.imp-report{margin-top:8px;border:1px solid var(--border-glass);border-radius:14px;background:var(--bg-subtle-2,var(--surface));padding:10px 12px;font-size:11px;line-height:1.5;color:var(--text-secondary)}
+.imp-report .ir-sum{display:flex;flex-wrap:wrap;gap:6px}
+.imp-report .ir-pill{font-weight:700;padding:3px 9px;border-radius:999px;font-size:11px}
+.imp-report .ir-pill.new{background:rgba(var(--accent-rgb),.14);color:var(--accent)}
+.imp-report .ir-pill.chg{background:rgba(245,158,11,.16);color:#b45309}
+.imp-report .ir-pill.same{background:var(--fill-soft);color:var(--text-secondary)}
+.imp-report .ir-pill.warn{background:rgba(220,38,38,.12);color:#dc2626}
+.imp-report .ir-note{margin-top:8px;color:var(--text-muted)}
+.imp-report details{margin-top:8px;border-top:1px solid var(--fill-soft);padding-top:6px}
+.imp-report summary{cursor:pointer;font-weight:700;color:var(--text-primary);list-style:none;display:flex;align-items:center;justify-content:space-between}
+.imp-report summary::-webkit-details-marker{display:none}
+.imp-report summary::after{content:'\25BE';color:var(--text-muted);transition:transform .2s}
+.imp-report details[open] summary::after{transform:rotate(180deg)}
+.imp-report ul{list-style:none;margin:6px 0 0;padding:0;display:flex;flex-direction:column;gap:5px}
+.imp-report li{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+.imp-report li .n{flex:1;min-width:0;color:var(--text-primary);font-weight:600;word-break:break-word}
+.imp-report li .n i{display:block;font-style:normal;font-weight:400;color:var(--text-muted)}
+.imp-report li .v{text-align:right;flex-shrink:0;font-variant-numeric:tabular-nums;color:var(--text-secondary)}
+.imp-report li .v b.up{color:#dc2626}
+.imp-report li .v b.dn{color:#16a34a}
 </style>
 <div class="modal-overlay" id="imp-pick-overlay">
   <div class="modal-box">
-    <div class="modal-header">
-      <h3 id="imp-pick-title">Import</h3>
-      <div class="modal-close" onclick="window.__impPickCancel&&window.__impPickCancel()"><svg class="ui-icon" style="width:16px;"><use href="#icon-close"></use></svg></div>
+    <div class="ip-head">
+      <div><h3 class="ip-title" id="imp-pick-title">Import</h3><div class="ip-sub" id="imp-pick-sub"></div></div>
+      <div class="ip-x" onclick="window.__impPickCancel&&window.__impPickCancel()"><svg class="ui-icon" style="width:16px;"><use href="#icon-close"></use></svg></div>
     </div>
-    <div class="modal-body">
-      <div class="imp-tools"><input type="search" id="imp-pick-search" placeholder="Search..." autocomplete="off"></div>
-      <div class="imp-chips">
-        <button type="button" class="imp-chip" data-act="all">Select all</button>
-        <button type="button" class="imp-chip" data-act="none">Clear</button>
-        <button type="button" class="imp-chip" data-act="new">New only</button>
+    <div class="ip-tools">
+      <div class="ip-seg" id="imp-pick-seg">
+        <button type="button" data-f="all" class="on">All<b></b></button>
+        <button type="button" data-f="new">New<b></b></button>
+        <button type="button" data-f="upd">Update<b></b></button>
       </div>
-      <div class="imp-list" id="imp-pick-list"></div>
+      <input type="search" class="ip-search" id="imp-pick-search" placeholder="Search..." autocomplete="off">
     </div>
-    <div class="modal-footer"><div class="imp-foot">
+    <div class="ip-bar"><span id="imp-pick-count"></span><span><button type="button" data-act="all">Select all</button><span class="sp"></span><button type="button" data-act="none">Clear</button></span></div>
+    <div class="imp-list" id="imp-pick-list"></div>
+    <div class="ip-foot">
       <button type="button" class="btn btn-outline" onclick="window.__impPickCancel&&window.__impPickCancel()">Cancel</button>
       <button type="button" class="btn btn-primary" id="imp-pick-ok">Import</button>
-    </div></div>
+    </div>
   </div>
 </div>
 <script id="import-picker-js">
 /* Pick-what-to-import popup, shared by every package catalogue import.
-   items: [{key,label,cost,existing}] -> resolves to a Set of chosen keys, or null if cancelled.
+   items: [{key,label,cost,existing,oldCost}] -> resolves to a Set of chosen keys, or null if cancelled.
    - Ticked rows that already exist only get their Cost refreshed; ticked new rows are added.
    - New rows left unticked are remembered per game, so they stay unticked next time
-     (packages you removed on purpose no longer come back by themselves). */
+     (packages you removed on purpose no longer come back by themselves).
+   - Rows are always listed low -> high by cost. Existing rows show old -> new cost. */
 window.pickImportItems = function (kind, code, items) {
   return new Promise(function (resolve) {
     var ov = document.getElementById('imp-pick-overlay');
     var list = document.getElementById('imp-pick-list');
     var search = document.getElementById('imp-pick-search');
     var okBtn = document.getElementById('imp-pick-ok');
+    var seg = document.getElementById('imp-pick-seg');
     var memKey = 'pkgImportSkip:' + kind + ':' + code, skip = {};
     try { (JSON.parse(localStorage.getItem(memKey) || '[]') || []).forEach(function (k) { skip[k] = 1; }); } catch (e) {}
-    var data = items.slice().sort(function (a, b) { return (a.cost || 0) - (b.cost || 0); }); // low -> high
-    var sel = {};
+    var data = items.slice().sort(function (a, b) { return (a.cost || 0) - (b.cost || 0) || String(a.label).localeCompare(String(b.label), undefined, { numeric: true }); });
+    var sel = {}, filter = 'all';
     data.forEach(function (it) { sel[it.key] = it.existing ? true : !skip[it.key]; });
-    document.getElementById('imp-pick-title').textContent = 'Import packages (' + data.length + ')';
+    var nNew = data.filter(function (i) { return !i.existing; }).length, nUpd = data.length - nNew;
+    document.getElementById('imp-pick-title').textContent = 'Import packages';
+    document.getElementById('imp-pick-sub').textContent = data.length + ' products · low → high';
+    var segBtns = seg.querySelectorAll('button');
+    segBtns[0].querySelector('b').textContent = data.length; segBtns[1].querySelector('b').textContent = nNew; segBtns[2].querySelector('b').textContent = nUpd;
     search.value = '';
 
     function fmt(n) { return (Number(n) || 0).toLocaleString(); }
     function count() { return data.filter(function (it) { return sel[it.key]; }).length; }
-    function paint() {
+    function visible() {
       var q = search.value.trim().toLowerCase();
+      return data.filter(function (it) {
+        if (filter === 'new' && it.existing) return false;
+        if (filter === 'upd' && !it.existing) return false;
+        return !q || String(it.label).toLowerCase().indexOf(q) >= 0;
+      });
+    }
+    function paint() {
       list.innerHTML = '';
-      var shown = 0;
-      data.forEach(function (it) {
-        if (q && String(it.label).toLowerCase().indexOf(q) < 0) return;
-        shown++;
+      var vis = visible();
+      vis.forEach(function (it) {
         var row = document.createElement('label'); row.className = 'imp-row';
         var cb = document.createElement('input'); cb.type = 'checkbox'; cb.checked = !!sel[it.key];
         cb.onchange = function () { sel[it.key] = cb.checked; upd(); };
-        var nm = document.createElement('span'); nm.className = 'imp-name'; nm.textContent = it.label; nm.title = it.label;
-        var co = document.createElement('span'); co.className = 'imp-cost'; co.textContent = fmt(it.cost) + ' Ks';
+        var ck = document.createElement('span'); ck.className = 'imp-ck'; ck.innerHTML = '<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+        var main = document.createElement('div'); main.className = 'imp-main';
+        var nm = document.createElement('div'); nm.className = 'imp-name'; nm.textContent = it.label; nm.title = it.label;
+        var meta = document.createElement('div'); meta.className = 'imp-meta';
         var tg = document.createElement('span'); tg.className = 'imp-tag ' + (it.existing ? 'upd' : 'new'); tg.textContent = it.existing ? 'Update' : 'New';
-        row.appendChild(cb); row.appendChild(nm); row.appendChild(co); row.appendChild(tg);
+        meta.appendChild(tg);
+        main.appendChild(nm); main.appendChild(meta);
+        var co = document.createElement('div'); co.className = 'imp-cost'; co.textContent = fmt(it.cost) + ' Ks';
+        if (it.existing && it.oldCost && it.oldCost !== it.cost) {
+          var d = it.cost - it.oldCost, sm = document.createElement('small');
+          sm.className = d > 0 ? 'up' : 'dn';
+          sm.textContent = fmt(it.oldCost) + ' → ' + (d > 0 ? '▲ +' : '▼ ') + fmt(d);
+          co.appendChild(sm);
+        }
+        row.appendChild(cb); row.appendChild(ck); row.appendChild(main); row.appendChild(co);
         list.appendChild(row);
       });
-      if (!shown) { var e = document.createElement('div'); e.className = 'imp-empty'; e.textContent = 'Nothing found'; list.appendChild(e); }
+      if (!vis.length) { var e = document.createElement('div'); e.className = 'imp-empty'; e.textContent = 'Nothing found'; list.appendChild(e); }
       upd();
     }
-    function upd() { var n = count(); okBtn.textContent = 'Import ' + n + ' / ' + data.length; okBtn.disabled = n === 0; }
-    function visibleKeys() {
-      var q = search.value.trim().toLowerCase();
-      return data.filter(function (it) { return !q || String(it.label).toLowerCase().indexOf(q) >= 0; });
+    function upd() {
+      var n = count();
+      okBtn.textContent = 'Import ' + n + ' / ' + data.length; okBtn.disabled = n === 0;
+      document.getElementById('imp-pick-count').textContent = n + ' selected';
     }
     function done(result) {
       ov.classList.remove('show');
       search.oninput = null; okBtn.onclick = null; ov.onclick = null; window.__impPickCancel = null;
-      ov.querySelectorAll('.imp-chip').forEach(function (c) { c.onclick = null; });
+      ov.querySelectorAll('.ip-bar button,.ip-seg button').forEach(function (c) { c.onclick = null; });
       resolve(result);
     }
-    ov.querySelectorAll('.imp-chip').forEach(function (c) {
+    segBtns.forEach(function (b) {
+      b.classList.toggle('on', b.getAttribute('data-f') === 'all');
+      b.onclick = function () {
+        filter = b.getAttribute('data-f');
+        segBtns.forEach(function (x) { x.classList.toggle('on', x === b); });
+        paint();
+      };
+    });
+    ov.querySelectorAll('.ip-bar button').forEach(function (c) {
       c.onclick = function () {
-        var act = c.getAttribute('data-act'), vis = visibleKeys();
-        if (act === 'all') vis.forEach(function (it) { sel[it.key] = true; });
-        else if (act === 'none') vis.forEach(function (it) { sel[it.key] = false; });
-        else data.forEach(function (it) { sel[it.key] = !it.existing; });
+        var on = c.getAttribute('data-act') === 'all';
+        visible().forEach(function (it) { sel[it.key] = on; });
         paint();
       };
     });
@@ -27660,6 +27891,71 @@ window.pickImportItems = function (kind, code, items) {
     ov.classList.add('show');
   });
 };
+</script>
+<style id="admin-reload-css">
+/* ===== Own reload UI: header button + full-screen overlay (replaces the browser's reload) ===== */
+#hdr-reload.spin .ui-icon{animation:rlSpin .8s linear infinite}
+@keyframes rlSpin{to{transform:rotate(360deg)}}
+#rl-overlay{position:fixed;inset:0;z-index:600;display:flex;align-items:center;justify-content:center;padding:24px;background:color-mix(in srgb,var(--surface) 86%,transparent);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);opacity:0;pointer-events:none;transition:opacity .22s ease}
+#rl-overlay.show{opacity:1;pointer-events:auto}
+#rl-overlay .rl-card{width:100%;max-width:300px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:14px;transform:scale(.94);transition:transform .3s cubic-bezier(.2,1.1,.3,1)}
+#rl-overlay.show .rl-card{transform:scale(1)}
+#rl-overlay .rl-ring{position:relative;width:76px;height:76px;display:flex;align-items:center;justify-content:center;color:var(--accent)}
+#rl-overlay .rl-ring::before{content:'';position:absolute;inset:0;border-radius:50%;border:3px solid var(--fill-soft);border-top-color:var(--accent);animation:rlSpin .85s linear infinite}
+#rl-overlay .rl-ring .ui-icon{width:28px;height:28px;stroke:currentColor}
+#rl-overlay .rl-t{font-size:17px;font-weight:700;color:var(--text-strong,var(--text-primary))}
+#rl-overlay .rl-s{font-size:12.5px;color:var(--text-muted);line-height:1.5}
+#rl-overlay .rl-bar{width:100%;height:4px;border-radius:99px;background:var(--fill-soft);overflow:hidden}
+#rl-overlay .rl-bar i{display:block;height:100%;width:0;background:var(--accent);border-radius:99px}
+#rl-overlay.go .rl-bar i{width:100%;transition:width 1s cubic-bezier(.3,.7,.3,1)}
+#rl-overlay .rl-btns{display:none;gap:10px;width:100%}
+#rl-overlay .rl-btns .btn{flex:1}
+#rl-overlay.ask .rl-btns{display:flex}
+#rl-overlay.ask .rl-bar,#rl-overlay.ask .rl-ring{display:none}
+</style>
+<div id="rl-overlay" role="alertdialog" aria-live="polite">
+  <div class="rl-card">
+    <div class="rl-ring"><svg class="ui-icon"><use href="#icon-refresh"></use></svg></div>
+    <div class="rl-t" id="rl-t">Reloading…</div>
+    <div class="rl-s" id="rl-s">Admin panel ကို refresh လုပ်နေပါတယ်</div>
+    <div class="rl-bar"><i></i></div>
+    <div class="rl-btns">
+      <button type="button" class="btn btn-outline" onclick="adminReloadCancel()">Cancel</button>
+      <button type="button" class="btn btn-primary" onclick="adminReload(true)">Reload</button>
+    </div>
+  </div>
+</div>
+<script id="admin-reload-js">
+(function () {
+  'use strict';
+  var timer = null;
+  function el(id) { return document.getElementById(id); }
+  function editorOpen() { var a = document.querySelector('.page-section.active'); return !!(a && a.id === 'game-editor-page'); }
+  function start() {
+    var o = el('rl-overlay'), b = el('hdr-reload');
+    el('rl-t').textContent = 'Reloading…'; el('rl-s').textContent = 'Admin panel ကို refresh လုပ်နေပါတယ်';
+    o.classList.remove('ask'); o.classList.add('show');
+    void o.offsetWidth; o.classList.add('go');
+    if (b) b.classList.add('spin');
+    try { if (navigator.vibrate) navigator.vibrate(10); } catch (e) {}
+    clearTimeout(timer);
+    timer = setTimeout(function () { location.reload(); }, 1000);
+  }
+  /* skipAsk=true -> reload straight away. Otherwise, with the Game editor open, ask first
+     so unsaved package edits are not lost by accident. */
+  window.adminReload = function (skipAsk) {
+    var o = el('rl-overlay'); if (!o) { location.reload(); return; }
+    if (timer) return;
+    if (skipAsk !== true && editorOpen()) {
+      el('rl-t').textContent = 'Reload လုပ်မလား?'; el('rl-s').textContent = 'Game editor ထဲက မသိမ်းရသေးတာတွေ ပျောက်သွားမယ်';
+      o.classList.remove('go'); o.classList.add('show', 'ask'); return;
+    }
+    start();
+  };
+  window.adminReloadCancel = function () {
+    var o = el('rl-overlay'); if (o) o.classList.remove('show', 'ask', 'go');
+  };
+})();
 </script>
 <script id="redesign-v4-js">
 /* Some page sections ended up outside <main class="content-area"> (a stray closing tag
@@ -29729,6 +30025,125 @@ html body #game-list .game-row-tags .prov-chip{background:var(--fill-soft)!impor
 /* bottom nav room is already added by .content-area, so don't pad twice */
 html body .page-section{padding-bottom:12px!important}
 }
+</style>
+<style id="pkg-rows-v2">
+/* ===== Package (price) rows v2 - one clean bordered card per row, no grid ===== */
+html body #edit-packages-list{display:flex!important;flex-direction:column!important;grid-template-columns:none!important;gap:10px!important;padding:2px!important;border:0!important;background:transparent!important;box-shadow:none!important;border-radius:0!important}
+html body #edit-packages-list .package-row{flex-direction:row!important;align-items:stretch!important;min-width:0;background:var(--surface)!important;border:1px solid var(--border-glass)!important;border-radius:14px!important;box-shadow:none!important;overflow:hidden}
+html body #edit-packages-list .package-row.pkg-row-selected{border-color:var(--accent)!important;outline:0!important;box-shadow:0 0 0 1px var(--accent)!important}
+html body #edit-packages-list .pkg-order-col{flex-direction:column!important;flex:0 0 32px!important;width:32px!important;height:auto!important;border-right:1px solid var(--border-glass)!important;border-bottom:0!important;background:transparent!important}
+html body #edit-packages-list .pkg-order-col .pkg-move-btn{flex:1 1 0!important;min-height:0;padding:0!important;background:transparent!important;color:var(--text-muted)!important;border:0!important}
+html body #edit-packages-list .pkg-order-col .pkg-move-btn:first-child svg{transform:rotate(180deg)!important}
+html body #edit-packages-list .pkg-order-col .pkg-move-btn:last-child svg{transform:none!important}
+html body #edit-packages-list .pkg-drag-handle{flex:0 0 auto!important;flex-direction:column!important;gap:1px!important;padding:3px 0!important;background:transparent!important;color:var(--text-muted)!important}
+html body #edit-packages-list .pkg-order-num{font-size:11px!important;font-weight:500!important}
+html body #edit-packages-list .pkg-summary{flex-direction:column!important;gap:9px!important;padding:11px 12px!important;min-height:0!important;background:transparent}
+html body #edit-packages-list .pkg-summary-head{gap:8px!important}
+html body #edit-packages-list .pkg-summary-label{gap:9px!important}
+html body #edit-packages-list .pkg-summary-thumb{width:30px!important;height:30px!important;border-radius:8px!important;background:transparent!important;border:1px solid var(--border-glass)!important}
+html body #edit-packages-list .pkg-summary-name{font-size:13.5px!important;font-weight:500!important;font-style:normal!important;line-height:1.3!important;text-align:left!important;white-space:normal!important;overflow:hidden!important;text-overflow:clip!important;display:-webkit-box!important;-webkit-line-clamp:2;-webkit-box-orient:vertical;color:var(--text-primary)}
+html body #edit-packages-list .pkg-nm-in{display:inline!important;white-space:normal!important;font-style:normal!important;animation:none!important;transform:none!important}
+html body #edit-packages-list .pkg-summary-body{flex-wrap:nowrap!important;justify-content:space-between!important;gap:8px!important;padding-top:0!important;border-top:0!important}
+html body #edit-packages-list .pkg-summary-value{background:transparent!important;border:1px solid var(--border-glass);border-radius:9px!important;padding:5px 10px!important}
+html body #edit-packages-list .pkg-summary-price-text{font-size:13.5px!important;font-weight:600!important;text-overflow:clip!important}
+html body #edit-packages-list .pkg-summary-price-unit{font-size:10.5px!important}
+html body #edit-packages-list .pkg-summary-actions{gap:8px!important}
+html body #edit-packages-list .pkg-summary-profit{background:transparent!important;border:1px solid var(--border-glass)!important;border-radius:9px!important;font-size:11.5px!important;font-weight:500!important;padding:4px 8px!important}
+html body #edit-packages-list .pkg-summary-profit.positive{color:#1E9E4B!important;border-color:rgba(30,158,75,.4)!important}
+html body #edit-packages-list .pkg-summary-profit.negative{color:var(--danger-strong)!important;border-color:rgba(250,62,62,.4)!important}
+html body #edit-packages-list .pkg-summary-remove{width:30px;height:28px;padding:0!important;background:transparent!important;border:1px solid rgba(220,38,38,.35)!important;border-radius:9px!important;opacity:1!important;color:var(--danger-strong,#dc2626)!important}
+/* no text-selection / Copy-Cut popup / image save menu when a row is long-pressed */
+html body #edit-packages-list .pkg-summary,html body #edit-packages-list .pkg-summary *,html body #edit-packages-list .pkg-order-col,html body #edit-packages-list .pkg-order-col *{-webkit-user-select:none!important;user-select:none!important;-webkit-touch-callout:none!important;-webkit-tap-highlight-color:transparent}
+html body #edit-packages-list .pkg-summary img{-webkit-user-drag:none;pointer-events:none}
+/* Edit / Pricing action buttons: lighter weight + a thin border */
+html body #game-editor-page .pkg-actions-stack .btn,html body #game-editor-page .pkg-actions-stack .resync-pct-go,html body #game-editor-page .pkg-actions-stack #resync-pct-value,html body #game-editor-page .pkg-actions-label{font-weight:500!important}
+html body #game-editor-page .pkg-actions-stack .btn{border:1px solid var(--border-glass)!important;background:var(--surface)!important;color:var(--text-primary)!important;border-radius:10px!important;box-shadow:none!important}
+html body #game-editor-page .pkg-actions-stack .resync-pct-control{border:1px solid var(--border-glass)!important;background:var(--surface)!important;border-radius:10px!important}
+</style>
+<script id="pkg-rows-v2-js">
+/* Long-press on a package row = select for bulk image upload. Stop the browser's own
+   long-press behaviour (text selection handles, Copy / Cut bar, image menu) there. */
+(function () {
+  function inRow(t) { var n = t && (t.nodeType === 1 ? t : t.parentElement); return n && n.closest && n.closest('#edit-packages-list .pkg-summary, #edit-packages-list .pkg-order-col'); }
+  document.addEventListener('contextmenu', function (e) { if (inRow(e.target)) e.preventDefault(); }, true);
+  document.addEventListener('selectstart', function (e) { if (inRow(e.target)) e.preventDefault(); }, true);
+  document.addEventListener('dragstart', function (e) { if (e.target && e.target.tagName === 'IMG' && inRow(e.target)) e.preventDefault(); }, true);
+})();
+</script>
+<style id="pkg-rows-v3">
+/* Regular weight for small text; bold only where it matters (price value). Smaller price-card text. */
+html body #edit-packages-list .pkg-summary-name{font-size:12.5px!important;font-weight:400!important}
+html body #edit-packages-list .pkg-summary-price-text{font-size:12.5px!important;font-weight:600!important}
+html body #edit-packages-list .pkg-summary-price-unit{font-size:10px!important;font-weight:400!important}
+html body #edit-packages-list .pkg-summary-profit{font-size:10.5px!important;font-weight:400!important;padding:3px 7px!important}
+html body #edit-packages-list .pkg-summary-badge-tag{font-weight:500!important;font-size:8.5px!important}
+html body #edit-packages-list .pkg-order-num{font-size:10px!important;font-weight:400!important}
+html body #edit-packages-list .pkg-summary{padding:9px 11px!important;gap:7px!important}
+html body #edit-packages-list .pkg-summary-thumb{width:26px!important;height:26px!important}
+html body #game-editor-page .pkg-actions-stack .btn,html body #game-editor-page .pkg-actions-stack .resync-pct-go,html body #game-editor-page .pkg-actions-stack .resync-pct-btn,html body #game-editor-page .pkg-actions-stack #resync-pct-value,html body #game-editor-page .pkg-actions-label{font-weight:400!important}
+html body #game-editor-page .pkg-actions-stack .btn{font-size:12.5px!important}
+html body .pkg-tab-btn,html body .pkg-type-tab{font-weight:500!important}
+.imp-report .ir-pill,.imp-report li .n{font-weight:500!important}
+#imp-pick-overlay .imp-name,#imp-pick-overlay .imp-cost,#imp-pick-overlay .ip-seg button,#imp-pick-overlay .ip-bar button,#imp-pick-overlay .imp-tag{font-weight:500!important}
+#imp-pick-overlay .imp-cost small{font-weight:400!important}
+</style>
+<style id="users-v2">
+/* ===== Manage Users: lighter weights, rounded-square shapes, aligned text, bordered buttons ===== */
+html body #user-list .title-header{font-weight:600}
+html body #user-list .title-header .btn{border:1px solid var(--border-glass)!important;border-radius:10px!important;font-weight:400!important;box-shadow:none!important}
+html body #user-list .title-header .btn.btn-primary{border-color:rgba(var(--accent-rgb),.55)!important}
+html body #user-list .udp-tabs{gap:8px}
+html body #user-list .udp-tab{border:1px solid var(--border-glass)!important;border-radius:10px!important;font-weight:400!important;font-size:12.5px!important;box-shadow:none!important}
+html body #user-list .udp-tab.active{border-color:var(--accent)!important;font-weight:500!important}
+html body #user-list .admin-search-wrap{border-radius:12px!important}
+html body #user-list .admin-search-wrap .btn,html body #user-list #ban-nonlinn-btn{border:1px solid var(--border-glass)!important;border-radius:10px!important;font-weight:400!important;font-size:12.5px!important;box-shadow:none!important}
+html body #user-list .user-grid-card{border-radius:14px!important;padding:12px 14px!important;box-shadow:none!important}
+html body #user-list .ugc2{display:flex;align-items:flex-start!important;gap:12px!important}
+html body #user-list .ugc2-av{flex:0 0 46px;width:46px!important;height:46px!important;border-radius:12px!important}
+html body #user-list .ugc2-av img{border-radius:12px!important;width:100%;height:100%;object-fit:cover}
+html body #user-list .ugc2-main{flex:1;min-width:0;display:flex;flex-direction:column;align-items:flex-start;gap:5px;text-align:left}
+html body #user-list .ugc2-main h5{margin:0!important;font-size:14px!important;font-weight:500!important;line-height:1.3;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+html body #user-list .ugc2-main .ugc-id{display:block!important;margin:0!important;font-size:11px!important;font-weight:400!important;line-height:1.35;color:var(--text-muted)!important;overflow-wrap:anywhere}
+html body #user-list .ugc2-main .ugc-id svg{display:inline-block;vertical-align:-2px;margin-left:4px}
+html body #user-list .ugc2-tags{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:0!important}
+html body #user-list .ugc2-tags>*{display:inline-flex!important;align-items:center;gap:4px;height:24px;padding:0 8px!important;margin:0!important;border-radius:8px!important;font-size:11px!important;font-weight:400!important;line-height:1;box-sizing:border-box}
+html body #user-list .ugc2-tags .badge{border:1px solid currentColor;background:transparent!important}
+html body #user-list .ugc2-tags .badge-success{color:#1E9E4B!important;border-color:rgba(30,158,75,.4)}
+html body #user-list .ugc2-tags .badge-danger{color:var(--danger-strong,#dc2626)!important;border-color:rgba(220,38,38,.4)}
+html body #user-list .ugc2-tags .badge-warning{color:#b45309!important;border-color:rgba(180,83,9,.4)}
+html body #user-list .ugc2-side{align-self:stretch;display:flex;flex-direction:column;align-items:flex-end;justify-content:space-between;gap:6px;flex-shrink:0}
+html body #user-list .ugc2-side b{font-size:13px!important;font-weight:500!important;white-space:nowrap;line-height:1.3}
+html body #user-list .ugc2-bannote{font-weight:400}
+</style>
+<style id="lists-v2">
+/* ===== User list: no layout shift while scrolling ===== */
+html body #user-list img{content-visibility:visible!important}
+html body #user-list .user-grid-card{contain:layout style;overflow-anchor:none}
+html body #admin-users-container{overflow-anchor:none}
+html body #user-list .ugc2-main,html body #user-list .ugc2-side{min-height:46px}
+/* ===== Top-up list: small, tidy rows ===== */
+html body #topups-container{background:transparent!important;border:0!important;box-shadow:none!important;padding:0!important;display:flex;flex-direction:column;gap:8px}
+html body #topups-container .admin-card{padding:9px 11px!important;margin:0!important;border-radius:12px!important;box-shadow:none!important;border:1px solid var(--border-glass)!important}
+html body #topups-container .oc-top{display:flex;align-items:center!important;gap:10px!important}
+html body #topups-container .oc-thumb{flex:0 0 34px;width:34px!important;height:34px!important;border-radius:9px!important;background:transparent!important;border:1px solid var(--border-glass)!important}
+html body #topups-container .oc-info{display:flex;flex-direction:column;gap:2px;min-width:0}
+html body #topups-container .oc-game-name{font-size:13px!important;font-weight:500!important;line-height:1.3}
+html body #topups-container .oc-meta{font-size:11px!important;font-weight:400!important;margin:0!important;color:var(--text-muted)!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+html body #topups-container .oc-status{flex-direction:row!important;align-items:center!important;gap:6px!important}
+html body #topups-container .oc-status .badge{height:22px;padding:0 8px!important;font-size:10.5px!important;font-weight:400!important;border-radius:8px!important;border:1px solid currentColor;background:transparent!important}
+html body #topups-container .oc-status .ui-icon{width:14px!important;height:14px!important}
+html body #topups-container .wl-tag{font-size:10px!important;font-weight:400!important;padding:1px 6px!important;border-radius:6px!important}
+html body #topups-container .oc-quick{margin-top:8px;padding-top:8px}
+html body #topups-container .oc-quick-id{font-size:10.5px!important;font-weight:400!important}
+html body #topups-container .btn,html body #topup-list .th-actions .btn,html body #ticker-list-container .btn{min-height:30px!important;height:30px;padding:0 11px!important;font-size:12px!important;font-weight:400!important;border-radius:9px!important;border:1px solid var(--border-glass)}
+html body #topups-container .btn-primary,html body #ticker-list-container .btn-primary{border-color:rgba(var(--accent-rgb),.55)}
+html body #topups-container .btn-danger,html body #ticker-list-container .btn-danger{border-color:rgba(220,38,38,.5)}
+/* ===== Ticker messages ===== */
+html body #ticker-list-container .admin-card{padding:10px 12px!important;border-radius:12px!important;box-shadow:none!important}
+html body #ticker-list-container .tk-text{font-size:12.5px;font-weight:400;line-height:1.45;margin:0;word-break:break-word}
+html body #ticker-list-container .tk-foot{display:flex;gap:8px;margin-top:8px;padding:0;border:0}
+html body #ticker-list-container .tk-input{margin:0!important;font-size:13px}
+html body #add-ticker-btn{min-height:34px!important;font-size:12.5px!important;font-weight:400!important;border-radius:10px!important;padding:0 14px!important}
 </style>
 </body>
 </html>
