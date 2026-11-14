@@ -3462,6 +3462,15 @@ html body #edit-packages-list .pkg-summary-profit{font-size:10px!important;paddi
 .pim-ft{display:flex;gap:8px;padding:10px 14px calc(10px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--fill-soft)}
 .pim-ft button{flex:1;border:0;border-radius:10px;padding:11px;font-size:13.5px;font-weight:500;cursor:pointer}
 .pim-go{background:var(--accent);color:#fff;flex:2!important}
+.pim-seg{display:flex;gap:6px;padding:10px 14px 0}
+.pim-seg button{flex:1;border:1px solid var(--border-glass);background:var(--surface);color:var(--text-secondary);border-radius:10px;padding:8px;font-size:12.5px;cursor:pointer}
+.pim-seg button.on{border-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
+.pim-list.pim-one{grid-template-columns:1fr}
+.pim-empty{grid-column:1/-1;text-align:center;color:var(--text-muted);font-size:12.5px;padding:22px 8px}
+.pim-game{flex-direction:row;align-items:center;gap:8px}
+.pim-th{flex:0 0 34px;width:34px;height:34px;border-radius:9px;overflow:hidden;background:var(--fill-soft);display:flex;align-items:center;justify-content:center;font-style:normal;font-size:11px;color:var(--text-muted)}
+.pim-th img{width:100%;height:100%;object-fit:cover}
+.pim-go:disabled{opacity:.45}
 .pim-go:disabled{opacity:.5}
 .pim-alt{background:var(--fill-soft);color:var(--text-primary)}
 .pim-empty{grid-column:1/-1;text-align:center;font-size:12px;color:var(--text-muted);padding:18px 0}
@@ -14410,6 +14419,15 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
         // G2Bulk/JCPlays catalogue price, the same way checkLivePriceChanges
         // does for an open editor row — just reading straight from the
         // GAMES data instead of the DOM, since no editor is open here.
+        // A package is bought through its own provider game (pcode) when it has one, else through the game-level link.
+        function pkgCode(p, g, kind) { return String((p && p.pcode) || (kind === 'jc' ? g.jcplaysProduct : g.g2bulkCode) || ''); }
+        // Every provider game code a store game uses for one provider kind: the game-level link + each package's own pcode.
+        function providerCodes(g, kind) {
+            const set = new Set(), base = kind === 'jc' ? g.jcplaysProduct : g.g2bulkCode;
+            if (base) set.add(String(base));
+            (g.packages || []).forEach(p => { if (p && p.pcode && (kind === 'jc' ? p.jcplays : p.g2bulk)) set.add(String(p.pcode)); });
+            return Array.from(set);
+        }
         async function computeGameCostUpdateCount(g) {
             const rate = G2BULK_SETTINGS.usdRate || 4500;
             const packages = g.packages || [];
@@ -14422,22 +14440,24 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
             // of stopping at the first match.
             let changed = 0;
             try {
-                if (g.g2bulkCode) {
-                    const data = await scanG2BulkCatalogue(g.g2bulkCode);
+                for (const __c of providerCodes(g, 'g2')) {
+                    const data = await scanG2BulkCatalogue(__c);
                     if (data.success) {
                         const liveByName = liveCostMap((data.catalogues || []).map(c => [c.name, c.amount, rate]));
                         packages.forEach(p => {
+                            if (pkgCode(p, g, 'g2') !== __c) return;
                             const key = (p.g2bulk || '').trim();
                             if (!key || !liveByName.has(key)) return;
                             if (liveByName.get(key) !== (Number(p.cost) || 0)) changed++;
                         });
                     }
                 }
-                if (g.jcplaysProduct && JCPLAYS_SETTINGS.uid && JCPLAYS_SETTINGS.email && JCPLAYS_SETTINGS.mKey) {
-                    const data = await scanJcplaysProducts(g.jcplaysProduct);
+                if (JCPLAYS_SETTINGS.uid && JCPLAYS_SETTINGS.email && JCPLAYS_SETTINGS.mKey) for (const __c of providerCodes(g, 'jc')) {
+                    const data = await scanJcplaysProducts(__c);
                     if (data.status === 200) {
                         const liveById = liveCostMap(((data.data && data.data.product) || []).map(r => [String(r.id), r.price, jcplaysRate()]));
                         packages.forEach(p => {
+                            if (pkgCode(p, g, 'jc') !== __c) return;
                             const key = (p.jcplays || '').trim();
                             if (!key || !liveById.has(key)) return;
                             if (liveById.get(key) !== (Number(p.cost) || 0)) changed++;
@@ -14485,22 +14505,24 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
             // across its packages instead of being tied to a single one.
             let outCount = 0;
             try {
-                if (g.g2bulkCode) {
-                    const data = await scanG2BulkCatalogue(g.g2bulkCode);
+                for (const __c of providerCodes(g, 'g2')) {
+                    const data = await scanG2BulkCatalogue(__c);
                     if (data.success) {
                         const liveNames = new Set((data.catalogues || []).map(c => c.name));
                         packages.forEach(p => {
+                            if (pkgCode(p, g, 'g2') !== __c) return;
                             const key = (p.g2bulk || '').trim();
                             if (!key) return;
                             if (!liveNames.has(key)) outCount++;
                         });
                     }
                 }
-                if (g.jcplaysProduct && JCPLAYS_SETTINGS.uid && JCPLAYS_SETTINGS.email && JCPLAYS_SETTINGS.mKey) {
-                    const data = await scanJcplaysProducts(g.jcplaysProduct);
+                if (JCPLAYS_SETTINGS.uid && JCPLAYS_SETTINGS.email && JCPLAYS_SETTINGS.mKey) for (const __c of providerCodes(g, 'jc')) {
+                    const data = await scanJcplaysProducts(__c);
                     if (data.status === 200) {
                         const liveIds = new Set(((data.data && data.data.product) || []).map(r => String(r.id)));
                         packages.forEach(p => {
+                            if (pkgCode(p, g, 'jc') !== __c) return;
                             const key = (p.jcplays || '').trim();
                             if (!key) return;
                             if (!liveIds.has(key)) outCount++;
@@ -14619,20 +14641,20 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
                 const sources = [];
                 const sourceErrors = [];
 
-                if (g.g2bulkCode) {
+                for (const __c of providerCodes(g, 'g2')) {
                     try {
-                        const res = await fetch(`https://api.g2bulk.com/v1/games/${encodeURIComponent(g.g2bulkCode)}/catalogue`);
+                        const res = await fetch(`https://api.g2bulk.com/v1/games/${encodeURIComponent(__c)}/catalogue`);
                         const data = await res.json();
                         if (!data.success) throw new Error(data.message || 'Check failed');
-                        sources.push({ keyField: 'g2bulk', liveByKey: liveCostMap((data.catalogues || []).map(c => [c.name, c.amount, rate])) });
+                        sources.push({ keyField: 'g2bulk', code: __c, liveByKey: liveCostMap((data.catalogues || []).map(c => [c.name, c.amount, rate])) });
                     } catch (err) { sourceErrors.push(`G2Bulk: ${err.message}`); }
                 }
-                if (g.jcplaysProduct) {
+                for (const __c of providerCodes(g, 'jc')) {
                     try {
                         if (!JCPLAYS_SETTINGS.uid || !JCPLAYS_SETTINGS.email || !JCPLAYS_SETTINGS.mKey) throw new Error('Add your JCPlays credentials first.');
-                        const data = await jcplaysRequest('productlist', { product: g.jcplaysProduct });
+                        const data = await jcplaysRequest('productlist', { product: __c });
                         if (data.status !== 200) throw new Error(data.message || `status ${data.status}`);
-                        sources.push({ keyField: 'jcplays', liveByKey: liveCostMap(((data.data && data.data.product) || []).map(r => [String(r.id), r.price, jcplaysRate()])) });
+                        sources.push({ keyField: 'jcplays', code: __c, liveByKey: liveCostMap(((data.data && data.data.product) || []).map(r => [String(r.id), r.price, jcplaysRate()])) });
                     } catch (err) { sourceErrors.push(`JCPlays: ${err.message}`); }
                 }
                 if (g.fulfillProvider === 'g2bulk_voucher' && g.g2bulkVoucherCategory) {
@@ -14650,7 +14672,8 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
 
                 let changed = 0;
                 packages.forEach(p => {
-                    sources.forEach(({ keyField, liveByKey }) => {
+                    sources.forEach(({ keyField, liveByKey, code }) => {
+                        if ((keyField === 'g2bulk' && pkgCode(p, g, 'g2') !== code) || (keyField === 'jcplays' && pkgCode(p, g, 'jc') !== code)) return;
                         const key = (p[keyField] || '').trim();
                         if (!key || !liveByKey.has(key)) return;
                         const liveCost = liveByKey.get(key);
@@ -14696,17 +14719,17 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
                         const rate = G2BULK_SETTINGS.usdRate || 4500;
             const packages = (g.packages || []).map(p => ({ ...p }));
             const sources = [];
-            if (g.g2bulkCode) {
+            for (const __c of providerCodes(g, 'g2')) {
                 try {
-                    const res = await fetch(`https://api.g2bulk.com/v1/games/${encodeURIComponent(g.g2bulkCode)}/catalogue`);
+                    const res = await fetch(`https://api.g2bulk.com/v1/games/${encodeURIComponent(__c)}/catalogue`);
                     const data = await res.json();
-                    if (data.success) sources.push({ keyField: 'g2bulk', liveByKey: liveCostMap((data.catalogues || []).map(c => [c.name, c.amount, rate])) });
+                    if (data.success) sources.push({ keyField: 'g2bulk', code: __c, liveByKey: liveCostMap((data.catalogues || []).map(c => [c.name, c.amount, rate])) });
                 } catch (error) { console.error('Auto price update — G2Bulk fetch error:', gameId, error); }
             }
-            if (g.jcplaysProduct && JCPLAYS_SETTINGS.uid && JCPLAYS_SETTINGS.email && JCPLAYS_SETTINGS.mKey) {
+            if (JCPLAYS_SETTINGS.uid && JCPLAYS_SETTINGS.email && JCPLAYS_SETTINGS.mKey) for (const __c of providerCodes(g, 'jc')) {
                 try {
-                    const data = await jcplaysRequest('productlist', { product: g.jcplaysProduct });
-                    if (data.status === 200) sources.push({ keyField: 'jcplays', liveByKey: liveCostMap(((data.data && data.data.product) || []).map(r => [String(r.id), r.price, jcplaysRate()])) });
+                    const data = await jcplaysRequest('productlist', { product: __c });
+                    if (data.status === 200) sources.push({ keyField: 'jcplays', code: __c, liveByKey: liveCostMap(((data.data && data.data.product) || []).map(r => [String(r.id), r.price, jcplaysRate()])) });
                 } catch (error) { console.error('Auto price update — JCPlays fetch error:', gameId, error); }
             }
             if (g.fulfillProvider === 'g2bulk_voucher' && g.g2bulkVoucherCategory) {
@@ -14722,7 +14745,8 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
 
             let changed = 0;
             packages.forEach(p => {
-                sources.forEach(({ keyField, liveByKey }) => {
+                sources.forEach(({ keyField, liveByKey, code }) => {
+                    if ((keyField === 'g2bulk' && pkgCode(p, g, 'g2') !== code) || (keyField === 'jcplays' && pkgCode(p, g, 'jc') !== code)) return;
                     const key = (p[keyField] || '').trim();
                     if (!key || !liveByKey.has(key)) return;
                     const liveCost = liveByKey.get(key);
@@ -15682,6 +15706,7 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
             row.className = 'package-row';
             row.dataset.tab = resolvedTab;
             row.innerHTML = `
+                <div class="pkg-swipe-bg" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path><path d="M10 11v6M14 11v6M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"></path></svg><span>ဖျက်မည်</span></div>
                 <div class="pkg-order-col">
                     <button type="button" class="pkg-move-btn" onclick="movePackageRow(this,-1)" title="အပေါ်ရွှေ့ရန်">
                         <svg class="ui-icon" style="width:13px;height:13px;transform:rotate(180deg);"><use href="#icon-chevron-down"></use></svg>
@@ -15704,6 +15729,7 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
                                     <div class="pkg-select-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></div>
                                 </div>
                                 <span class="pkg-summary-name">${amount || 'Unnamed package'}</span>
+                                <span class="pkg-summary-code" style="display:none;"></span>
                                 <span class="pkg-summary-badge-tag" style="${badge === 'top' || badge === 'hot' ? '' : 'display:none;'}padding:1px 6px;border-radius:8px;font-size:9px;font-weight:700;color:#fff;background:${badge === 'top' ? 'linear-gradient(135deg,#FFC93C,#FF9800)' : 'linear-gradient(135deg,#FF8A65,#FF3D57)'};">${badge === 'top' ? 'TOP' : 'HOT'}</span>
                             </div>
                             <span class="pkg-summary-dot ${type === 'package' ? 'pkg-dot-package' : ''}" title="${type === 'package' ? 'Package (wide banner)' : 'Currency (grid card)'}"></span>
@@ -15716,7 +15742,7 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
                             </span>
                             <div class="pkg-summary-actions">
                                 <span class="pkg-summary-profit">--</span>
-                                <div class="pkg-summary-remove pkg-x-icon" onclick="event.stopPropagation(); removePackageRow(this)" title="ဖျက်ရန်"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></div>
+                                
                             </div>
                         </div>
                     </div>
@@ -16218,6 +16244,15 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
         });
 
         // Removes a package row (called from the × button) and refreshes order numbers.
+        // Remembers which provider game a package is bought through and shows it as a small tag on the card.
+        function setRowPcode(row, code) {
+            if (!row) return;
+            code = code ? String(code) : '';
+            if (code) row.dataset.pcode = code; else delete row.dataset.pcode;
+            const chip = row.querySelector('.pkg-summary-code');
+            if (chip) { chip.textContent = code; chip.style.display = code ? '' : 'none'; }
+        }
+        window.setRowPcode = setRowPcode;
         function removePackageRow(el) {
             const row = el.closest('.package-row');
             if (!row || row.__rm) return;
@@ -17057,6 +17092,7 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
                         p.voucherId || '',
                         null, p.badge || '', p.costUsd || ''
                     );
+                    if (p.pcode) setRowPcode(document.querySelector('#edit-packages-list .package-row:last-child'), p.pcode);
                 });
                 {   // open on the first tab that actually has packages
                     const __rows = Array.from(document.querySelectorAll('#edit-packages-list .package-row'));
@@ -17468,7 +17504,9 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
                     image: row.querySelector('.pkg-img-preview').dataset.url || '',
                     type: row.querySelector('.pkg-type').value || 'currency',
                     tab: row.dataset.tab || row.querySelector('.pkg-type').value || 'currency',
-                    badge: row.querySelector('.pkg-badge') ? row.querySelector('.pkg-badge').value : ''
+                    badge: row.querySelector('.pkg-badge') ? row.querySelector('.pkg-badge').value : '',
+                    // provider game this package is bought through (only when it differs from / is set apart from the game-level link)
+                    pcode: row.dataset.pcode || ''
                 };
             }).filter(p => p.amount && p.price > 0);
 
@@ -22897,6 +22935,7 @@ return `
                 // gets appended as a new row (Cost = Price, same as first import).
                 const rowByG2BulkName = new Map();
                 Array.from(document.querySelectorAll('#edit-packages-list .package-row')).forEach(row => {
+                    if (row.dataset.pcode && row.dataset.pcode !== code) return;   // belongs to another provider game
                     const key = row.querySelector('.pkg-g2bulk').value.trim();
                     if (key) rowByG2BulkName.set(key, row);
                 });
@@ -23539,25 +23578,30 @@ return `
                         if (markRowChanged(row, liveById.get(key), liveById.usd.get(key))) changed++;
                     });
                 } else {
-                    if (g2bulkCodeVal) {
-                        const res = await fetch(`https://api.g2bulk.com/v1/games/${encodeURIComponent(g2bulkCodeVal)}/catalogue`);
+                    const rowCode = (r, base) => r.dataset.pcode || base;
+                    const g2codes = Array.from(new Set([g2bulkCodeVal].concat(rows.filter(r => r.dataset.pcode && r.querySelector('.pkg-g2bulk').value.trim()).map(r => r.dataset.pcode)).filter(Boolean)));
+                    const jccodes = Array.from(new Set([jcplaysCodeVal].concat(rows.filter(r => r.dataset.pcode && r.querySelector('.pkg-jcplays').value.trim()).map(r => r.dataset.pcode)).filter(Boolean)));
+                    for (const __c of g2codes) {
+                        const res = await fetch(`https://api.g2bulk.com/v1/games/${encodeURIComponent(__c)}/catalogue`);
                         const data = await res.json();
                         if (!data.success) throw new Error(data.message || 'Check failed');
                         const liveByName = liveCostMap((data.catalogues || []).map(c => [c.name, c.amount, rate]));
                         anyChecked = true;
                         rows.forEach(row => {
+                            if (rowCode(row, g2bulkCodeVal) !== __c) return;
                             const key = row.querySelector('.pkg-g2bulk').value.trim();
                             if (!key || !liveByName.has(key)) return;
                             if (markRowChanged(row, liveByName.get(key), liveByName.usd.get(key))) changed++;
                         });
                     }
-                    if (jcplaysCodeVal) {
+                    for (const __c of jccodes) {
                         if (!JCPLAYS_SETTINGS.uid || !JCPLAYS_SETTINGS.email || !JCPLAYS_SETTINGS.mKey) throw new Error('Add your JCPlays credentials first.');
-                        const data = await jcplaysRequest('productlist', { product: jcplaysCodeVal });
+                        const data = await jcplaysRequest('productlist', { product: __c });
                         if (data.status !== 200) throw new Error(data.message || `status ${data.status}`);
                         const liveById = liveCostMap(((data.data && data.data.product) || []).map(r => [String(r.id), r.price, jcplaysRate()]));
                         anyChecked = true;
                         rows.forEach(row => {
+                            if (rowCode(row, jcplaysCodeVal) !== __c) return;
                             const key = row.querySelector('.pkg-jcplays').value.trim();
                             if (!key || !liveById.has(key)) return;
                             if (markRowChanged(row, liveById.get(key), liveById.usd.get(key))) changed++;
@@ -24101,6 +24145,7 @@ return `
                 // with no matching row is brand new, so it's appended.
                 const rowByJcplaysId = new Map();
                 Array.from(document.querySelectorAll('#edit-packages-list .package-row')).forEach(row => {
+                    if (row.dataset.pcode && row.dataset.pcode !== product) return;   // belongs to another provider game
                     const key = row.querySelector('.pkg-jcplays').value.trim();
                     if (key) rowByJcplaysId.set(key, row);
                 });
@@ -24459,11 +24504,14 @@ return `
         // (only the singular was exposed, which threw a ReferenceError and made the picker do nothing).
         window.previewGameBanners = previewGameBanners;
 
-        // ===== Import packages from another game (Game Editor) + marquee for long package names =====
+        // ===== Import packages from a provider game (Game Editor) =====
+        // Lists the provider's games (G2Bulk / JCPlays) that have NOT been added to the store yet,
+        // lets the admin tick the packages they want, and imports them into the game being edited.
+        // The first provider game becomes the game's default link (g2bulkCode / jcplaysProduct); every imported
+        // package also remembers its own provider game (pcode), so one store game can mix several provider
+        // games and each order is fulfilled / checked through the package's own code.
         function openImportFromGame() {
             const curId = (document.getElementById('edit-game-id') || {}).value || '';
-            const games = Object.entries(GAMES || {}).filter(([id, g]) => id !== curId && g && Array.isArray(g.packages) && g.packages.length);
-            games.sort((a, b) => String(a[1].name || '').localeCompare(String(b[1].name || '')));
             const ov = document.createElement('div');
             ov.className = 'pim-ov';
             ov.innerHTML = '<div class="pim-sheet"></div>';
@@ -24471,42 +24519,94 @@ return `
             const sheet = ov.firstChild;
             const close = () => ov.remove();
             ov.addEventListener('click', e => { if (e.target === ov) close(); });
+            let provider = 'g2bulk';
+            const PROV = { g2bulk: 'G2Bulk', jcplays: 'JCPlays' };
+            const imgUrl = u => u ? (/^https?:\/\//.test(u) ? u : 'https://api.g2bulk.com' + u) : '';
 
-            function labelOf(g) { return (g.name || 'Game') + (g.serverName ? ' - ' + g.serverName : ''); }
+            // provider codes already used by a store game (the game being edited does not count)
+            function linkedCodes() {
+                const s = new Set();
+                Object.entries(GAMES || {}).forEach(([id, g]) => {
+                    if (!g || id === curId) return;
+                    const c = provider === 'jcplays' ? g.jcplaysProduct : g.g2bulkCode;
+                    if (c) s.add(String(c));
+                    (g.packages || []).forEach(p => { if (p && p.pcode) s.add(String(p.pcode)); });
+                });
+                return s;
+            }
+            async function loadItems() {
+                if (provider === 'jcplays') {
+                    if (!JCPLAYS_SETTINGS.uid || !JCPLAYS_SETTINGS.email || !JCPLAYS_SETTINGS.mKey) throw new Error('JCPlays credentials မထည့်ရသေးပါ (Dashboard → JCPlays → Settings)');
+                    return (await fetchJCPlaysProductsList()).map(x => ({ code: String(x.code), name: x.name || x.code, image: x.image || '' }));
+                }
+                return (await fetchG2BulkGamesList()).map(g => ({ code: String(g.code || g.id || g.name), name: g.name || g.title || g.code, image: imgUrl(g.image || g.image_url || '') }));
+            }
 
             function stepGames() {
                 sheet.innerHTML = '<div class="pim-hd"><b>Import packages from</b><button type="button" class="pim-x" aria-label="Close">x</button></div>' +
+                    '<div class="pim-seg"><button type="button" data-p="g2bulk">G2Bulk</button><button type="button" data-p="jcplays">JCPlays</button></div>' +
                     '<input class="pim-search" type="search" placeholder="Search game">' +
                     '<div class="pim-list"></div>';
                 sheet.querySelector('.pim-x').onclick = close;
                 const listEl = sheet.querySelector('.pim-list'), q = sheet.querySelector('.pim-search');
+                let items = null, seq = 0;
                 function draw() {
+                    if (!items) return;
                     const t = q.value.trim().toLowerCase();
-                    const rows = games.filter(([id, g]) => !t || labelOf(g).toLowerCase().includes(t));
-                    listEl.innerHTML = rows.length ? '' : '<div class="pim-empty">No games with packages</div>';
-                    rows.forEach(([id, g]) => {
+                    const used = linkedCodes();
+                    const avail = items.filter(it => !used.has(it.code));
+                    const rows = avail.filter(it => !t || it.name.toLowerCase().includes(t));
+                    listEl.innerHTML = rows.length ? '' : '<div class="pim-empty">' + (avail.length ? 'No match' : 'Every ' + PROV[provider] + ' game is already added') + '</div>';
+                    rows.forEach(it => {
                         const b = document.createElement('button');
                         b.type = 'button'; b.className = 'pim-game';
-                        b.innerHTML = '<b>' + escapeHtml(labelOf(g)) + '</b><small>' + g.packages.length + ' packages</small>';
-                        b.onclick = () => stepPackages(id, g);
+                        b.innerHTML = '<i class="pim-th">' + (it.image ? '<img src="' + escapeHtml(it.image) + '" alt="" loading="lazy">' : escapeHtml(pickerInitials(it.name))) + '</i><b>' + escapeHtml(it.name) + '</b>';
+                        const im = b.querySelector('img'); if (im) im.onerror = () => { im.remove(); };
+                        b.onclick = () => stepPackages(it);
                         listEl.appendChild(b);
                     });
                 }
-                q.addEventListener('input', draw); draw();
+                function pick(p) {
+                    provider = p;
+                    sheet.querySelectorAll('.pim-seg button').forEach(b => b.classList.toggle('on', b.dataset.p === p));
+                    const my = ++seq; items = null;
+                    listEl.innerHTML = '<div class="pim-empty">Loading...</div>';
+                    loadItems().then(r => { if (my !== seq) return; items = r; draw(); })
+                        .catch(e => { if (my === seq) listEl.innerHTML = '<div class="pim-empty">' + escapeHtml(e.message || 'Could not load games') + '</div>'; });
+                }
+                sheet.querySelectorAll('.pim-seg button').forEach(b => b.onclick = () => pick(b.dataset.p));
+                q.addEventListener('input', draw);
+                pick(provider);
             }
 
-            function stepPackages(id, g) {
-                const pk = g.packages;
-                sheet.innerHTML = '<div class="pim-hd"><button type="button" class="pim-x pim-back" aria-label="Back">&lsaquo;</button><b>' + escapeHtml(labelOf(g)) + '</b><button type="button" class="pim-x" aria-label="Close">x</button></div>' +
-                    '<div class="pim-list" style="grid-template-columns:1fr"></div>' +
-                    '<div class="pim-ft"><button type="button" class="pim-alt pim-all">Select all</button><button type="button" class="pim-go">Import</button></div>';
+            async function stepPackages(it) {
+                const kind = provider;
+                sheet.innerHTML = '<div class="pim-hd"><button type="button" class="pim-x pim-back" aria-label="Back">&lsaquo;</button><b>' + escapeHtml(it.name) + '</b><button type="button" class="pim-x pim-close" aria-label="Close">x</button></div>' +
+                    '<div class="pim-list pim-one"><div class="pim-empty">Loading packages...</div></div>' +
+                    '<div class="pim-ft"><button type="button" class="pim-alt pim-all">Select all</button><button type="button" class="pim-go" disabled>Import 0</button></div>';
                 sheet.querySelector('.pim-back').onclick = stepGames;
-                sheet.querySelector('.pim-x:not(.pim-back)').onclick = close;
+                sheet.querySelector('.pim-close').onclick = close;
                 const listEl = sheet.querySelector('.pim-list'), go = sheet.querySelector('.pim-go'), allBtn = sheet.querySelector('.pim-all');
+                let pk = [];
+                try {
+                    const rate = G2BULK_SETTINGS.usdRate || 4500;
+                    if (kind === 'jcplays') {
+                        const data = await jcplaysRequest('productlist', { product: it.code });
+                        if (data.status !== 200) throw new Error(data.message || ('status ' + data.status));
+                        pk = ((data.data && data.data.product) || []).map(r => ({ label: r.spu, usd: Number(r.price), cost: Math.round(Number(r.price) * jcplaysRate()), jc: String(r.id), g2: '' }));
+                    } else {
+                        const res = await fetch('https://api.g2bulk.com/v1/games/' + encodeURIComponent(it.code) + '/catalogue');
+                        const data = await res.json();
+                        if (!data.success) throw new Error(data.message || 'Load failed');
+                        pk = (data.catalogues || []).map(c => ({ label: c.name, usd: c.amount, cost: Math.round(c.amount * rate), jc: '', g2: c.name }));
+                    }
+                } catch (e) { listEl.innerHTML = '<div class="pim-empty">' + escapeHtml(e.message || 'Could not load packages') + '</div>'; return; }
+                if (!pk.length) { listEl.innerHTML = '<div class="pim-empty">No packages</div>'; return; }
+                listEl.innerHTML = '';
                 pk.forEach((p, i) => {
                     const l = document.createElement('label');
                     l.className = 'pim-pk';
-                    l.innerHTML = '<input type="checkbox" checked data-i="' + i + '"><span>' + escapeHtml(String(p.amount || 'Unnamed')) + '</span><em>' + (p.price ? Number(p.price).toLocaleString() + ' MMK' : '--') + '</em>';
+                    l.innerHTML = '<input type="checkbox" data-i="' + i + '"><span>' + escapeHtml(String(p.label || 'Unnamed')) + '</span><em>' + (p.cost ? p.cost.toLocaleString() + ' MMK' : '--') + '</em>';
                     listEl.appendChild(l);
                 });
                 const boxes = () => Array.from(listEl.querySelectorAll('input'));
@@ -24515,18 +24615,64 @@ return `
                 allBtn.onclick = () => { const on = boxes().some(b => !b.checked); boxes().forEach(b => b.checked = on); sync(); };
                 sync();
                 go.onclick = () => {
-                    const have = new Set(Array.from(document.querySelectorAll('#edit-packages-list .package-row')).map(r => ((r.querySelector('.pkg-amount') || {}).value || '').trim().toLowerCase() + '|' + r.dataset.tab));
+                    const field = document.getElementById(kind === 'jcplays' ? 'edit-game-jcplays-code' : 'edit-game-g2bulk-code');
+                    const cur = (field.value || '').trim();
+                    const wasLinked = !!cur;
+                    // a package is identified by (provider game code + package name/id), so two provider games can share a name without clashing
+                    const idOf = r => (kind === 'jcplays' ? r.querySelector('.pkg-jcplays') : r.querySelector('.pkg-g2bulk')).value.trim();
+                    const have = new Set(Array.from(document.querySelectorAll('#edit-packages-list .package-row')).map(r => idOf(r) ? ((r.dataset.pcode || cur) + '|' + idOf(r)) : '').filter(Boolean));
+                    const snap = pkgRowSnapshot();
                     let added = 0, skipped = 0;
                     boxes().filter(b => b.checked).forEach(b => {
                         const p = pk[+b.dataset.i];
-                        const tab = p.tab || p.type || 'currency';
-                        const key = String(p.amount || '').trim().toLowerCase() + '|' + tab;
-                        if (have.has(key)) { skipped++; return; }
-                        have.add(key);
-                        addPackageRow(p.amount || '', p.cost || 0, p.price || 0, p.g2bulk || '', p.jcplays || '', p.image || '', p.type || 'currency', tab, false, p.voucherId || '', null, p.badge || '', p.costUsd || '');
+                        const key = kind === 'jcplays' ? p.jc : p.g2;
+                        const uid = it.code + '|' + key;
+                        if (have.has(uid)) { skipped++; return; }
+                        have.add(uid);
+                        const price = autoPriceForCost(p.cost);
+                        addPackageRow(p.label, p.cost, price, p.g2, p.jc, '', 'currency', null, true);
+                        const lastRow = document.querySelector('#edit-packages-list .package-row:last-child');
+                        setPkgCostUsd(lastRow, p.usd);
+                        setRowPcode(lastRow, it.code);   // orders for this package go through ITS provider game
                         added++;
                     });
-                    try { renumberPackageRows(); renderPkgTabBar(); applyPackageTabFilter(); } catch (e) {}
+                    // link the game being edited to the provider game so purchases go through it
+                    if (!wasLinked) {   // game-level link is only the default; it is set once, other codes live on their packages
+                    field.value = it.code;
+                    field.dispatchEvent(new Event('input', { bubbles: true }));
+                    field.dispatchEvent(new Event('change', { bubbles: true }));
+                    }
+                    if (!gamePickerItems.some(x => String(x.code) === it.code)) gamePickerItems.push(it);
+                    try { refreshPickerButton(kind); } catch (e) {}
+                    try { if (kind === 'g2bulk') onG2BulkGameChange(); else onJCPlaysCodeTyped(); } catch (e) {}
+                    try { if (currentFulfillProvider === 'manual') setFulfillProvider(kind); } catch (e) {}
+                    // brand-new game: take the provider game's name / cover like the normal picker does
+                    try {
+                        if (!curId) {
+                            const nameField = document.getElementById('edit-game-name');
+                            if (nameField && !nameField.readOnly && !nameField.value.trim()) nameField.value = it.name || '';
+                            if (it.image && !editingImageFile && !editingImageRemoteUrl) {
+                                const preview = document.getElementById('edit-game-preview');
+                                if (preview) {
+                                    preview.src = it.image; preview.style.display = 'block';
+                                    document.getElementById('game-img-update-box').classList.add('has-image');
+                                    document.getElementById('game-img-update-change').style.display = 'flex';
+                                    editingImageRemoteUrl = it.image;
+                                }
+                            }
+                        }
+                    } catch (e) {}
+                    // G2Bulk: first link -> auto-detect whether the game needs a Server ID
+                    if (kind === 'g2bulk' && !wasLinked) {
+                        fetch('https://api.g2bulk.com/v1/games/fields', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ game: it.code }) })
+                            .then(r => r.json()).then(d => {
+                                const f = Array.isArray(d.fields) ? d.fields : (d.info && Array.isArray(d.info.fields)) ? d.info.fields : [];
+                                document.getElementById('edit-game-playerid').checked = true;
+                                onPlayerIdRequiredToggle();
+                                document.getElementById('edit-game-serverid').checked = f.some(k => /server/i.test(k));
+                            }).catch(() => {});
+                    }
+                    try { sortImportedTabs(snap); renumberPackageRows(); renderPkgTabBar(); applyPackageTabFilter(); } catch (e) {}
                     close();
                     window.showToast('Imported ' + added + ' packages' + (skipped ? ' (' + skipped + ' already existed)' : '') + ' - tap Save Game to keep them', 'success');
                 };
@@ -30042,7 +30188,6 @@ html body #edit-packages-list .pkg-summary-head{gap:8px!important}
 html body #edit-packages-list .pkg-summary-label{gap:9px!important}
 html body #edit-packages-list .pkg-summary-thumb{width:30px!important;height:30px!important;border-radius:8px!important;background:transparent!important;border:1px solid var(--border-glass)!important}
 html body #edit-packages-list .pkg-summary-name{font-size:13.5px!important;font-weight:500!important;font-style:normal!important;line-height:1.3!important;text-align:left!important;white-space:normal!important;overflow:hidden!important;text-overflow:clip!important;display:-webkit-box!important;-webkit-line-clamp:2;-webkit-box-orient:vertical;color:var(--text-primary)}
-html body #edit-packages-list .pkg-nm-in{display:inline!important;white-space:normal!important;font-style:normal!important;animation:none!important;transform:none!important}
 html body #edit-packages-list .pkg-summary-body{flex-wrap:nowrap!important;justify-content:space-between!important;gap:8px!important;padding-top:0!important;border-top:0!important}
 html body #edit-packages-list .pkg-summary-value{background:transparent!important;border:1px solid var(--border-glass);border-radius:9px!important;padding:5px 10px!important}
 html body #edit-packages-list .pkg-summary-price-text{font-size:13.5px!important;font-weight:600!important;text-overflow:clip!important}
@@ -30145,5 +30290,94 @@ html body #ticker-list-container .tk-foot{display:flex;gap:8px;margin-top:8px;pa
 html body #ticker-list-container .tk-input{margin:0!important;font-size:13px}
 html body #add-ticker-btn{min-height:34px!important;font-size:12.5px!important;font-weight:400!important;border-radius:10px!important;padding:0 14px!important}
 </style>
+<style id="pkg-rows-v4">
+@layer soft-glass{
+/* ===== Package rows v4: one line per row, bordered cards, gliding long names, swipe-right to delete ===== */
+html:root body:not(#_a1):not(#_a2):not(#_a3):not(#_a4):not(#_a5):not(#_a6):not(#_a7):not(#_a8):not(#_a9):not(#_b1):not(#_b2):not(#_b3) #edit-packages-list{gap:8px!important;padding:2px 1px!important}
+html:root body:not(#_a1):not(#_a2):not(#_a3):not(#_a4):not(#_a5):not(#_a6):not(#_a7):not(#_a8):not(#_a9):not(#_b1):not(#_b2):not(#_b3) #edit-packages-list .package-row{position:relative!important;min-height:46px!important;border:1.5px solid color-mix(in srgb,var(--text-primary) 24%,transparent)!important;border-radius:12px!important;background:var(--surface-strong,var(--surface))!important;box-shadow:0 1px 3px rgba(0,0,0,.07)!important;overflow:hidden!important;touch-action:pan-y}
+html:root body:not(#_a1):not(#_a2):not(#_a3):not(#_a4):not(#_a5):not(#_a6):not(#_a7):not(#_a8):not(#_a9):not(#_b1):not(#_b2):not(#_b3) #edit-packages-list .package-row .pkg-order-col{flex:0 0 38px!important;width:38px!important;padding:0 0 0 4px!important;border-right:0!important}
+html:root body:not(#_a1):not(#_a2):not(#_a3):not(#_a4):not(#_a5):not(#_a6):not(#_a7):not(#_a8):not(#_a9):not(#_b1):not(#_b2):not(#_b3) #edit-packages-list .package-row .pkg-row-fields{flex:1 1 0!important;min-width:0!important}
+html:root body:not(#_a1):not(#_a2):not(#_a3):not(#_a4):not(#_a5):not(#_a6):not(#_a7):not(#_a8):not(#_a9):not(#_b1):not(#_b2):not(#_b3) #edit-packages-list .package-row .pkg-summary{flex-direction:row!important;flex-wrap:nowrap!important;align-items:center!important;gap:8px!important;padding:6px 8px 6px 2px!important;min-height:0!important}
+html:root body:not(#_a1):not(#_a2):not(#_a3):not(#_a4):not(#_a5):not(#_a6):not(#_a7):not(#_a8):not(#_a9):not(#_b1):not(#_b2):not(#_b3) #edit-packages-list .package-row .pkg-summary-label{display:flex!important;align-items:center!important;flex:1 1 0!important;min-width:0!important;gap:6px!important;overflow:hidden!important}
+/* name: single line, regular weight, never wraps / never "..." - long names glide left-right (pkgNameMarquee) */
+html:root body:not(#_a1):not(#_a2):not(#_a3):not(#_a4):not(#_a5):not(#_a6):not(#_a7):not(#_a8):not(#_a9):not(#_b1):not(#_b2):not(#_b3) #edit-packages-list .package-row .pkg-summary-name{display:block!important;flex:1 1 0!important;min-width:0!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:clip!important;-webkit-line-clamp:unset!important;-webkit-box-orient:horizontal!important;font-size:13px!important;font-weight:400!important;line-height:1.35!important;text-align:left!important}
+html:root body:not(#_a1):not(#_a2):not(#_a3):not(#_a4):not(#_a5):not(#_a6):not(#_a7):not(#_a8):not(#_a9):not(#_b1):not(#_b2):not(#_b3) #edit-packages-list .package-row .pkg-nm-in{display:inline-block!important;white-space:nowrap!important;font-weight:400!important;font-style:normal!important}
+html:root body:not(#_a1):not(#_a2):not(#_a3):not(#_a4):not(#_a5):not(#_a6):not(#_a7):not(#_a8):not(#_a9):not(#_b1):not(#_b2):not(#_b3) #edit-packages-list .package-row .pkg-summary-badge-tag{flex:0 0 auto!important}
+html:root body:not(#_a1):not(#_a2):not(#_a3):not(#_a4):not(#_a5):not(#_a6):not(#_a7):not(#_a8):not(#_a9):not(#_b1):not(#_b2):not(#_b3) #edit-packages-list .package-row .pkg-summary-value{min-width:84px!important;padding:3px 8px!important;border:1px solid color-mix(in srgb,var(--accent) 35%,var(--border-glass))!important;border-radius:9px!important}
+html:root body:not(#_a1):not(#_a2):not(#_a3):not(#_a4):not(#_a5):not(#_a6):not(#_a7):not(#_a8):not(#_a9):not(#_b1):not(#_b2):not(#_b3) #edit-packages-list .package-row .pkg-summary-price-unit{width:auto!important}
+html:root body:not(#_a1):not(#_a2):not(#_a3):not(#_a4):not(#_a5):not(#_a6):not(#_a7):not(#_a8):not(#_a9):not(#_b1):not(#_b2):not(#_b3) #edit-packages-list .package-row .pkg-summary-profit{width:50px!important;border-radius:9px!important}
+/* swipe-to-delete */
+#edit-packages-list .pkg-swipe-bg{display:none;position:absolute;inset:0;align-items:center;justify-content:flex-start;gap:8px;padding-left:16px;background:#e5484d;color:#fff;font-size:13px;z-index:0}
+#edit-packages-list .pkg-swipe-bg svg{width:18px;height:18px}
+#edit-packages-list .package-row.pkg-swiping .pkg-swipe-bg{display:flex}
+#edit-packages-list .package-row.pkg-swiping.pkg-swipe-ready .pkg-swipe-bg{background:#c9252b}
+#edit-packages-list .package-row.pkg-swiping>.pkg-order-col,#edit-packages-list .package-row.pkg-swiping>.pkg-row-fields{align-self:stretch!important;position:relative;z-index:1;background:var(--surface-strong,var(--surface,#fff))!important}
+
+/* ===== v5: price card like the reference - thumb + name on top, price + profit pill below ===== */
+html:root body:not(#_a1):not(#_a2):not(#_a3):not(#_a4):not(#_a5):not(#_a6):not(#_a7):not(#_a8):not(#_a9):not(#_b1):not(#_b2):not(#_b3) #edit-packages-list .package-row .pkg-summary{display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;grid-template-areas:"n d" "v p"!important;gap:5px 8px!important;align-items:center!important;padding:8px 10px 8px 4px!important}
+html:root body:not(#_a1):not(#_a2):not(#_a3):not(#_a4):not(#_a5):not(#_a6):not(#_a7):not(#_a8):not(#_a9):not(#_b1):not(#_b2):not(#_b3) #edit-packages-list .package-row .pkg-summary-label{grid-area:n!important}
+html:root body:not(#_a1):not(#_a2):not(#_a3):not(#_a4):not(#_a5):not(#_a6):not(#_a7):not(#_a8):not(#_a9):not(#_b1):not(#_b2):not(#_b3) #edit-packages-list .package-row .pkg-summary-dot{display:block!important;grid-area:d!important;width:8px!important;height:8px!important;border-radius:50%!important;background:var(--accent)!important}
+html:root body:not(#_a1):not(#_a2):not(#_a3):not(#_a4):not(#_a5):not(#_a6):not(#_a7):not(#_a8):not(#_a9):not(#_b1):not(#_b2):not(#_b3) #edit-packages-list .package-row .pkg-summary-dot.pkg-dot-package{background:#f59e0b!important}
+html:root body:not(#_a1):not(#_a2):not(#_a3):not(#_a4):not(#_a5):not(#_a6):not(#_a7):not(#_a8):not(#_a9):not(#_b1):not(#_b2):not(#_b3) #edit-packages-list .package-row .pkg-summary-thumb{display:flex!important;flex:0 0 36px!important;width:36px!important;height:36px!important;border-radius:9px!important;border:1px solid var(--border-glass)!important;overflow:hidden!important;align-items:center!important;justify-content:center!important}
+html:root body:not(#_a1):not(#_a2):not(#_a3):not(#_a4):not(#_a5):not(#_a6):not(#_a7):not(#_a8):not(#_a9):not(#_b1):not(#_b2):not(#_b3) #edit-packages-list .package-row .pkg-summary-thumb-img{width:100%!important;height:100%!important;object-fit:cover!important}
+html:root body:not(#_a1):not(#_a2):not(#_a3):not(#_a4):not(#_a5):not(#_a6):not(#_a7):not(#_a8):not(#_a9):not(#_b1):not(#_b2):not(#_b3) #edit-packages-list .package-row .pkg-summary-value{grid-area:v!important;justify-self:start!important;min-width:0!important;padding:0!important;border:0!important;background:none!important;gap:4px!important}
+html:root body:not(#_a1):not(#_a2):not(#_a3):not(#_a4):not(#_a5):not(#_a6):not(#_a7):not(#_a8):not(#_a9):not(#_b1):not(#_b2):not(#_b3) #edit-packages-list .package-row .pkg-summary-price-text{font-size:15px!important;font-weight:500!important}
+html:root body:not(#_a1):not(#_a2):not(#_a3):not(#_a4):not(#_a5):not(#_a6):not(#_a7):not(#_a8):not(#_a9):not(#_b1):not(#_b2):not(#_b3) #edit-packages-list .package-row .pkg-summary-actions{display:contents!important}
+html:root body:not(#_a1):not(#_a2):not(#_a3):not(#_a4):not(#_a5):not(#_a6):not(#_a7):not(#_a8):not(#_a9):not(#_b1):not(#_b2):not(#_b3) #edit-packages-list .package-row .pkg-summary-profit{grid-area:p!important;justify-self:end!important;width:auto!important;min-width:46px!important;padding:3px 9px!important;border:0!important;border-radius:10px!important;font-size:11.5px!important;font-weight:500!important;background:color-mix(in srgb,var(--text-muted) 14%,transparent)!important}
+html:root body:not(#_a1):not(#_a2):not(#_a3):not(#_a4):not(#_a5):not(#_a6):not(#_a7):not(#_a8):not(#_a9):not(#_b1):not(#_b2):not(#_b3) #edit-packages-list .package-row .pkg-summary-profit.positive{background:rgba(30,158,75,.14)!important;color:#1E9E4B!important}
+html:root body:not(#_a1):not(#_a2):not(#_a3):not(#_a4):not(#_a5):not(#_a6):not(#_a7):not(#_a8):not(#_a9):not(#_b1):not(#_b2):not(#_b3) #edit-packages-list .package-row .pkg-summary-profit.positive::before{content:"";display:inline-block;width:12px;height:12px;margin-right:4px;vertical-align:-1px;background:currentColor;-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='22 7 13.5 15.5 8.5 10.5 2 17'/%3E%3Cpolyline points='16 7 22 7 22 13'/%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='22 7 13.5 15.5 8.5 10.5 2 17'/%3E%3Cpolyline points='16 7 22 7 22 13'/%3E%3C/svg%3E") center/contain no-repeat}
+html:root body:not(#_a1):not(#_a2):not(#_a3):not(#_a4):not(#_a5):not(#_a6):not(#_a7):not(#_a8):not(#_a9):not(#_b1):not(#_b2):not(#_b3) #edit-packages-list .package-row .pkg-summary-profit.negative{background:rgba(229,72,77,.14)!important;color:var(--danger-strong,#e5484d)!important}
+html:root body:not(#_a1):not(#_a2):not(#_a3):not(#_a4):not(#_a5):not(#_a6):not(#_a7):not(#_a8):not(#_a9):not(#_b1):not(#_b2):not(#_b3) #edit-packages-list .package-row .pkg-summary-name{font-size:13.5px!important}
+.pkg-summary-code{font-weight:400!important;flex:0 0 auto;max-width:78px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:9.5px;line-height:1;padding:3px 6px;border-radius:6px;color:var(--text-muted);background:color-mix(in srgb,var(--text-muted) 14%,transparent)}
+}
+</style>
+<script id="pkg-swipe-js">
+/* Swipe a package row to the right to delete it (replaces the old x button). */
+(function () {
+  var st = null, quiet = 0, EASE = 'transform .18s ease';
+  function kids(row) { return Array.prototype.filter.call(row.children, function (c) { return c.classList.contains('pkg-order-col') || c.classList.contains('pkg-row-fields'); }); }
+  function shift(row, px, anim) { kids(row).forEach(function (k) { k.style.setProperty('transition', anim ? EASE : 'none', 'important'); k.style.setProperty('transform', 'translateX(' + px + 'px)', 'important'); }); }
+  function reset(row) { kids(row).forEach(function (k) { k.style.removeProperty('transform'); k.style.removeProperty('transition'); }); row.classList.remove('pkg-swiping', 'pkg-swipe-ready'); }
+  function down(e) {
+    if (e.pointerType === 'mouse' && e.button !== 0) return;
+    var t = e.target; if (!t || !t.closest) return;
+    var row = t.closest('#edit-packages-list .package-row'); if (!row) return;
+    if (t.closest('.pkg-drag-handle,.pkg-move-btn,.pkg-card-overlay,input,select,textarea') || row.classList.contains('editing') || row.classList.contains('dragging')) return;
+    st = { row: row, id: e.pointerId, x: e.clientX, y: e.clientY, dx: 0, on: false, w: row.offsetWidth };
+  }
+  function move(e) {
+    if (!st || e.pointerId !== st.id) return;
+    var dx = e.clientX - st.x, dy = e.clientY - st.y;
+    if (!st.on) {
+      if (Math.abs(dy) > 10 && Math.abs(dy) > Math.abs(dx)) { st = null; return; }
+      if (dx > 12 && dx > Math.abs(dy) * 1.5) { st.on = true; st.row.classList.add('pkg-swiping'); try { st.row.setPointerCapture(e.pointerId); } catch (_) {} }
+      else return;
+    }
+    st.dx = Math.min(Math.max(0, dx), st.w);
+    shift(st.row, st.dx, false);
+    st.row.classList.toggle('pkg-swipe-ready', st.dx >= st.w * 0.35);
+  }
+  function up(e) {
+    if (!st || e.pointerId !== st.id) return;
+    var s = st; st = null;
+    if (!s.on) return;
+    quiet = Date.now() + 400;
+    if (e.type !== 'pointercancel' && s.dx >= s.w * 0.35) {
+      shift(s.row, s.w, true);
+      setTimeout(function () { if (window.removePackageRow) window.removePackageRow(s.row); }, 170);
+    } else {
+      shift(s.row, 0, true);
+      setTimeout(function () { reset(s.row); }, 200);
+    }
+  }
+  document.addEventListener('pointerdown', down, true);
+  document.addEventListener('pointermove', move, true);
+  document.addEventListener('pointerup', up, true);
+  document.addEventListener('pointercancel', up, true);
+  document.addEventListener('click', function (e) {
+    if (Date.now() < quiet && e.target.closest && e.target.closest('#edit-packages-list .package-row')) { e.stopPropagation(); e.preventDefault(); }
+  }, true);
+})();
+</script>
 </body>
 </html>
