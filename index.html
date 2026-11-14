@@ -6212,8 +6212,8 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
                     </label>
                 </div>
 
-                <div class="ge-sec"><span class="ge-sec-dot"></span><b>Images</b><small>Game icon · Banner</small></div>
-                <div style="display:flex;gap:10px;align-items:flex-start;">
+                <div class="ge-sec"><span class="ge-sec-dot"></span><b>Images</b><small>Game icon · Banner</small><button type="button" id="ge-img-toggle" class="ge-img-toggle" data-no-busy onclick="toggleGameEditorImages()">Show</button></div>
+                <div id="ge-images-row" class="ge-img-hidden" style="display:flex;gap:10px;align-items:flex-start;">
                     <div style="flex:0 0 calc((100% - 10px) * 0.36);min-width:0;">
                         <label>Game Image <span class="u-muted">(1:1)</span></label>
                         <label class="img-update-box ratio-square" id="game-img-update-box" for="edit-game-file">
@@ -12741,9 +12741,9 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
                                         <svg class="ui-icon" style="width:16px;height:16px;"><use href="#icon-close"></use></svg>
                                     </div>
                                 </div>
-                                <div style="display:flex;gap:10px;align-items:stretch;">
-                                    ${window.lgOrderTimeline(t.status)}
-                                    <div class="od-grid" style="flex:1;grid-template-columns:1fr;">
+                                ${window.lgOrderTimeline(t.status)}
+                                <div class="tu-detail-row" style="display:flex;gap:10px;align-items:stretch;">
+                                    <div class="od-grid" style="flex:1;min-width:0;grid-template-columns:1fr;">
                                         <div class="od-cell"><div class="od-label">UID</div><div class="od-value highlight-id">${escapeHtml(t.userId || 'N/A')}</div></div>
                                         ${t.userPhone ? `<div class="od-cell"><div class="od-label">Phone</div><div class="od-value"><a href="tel:${escapeHtml(t.userPhone)}">${escapeHtml(t.userPhone)}</a></div></div>` : ''}
                                         <div class="od-cell"><div class="od-label">Payment</div><div class="od-value">${escapeHtml(t.paymentMethod || 'N/A')}</div></div>
@@ -17087,6 +17087,7 @@ window.showPage = function (p) { const r = sp.apply(this, arguments); if (p === 
             editingBannerImageUrls = [];
             editingImageRemoteUrl = null;
             document.getElementById('edit-game-id').value = gameId || '';
+            if (window.setGameEditorImagesHidden) window.setGameEditorImagesHidden(true);
             { const _gp = document.getElementById('game-editor-page'); if (_gp) _gp.classList.toggle('ge-editing', !!gameId); }
             unlockGameNameField();
             document.getElementById('edit-packages-list').innerHTML = '';
@@ -18404,9 +18405,9 @@ return `
                                 <div class="pm-name">${escapeHtml(p.name ?? '')}${p.hot ? ' <span class="badge badge-danger">Hot</span>' : ''}</div>
                                 <div class="pm-acc">${escapeHtml(p.accountName ?? '')}</div>
                             </div>
+                            <button type="button" class="pm-copy" data-no-busy data-copy="${escapeHtml(String(p.number ?? ''))}" onclick="navigator.clipboard && navigator.clipboard.writeText(this.dataset.copy); this.textContent='Copied'; var t=this; setTimeout(function(){t.textContent='Copy'},1200)">Copy</button>
                             <span class="pm-pos">#${idx + 1}</span>
                         </div>
-                        <div class="pm-num"><b>${p.number}</b><button type="button" data-no-busy data-copy="${escapeHtml(String(p.number ?? ''))}" onclick="navigator.clipboard && navigator.clipboard.writeText(this.dataset.copy); this.textContent='Copied'; var t=this; setTimeout(function(){t.textContent='Copy'},1200)">Copy</button></div>
                         ${p.availabilityNote ? `<div class="pm-note">${p.availabilityNote}</div>` : ''}
                         <div class="pm-foot">
                             <div class="pm-move">
@@ -18879,13 +18880,15 @@ return `
                         ${u.photo ? `<img src="${escapeHtml(u.photo)}" loading="lazy" decoding="async">` : `<svg class="ui-icon" style="width:20px;height:20px;"><use href="#icon-users"></use></svg>`}
                     </div>
                     <div class="ugc2-main">
-                        <h5>${escapeHtml(displayName)} ${googleVerifiedBadgeHTML(u)}</h5>
+                        <div class="ugc2-top">${adminTierBadgeHTML(tier)}</div>
+                        <div class="ugc2-namerow">
+                            <h5>${escapeHtml(displayName)} ${googleVerifiedBadgeHTML(u)}</h5>
+                            <span class="badge ${u.banned ? 'badge-danger' : 'badge-success'}">${statusBadgeHtml(u.banned ? 'badge-danger' : 'badge-success', u.banned ? 'Banned' : 'Active')}</span>
+                        </div>
                         <div class="ugc-id">ID: ${u.guestId || id} <svg class="ui-icon copy-id-btn" style="width:12px;height:12px;cursor:pointer;" onclick="copyUserId(event, '${u.guestId || id}')"><use href="#icon-copy"></use></svg></div>
                         <div class="ugc2-tags">
                             ${presenceChipHtml(u)}
-                            <span class="badge ${u.banned ? 'badge-danger' : 'badge-success'}">${statusBadgeHtml(u.banned ? 'badge-danger' : 'badge-success', u.banned ? 'Banned' : 'Active')}</span>
                             ${u.storeAdmin === true ? '<span class="badge badge-warning" title="Sees package cost in the Store">Admin</span>' : ''}
-                            ${adminTierBadgeHTML(tier)}
                         </div>
                         ${u.banned && u.banNote ? `<div class="ugc2-bannote" style="margin-top:6px;font-size:11.5px;color:var(--text-muted);line-height:1.45;white-space:pre-wrap;word-break:break-word;">${escapeHtml(u.banNote)}</div>` : ''}
                     </div>
@@ -21959,7 +21962,7 @@ return `
                     const dateStr = t.created_at ? new Date(t.created_at).toLocaleString() : '';
                     return `
                         <div class="tx-row">
-                            <div class="tx-row-icon" style="background:${isCharge ? 'var(--danger-soft)' : '#E7F6EC'};">
+                            <div class="tx-row-icon" style="background:${isCharge ? 'rgba(229,72,77,.13)' : 'rgba(30,158,75,.14)'} !important;">
                                 <svg class="ui-icon" style="stroke:${isCharge ? 'var(--danger-strong)' : '#1E8E4F'};"><use href="#${isCharge ? 'icon-trending-up' : 'icon-dollar'}"></use></svg>
                             </div>
                             <div class="tx-row-info">
@@ -22002,7 +22005,7 @@ return `
                 const d = o.confirmedAt && o.confirmedAt.seconds ? new Date(o.confirmedAt.seconds * 1000).toLocaleString() : '';
                 const title = escapeHtml(String(o.gameName || o.game || o.jcplaysProduct || 'JCPlays order'));
                 const sub = escapeHtml(String(o.packageName || o.package || o.jcplaysProductId || ''));
-                return `<div class="tx-row"><div class="tx-row-icon" style="background:var(--danger-soft);"><svg class="ui-icon" style="stroke:var(--danger-strong);"><use href="#icon-trending-up"></use></svg></div>
+                return `<div class="tx-row"><div class="tx-row-icon" style="background:rgba(229,72,77,.13) !important;"><svg class="ui-icon" style="stroke:var(--danger-strong);"><use href="#icon-trending-up"></use></svg></div>
                     <div class="tx-row-info"><span class="tx-row-title">${title}</span><span class="tx-row-sub">${d}${d && sub ? ' · ' : ''}${sub} · #${escapeHtml(String(o.jcplaysOrderId))}</span></div></div>`;
             }).join('');
         }
@@ -22755,6 +22758,10 @@ return `
             const filtered = q ? gamePickerItems.filter(g => g.name.toLowerCase().includes(q)) : gamePickerItems;
             const currentCode = document.getElementById(gamePickerFieldId(gamePickerKind())).value;
             const bulk = pickerBulkMode;
+            // Catalogue entries already linked to an existing game (other than the one being edited) = "Picked"
+            const pickedField = bulkLinkedFieldForKind(gamePickerKind());
+            const editingId = document.getElementById('edit-game-id').value;
+            const pickedSet = new Set(Object.entries(GAMES || {}).filter(([id, gm]) => gm && id !== editingId).map(([id, gm]) => gm[pickedField]).filter(Boolean));
 
             // In bulk mode there's no single "current" link to highlight and
             // no "Not linked" option (bulk add only ever creates new games),
@@ -22769,9 +22776,10 @@ return `
                 html += `<div class="game-picker-empty-msg">No games match "${escapeHtml(term)}"</div>`;
             } else {
                 html += filtered.map(g => `
-                    <div class="game-picker-card${bulk ? ' bulk-pickable' + (pickerBulkSelected.has(g.code) ? ' bulk-selected' : '') : (currentCode === g.code ? ' selected' : '')}" data-code="${escapeHtml(g.code)}" data-name="${escapeHtml(g.name)}">
+                    <div class="game-picker-card${pickedSet.has(g.code) ? ' picked' : ''}${bulk ? ' bulk-pickable' + (pickerBulkSelected.has(g.code) ? ' bulk-selected' : '') : (currentCode === g.code ? ' selected' : '')}" data-code="${escapeHtml(g.code)}" data-name="${escapeHtml(g.name)}">
                         <div class="game-picker-thumb" style="${g.image ? '' : `background:${pickerColorFor(g.name)}`}">${pickerThumbHtml(g) || escapeHtml(pickerInitials(g.name))}</div>
                         ${bulk ? `<div class="game-picker-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg></div>` : ''}
+                        ${pickedSet.has(g.code) ? '<em class="game-picker-picked">Picked</em>' : ''}
                         <span>${escapeHtml(g.name)}${typeof g.count === 'number' ? ` <span style="opacity:.6;">(${g.count})</span>` : ''}</span>
                     </div>`).join('');
             }
@@ -22783,7 +22791,7 @@ return `
         // container, since its inner HTML gets replaced on every render.
         document.getElementById('game-picker-grid').addEventListener('click', (e) => {
             const card = e.target.closest('.game-picker-card');
-            if (!card) return;
+            if (!card || card.classList.contains('picked')) return;
             if (pickerBulkMode) {
                 togglePickerBulkSelection(card);
                 return;
@@ -30394,6 +30402,149 @@ html:root body:not(#_a1):not(#_a2):not(#_a3):not(#_a4):not(#_a5):not(#_a6):not(#
 html:root body:not(#_a1):not(#_a2):not(#_a3):not(#_a4):not(#_a5):not(#_a6):not(#_a7):not(#_a8):not(#_a9):not(#_b1):not(#_b2):not(#_b3) #edit-packages-list .package-row .pkg-summary-thumb{flex:0 0 24px!important;width:24px!important;height:24px!important}
 html:root body:not(#_a1):not(#_a2):not(#_a3):not(#_a4):not(#_a5):not(#_a6):not(#_a7):not(#_a8):not(#_a9):not(#_b1):not(#_b2):not(#_b3) #edit-packages-list .package-row .pkg-summary-value{padding-left:30px!important}
 }
+</style>
+<style id="ui-tweaks-v1">
+/* Price % stepper only shows when "Price Auto Update" is ON */
+html body #game-editor-page .ge-margin.is-off{display:none!important}
+/* User list: smaller / shorter cards, small gap so none touch */
+html body #admin-users-container.users-grid{display:flex!important;flex-direction:column;gap:10px!important}
+html body #user-list .user-grid-card{padding:8px 11px!important;border-radius:12px!important;margin:0!important}
+html body #user-list .ugc2{gap:9px!important;align-items:center!important}
+html body #user-list .ugc2-av{flex:0 0 36px!important;width:36px!important;height:36px!important;border-radius:10px!important}
+html body #user-list .ugc2-av img{border-radius:10px!important}
+html body #user-list .ugc2-main,html body #user-list .ugc2-side{min-height:0!important}
+html body #user-list .ugc2-main{gap:2px!important}
+html body #user-list .ugc2-top{display:flex;line-height:1}
+html body #user-list .ugc2-top .tier-mini-badge{margin:0!important;font-size:9.5px!important;padding:1px 7px 1px 5px!important}
+html body #user-list .ugc2-namerow{display:flex;align-items:center;gap:6px;min-width:0;max-width:100%}
+html body #user-list .ugc2-namerow h5{flex:0 1 auto;min-width:0;font-size:12.5px!important;font-weight:400!important}
+html body #user-list .ugc2-namerow .badge{flex:0 0 auto;display:inline-flex!important;align-items:center;height:18px;padding:0 6px!important;margin:0!important;border-radius:6px!important;font-size:9.5px!important;font-weight:400!important;line-height:1;border:1px solid currentColor;background:transparent!important}
+html body #user-list .ugc2-namerow .badge-success{color:#1E9E4B!important;border-color:rgba(30,158,75,.4)}
+html body #user-list .ugc2-namerow .badge-danger{color:var(--danger-strong,#dc2626)!important;border-color:rgba(220,38,38,.4)}
+html body #user-list .ugc2-main .ugc-id{font-size:10px!important}
+html body #user-list .ugc2-tags{gap:4px!important}
+html body #user-list .ugc2-tags:empty{display:none}
+html body #user-list .ugc2-tags>*{height:19px!important;padding:0 6px!important;font-size:9.5px!important}
+html body #user-list .ugc2-side b{font-size:12px!important}
+</style>
+<style id="picker-picked-v1">
+html body .game-picker-card{position:relative}
+html body .game-picker-card.picked{opacity:.45;filter:grayscale(.6);pointer-events:none;cursor:not-allowed}
+html body .game-picker-card .game-picker-picked{position:absolute;top:5px;left:5px;z-index:2;font-style:normal;font-size:9.5px;font-weight:600;line-height:1;padding:3px 7px;border-radius:8px;background:#1E9E4B;color:#fff}
+</style>
+<style id="picker-scroll-fix-v1">
+/* Choose Game picker: stable scrolling (no height guessing, no snap/smooth, no layout jumps) */
+html body .game-picker-grid{scroll-snap-type:none!important;scroll-behavior:auto!important;overflow-anchor:none;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+html body .game-picker-card{content-visibility:visible!important;contain-intrinsic-size:none!important;scroll-snap-align:none!important;animation:none!important;transition:border-color .15s ease,background .15s ease!important;min-height:112px;justify-content:flex-start}
+html body .game-picker-card .game-picker-thumb{flex:0 0 auto;aspect-ratio:1/1}
+html body .game-picker-card .game-picker-thumb img{aspect-ratio:1/1}
+html body .game-picker-card>span{min-height:2.5em}
+@media (hover:none){html body .game-picker-card:hover{transform:none!important;box-shadow:inherit!important}}
+</style>
+<style id="ge-images-toggle-v1">
+html body #game-editor-page .ge-sec .ge-img-toggle{pointer-events:auto!important;cursor:pointer;margin-left:auto;flex:0 0 auto;display:inline-flex;align-items:center;height:26px;padding:0 12px;border:1px solid color-mix(in srgb,var(--accent) 45%,transparent);border-radius:9px;background:var(--surface);color:var(--accent);font:600 11.5px/1 inherit;font-family:inherit;text-transform:none;letter-spacing:0}
+html body #game-editor-page .ge-sec .ge-img-toggle:active{background:var(--accent-soft)}
+html body #game-editor-page #ge-images-row.ge-img-hidden{display:none!important}
+html body #game-editor-page .ge-body:has(>#ge-images-row.ge-img-hidden){display:none!important}
+</style>
+<script id="ge-images-toggle-js">
+(function(){
+  function setHidden(h){
+    var row=document.getElementById('ge-images-row'), btn=document.getElementById('ge-img-toggle');
+    if(row) row.classList.toggle('ge-img-hidden',!!h);
+    if(btn) btn.textContent=h?'Show':'Hide';
+  }
+  window.setGameEditorImagesHidden=setHidden;
+  window.toggleGameEditorImages=function(){
+    var row=document.getElementById('ge-images-row');
+    setHidden(!(row&&row.classList.contains('ge-img-hidden')));
+  };
+})();
+</script>
+<style id="od-sheet-fix-v1">
+/* ===== Order / Top-up detail sheet: proper layout ===== */
+/* 1) sheet sits above the bottom nav + header (was hidden behind them) */
+html body .admin-card.oc-open{position:relative!important;z-index:350!important;contain:none!important;content-visibility:visible!important;animation:none!important;transform:none!important;filter:none!important}
+html body .admin-card.oc-open .od-overlay{z-index:350!important;position:fixed!important;inset:0!important}
+/* 2) card: one consistent side padding (16px) shared by header / footer */
+html body .od-overlay .od-card{box-sizing:border-box;padding:0 16px 0!important;max-height:88vh!important;max-height:88dvh!important;overflow-y:auto;overscroll-behavior:contain;border-radius:24px 24px 0 0!important}
+html body .od-overlay .od-card::before{content:"";display:block;position:static!important;width:36px;height:4px;margin:8px auto 4px!important;left:auto!important;top:auto!important;border-radius:4px;background:rgba(120,130,150,.35)}
+/* 3) header: padded so thumb + close button are never cut off */
+html body .od-overlay .od-card .od-card-header{position:sticky;top:0;z-index:3;box-sizing:border-box;margin:0 -16px 10px!important;padding:10px 16px!important;gap:10px!important;display:flex!important;align-items:center!important;justify-content:space-between!important}
+html body .od-overlay .od-card .od-card-title{min-width:0;flex:1 1 auto}
+html body .od-overlay .od-card .od-card-title .oc-thumb{flex:0 0 40px!important;width:40px!important;height:40px!important;margin:0!important}
+html body .od-overlay .od-card .od-card-title-text .oc-game-name{font-size:17px!important;line-height:1.25}
+html body .od-overlay .od-card .od-card-close{flex:0 0 36px!important;width:36px!important;height:36px!important;margin:0!important}
+/* 4) timeline: full width, evenly spread */
+html body .od-overlay .od-card .ord-tl{width:100%;box-sizing:border-box;justify-content:space-between;margin:6px 0 12px!important;padding:0 4px}
+html body .od-overlay .od-card .ord-tl-step{min-width:0;flex:0 0 auto;text-align:center}
+html body .od-overlay .od-card .ord-tl-line{flex:1 1 0;min-width:12px;margin:12px 4px 0!important}
+/* 5) detail cells: label left, value right, no awkward wrapping */
+html body .od-overlay .od-card .od-grid{width:100%;min-width:0;margin:0 0 8px!important}
+html body .od-overlay .od-card .od-cell{min-width:0;padding:10px 2px!important}
+html body .od-overlay .od-card .od-value{min-width:0;text-align:right;overflow-wrap:anywhere}
+/* 6) small texts + footer */
+html body .od-overlay .od-card>p{margin:4px 0!important;font-size:12px!important;line-height:1.4}
+html body .od-overlay .od-card .od-card-footer{position:sticky;bottom:0;z-index:3;box-sizing:border-box;display:flex!important;flex-wrap:wrap;gap:8px!important;margin:10px -16px 0!important;padding:10px 16px calc(12px + env(safe-area-inset-bottom,0px))!important;background:var(--surface-strong);border-top:1px solid var(--border-glass)}
+html body .od-overlay .od-card .od-card-footer>.btn{flex:1 1 calc(50% - 4px)!important;min-width:0!important}
+html body .od-overlay .od-card .od-card-footer>.btn-primary{flex:1 1 100%!important}
+html body .od-overlay .od-card .od-card-footer>.od-done-label{flex:1 1 100%;text-align:center}
+/* 7) list cards: natural height, never overlap each other */
+html body :is(#topups-container,#orders-container,#payin-container)>.admin-card{display:block!important;position:relative;height:auto!important;min-height:0!important;max-height:none!important;transform:none!important;contain:none!important;content-visibility:visible!important;margin:0 0 8px!important;overflow:hidden}
+html body :is(#topups-container,#orders-container,#payin-container)>.admin-card .oc-top{position:static!important;transform:none!important;margin:0!important}
+</style>
+<style id="compact-cards-v1">
+/* ===== Names: lighter weight ===== */
+html body :is(.oc-game-name,.game-row-name,.game-reorder-name,.pm-name,.od-card-title-text .oc-game-name){font-weight:500!important}
+html body .od-overlay .od-card .od-card-title-text .oc-game-name{font-size:15px!important}
+/* ===== Payment methods: small cards, Copy button only ===== */
+html body #admin-payment-container{display:flex!important;flex-direction:column;gap:6px!important}
+html body #admin-payment-container .pm-card{padding:8px 10px!important;margin:0!important;border-radius:12px!important;display:block}
+html body #admin-payment-container .pm-top{display:flex!important;align-items:center;gap:8px!important;margin:0!important}
+html body #admin-payment-container .pm-img{flex:0 0 30px!important;width:30px!important;height:30px!important;border-radius:8px!important;overflow:hidden}
+html body #admin-payment-container .pm-img img{width:100%;height:100%;object-fit:cover}
+html body #admin-payment-container .pm-info{flex:1 1 auto;min-width:0}
+html body #admin-payment-container .pm-name{font-size:13px!important;font-weight:500!important;line-height:1.25;display:flex;align-items:center;gap:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+html body #admin-payment-container .pm-name .badge{font-size:9px!important;padding:1px 6px!important;height:auto!important;line-height:1.4}
+html body #admin-payment-container .pm-acc{font-size:11px!important;margin:1px 0 0!important}
+html body #admin-payment-container .pm-pos{font-size:10px!important;padding:2px 7px!important;flex:0 0 auto}
+html body #admin-payment-container .pm-copy{flex:0 0 auto;height:28px;padding:0 12px;border:1px solid color-mix(in srgb,var(--accent) 40%,transparent);border-radius:9px;background:var(--accent-soft);color:var(--accent);font:600 12px/1 inherit;font-family:inherit;cursor:pointer}
+html body #admin-payment-container .pm-note{font-size:10.5px!important;margin:4px 0 0!important;line-height:1.3}
+html body #admin-payment-container .pm-foot{display:flex!important;align-items:center;gap:6px!important;margin:6px 0 0!important;padding:0!important}
+html body #admin-payment-container .pm-move{display:flex;gap:4px;flex:0 0 auto}
+html body #admin-payment-container .pm-foot .btn{min-height:28px!important;height:28px!important;padding:0 10px!important;font-size:12px!important;font-weight:500!important;border-radius:9px!important;line-height:1}
+html body #admin-payment-container .pm-move .btn{width:30px;padding:0!important}
+html body #admin-payment-container .pm-foot>.btn{flex:1 1 0!important}
+/* ===== Order cards: smaller ===== */
+html body #orders-container{gap:6px}
+html body #orders-container>.admin-card{margin:0 0 6px!important;border-radius:12px!important}
+html body #orders-container .oc-top{padding:8px 10px!important;gap:8px!important}
+html body #orders-container .oc-thumb{width:32px!important;height:32px!important;flex:0 0 32px!important;border-radius:9px!important}
+html body #orders-container .oc-game-name{font-size:12.5px!important;line-height:1.3}
+html body #orders-container .oc-meta{font-size:10.5px!important;margin:1px 0 0!important}
+html body #orders-container .oc-status .badge{height:20px!important;font-size:10px!important;padding:0 7px!important}
+html body #orders-container .oc-quick{margin:0!important;padding:5px 10px 7px!important}
+html body #orders-container .oc-quick .btn{min-height:26px!important;height:26px!important;padding:0 10px!important;font-size:11.5px!important}
+</style>
+<style id="page-fade-smooth-v1">
+/* ===== Smooth page fade: opacity only (no slide / no scale), never replays on list refresh ===== */
+@layer soft-glass{
+@keyframes pgFadeSmooth{from{opacity:0}to{opacity:1}}
+/* every page (Home + all tabs): pure fade-in */
+html body .page-section.active{animation:pgFadeSmooth .32s ease-out both!important;transform:none!important}
+html body .page-section.active :is(.card-title,.section-title){animation:none!important;transform:none!important}
+/* lists: no per-item slide-up (it replayed on every live update and made rows jump) */
+html body :is(#orders-container,#topups-container,#payin-container,#admin-users-container,#admin-games-container,#admin-payment-container,#notif-history-container,#ticker-list-container)>*,
+html body #edit-packages-list>.package-row,
+html body .scroll-reveal{animation:none!important;transform:none!important}
+html body .scroll-reveal{opacity:1!important;transition:none!important}
+}
+/* numbers keep a fixed digit width so counters / live updates don't resize cards */
+html body :is(.stat-card-value,.stat-chip p,.stat-chip b,.oc-game-name,.wtx-amt,.tx-row-amount,.ugc2-side b){font-variant-numeric:tabular-nums}
+/* no layout hopping while content streams in */
+html body .page-section{overflow-anchor:auto}
+html body :is(#dashboard,#order-list,#topup-list,#user-list,#game-list) img{aspect-ratio:auto}
+@media (prefers-reduced-motion:reduce){@layer soft-glass{html body .page-section.active{animation:none!important}}}
 </style>
 <script id="pkg-swipe-js">
 /* Swipe a package row to the right to delete it (replaces the old x button). */
